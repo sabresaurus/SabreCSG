@@ -9,7 +9,6 @@ namespace Sabresaurus.SabreCSG
     public class CSGModelInspector : Editor
     {
 		// Build settings for the next build
-
 		SerializedProperty generateCollisionMeshesProperty;
 		SerializedProperty generateTangentsProperty;
 		SerializedProperty optimizeGeometryProperty;
@@ -65,10 +64,8 @@ namespace Sabresaurus.SabreCSG
 
 				EditorGUILayout.PropertyField(generateCollisionMeshesProperty, new GUIContent("Generate Collision Meshes"));
 				EditorGUILayout.PropertyField(generateTangentsProperty, new GUIContent("Generate Tangents"));
-                GUI.enabled = false;
-				EditorGUILayout.PropertyField(optimizeGeometryProperty, new GUIContent("Optimize Geometry"));
-                GUILayout.Label("(Optimize Geometry disabled in this beta)");
-                GUI.enabled = true;
+                
+
                 EditorGUILayout.PropertyField(generateLightmapUVsProperty, new GUIContent("Generate Lightmap UVs"));
 				EditorGUIUtility.labelWidth = 125;
 
@@ -82,7 +79,14 @@ namespace Sabresaurus.SabreCSG
 				EditorGUI.indentLevel = 0;
 				EditorGUIUtility.labelWidth = 0;
 				GUI.enabled = true;
-			}
+
+                // Experimental build settings to enable features that are not yet completely stable
+                GUILayout.Label("Experimental", EditorStyles.boldLabel);
+                EditorGUI.indentLevel = 1;
+
+                EditorGUILayout.PropertyField(optimizeGeometryProperty, new GUIContent("Optimize Geometry"));
+                EditorGUI.indentLevel = 0;
+            }
 
 			using (new NamedVerticalScope("Default Material"))
 			{
