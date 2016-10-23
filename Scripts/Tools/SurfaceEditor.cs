@@ -1153,7 +1153,18 @@ namespace Sabresaurus.SabreCSG
 							// Ignore normal maps
 							string assetPath = AssetDatabase.GetAssetPath(newTexture);
 							TextureImporter importer = TextureImporter.GetAtPath(assetPath) as TextureImporter;
-							if(!importer.normalmap)
+
+#if UNITY_5_5_OR_NEWER
+                            // Unity 5.5 refactored the TextureImporter, requiring slightly different logic
+                            TextureImporterSettings importerSettings = new TextureImporterSettings();
+                            importer.ReadTextureSettings(importerSettings);
+                            bool isNormalMap = importerSettings.textureType == TextureImporterType.NormalMap;
+#else
+                            // Pre Unity 5.5 way of checking if a texture is a normal map
+                            bool isNormalMap = importer.normalmap;
+#endif
+
+							if(!isNormalMap)
 							{
 								secondaryTexture = newTexture;
 								break;
