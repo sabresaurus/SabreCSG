@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 using System.Text;
 
@@ -43,7 +44,7 @@ namespace Sabresaurus.SabreCSG
         [MenuItem("Window/Palette")]
         static void CreateAndShow()
         {
-			EditorWindow window = EditorWindow.GetWindow<PaletteWindow>();//false, "Palette", true);
+			EditorWindow window = EditorWindow.GetWindow<PaletteWindow>("Palette");//false, "Palette", true);
 
             window.Show();
         }
@@ -226,7 +227,21 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
-           
+            if (mouseInRect && e.type == EventType.MouseDown && !dragging)
+            {
+                if (e.button == 0)
+                {
+                    if (e.clickCount == 2 && selectedObject != null && selectedObject.GetType() == typeof(SceneAsset))
+                    {
+                        if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                        {
+                            EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(selectedObject), OpenSceneMode.Single);
+                        }
+                    }
+                }
+            }
+
+
 
             if (e.type == EventType.DragUpdated || e.type == EventType.DragPerform)
             {
