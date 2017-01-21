@@ -13,8 +13,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ToggleMode: Space
   ToggleModeBack: '#Space'
-  ActivateDrawMode: d
-  ActivateClipMode: c
+  ActivateDrawMode: '#d'
+  ActivateClipMode: '#c'
+  ActivateResizeMode: '#r'
+  ActivateFaceMode: '#f'
+  ActivateVertexMode: '#v'
   TogglePosSnapping: /
   DecreasePosSnapping: ','
   IncreasePosSnapping: .
