@@ -657,6 +657,39 @@ namespace Sabresaurus.SabreCSG
 				}
 				e.Use();
 			}
+			else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivateFaceMode)))
+			{
+				// Activate mode - immediately (key down)
+				if (e.type == EventType.KeyDown && !MouseIsHeldOrRecent)
+				{
+					SetCurrentMode(MainMode.Face);
+//					SetOverrideMode(OverrideMode.Face);
+
+					SceneView.RepaintAll();
+				}
+				e.Use();
+			}
+			else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivateVertexMode)))
+			{
+				// Activate mode - immediately (key down)
+				if (e.type == EventType.KeyDown && !MouseIsHeldOrRecent)
+				{
+					SetCurrentMode(MainMode.Vertex);
+//					SetOverrideMode(OverrideMode.Vertex);
+
+					SceneView.RepaintAll();
+				}
+				e.Use();
+			}
+            else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivateResizeMode)))
+            {
+                if (e.type == EventType.KeyDown && !MouseIsHeldOrRecent)
+                {
+                    SetCurrentMode(MainMode.Resize);
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
 			else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.IncreasePosSnapping)) 
 				&& !SabreGUIHelper.AnyControlFocussed)
 			{

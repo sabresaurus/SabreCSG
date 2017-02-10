@@ -1,5 +1,4 @@
-﻿#define DISABLE_OPTIMIZE_GEOMETRY
-#if UNITY_EDITOR || RUNTIME_CSG
+﻿#if UNITY_EDITOR || RUNTIME_CSG
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -374,14 +373,12 @@ namespace Sabresaurus.SabreCSG
 					{
 						// Grab the polygons grouped by ID, optimizing them if requested
 						Dictionary<int, List<Polygon>> groupedPolygons =  null;
-#if !DISABLE_OPTIMIZE_GEOMETRY
                         if (buildSettings.OptimizeGeometry)
 						{
 							// Return the optimal list of polygons (this call also updates BuiltVisualPolygons)
 							groupedPolygons = BrushCache.OptimizeVisual(allBrushCaches[brushIndex]);
 						}
 						else
-#endif
                         {
 							groupedPolygons = allBrushCaches[brushIndex].GetGroupedBuiltVisualPolygons();
 						}
@@ -427,14 +424,12 @@ namespace Sabresaurus.SabreCSG
 							{
 								// Intersection sets are different, need to triangulate separately
 								Dictionary<int, List<Polygon>> groupedPolygons =  null;
-#if !DISABLE_OPTIMIZE_GEOMETRY
                                 if(buildSettings.OptimizeGeometry)
 								{
 									// Return the optimal list of polygons (this call also updates BuiltCollisionPolygons)
 									groupedPolygons = BrushCache.OptimizeCollision(allBrushCaches[brushIndex]);
 								}
 								else
-#endif
 								{
 									groupedPolygons = allBrushCaches[brushIndex].GetGroupedBuiltCollisionPolygons();
 								}

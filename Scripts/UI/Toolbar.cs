@@ -145,6 +145,8 @@ namespace Sabresaurus.SabreCSG
 					newPosition = hits[0].Point;
 					// Back a unit, since the brush is around 2 units in each dimensions
 					newPosition += hits[0].Normal;
+					newPosition -= csgModel.GetComponent<Transform>().position;
+
 					if(CurrentSettings.PositionSnappingEnabled)
 					{
 						float snapDistance = CurrentSettings.PositionSnapDistance;
@@ -161,6 +163,7 @@ namespace Sabresaurus.SabreCSG
                         newPosition = ray.GetPoint(hitDistance);
                         // Back a unit, since the brush is around 2 units in each dimensions
                         newPosition += activePlane.normal;
+						newPosition -= csgModel.GetComponent<Transform>().position;
 
                         if (CurrentSettings.PositionSnappingEnabled)
                         {

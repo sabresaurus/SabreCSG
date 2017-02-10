@@ -143,7 +143,13 @@ namespace Sabresaurus.SabreCSG
 			}
 
 #if UNITY_EDITOR
+#if UNITY_5_5_OR_NEWER
+            // Unity 5.5 introduces a second possible selection highlight state, so the hiding API has changed
+            UnityEditor.EditorUtility.SetSelectedRenderState(GetComponent<Renderer>(), UnityEditor.EditorSelectedRenderState.Hidden);
+#else
+            // Pre Unity 5.5 the only selection highlight was a wireframe
             UnityEditor.EditorUtility.SetSelectedWireframeHidden(GetComponent<Renderer>(), true);
+#endif
 #endif
 
 			objectVersionUnserialized = objectVersionSerialized;
