@@ -315,7 +315,7 @@ namespace Sabresaurus.SabreCSG
             if (CurrentSettings.BrushesHidden != lastBrushesHidden)
             {
                 // Has changed
-                csgModel.UpdateBrushVisibility();
+                CSGModel.UpdateAllBrushesVisibility();
                 SceneView.RepaintAll();
             }
 			GUI.color = Color.white;
@@ -330,7 +330,7 @@ namespace Sabresaurus.SabreCSG
 			if (CurrentSettings.MeshHidden != lastMeshHidden)
 			{
 				// Has changed
-				csgModel.UpdateBrushVisibility();
+                CSGModel.UpdateAllBrushesVisibility();
 				SceneView.RepaintAll();
 			}
 

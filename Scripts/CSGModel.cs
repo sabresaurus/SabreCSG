@@ -31,6 +31,7 @@ namespace Sabresaurus.SabreCSG
 		bool autoRebuild = false;
 
 		bool editMode = false;
+        static CSGModel editModeModel = null;
 
 		bool mouseIsDragging = false;
 		bool mouseIsHeld = false;
@@ -172,13 +173,7 @@ namespace Sabresaurus.SabreCSG
 			// in edit mode. wereAnyInEditMode would be true and anyCSGModelsInEditMode would now be false
 			if(anyCSGModelsInEditMode != wereAnyInEditMode)
 			{
-				for (int i = 0; i < csgModels.Length; i++) 
-				{
-					if(csgModels[i] != null && csgModels[i].gameObject != null)
-					{
-						csgModels[i].UpdateBrushVisibility();
-					}
-				}
+                UpdateAllBrushesVisibility();
 			}
 
 			if(modelVersion < MODEL_VERSION)
@@ -214,6 +209,8 @@ namespace Sabresaurus.SabreCSG
 			base.OnBuildComplete ();
 
 			EditorUtility.ClearProgressBar();
+
+            UpdateAllBrushesVisibility();
 
 			EditorHelper.SetDirty(this);
 			SetContextDirty();
@@ -770,7 +767,7 @@ namespace Sabresaurus.SabreCSG
 				if (e.type == EventType.KeyUp)
 				{
 					CurrentSettings.BrushesHidden = !CurrentSettings.BrushesHidden;
-					UpdateBrushVisibility();
+                    UpdateAllBrushesVisibility();
 					SceneView.RepaintAll();
 				}
 				e.Use();
@@ -1147,15 +1144,7 @@ namespace Sabresaurus.SabreCSG
 			if(editMode && !anyCSGModelsInEditMode)
 			{
 				anyCSGModelsInEditMode = true;
-				CSGModel[] csgModels = FindObjectsOfType<CSGModel>();
-
-				for (int i = 0; i < csgModels.Length; i++) 
-				{
-					if(csgModels[i] != null && csgModels[i].gameObject != null)
-					{
-						csgModels[i].UpdateBrushVisibility();
-					}
-				}
+                UpdateAllBrushesVisibility();
 			}
 				
 			base.Update();
@@ -1365,8 +1354,7 @@ namespace Sabresaurus.SabreCSG
 				}
 				activeTool.ResetTool();
 			}
-
-            UpdateBrushVisibility();
+            UpdateAllBrushesVisibility();
         }
 
 		public Tool GetTool(MainMode mode)
@@ -1413,8 +1401,6 @@ namespace Sabresaurus.SabreCSG
 			CurrentSettings.OverrideMode = OverrideMode.None;
 
 			UpdateActiveTool();
-
-			UpdateBrushVisibility();
 		}
 
 		public bool EditMode
@@ -1430,7 +1416,9 @@ namespace Sabresaurus.SabreCSG
 				{
 					editMode = value;
 
-					CSGModel[] csgModels = FindObjectsOfType<CSGModel>();
+                    editModeModel = this;
+
+                    CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
 
 					if (value == true) // Edit mode enabled
 					{
@@ -1484,19 +1472,14 @@ namespace Sabresaurus.SabreCSG
 								if(csgModels[i] != this
 									&& csgModels[i].EditMode)
 								{
+                                    editModeModel = csgModels[i];
 									anyCSGModelsInEditMode = true;
 								}
 							}
 						}
 					}
 
-					for (int i = 0; i < csgModels.Length; i++) 
-					{
-						if(csgModels[i] != null && csgModels[i].gameObject != null)
-						{
-							csgModels[i].UpdateBrushVisibility();
-						}
-					}
+                    UpdateAllBrushesVisibility();
 
 					GridManager.UpdateGrid();
 				}
@@ -1587,24 +1570,37 @@ namespace Sabresaurus.SabreCSG
 			get {
 				if(!Application.isPlaying)
 				{
-					return anyCSGModelsInEditMode &&
-						CurrentSettings.BrushesVisible && (activeTool == null || activeTool.BrushesHandleDrawing);
+                    return CurrentSettings.BrushesVisible
+                        && anyCSGModelsInEditMode 
+                        && editModeModel != null 
+                        && (editModeModel.activeTool == null || editModeModel.activeTool.BrushesHandleDrawing);
 				}
 				return base.AreBrushesVisible;
 			}
 		}
 
-		public override void UpdateBrushVisibility ()
-		{
-			base.UpdateBrushVisibility ();
+        public static void UpdateAllBrushesVisibility()
+        {
+            CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
+            for (int i = 0; i < csgModels.Length; i++) 
+            {
+                Transform meshGroup = csgModels[i].transform.FindChild("MeshGroup");
 
-			Transform meshGroup = transform.FindChild("MeshGroup");
+                if(meshGroup != null)
+                {
+                    meshGroup.gameObject.SetActive(!CurrentSettings.MeshHidden);
+                }
 
-			if(meshGroup != null)
-			{
-				meshGroup.gameObject.SetActive(!CurrentSettings.MeshHidden);
-			}
-		}
+                List<Brush> brushes = csgModels[i].brushes;
+                for (int j = 0; j < brushes.Count; j++)
+                {
+                    if (brushes[j] != null)
+                    {
+                        brushes[j].UpdateVisibility();
+                    }
+                }
+            }
+        }
 
 
 
@@ -1867,11 +1863,11 @@ namespace Sabresaurus.SabreCSG
 			Transform meshGroup = csgModelTransform.FindChild("MeshGroup");
 			if(meshGroup != null)
 			{
-				// Reanchor the meshes to the root
-				meshGroup.parent = null;
+				// Reanchor the meshes to the parent of the CSG Model
+                meshGroup.SetParent(csgModelTransform.parent, true);
 			}
 
-			// Remove this game object
+			// Remove the CSG Model and its brushes
 			if(Application.isPlaying)
 			{
 				Destroy (csgModelTransform.gameObject);	
@@ -1885,7 +1881,7 @@ namespace Sabresaurus.SabreCSG
 		[PostProcessScene(1)]
 		public static void OnPostProcessScene()
 		{
-			CSGModel[] csgModels = FindObjectsOfType<CSGModel>();
+            CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
 			for (int i = 0; i < csgModels.Length; i++) 
 			{
 				CleanupForBuild(csgModels[i].transform);
@@ -1897,6 +1893,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			// Ensure Edit Mode is on
 			EditMode = true;
+            editModeModel = this;
 		}
 #endif
 #endif

@@ -149,7 +149,6 @@ namespace Sabresaurus.SabreCSG
 
 		protected virtual void Start()
 		{
-			UpdateBrushVisibility();
 		}
 
 		protected virtual void Update()
@@ -216,7 +215,6 @@ namespace Sabresaurus.SabreCSG
 		public virtual void OnBuildComplete()
 		{
 			polygonsRemoved = false;
-			UpdateBrushVisibility();
 
 			// Mark the brushes that have been built (so we can differentiate later if new brushes are built or not)
 			builtBrushes.Clear();
@@ -512,17 +510,6 @@ namespace Sabresaurus.SabreCSG
             }
             return brushBases;
         }
-
-		public virtual void UpdateBrushVisibility()
-		{
-			for (int i = 0; i < brushes.Count; i++)
-			{
-				if (brushes[i] != null)
-				{
-					brushes[i].UpdateVisibility();
-				}
-			}
-		}
 
 		public bool HasBrushBeenBuilt(Brush candidateBrush)
 		{
