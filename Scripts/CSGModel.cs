@@ -5,11 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Callbacks;
-using UnityEditor.SceneManagement;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -208,10 +208,58 @@ namespace Sabresaurus.SabreCSG
         public override void Build(bool forceRebuild, bool buildInBackground)
         {
             // Build can take place if meshes are not saved to the DB, or if the scene is saved
-            if(!buildSettings.SaveMeshesAsAssets || EditorSceneManager.EnsureUntitledSceneHasBeenSaved("Scene must be saved for SaveMeshesAsAssets to work"))
+            if(!buildSettings.SaveMeshesAsAssets || EnsureUntitledSceneHasBeenSaved("Scene must be saved for SaveMeshesAsAssets to work"))
             {
                 base.Build(forceRebuild, buildInBackground);
             }
+        }
+
+        private bool EnsureUntitledSceneHasBeenSaved(string message)
+        {
+#if UNITY_5_6_OR_NEWER || UNITY_5_6
+            return UnityEditor.SceneManagement.EditorSceneManager.EnsureUntitledSceneHasBeenSaved(message);
+           
+#elif UNITY_5_3_OR_NEWER
+            if(string.IsNullOrEmpty(SceneManager.GetActiveScene().path)) // Scene not saved
+            {
+                // Ask the user to save
+                UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+                    
+                // Check that the scene was saved
+                if(!string.IsNullOrEmpty(SceneManager.GetActiveScene().path))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return true;
+            }
+#else
+            if(string.IsNullOrEmpty(EditorApplication.currentScene))
+            {
+                // Ask the user to save
+                EditorApplication.SaveCurrentSceneIfUserWantsTo();
+
+                // Check that the scene was saved
+                if(!string.IsNullOrEmpty(EditorApplication.currentScene))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return true;
+            }
+#endif
         }
 
 		public override void OnBuildComplete ()
