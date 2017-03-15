@@ -43,6 +43,19 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField]
 		List<Mapping> mappings = new List<Mapping>();
 
+        public int MeshCount
+        {
+            get
+            {
+                int meshCount = 0;
+                for (int i = 0; i < mappings.Count; i++) 
+                {
+                    meshCount += mappings[i].MeshObjectMappings.Count;
+                }
+                return meshCount;
+            }
+        }
+
 		public void Clear()
 		{
 			mappings.Clear();

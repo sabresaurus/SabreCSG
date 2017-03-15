@@ -168,7 +168,7 @@ namespace Sabresaurus.SabreCSG
 		/// </summary>
 		/// <param name="forceRebuild">If set to <c>true</c> all brushes will be built and cached data ignored, otherwise SabreCSG will only rebuild brushes it knows have changed</param>
 		/// <param name="buildInBackground">If set to <c>true</c> the majority of the build will occur in a background thread</param>
-		public void Build (bool forceRebuild, bool buildInBackground)
+		public virtual void Build (bool forceRebuild, bool buildInBackground)
 		{
 			// If any of the build settings have changed, force all brushes to rebuild
 			if(!lastBuildSettings.IsBuilt || CSGBuildSettings.AreDifferent(buildSettings, lastBuildSettings))

@@ -15,6 +15,8 @@ namespace Sabresaurus.SabreCSG
 
         public bool OptimizeGeometry = true;
 
+        public bool SaveMeshesAsAssets = false;
+
         // Generate a UV2 channel for lightmapping
         [Tooltip("Note that when enabled this will have a non-trivial increase in build times")]
 		public bool GenerateLightmapUVs = false;

@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Reflection;
+using UnityEngine.SceneManagement;
+using System.IO;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -22,11 +24,17 @@ namespace Sabresaurus.SabreCSG
 
 			for (int i = 0; i < filters.Length; i++) 
 			{
+#if UNITY_EDITOR
+                if(filters[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(filters[i].sharedMesh))
+#endif                
 				GameObject.DestroyImmediate(filters[i].sharedMesh);
 			}
 
 			for (int i = 0; i < colliders.Length; i++) 
 			{
+#if UNITY_EDITOR
+                if(filters[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(filters[i].sharedMesh))
+#endif                
 				GameObject.DestroyImmediate(colliders[i].sharedMesh);
 			}
 
@@ -184,6 +192,21 @@ namespace Sabresaurus.SabreCSG
 //			newGameObject.transform.parent = meshGroupHolder;
 			newGameObject.transform.SetParent(meshGroupHolder, false);
 
+#if UNITY_EDITOR
+            if(buildSettings.SaveMeshesAsAssets)
+            {
+                // Make sure the folder exists to save into
+                string path = SceneManager.GetActiveScene().path;
+                path = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                if(!Directory.Exists(path))
+                {
+                    UnityEditor.AssetDatabase.CreateFolder(Path.GetDirectoryName(path), Path.GetFileName(path));    
+                }
+                // Save to a file rather than leaving it as a scene asset
+                UnityEditor.AssetDatabase.CreateAsset(mesh, Path.Combine(path, "VisualMesh" + materialMeshDictionary.MeshCount + ".asset"));
+            }
+#endif
+
 			materialMeshDictionary.Add(material, mesh, newGameObject);
 		}
 
@@ -291,6 +314,23 @@ namespace Sabresaurus.SabreCSG
 			meshCollider.sharedMaterial = buildSettings.DefaultPhysicsMaterial;
 			// Reparent
 			newGameObject.transform.SetParent(meshGroupHolder, false);//.parent = meshGroupHolder;
+
+
+#if UNITY_EDITOR
+            if(buildSettings.SaveMeshesAsAssets)
+            {
+                // Make sure the folder exists to save into
+                string path = SceneManager.GetActiveScene().path;
+                path = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                if(!Directory.Exists(path))
+                {
+                    UnityEditor.AssetDatabase.CreateFolder(Path.GetDirectoryName(path), Path.GetFileName(path));    
+                }
+                // Save to a file rather than leaving it as a scene asset
+                UnityEditor.AssetDatabase.CreateAsset(mesh, Path.Combine(path, "CollisionMesh" + collisionMeshDictionary.Count + ".asset"));
+            }
+#endif
+
 			collisionMeshDictionary.Add(mesh);
 		}
 

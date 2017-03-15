@@ -11,7 +11,8 @@ namespace Sabresaurus.SabreCSG
 		// Build settings for the next build
 		SerializedProperty generateCollisionMeshesProperty;
 		SerializedProperty generateTangentsProperty;
-		SerializedProperty optimizeGeometryProperty;
+        SerializedProperty optimizeGeometryProperty;
+		SerializedProperty saveMeshesAsAssetsProperty;
 		SerializedProperty generateLightmapUVsProperty;
 
 		SerializedProperty unwrapAngleErrorProperty;
@@ -31,7 +32,8 @@ namespace Sabresaurus.SabreCSG
 			// Build settings for the next build
 			generateCollisionMeshesProperty = serializedObject.FindProperty("buildSettings.GenerateCollisionMeshes");
 			generateTangentsProperty = serializedObject.FindProperty("buildSettings.GenerateTangents");
-			optimizeGeometryProperty = serializedObject.FindProperty("buildSettings.OptimizeGeometry");
+            optimizeGeometryProperty = serializedObject.FindProperty("buildSettings.OptimizeGeometry");
+            saveMeshesAsAssetsProperty = serializedObject.FindProperty("buildSettings.SaveMeshesAsAssets");
 			generateLightmapUVsProperty = serializedObject.FindProperty("buildSettings.GenerateLightmapUVs");
 
 			unwrapAngleErrorProperty = serializedObject.FindProperty("buildSettings.UnwrapAngleError");
@@ -85,6 +87,7 @@ namespace Sabresaurus.SabreCSG
                 EditorGUI.indentLevel = 1;
 
                 EditorGUILayout.PropertyField(optimizeGeometryProperty, new GUIContent("Optimize Geometry"));
+                EditorGUILayout.PropertyField(saveMeshesAsAssetsProperty, new GUIContent("Save Meshes As Assets"));
                 EditorGUI.indentLevel = 0;
             }
 

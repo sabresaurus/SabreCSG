@@ -9,6 +9,7 @@ using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Callbacks;
+using UnityEditor.SceneManagement;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -203,6 +204,15 @@ namespace Sabresaurus.SabreCSG
 				modelVersion = MODEL_VERSION;
 			}
 		}
+
+        public override void Build(bool forceRebuild, bool buildInBackground)
+        {
+            // Build can take place if meshes are not saved to the DB, or if the scene is saved
+            if(!buildSettings.SaveMeshesAsAssets || EditorSceneManager.EnsureUntitledSceneHasBeenSaved("Scene must be saved for SaveMeshesAsAssets to work"))
+            {
+                base.Build(forceRebuild, buildInBackground);
+            }
+        }
 
 		public override void OnBuildComplete ()
 		{
