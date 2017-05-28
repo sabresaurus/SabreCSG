@@ -20,6 +20,8 @@ namespace Sabresaurus.SabreCSG
 		SerializedProperty unwrapHardAngleProperty;
 		SerializedProperty unwrapPackMarginProperty;
 
+        SerializedProperty shadowCastingModeProperty;
+
 		SerializedProperty defaultPhysicsMaterialProperty;
 		SerializedProperty defaultVisualMaterialProperty;
 
@@ -39,7 +41,9 @@ namespace Sabresaurus.SabreCSG
 			unwrapAngleErrorProperty = serializedObject.FindProperty("buildSettings.UnwrapAngleError");
 			unwrapAreaErrorProperty = serializedObject.FindProperty("buildSettings.UnwrapAreaError");
 			unwrapHardAngleProperty = serializedObject.FindProperty("buildSettings.UnwrapHardAngle");
-			unwrapPackMarginProperty = serializedObject.FindProperty("buildSettings.UnwrapPackMargin");
+            unwrapPackMarginProperty = serializedObject.FindProperty("buildSettings.UnwrapPackMargin");
+			
+            shadowCastingModeProperty = serializedObject.FindProperty("buildSettings.ShadowCastingMode");
 
 			defaultPhysicsMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultPhysicsMaterial");
 			defaultVisualMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultVisualMaterial");
@@ -81,6 +85,8 @@ namespace Sabresaurus.SabreCSG
 				EditorGUI.indentLevel = 0;
 				EditorGUIUtility.labelWidth = 0;
 				GUI.enabled = true;
+
+                EditorGUILayout.PropertyField(shadowCastingModeProperty, new GUIContent("Shadow Casting Mode"));
 
                 // Experimental build settings to enable features that are not yet completely stable
                 GUILayout.Label("Experimental", EditorStyles.boldLabel);

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || RUNTIME_CSG
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Rendering;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -29,6 +30,8 @@ namespace Sabresaurus.SabreCSG
 		[Range(0f,180f)]
 		public float UnwrapHardAngle = 88f; // degrees, 0 to 180
 		public float UnwrapPackMargin = 0.00390625f; // Assumes a 1024 texture, pack margin = PadPixels / 1024
+
+        public ShadowCastingMode ShadowCastingMode = ShadowCastingMode.On;
 
 		// What default physics material to use on collision meshes
 		public PhysicMaterial DefaultPhysicsMaterial = null;
@@ -97,6 +100,11 @@ namespace Sabresaurus.SabreCSG
 			{
 				return true;
 			}
+
+            if(settings1.ShadowCastingMode != settings2.ShadowCastingMode)
+            {
+                return true;
+            }
 
 			// Don't compare IsBuilt
 

@@ -188,7 +188,9 @@ namespace Sabresaurus.SabreCSG
 
 
 			newGameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
-			newGameObject.AddComponent<MeshRenderer>().sharedMaterial = material;
+            MeshRenderer meshRenderer = newGameObject.AddComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = material;
+            meshRenderer.shadowCastingMode = buildSettings.ShadowCastingMode;
 //			newGameObject.transform.parent = meshGroupHolder;
 			newGameObject.transform.SetParent(meshGroupHolder, false);
 
