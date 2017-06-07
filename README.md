@@ -1,5 +1,9 @@
 # SabreCSG
 
+Level design tools for Unity
+https://www.assetstore.unity3d.com/en/#!/content/47418
+
+
 SabreCSG is a set of level design tools for building complex levels quickly inside Unity. Using Constructive Solid Geometry techniques SabreCSG allows you to add and subtract brushes to create great levels without needing to understand 3D art packages.
 
 SabreCSG was originally sold on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/47418), but as of 14th October 2016 has been [open sourced](http://sabrecsg.com/2016/10/14/sabrecsg-released-as-open-source/) under the MIT License (see LICENSE for details). It is now maintained on this [Github repository](https://github.com/sabresaurus/SabreCSG).
@@ -17,3 +21,4 @@ Core Features:
 - Experimental Code API - Experimental support for procedurally generating levels through code
 
 Documentation and videos on how to use SabreCSG are available at the [SabreCSG Learn website](http://sabrecsg.com/learn/)
+
