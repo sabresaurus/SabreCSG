@@ -330,14 +330,15 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+#if !UNITY_2017_1_OR_NEWER
+        // Before Unity 2017 there wasn't a built in Flip() method
         public static Plane Flip(this Plane sourcePlane)
         {
             sourcePlane.normal = -sourcePlane.normal;
             sourcePlane.distance = -sourcePlane.distance;
             return sourcePlane;
-            //		Plane newPlane = new Plane(-sourcePlane.normal, -sourcePlane.distance);
-            //		return newPlane;
         }
+#endif
 
         public static bool EqualsWithEpsilon(this float a, float b)
         {

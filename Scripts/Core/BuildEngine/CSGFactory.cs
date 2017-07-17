@@ -37,7 +37,7 @@ namespace Sabresaurus.SabreCSG
 
         static bool Prepare(Transform rootTransform)
 		{
-			meshGroupHolder = rootTransform.FindChild("MeshGroup");
+			meshGroupHolder = rootTransform.Find("MeshGroup");
 
 			if (meshGroupHolder != null)
 			{
@@ -509,7 +509,7 @@ namespace Sabresaurus.SabreCSG
 
             public static GameObject CreateMaterialMesh(Transform rootTransform, Material material, Mesh mesh)
             {
-                meshGroup = rootTransform.FindChild("MeshGroup");
+                meshGroup = rootTransform.Find("MeshGroup");
                 // Create a grouping object which will act as a parent for all the per material meshes
                 if (meshGroup == null)
                 {
@@ -530,7 +530,7 @@ namespace Sabresaurus.SabreCSG
 
             public static GameObject CreateCollisionMesh(Transform rootTransform, Mesh mesh)
             {
-                meshGroup = rootTransform.FindChild("MeshGroup");
+                meshGroup = rootTransform.Find("MeshGroup");
                 // Create a grouping object which will act as a parent for all the per material meshes
                 if (meshGroup == null)
                 {

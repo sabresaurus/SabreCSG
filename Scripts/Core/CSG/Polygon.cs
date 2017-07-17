@@ -165,7 +165,12 @@ namespace Sabresaurus.SabreCSG
 	        }
 
 			// Flip the cached plane
+#if UNITY_2017_1_OR_NEWER
+            // Unity 2017 introduces a built in Plane flip method
+            cachedPlane.Value.Flip();
+#else
 			cachedPlane = cachedPlane.Value.Flip();
+#endif
 	    }
 
 		public void SetVertices(Vertex[] vertices)

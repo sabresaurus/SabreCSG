@@ -653,7 +653,7 @@ namespace Sabresaurus.SabreCSG
 
 		public Transform GetMeshGroupTransform()
 		{
-			Transform meshGroup = transform.FindChild("MeshGroup");
+			Transform meshGroup = transform.Find("MeshGroup");
 			return meshGroup;
 		}
 

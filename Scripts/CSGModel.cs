@@ -1642,7 +1642,7 @@ namespace Sabresaurus.SabreCSG
             CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
             for (int i = 0; i < csgModels.Length; i++) 
             {
-                Transform meshGroup = csgModels[i].transform.FindChild("MeshGroup");
+                Transform meshGroup = csgModels[i].transform.Find("MeshGroup");
 
                 if(meshGroup != null)
                 {
@@ -1918,7 +1918,7 @@ namespace Sabresaurus.SabreCSG
 
 		static void CleanupForBuild(Transform csgModelTransform)
 		{
-			Transform meshGroup = csgModelTransform.FindChild("MeshGroup");
+			Transform meshGroup = csgModelTransform.Find("MeshGroup");
 			if(meshGroup != null)
 			{
 				// Reanchor the meshes to the parent of the CSG Model
