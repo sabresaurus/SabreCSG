@@ -1926,14 +1926,7 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Remove the CSG Model and its brushes
-			if(Application.isPlaying)
-			{
-				Destroy (csgModelTransform.gameObject);	
-			}
-			else
-			{
-				DestroyImmediate (csgModelTransform.gameObject);	
-			}
+			DestroyImmediate (csgModelTransform.gameObject);	
 		}
 
 		[PostProcessScene(1)]
