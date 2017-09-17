@@ -71,6 +71,9 @@ namespace Sabresaurus.SabreCSG
 
 		VertexColorWindow vertexColorWindow = null;
 
+        // Whether we are actively searching for hidden faces.
+        bool findingHiddenFaces = false;
+
 		Rect ToolbarRect
 		{
 			get
@@ -78,7 +81,7 @@ namespace Sabresaurus.SabreCSG
 				Rect rect = new Rect(toolbarRect);
 				if(selectHelpersVisible)
 				{
-					rect.height += 116;
+					rect.height += 136;
 				}
 				return rect;
 			}
@@ -915,6 +918,50 @@ namespace Sabresaurus.SabreCSG
 				GL.End();
 				GL.PopMatrix();
 			}
+
+            // Deselect surfaces that are not hidden during "find hidden surfaces"
+            if (findingHiddenFaces)
+            {
+                List<Polygon> toDeselect = new List<Polygon>();
+                for (int polygonIndex = 0; polygonIndex < selectedSourcePolygons.Count; polygonIndex++)
+                {
+                    Polygon polygon = selectedSourcePolygons[polygonIndex];
+                    Brush brush = csgModel.FindBrushFromPolygon(polygon);
+
+                    // todo: I don't understand... are the normals simply inverted due to some math bug elsewhere? Inverting my logic depending on the CSG Mode fixes it...
+                    if (brush.Mode == CSGMode.Add)
+                    {
+                        // is the camera on the positive side of the plane?
+                        if (Vector3.Dot(brush.transform.TransformDirection(polygon.Plane.normal), Camera.current.transform.position - brush.transform.TransformPoint(polygon.GetCenterPoint())) > 0)
+                        {
+                            // deselect polygon.
+                            toDeselect.Add(polygon);
+                        }
+                    }
+                    else
+                    {
+                        // is the camera on the positive side of the plane?
+                        if (Vector3.Dot(brush.transform.TransformDirection(polygon.Plane.normal), Camera.current.transform.position - brush.transform.TransformPoint(polygon.GetCenterPoint())) < 0)
+                        {
+                            // deselect polygon.
+                            toDeselect.Add(polygon);
+                        }
+                    }
+                }
+
+                foreach (Polygon polygon in toDeselect)
+                {
+                    selectedSourcePolygons.Remove(polygon);
+                }
+
+                // Recalculate the matched brushes
+                matchedBrushes.Clear();
+
+                for (int i = 0; i < selectedSourcePolygons.Count; i++)
+                {
+                    matchedBrushes.Add(selectedSourcePolygons[i], csgModel.FindBrushFromPolygon(selectedSourcePolygons[i]));
+                }
+            }
 		}
 
 		void OnDragPerform (SceneView sceneView, Event e)
@@ -1695,7 +1742,27 @@ namespace Sabresaurus.SabreCSG
 
 				GUILayout.EndHorizontal();
 
-				GUILayout.Label("Adjacent", SabreGUILayout.GetTitleStyle());
+				GUILayout.BeginHorizontal(GUILayout.Width(180));
+
+                if (!findingHiddenFaces)
+                {
+                    if (GUILayout.Button("Start Finding Hidden Faces", EditorStyles.miniButton))
+                    {
+                        findingHiddenFaces = true;
+                        SelectAll();
+                    }
+                }
+                else
+                {
+                    if (GUILayout.Button("Stop Finding Hidden Faces", EditorStyles.miniButton))
+                    {
+                        findingHiddenFaces = false;
+                    }
+                }
+
+                GUILayout.EndHorizontal();
+
+                GUILayout.Label("Adjacent", SabreGUILayout.GetTitleStyle());
 
 				GUILayout.BeginHorizontal(GUILayout.Width(180));
 
@@ -1741,8 +1808,8 @@ namespace Sabresaurus.SabreCSG
 
 		public override void ResetTool()
 		{
-			
-		}
+            findingHiddenFaces = false;
+        }
 
 		public override void OnSelectionChanged ()
 		{
