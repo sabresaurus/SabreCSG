@@ -24,7 +24,10 @@ namespace Sabresaurus.SabreCSG
 		// Whether the stairs align to the bottom edge or the top edge
 		SerializedProperty leadFromTopProp;
 
-		protected override void OnEnable ()
+        // Whether the height of each step is stretched to the floor to fill it
+		SerializedProperty fillToBottom;
+
+        protected override void OnEnable ()
 		{
 			base.OnEnable ();
 			// Setup the SerializedProperties.
@@ -38,7 +41,8 @@ namespace Sabresaurus.SabreCSG
             autoHeightProp = serializedObject.FindProperty ("autoHeight");
 
 			leadFromTopProp = serializedObject.FindProperty ("leadFromTop");
-		}
+            fillToBottom = serializedObject.FindProperty ("fillToBottom");
+        }
 
 		public override void OnInspectorGUI()
 		{
@@ -76,6 +80,8 @@ namespace Sabresaurus.SabreCSG
 	                ApplyAndInvalidate();
 	            }
 
+                EditorGUILayout.BeginHorizontal();
+
 	            bool oldValue = leadFromTopProp.boolValue;
 				bool newValue = GUILayout.Toggle(oldValue, "Lead From Top", EditorStyles.toolbarButton);
 				if(newValue != oldValue)
@@ -84,7 +90,19 @@ namespace Sabresaurus.SabreCSG
 					serializedObject.ApplyModifiedProperties();
 					System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
 				}
-				EditorGUILayout.Space();
+
+                oldValue = fillToBottom.boolValue;
+                newValue = GUILayout.Toggle(oldValue, "Fill To Bottom", EditorStyles.toolbarButton);
+                if (newValue != oldValue)
+                {
+                    fillToBottom.boolValue = newValue;
+                    serializedObject.ApplyModifiedProperties();
+                    System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space();
 			}
 
 			base.OnInspectorGUI();
@@ -115,10 +133,21 @@ namespace Sabresaurus.SabreCSG
             stepRect1.center += new Vector2(-stepUISize.x - stepUISpacing.x/2f, stepUISpacing.y / 2f);
             GUI.Box(stepRect1, new GUIContent());
 
+            // Calculate top right step size
+            float stepHeight2 = stepUISize.y;
+
+            // Apply the fill to bottom height for drawing
+            if (fillToBottom.boolValue)
+                stepHeight2 = stepUISize.y * 2 + stepUISpacing.y;
+
             // Draw top right step
-            Rect stepRect2 = new Rect(centerOffset.x, centerOffset.y, stepUISize.x, stepUISize.y);
+            Rect stepRect2 = new Rect(centerOffset.x, centerOffset.y, stepUISize.x, stepHeight2);
             stepRect2.center += new Vector2(stepUISpacing.x / 2f, -stepUISize.y - stepUISpacing.y/2f);
             GUI.Box(stepRect2, new GUIContent());
+
+            // Undo the fill to bottom height
+            if (fillToBottom.boolValue)
+                stepRect2.height -= stepUISize.y + stepUISpacing.y;
 
             // Draw depth spacing lines          
             GUI.color = Color.grey;
