@@ -11,7 +11,7 @@ namespace Sabresaurus.SabreCSG
     public class SurfaceEditor : Tool
     {
 		bool selectHelpersVisible = false;
-		enum Mode { None, Translate, Rotate };
+		enum Mode { None, Translate, Rotate, QuickSelect };
 		enum AlignDirection { Top, Bottom, Left, Right, Center };
 
 		Mode currentMode = Mode.None;
@@ -74,7 +74,11 @@ namespace Sabresaurus.SabreCSG
         // Whether we are actively searching for hidden faces.
         bool findingHiddenFaces = false;
 
-		Rect ToolbarRect
+        // Whether quick select is selecting or deselecting polygons.
+        enum QuickSelectModes { Additive, Subtractive};
+        QuickSelectModes QuickSelectMode = QuickSelectModes.Additive;
+
+        Rect ToolbarRect
 		{
 			get
 			{
@@ -251,6 +255,47 @@ namespace Sabresaurus.SabreCSG
                     {
                         currentMode = Mode.Translate;
                     }
+                    else if (!e.control && e.shift)
+                    {
+                        QuickSelectMode = QuickSelectModes.Additive;
+                        // Detect whether quick mode will select or deselect polygons
+                        if (sourcePolygon != null)
+                        {
+                            bool match1 = matchedBrushes.ContainsKey(sourcePolygon);
+                            bool match2 = selectedSourcePolygons.Contains(sourcePolygon);
+
+                            if (match1 || match2)
+                            {
+                                // Subtractive, immediately deselect the polygon in case the user doesn't drag.
+                                QuickSelectMode = QuickSelectModes.Subtractive;
+                                if (match1)
+                                {
+                                    matchedBrushes.Remove(sourcePolygon);
+                                }
+
+                                if (match2)
+                                {
+                                    selectedSourcePolygons.Remove(sourcePolygon);
+                                }
+                            }
+                            else
+                            {
+                                // Additive, immediately select the polygon in case the user doesn't drag.
+                                QuickSelectMode = QuickSelectModes.Additive;
+                                if (!match1)
+                                {
+                                    matchedBrushes.Add(sourcePolygon, csgModel.FindBrushFromPolygon(sourcePolygon));
+                                }
+
+                                if (!match2)
+                                {
+                                    selectedSourcePolygons.Add(sourcePolygon);
+                                }
+                            }
+                        }
+
+                        currentMode = Mode.QuickSelect;
+                    }
                     else
                     {
                         currentMode = Mode.None;
@@ -309,6 +354,10 @@ namespace Sabresaurus.SabreCSG
 					}
 				}
 			}
+            else if(currentMode == Mode.QuickSelect)
+            {
+                OnMouseDragQuickSelect(sceneView, e);
+            }
 		}
 
         void EnsureCurrentPolygonSelected()
@@ -494,7 +543,51 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void OnMouseUp (SceneView sceneView, Event e)
+        void OnMouseDragQuickSelect(SceneView sceneView, Event e)
+        {
+            if (!EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
+            {
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                Polygon polygon = csgModel.RaycastBuiltPolygons(ray);
+
+                if (polygon != null)
+                {
+                    Polygon sourcePolygon = csgModel.GetSourcePolygon(polygon.UniqueIndex);
+
+                    if (sourcePolygon != null)
+                    {
+                        if (QuickSelectMode == QuickSelectModes.Additive)
+                        {
+                            if (!matchedBrushes.ContainsKey(sourcePolygon))
+                            {
+                                matchedBrushes.Add(sourcePolygon, csgModel.FindBrushFromPolygon(sourcePolygon));
+                            }
+
+                            if (!selectedSourcePolygons.Contains(sourcePolygon))
+                            {
+                                selectedSourcePolygons.Add(sourcePolygon);
+                            }
+                        }
+                        else if (QuickSelectMode == QuickSelectModes.Subtractive)
+                        {
+                            if (matchedBrushes.ContainsKey(sourcePolygon))
+                            {
+                                matchedBrushes.Remove(sourcePolygon);
+                            }
+
+                            if (selectedSourcePolygons.Contains(sourcePolygon))
+                            {
+                                selectedSourcePolygons.Remove(sourcePolygon);
+                            }
+                        }
+                    }
+                }
+            }
+
+            e.Use();
+        }
+
+        void OnMouseUp (SceneView sceneView, Event e)
 		{
             // Normal selection mode
             if (e.button == 0 && !CameraPanInProgress 
@@ -583,9 +676,8 @@ namespace Sabresaurus.SabreCSG
                         // Most recent hit
                         previousHits.Insert(0, selectedPolygon);
                   
-                        // If holding control or shift, the action counts as selection toggle (if already selected it's removed)
-                        if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Shift)
-                        || EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
+                        // If holding control, the action counts as selection toggle (if already selected it's removed)
+                        if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
                         {
                             if (selectedSourcePolygons.Contains(selectedPolygon))
                             {
@@ -598,6 +690,11 @@ namespace Sabresaurus.SabreCSG
                                 lastSelectedPolygon = selectedPolygon;
                                 matchedBrushes.Add(selectedPolygon, csgModel.FindBrushFromPolygon(selectedPolygon));
                             }
+                        }
+                        // If holding shift, quick select is used and we don't change anything
+                        else if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Shift))
+                        {
+
                         }
                         else // No modifier pressed, add the polygon to selection
                         {
@@ -849,13 +946,13 @@ namespace Sabresaurus.SabreCSG
 				if(polygon != null)
 				{
 					allPolygons = csgModel.BuiltPolygonsByIndex(polygon.UniqueIndex);
-					SabreGraphics.DrawPolygons(new Color(0,1,0,0.15f), new Color(0,1,0,0.5f), allPolygons);	
-				}
+					SabreGraphics.DrawPolygons(new Color(0,1,0,0.15f), new Color(0,1,0,0.5f), allPolygons);
+                }
 			}
 
 
 			SabreCSGResources.GetSelectedBrushDashedMaterial().SetPass(0);
-			// Draw each of the selcted polygons
+			// Draw each of the selected polygons
 			for (int i = 0; i < selectedSourcePolygons.Count; i++) 
 			{
 				if(selectedSourcePolygons[i] != null)
