@@ -30,7 +30,10 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField]
 		bool leadFromTop = false;
 
-		public override int BrushCount 
+        [SerializeField]
+        bool fillToBottom = false;
+
+        public override int BrushCount 
 		{
 			get 
 			{
@@ -81,14 +84,17 @@ namespace Sabresaurus.SabreCSG
 				
 			for (int i = 0; i < brushCount; i++) 
 			{
-				Vector3 localPosition = startPosition + Vector3.forward * i * (activeDepth + stepDepthSpacing) + Vector3.up * i * (activeHeight + stepHeightSpacing);
-				generatedBrushes[i].transform.localPosition = localPosition;
+                Vector3 localPosition = startPosition + Vector3.forward * i * (activeDepth + stepDepthSpacing) + Vector3.up * i * (activeHeight + stepHeightSpacing) * (fillToBottom ? 0.5f : 1f);
+                generatedBrushes[i].transform.localPosition = localPosition;
 
 				generatedBrushes[i].Mode = this.Mode;
 				generatedBrushes[i].IsNoCSG = this.IsNoCSG;
 				generatedBrushes[i].IsVisible = this.IsVisible;
 				generatedBrushes[i].HasCollision = this.HasCollision;
 				BrushUtility.Resize(generatedBrushes[i], stepSize);
+
+                if (fillToBottom)
+                    stepSize.y += (activeHeight) + stepHeightSpacing;
 			}
 		}
 	}
