@@ -1025,7 +1025,6 @@ namespace Sabresaurus.SabreCSG
                     Polygon polygon = selectedSourcePolygons[polygonIndex];
                     Brush brush = csgModel.FindBrushFromPolygon(polygon);
 
-                    // todo: I don't understand... are the normals simply inverted due to some math bug elsewhere? Inverting my logic depending on the CSG Mode fixes it...
                     if (brush.Mode == CSGMode.Add)
                     {
                         // is the camera on the positive side of the plane?
