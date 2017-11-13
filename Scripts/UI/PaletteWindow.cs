@@ -10,14 +10,27 @@ namespace Sabresaurus.SabreCSG
 {
     public class PaletteWindow : EditorWindow
     {
+		[System.Serializable]
+		protected class Tab
+		{
+			public string Name = "";
+			public List<Object> selectedObjects = new List<Object>();
+		}
+
 		enum DropInType { Replace, InsertAfter };
-        const int SPACING = 8;
+        const int SPACING = 11;
 
 
         Vector2 scrollPosition = Vector2.zero;
 
         int width = 100; // Width of a palette cell
-        List<Object> selectedObjects = new List<Object>();
+
+		bool editingTabName = false;
+		int? hotControl = null;
+
+		List<Tab> tabs = new List<Tab>();
+
+		int activeTab = 0;
 
         int mouseDownIndex = -1;
 
@@ -28,7 +41,7 @@ namespace Sabresaurus.SabreCSG
 
 		int deferredIndexToRemove = -1;
 
-		protected virtual string PlayerPrefKey
+		protected virtual string PlayerPrefKeyPrefix
 		{
 			get
 			{
@@ -44,6 +57,14 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+        bool UseCells
+        {
+            get
+            {
+                return width >= 50;
+            }
+        }
+
         [MenuItem("Window/Palette")]
         static void CreateAndShow()
         {
@@ -54,12 +75,18 @@ namespace Sabresaurus.SabreCSG
 
         void OnEnable()
         {
-            Load();
+			for (int i = 0; i < 9; i++) 
+			{
+				Load(i);	
+			}
         }
 
         void OnDisable()
         {
-            Save();
+			for (int i = 0; i < 9; i++) 
+			{
+				Save(i);	
+			}
         }
 
         void OnGUI()
@@ -72,7 +99,7 @@ namespace Sabresaurus.SabreCSG
 #else
             int columnCount = Screen.width / (width + SPACING);
 #endif
-
+			List<Object> selectedObjects = tabs[activeTab].selectedObjects;
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
             GUILayout.Space(8);
             //GUILayout.Box(new GUIContent(), GUILayout.ExpandWidth(true));
@@ -83,49 +110,62 @@ namespace Sabresaurus.SabreCSG
                 selectedObjects.Add(null);
             }
 
-            if (e.rawType == EventType.MouseUp || e.rawType == EventType.MouseMove || e.rawType == EventType.DragUpdated)
+            if (e.rawType == EventType.MouseUp || e.rawType == EventType.MouseMove || e.rawType == EventType.DragUpdated || e.rawType == EventType.ScrollWheel)
             {
                 dropInTargetIndex = -1;
 				dropInType = DropInType.Replace;
             }
 
-			Object deferredInsertObject = null;
+			List<Object> deferredInsertObjects = null;
 			int deferredInsertIndex = -1;
 
             for (int i = 0; i < selectedObjects.Count; i++)
             {
                 int columnIndex = i % columnCount;
 
-                if(columnIndex == 0)
+                if(UseCells && columnIndex == 0)
                 {
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(8);
                 }
                 
                 
-				Object newSelectedObject = null;
+				List<Object> newSelectedObjects = null;
 				bool dropAccepted = false;
-				DrawElement(e, selectedObjects[i], i, out newSelectedObject, out dropAccepted);
+				DrawElement(e, selectedObjects[i], i, out newSelectedObjects, out dropAccepted);
 
-				if(dropAccepted || newSelectedObject != selectedObjects[i])
+				if(dropAccepted || newSelectedObjects.Count > 1 || newSelectedObjects[0] != selectedObjects[i])
 				{
 					if(dropInType == DropInType.InsertAfter)
 					{
 						// Defer the insert until after we've drawn the UI so we don't mismatch UI mid-draw
 						deferredInsertIndex = i + 1;
-						deferredInsertObject = newSelectedObject;
+						deferredInsertObjects = newSelectedObjects;
 					}
-					else if(newSelectedObject != selectedObjects[i])
+					else
 					{
-						selectedObjects[i] = newSelectedObject;
-						Save();
+						selectedObjects[i] = newSelectedObjects[0];
+						if(newSelectedObjects.Count > 1)
+						{
+							deferredInsertIndex = i + 1;
+							newSelectedObjects.RemoveAt(0);
+							deferredInsertObjects = newSelectedObjects;
+						}
+
+						Save(activeTab);
 					}
 				}
                 
+                if(UseCells)
+                {
+				    GUILayout.Space(4);
+                }
+                else
+                {
+                    GUILayout.Space(8);
+                }
 
-				GUILayout.Space(4);
-
-                if(columnIndex == columnCount-1 || i == selectedObjects.Count-1) // If last in row
+                if(UseCells && (columnIndex == columnCount-1 || i == selectedObjects.Count-1)) // If last in row
                 {
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.EndHorizontal();
@@ -154,28 +194,99 @@ namespace Sabresaurus.SabreCSG
 
             GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
             boxStyle.margin = new RectOffset(0, 0, 0, 0);
+			RectOffset padding = boxStyle.padding;
+			padding.top += 1;
+			boxStyle.padding = padding;
             GUILayout.Box(new GUIContent(), boxStyle, GUILayout.ExpandWidth(true));
 
             Rect lastRect = GUILayoutUtility.GetLastRect();
-            lastRect.xMax -= 10;
-            lastRect.xMin = lastRect.xMax - 60;
+
+			Rect buttonRect = lastRect;
+			buttonRect.y += 1;
+
+			buttonRect.width = (buttonRect.width - 90) / 9f;
+
+			GUIStyle activeStyle = EditorStyles.toolbarButton;
+			buttonRect.height = activeStyle.CalcHeight(new GUIContent(), 20);
+			for (int i = 0; i < 9; i++) 
+			{
+				string tabName = (i + 1).ToString();
+				if(!string.IsNullOrEmpty(tabs[i].Name))
+				{
+					tabName = tabs[i].Name;
+				}
+
+				bool oldValue = (activeTab == i);
+
+				if(oldValue == true && editingTabName)
+				{					
+					GUI.SetNextControlName("PaletteTabName");
+					tabs[activeTab].Name = GUI.TextField(buttonRect, tabs[activeTab].Name);
+
+					if(!hotControl.HasValue)
+					{
+						hotControl = GUIUtility.hotControl;
+						GUI.FocusControl("PaletteTabName");
+					}
+					else
+					{
+						if(GUIUtility.hotControl != hotControl.Value // Clicked off it
+                            || Event.current.type == EventType.KeyDown && Event.current.character == (char)10) // Return pressed
+						{
+							editingTabName = false;
+							hotControl = null;
+						}
+					}
+				}
+				else
+				{
+					bool newValue = GUI.Toggle(buttonRect, oldValue, tabName, activeStyle);
+					if(newValue != oldValue)
+					{
+						if(newValue == true)
+						{
+							activeTab = i;
+							Repaint();
+							editingTabName = false;
+						}
+						else if(newValue == false)
+						{
+							editingTabName = true;
+							hotControl = null;
+						}
+					}
+				}
+
+				buttonRect.x += buttonRect.width;
+			}
+
+//			Debug.Log(GUI.GetNameOfFocusedControl());
+//			if(GUI.GetNameOfFocusedControl() != "PaletteTabName")
+//			{
+//				editingTabName = false;
+//			}
+
+			Rect sliderRect = lastRect;
+			sliderRect.xMax -= 10;
+			sliderRect.xMin = sliderRect.xMax - 60;
             
 			// User configurable tile size
-            width = (int)GUI.HorizontalSlider(lastRect, width, 50, 100);
+			width = (int)GUI.HorizontalSlider(sliderRect, width, 49, 100);
+
 
             // Delete at the end of the OnGUI so we don't mismatch any UI groups
             if(deferredIndexToRemove != -1)
             {
                 selectedObjects.RemoveAt(deferredIndexToRemove);
                 deferredIndexToRemove = -1;
-                Save();
+				Save(activeTab);
             }
 
 			// Insert at the end of the OnGUI so we don't mismatch any UI groups
-			if(deferredInsertObject != null)
+			if(deferredInsertObjects != null)
 			{
-				selectedObjects.Insert(deferredInsertIndex, deferredInsertObject);
-				Save();
+				selectedObjects.InsertRange(deferredInsertIndex, deferredInsertObjects);
+				Save(activeTab);
 			}
 
 			// Carried out a DragPerform, so reset drop in states
@@ -183,10 +294,11 @@ namespace Sabresaurus.SabreCSG
 			{
 				dropInTargetIndex = -1;
 				dropInType = DropInType.Replace;
+                Repaint();
 			}
         }
 
-		public void DrawElement(Event e, Object selectedObject, int index, out Object newSelection, out bool dropAccepted)
+		public void DrawElement(Event e, Object selectedObject, int index, out List<Object> newSelection, out bool dropAccepted)
         {
 			dropAccepted = false;
             EditorGUILayout.BeginVertical();
@@ -211,26 +323,35 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
+            Rect previewRect;
+            Rect insertAfterRect;
 
-            GUIStyle style = new GUIStyle(GUI.skin.box);
-            style.padding = new RectOffset(0, 0, 0, 0);
-            style.alignment = TextAnchor.MiddleCenter;
-            
-            if(texture != null)
+            if(UseCells)
             {
-                GUILayout.Box(texture, style, GUILayout.Width(width), GUILayout.Height(width));
+                GUIStyle style = new GUIStyle(GUI.skin.box);
+                style.padding = new RectOffset(0, 0, 0, 0);
+                style.alignment = TextAnchor.MiddleCenter;
+                
+                if(texture != null)
+                {
+                    GUILayout.Box(texture, style, GUILayout.Width(width), GUILayout.Height(width));
+                }
+                else
+                {
+                    GUILayout.Box("Drag an object here", style, GUILayout.Width(width), GUILayout.Height(width));
+                }
+
+                previewRect = GUILayoutUtility.GetLastRect();
+                insertAfterRect = new Rect(previewRect.xMax, previewRect.y, 8, previewRect.height);
+
+                selectedObject = EditorGUILayout.ObjectField(selectedObject, TypeFilter, false, GUILayout.Width(width));
             }
             else
             {
-                GUILayout.Box("Drag an object here", style, GUILayout.Width(width), GUILayout.Height(width));
+                selectedObject = EditorGUILayout.ObjectField(selectedObject, TypeFilter, false);
+                previewRect = GUILayoutUtility.GetLastRect();
+                insertAfterRect = new Rect(previewRect.xMin, previewRect.yMax, previewRect.width, 8);
             }
-            Rect previewRect = GUILayoutUtility.GetLastRect();
-            bool mouseInRect = previewRect.Contains(e.mousePosition);
-
-			Rect insertAfterRect = new Rect(previewRect.xMax, previewRect.y, 8, previewRect.height);
-			bool mouseInInsertAfterRect = insertAfterRect.Contains(e.mousePosition);
-
-			selectedObject = EditorGUILayout.ObjectField(selectedObject, TypeFilter, false, GUILayout.Width(width));
 
             if(dropInTargetIndex == index)
             {
@@ -244,6 +365,8 @@ namespace Sabresaurus.SabreCSG
 				}
             }
 
+            bool mouseInRect = previewRect.Contains(e.mousePosition);
+            bool mouseInInsertAfterRect = insertAfterRect.Contains(e.mousePosition);
 
             if(mouseInRect && e.type == EventType.MouseDown)
             {
@@ -296,6 +419,10 @@ namespace Sabresaurus.SabreCSG
                                 SetProjectWindowFolder(AssetDatabase.GetAssetPath(selectedObject));
                             }
                         }
+                        else
+                        {
+                            AssetDatabase.OpenAsset(selectedObject);
+                        }
                     }
                 }
             }
@@ -331,7 +458,7 @@ namespace Sabresaurus.SabreCSG
 
             EditorGUILayout.EndVertical();
 
-			newSelection = selectedObject;
+			newSelection = new List<Object>{ selectedObject };
         }
 
         public static void SetProjectWindowFolder(string folderPath)
@@ -403,8 +530,13 @@ namespace Sabresaurus.SabreCSG
 			Selection.activeObject = selectedObject;
 		}
 
-        void Save()
+		void Save(int tabIndex)
         {
+			while(tabs.Count <= tabIndex)
+			{
+				tabs.Add(new Tab());
+			}
+			List<Object> selectedObjects = tabs[tabIndex].selectedObjects;
             StringBuilder output = new StringBuilder();
             for (int i = 0; i < selectedObjects.Count; i++)
             {
@@ -417,13 +549,34 @@ namespace Sabresaurus.SabreCSG
                 }
             }
             string outputString = output.ToString().TrimEnd(',');
-			PlayerPrefs.SetString(PlayerPrefKey, outputString);
+
+			string key = PlayerPrefKeyPrefix;
+			if(tabIndex > 0)
+			{
+				key += tabIndex;
+			}
+
+			PlayerPrefs.SetString(key, outputString);
+
+			PlayerPrefs.SetString(key + "-Tab", tabs[tabIndex].Name);
         }
 
-        void Load()
+		void Load(int tabIndex)
         {
-            selectedObjects.Clear();
-			string selectionString = PlayerPrefs.GetString(PlayerPrefKey);
+			while(tabs.Count <= tabIndex)
+			{
+				tabs.Add(new Tab());
+			}
+
+			tabs[tabIndex].selectedObjects.Clear();
+
+			string key = PlayerPrefKeyPrefix;
+			if(tabIndex > 0)
+			{
+				key += tabIndex;
+			}
+
+			string selectionString = PlayerPrefs.GetString(key);
             string[] newGUIDs = selectionString.Split(',');
             for (int i = 0; i < newGUIDs.Length; i++)
             {
@@ -432,9 +585,10 @@ namespace Sabresaurus.SabreCSG
 
                 if(mainAsset != null)
                 {
-                    selectedObjects.Add(mainAsset);
+					tabs[tabIndex].selectedObjects.Add(mainAsset);
                 }
             }
+			tabs[tabIndex].Name = PlayerPrefs.GetString(key + "-Tab");
         }
     }
 }

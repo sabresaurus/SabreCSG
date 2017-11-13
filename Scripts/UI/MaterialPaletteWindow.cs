@@ -16,7 +16,7 @@ namespace Sabresaurus.SabreCSG
 			window.Show();
 		}
 
-        protected override string PlayerPrefKey 
+        protected override string PlayerPrefKeyPrefix 
 		{
 			get 
 			{
