@@ -178,26 +178,12 @@ namespace Sabresaurus.SabreCSG
 
                 // Get all the polygons the ray hits
                 List<Polygon> raycastHits = csgModel.RaycastBuiltPolygonsAll(ray).Select(hit => csgModel.GetSourcePolygon(hit.Polygon.UniqueIndex)).Where(item => item != null).ToList();
-                Polygon sourcePolygon = null;
 
-                // Walk through the hits from front to back and find if any of them are in the selection set
-                for (int i = 0; i < raycastHits.Count; i++)
-                {
-                    if(selectedSourcePolygons.Contains(raycastHits[i]))
-                    {
-                        sourcePolygon = raycastHits[i];
-                        break;
-                    }
-                }
-
-                // None of the hit polygons are in the selection set, so just use the first hit polygon if it's available
-                if(sourcePolygon == null && raycastHits.Count >= 1)
-                {
-                    sourcePolygon = raycastHits[0];
-                }
+                // Use the first polygon that was hit so we don't accidentally select/deselect polygons behind the one we see.
+                Polygon sourcePolygon = raycastHits[0];
 
                 // If a polygon has been hit
-				if(sourcePolygon != null)
+                if (sourcePolygon != null)
                 {
                     // Reset drag values
                     totalDelta = Vector2.zero;
