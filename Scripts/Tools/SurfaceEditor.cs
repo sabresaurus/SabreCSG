@@ -178,9 +178,13 @@ namespace Sabresaurus.SabreCSG
 
                 // Get all the polygons the ray hits
                 List<Polygon> raycastHits = csgModel.RaycastBuiltPolygonsAll(ray).Select(hit => csgModel.GetSourcePolygon(hit.Polygon.UniqueIndex)).Where(item => item != null).ToList();
+                Polygon sourcePolygon = null;
 
                 // Use the first polygon that was hit so we don't accidentally select/deselect polygons behind the one we see.
-                Polygon sourcePolygon = raycastHits[0];
+                if (raycastHits.Count > 0)
+                {
+                    sourcePolygon = raycastHits[0];
+                }
 
                 // If a polygon has been hit
                 if (sourcePolygon != null)
