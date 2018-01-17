@@ -84,14 +84,16 @@ namespace Sabresaurus.SabreCSG
 		/// <param name="brushType">Primitive Brush type.</param>
 		public static Texture2D GetButtonTexture(PrimitiveBrushType brushType)
 		{
-			if (brushType == PrimitiveBrushType.Prism)
-				return ButtonPrismTexture;
-			else if (brushType == PrimitiveBrushType.Cylinder)
-				return ButtonCylinderTexture;
-			else if (brushType == PrimitiveBrushType.Sphere || brushType == PrimitiveBrushType.IcoSphere)
-				return ButtonSphereTexture;
-			else
-				return ButtonCubeTexture;
+            if (brushType == PrimitiveBrushType.Prism)
+                return ButtonPrismTexture;
+            else if (brushType == PrimitiveBrushType.Cylinder)
+                return ButtonCylinderTexture;
+            else if (brushType == PrimitiveBrushType.Sphere || brushType == PrimitiveBrushType.IcoSphere)
+                return ButtonSphereTexture;
+            else if (brushType == PrimitiveBrushType.Cone)
+                return ButtonConeTexture;
+            else
+                return ButtonCubeTexture;
 		}
 
 #region Accessors
@@ -234,6 +236,14 @@ namespace Sabresaurus.SabreCSG
 				return (Texture2D)LoadObject("Gizmos/ButtonStairs.png");
 			}
 		}
+
+        public static Texture2D ButtonConeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
+            }
+        }
 
         public static Texture2D GroupHeaderTexture
         {
