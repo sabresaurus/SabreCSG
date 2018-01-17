@@ -379,11 +379,16 @@ namespace Sabresaurus.SabreCSG
 				CreatePrimitiveBrush(PrimitiveBrushType.Sphere);
 			}
 
+            if (GUI.Button(new Rect(60, createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), SabreCSGResources.ButtonConeTexture, createBrushStyle))
+            {
+                CreatePrimitiveBrush(PrimitiveBrushType.Cone);
+            }
+
             //if (GUI.Button(new Rect(60, createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), "", createBrushStyle))
             //{
             //}
 
-            if (GUI.Button(new Rect(60,createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), "...", createBrushStyle))
+            if (GUI.Button(new Rect(90,createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), "...", createBrushStyle))
 			{
 				GenericMenu menu = new GenericMenu ();
 
@@ -396,7 +401,7 @@ namespace Sabresaurus.SabreCSG
 				menu.DropDown(new Rect(60,createBrushStyle.fixedHeight, 100, createBrushStyle.fixedHeight));
 			}
 
-			GUILayout.Space(92);
+			GUILayout.Space(92 + 30);
 
 			// Display brush count
 			GUILayout.Label(csgModel.BrushCount.ToStringWithSuffix(" brush", " brushes"), SabreGUILayout.GetLabelStyle());
