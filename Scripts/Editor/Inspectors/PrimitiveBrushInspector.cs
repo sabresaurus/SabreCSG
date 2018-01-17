@@ -19,8 +19,9 @@ namespace Sabresaurus.SabreCSG
 		SerializedProperty cylinderSideCountProp;
 		SerializedProperty sphereSideCountProp;
 		SerializedProperty icoSphereIterationCountProp;
+        SerializedProperty coneSideCountProp;
 
-		float shellDistance = 0;
+        float shellDistance = 0;
 
 		protected override void OnEnable ()
 		{
@@ -29,7 +30,8 @@ namespace Sabresaurus.SabreCSG
 			prismSideCountProp = serializedObject.FindProperty ("prismSideCount");
 			cylinderSideCountProp = serializedObject.FindProperty ("cylinderSideCount");
 			sphereSideCountProp = serializedObject.FindProperty ("sphereSideCount");
-			icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
+			coneSideCountProp = serializedObject.FindProperty ("coneSideCount");
+            icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
 		}
 
 		private void ChangeBrushesToType(PrimitiveBrushType newType)
@@ -139,6 +141,11 @@ namespace Sabresaurus.SabreCSG
                 DrawBrushButton(PrimitiveBrushType.Sphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.IcoSphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
 
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+
+                DrawBrushButton(PrimitiveBrushType.Cone, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
+
                 GUI.enabled = true; // Reset GUI enabled so that the next items aren't disabled
                 GUILayout.EndHorizontal();
 
@@ -173,6 +180,10 @@ namespace Sabresaurus.SabreCSG
                     else if (activeType.Value == PrimitiveBrushType.IcoSphere)
                     {
                         EditorGUILayout.PropertyField(icoSphereIterationCountProp, new GUIContent("Iterations"));
+                    }
+                    else if (activeType.Value == PrimitiveBrushType.Cone)
+                    {
+                        EditorGUILayout.PropertyField(coneSideCountProp, new GUIContent("Sides"));
                     }
                     if (EditorGUI.EndChangeCheck())
                     {

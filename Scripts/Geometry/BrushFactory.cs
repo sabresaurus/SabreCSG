@@ -474,12 +474,57 @@ namespace Sabresaurus.SabreCSG
 			return polygons;
 		}
 
-		/// <summary>
-		/// Generates the polygons from a supplied convex mesh, preserving quads if the MeshImporter has <c>keepQuads</c> set.
-		/// </summary>
-		/// <returns>The polygons converted from the mesh.</returns>
-		/// <param name="sourceMesh">Source mesh.</param>
-		public static List<Polygon> GeneratePolygonsFromMesh(Mesh sourceMesh)
+        /// <summary>
+        /// Generates a cone of height and radius 2
+        /// </summary>
+		/// <param name="sideCount">Side count for the cone.</param>
+        /// <returns>Polygons to be supplied to a brush.</returns>
+        public static Polygon[] GenerateCone(int sideCount = 20)
+        {
+            Polygon[] polygons = new Polygon[sideCount * 2];
+
+            float angleDelta = Mathf.PI * 2 / sideCount;
+
+            Vertex capCenterVertex = new Vertex(new Vector3(0, 1, 0), Vector3.up, new Vector2(0, 0));
+
+            for (int i = 0; i < sideCount; i++)
+            {
+                Vector3 normal = new Vector3(Mathf.Sin((i + 0.5f) * angleDelta), 0, Mathf.Cos((i + 0.5f) * angleDelta));
+
+                polygons[i] = new Polygon(new Vertex[]
+                {
+                    new Vertex(new Vector3(Mathf.Sin(i * angleDelta), -1, Mathf.Cos(i * angleDelta)),
+                        normal,
+                        new Vector2(i * (1f/sideCount),0)),
+                    new Vertex(new Vector3(Mathf.Sin((i+1) * angleDelta), -1, Mathf.Cos((i+1) * angleDelta)),
+                        normal,
+                        new Vector2((i+1) * (1f/sideCount),0)),
+                    new Vertex(new Vector3(0, 1, 0),
+                        normal,
+                        new Vector2((((i + 1) * (1f / sideCount)) + (i * (1f / sideCount))) / 2.0f, 1.0f)),
+                }, null, false, false);
+            }
+
+            capCenterVertex = new Vertex(new Vector3(0, -1, 0), Vector3.down, new Vector2(0, 0));
+
+            for (int i = 0; i < sideCount; i++)
+            {
+                Vertex vertex1 = new Vertex(new Vector3(Mathf.Sin(i * -angleDelta), -1, Mathf.Cos(i * -angleDelta)), Vector3.down, new Vector2(Mathf.Sin(i * angleDelta), Mathf.Cos(i * angleDelta)));
+                Vertex vertex2 = new Vertex(new Vector3(Mathf.Sin((i + 1) * -angleDelta), -1, Mathf.Cos((i + 1) * -angleDelta)), Vector3.down, new Vector2(Mathf.Sin((i + 1) * angleDelta), Mathf.Cos((i + 1) * angleDelta)));
+
+                Vertex[] capVertices = new Vertex[] { vertex1, vertex2, capCenterVertex.DeepCopy() };
+                polygons[sideCount + i] = new Polygon(capVertices, null, false, false);
+            }
+
+            return polygons;
+        }
+
+        /// <summary>
+        /// Generates the polygons from a supplied convex mesh, preserving quads if the MeshImporter has <c>keepQuads</c> set.
+        /// </summary>
+        /// <returns>The polygons converted from the mesh.</returns>
+        /// <param name="sourceMesh">Source mesh.</param>
+        public static List<Polygon> GeneratePolygonsFromMesh(Mesh sourceMesh)
 		{
 			List<Polygon> generatedPolygons = new List<Polygon>();
 			// Each sub mesh can have a different topology, i.e. triangles and quads

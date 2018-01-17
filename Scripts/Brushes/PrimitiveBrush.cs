@@ -12,7 +12,8 @@ namespace Sabresaurus.SabreCSG
 		Cylinder, 
 		Prism, 
 		Custom,
-		IcoSphere
+		IcoSphere,
+        Cone
 	};
 
 	/// <summary>
@@ -30,7 +31,10 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,HideInInspector]
 		int cylinderSideCount = 20;
 
-		[SerializeField,HideInInspector]
+        [SerializeField, HideInInspector]
+        int coneSideCount = 20;
+
+        [SerializeField,HideInInspector]
 		int sphereSideCount = 6;
 
 		[SerializeField,HideInInspector]
@@ -202,7 +206,15 @@ namespace Sabresaurus.SabreCSG
 				}
 				polygons = BrushFactory.GeneratePrism(prismSideCount);
 			}
-			else if(brushType == Sabresaurus.SabreCSG.PrimitiveBrushType.Custom)
+            else if (brushType == PrimitiveBrushType.Cone)
+            {
+                if (coneSideCount < 3)
+                {
+                    coneSideCount = 3;
+                }
+                polygons = BrushFactory.GenerateCone(coneSideCount);
+            }
+            else if(brushType == Sabresaurus.SabreCSG.PrimitiveBrushType.Custom)
 			{
 				// Do nothing
 				Debug.LogError("PrimitiveBrushType.Custom is not a valid type for new brush creation");
