@@ -817,7 +817,7 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Bounds is aligned with the object
-			transform.Translate(delta);
+			transform.Translate(delta.Multiply(transform.localScale));
 
 			// Counter the delta offset
 			Transform[] childTransforms = transform.GetComponentsInChildren<Transform>(true);
