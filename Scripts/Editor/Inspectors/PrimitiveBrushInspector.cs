@@ -16,10 +16,22 @@ namespace Sabresaurus.SabreCSG
 		Mesh sourceMesh = null;
 
 		SerializedProperty prismSideCountProp;
+
 		SerializedProperty cylinderSideCountProp;
+
 		SerializedProperty sphereSideCountProp;
+
 		SerializedProperty icoSphereIterationCountProp;
+
         SerializedProperty coneSideCountProp;
+
+        SerializedProperty curvedStairsInnerRadius;
+        SerializedProperty curvedStairsStepHeight;
+        SerializedProperty curvedStairsStepWidth;
+        SerializedProperty curvedStairsAngleOfCurve;
+        SerializedProperty curvedStairsNumSteps;
+        SerializedProperty curvedStairsAddToFirstStep;
+        SerializedProperty curvedStairsCounterClockwise;
 
         float shellDistance = 0;
 
@@ -28,11 +40,23 @@ namespace Sabresaurus.SabreCSG
 			base.OnEnable ();
 			// Setup the SerializedProperties.
 			prismSideCountProp = serializedObject.FindProperty ("prismSideCount");
+
 			cylinderSideCountProp = serializedObject.FindProperty ("cylinderSideCount");
+
 			sphereSideCountProp = serializedObject.FindProperty ("sphereSideCount");
+
 			coneSideCountProp = serializedObject.FindProperty ("coneSideCount");
+
             icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
-		}
+
+            curvedStairsInnerRadius = serializedObject.FindProperty ("curvedStairsInnerRadius");
+            curvedStairsStepHeight = serializedObject.FindProperty ("curvedStairsStepHeight");
+            curvedStairsStepWidth = serializedObject.FindProperty ("curvedStairsStepWidth");
+            curvedStairsAngleOfCurve = serializedObject.FindProperty ("curvedStairsAngleOfCurve");
+            curvedStairsNumSteps = serializedObject.FindProperty ("curvedStairsNumSteps");
+            curvedStairsAddToFirstStep = serializedObject.FindProperty ("curvedStairsAddToFirstStep");
+            curvedStairsCounterClockwise = serializedObject.FindProperty("curvedStairsCounterClockwise");
+        }
 
 		private void ChangeBrushesToType(PrimitiveBrushType newType)
 		{
@@ -54,6 +78,16 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 		}
+
+        private void ResetPolygons()
+        {
+            PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
+            foreach (PrimitiveBrush brush in brushes)
+            {
+                brush.ResetPolygons();
+                brush.Invalidate(true);
+            }
+        }
 
 		private void ResetPolygonsKeepScale()
 		{
@@ -103,7 +137,12 @@ namespace Sabresaurus.SabreCSG
             {
                 name = "Cyl";
             }
-            
+
+            if (shortMode && brushType == PrimitiveBrushType.CurvedStairs)
+            {
+                name = "CSt";
+            }
+
             GUI.Label(lastRect, name, labelStyle);
         }
 
@@ -140,11 +179,12 @@ namespace Sabresaurus.SabreCSG
                 DrawBrushButton(PrimitiveBrushType.Cylinder, activeType, brushButtonStyle, labelStyle, stretchButtonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.Sphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.IcoSphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
-
+				
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
 
                 DrawBrushButton(PrimitiveBrushType.Cone, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
+				DrawBrushButton(PrimitiveBrushType.CurvedStairs, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
 
                 GUI.enabled = true; // Reset GUI enabled so that the next items aren't disabled
                 GUILayout.EndHorizontal();
@@ -185,11 +225,31 @@ namespace Sabresaurus.SabreCSG
                     {
                         EditorGUILayout.PropertyField(coneSideCountProp, new GUIContent("Sides"));
                     }
+                    else if (activeType.Value == PrimitiveBrushType.CurvedStairs)
+                    {
+                        GUILayout.EndHorizontal();
+                        EditorGUIUtility.labelWidth = 120;
+                        EditorGUILayout.PropertyField(curvedStairsInnerRadius, new GUIContent("Inner Radius"));
+                        EditorGUILayout.PropertyField(curvedStairsStepHeight, new GUIContent("Step Height"));
+                        EditorGUILayout.PropertyField(curvedStairsStepWidth, new GUIContent("Step Width"));
+                        EditorGUILayout.PropertyField(curvedStairsAngleOfCurve, new GUIContent("Angle Of Curve"));
+                        EditorGUILayout.PropertyField(curvedStairsNumSteps, new GUIContent("Number Of Steps"));
+                        EditorGUILayout.PropertyField(curvedStairsAddToFirstStep, new GUIContent("Add To First Step"));
+                        EditorGUILayout.PropertyField(curvedStairsCounterClockwise, new GUIContent("Counter Clockwise"));
+                        GUILayout.BeginHorizontal();
+                    }
                     if (EditorGUI.EndChangeCheck())
                     {
                         // One of the properties has changed
                         serializedObject.ApplyModifiedProperties();
-                        ResetPolygonsKeepScale();
+                        if (activeType == PrimitiveBrushType.CurvedStairs)
+                        {
+                            ResetPolygons();
+                        }
+                        else
+                        {
+                            ResetPolygonsKeepScale();
+                        }
                     }
                 }
 

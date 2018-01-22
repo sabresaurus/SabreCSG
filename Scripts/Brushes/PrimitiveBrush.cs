@@ -13,7 +13,8 @@ namespace Sabresaurus.SabreCSG
 		Prism, 
 		Custom,
 		IcoSphere,
-        Cone
+        Cone,
+		CurvedStairs
 	};
 
 	/// <summary>
@@ -40,7 +41,22 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,HideInInspector]
 		int icoSphereIterationCount = 1;
 
-		[SerializeField,HideInInspector]
+        [SerializeField, HideInInspector]
+        float curvedStairsInnerRadius = 1.0f;
+        [SerializeField, HideInInspector]
+        float curvedStairsStepHeight = 0.0625f;
+        [SerializeField, HideInInspector]
+        float curvedStairsStepWidth = 1.0f;
+        [SerializeField, HideInInspector]
+        float curvedStairsAngleOfCurve = 90.0f;
+        [SerializeField, HideInInspector]
+        int curvedStairsNumSteps = 4;
+        [SerializeField, HideInInspector]
+        float curvedStairsAddToFirstStep = 0.0f;
+        [SerializeField, HideInInspector]
+        bool curvedStairsCounterClockwise = false;
+
+        [SerializeField,HideInInspector]
 		PrimitiveBrushType brushType = PrimitiveBrushType.Cube;
 
 		[SerializeField,HideInInspector]
@@ -213,6 +229,25 @@ namespace Sabresaurus.SabreCSG
                     coneSideCount = 3;
                 }
                 polygons = BrushFactory.GenerateCone(coneSideCount);
+            }
+            else if (brushType == PrimitiveBrushType.CurvedStairs)
+            {
+                if (curvedStairsAngleOfCurve < 1.0f)
+                    curvedStairsAngleOfCurve = 1.0f;
+                if (curvedStairsAngleOfCurve > 360.0f)
+                    curvedStairsAngleOfCurve = 360.0f;
+                if (curvedStairsInnerRadius < 1.0f)
+                    curvedStairsInnerRadius = 1.0f;
+                if (curvedStairsStepWidth < 0.01f)
+                    curvedStairsStepWidth = 0.01f;
+                if (curvedStairsStepHeight < 0.01f)
+                    curvedStairsStepHeight = 0.01f;
+                if (curvedStairsNumSteps < 1)
+                    curvedStairsNumSteps = 1;
+                if (curvedStairsAddToFirstStep < 0.0f)
+                    curvedStairsAddToFirstStep = 0.0f;
+
+                polygons = BrushFactory.GenerateCurvedStairs(curvedStairsInnerRadius, curvedStairsStepHeight, curvedStairsStepWidth, curvedStairsAngleOfCurve, curvedStairsNumSteps, curvedStairsAddToFirstStep, curvedStairsCounterClockwise);
             }
             else if(brushType == Sabresaurus.SabreCSG.PrimitiveBrushType.Custom)
 			{
@@ -817,7 +852,7 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Bounds is aligned with the object
-			transform.Translate(delta.Multiply(transform.localScale));
+			transform.Translate(delta);
 
 			// Counter the delta offset
 			Transform[] childTransforms = transform.GetComponentsInChildren<Transform>(true);

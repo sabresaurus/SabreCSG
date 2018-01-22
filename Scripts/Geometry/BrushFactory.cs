@@ -520,6 +520,182 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
+        /// Generates a curved staircase. Inspired by Unreal Editor 1 (1998).
+        /// </summary>
+        /// <remarks>Taking 256.0f unit chunks and 65536.0f rotations with integers down to the metric scale. My head hurts. ~Henry de Jongh.</remarks>
+        /// <param name="innerRadius">The radius in meters in the center of the staircase.</param>
+        /// <param name="stepHeight">The height of each step.</param>
+        /// <param name="stepWidth">The width of each step.</param>
+        /// <param name="angleOfCurve">The amount of curvature in degrees.</param>
+        /// <param name="numSteps">The amount of steps on the staircase.</param>
+        /// <param name="addToFirstStep">An amount of height to add to the first staircase.</param>
+        /// <param name="counterClockwise">Whether the stairs are mirrored counter-clockwise.</param>
+        /// <returns>Polygons to be supplied to a brush.</returns>
+        public static Polygon[] GenerateCurvedStairs(float innerRadius = 1.0f, float stepHeight = 0.0625f, float stepWidth = 1.0f, float angleOfCurve = 90.0f, int numSteps = 4, float addToFirstStep = 0.0f, bool counterClockwise = false)
+        {
+            List<Vector3> vertexPositions = new List<Vector3>();
+            List<Vertex> vertices = new List<Vertex>();
+            List<Polygon> polygons = new List<Polygon>();
+
+            // local variables
+            Plane plane;
+            Vector3 rotateStep = new Vector3();
+            Vector3 vertex = new Vector3(), newVertex = new Vector3();
+            float adjustment;
+            int x, innerStart, outerStart, bottomInnerStart, bottomOuterStart;
+
+            // begin
+            rotateStep.z = angleOfCurve / numSteps;
+
+            if (counterClockwise)
+            {
+                rotateStep.z *= -1;
+            }
+
+            // Generate the inner curve points.
+            innerStart = vertexPositions.Count;
+            vertex.x = innerRadius;
+            for (x = 0; x < (numSteps + 1); x++)
+            {
+                if (x == 0)
+                    adjustment = addToFirstStep;
+                else
+                    adjustment = 0;
+
+                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
+                vertex.z += stepHeight;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
+            }
+
+            // Generate the outer curve points.
+            outerStart = vertexPositions.Count;
+            vertex.x = innerRadius + stepWidth;
+            vertex.z = 0;
+            for (x = 0; x < (numSteps + 1); x++)
+            {
+                if (x == 0)
+                    adjustment = addToFirstStep;
+                else
+                    adjustment = 0;
+
+                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
+                vertex.z += stepHeight;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
+            }
+
+            // Generate the bottom inner curve points.
+            bottomInnerStart = vertexPositions.Count;
+            vertex.x = innerRadius;
+            vertex.z = 0;
+            for (x = 0; x < (numSteps + 1); x++)
+            {
+                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - addToFirstStep, newVertex.y));
+            }
+
+            // Generate the bottom outer curve points.
+            bottomOuterStart = vertexPositions.Count;
+            vertex.x = innerRadius + stepWidth;
+            for (x = 0; x < (numSteps + 1); x++)
+            {
+                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
+                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - addToFirstStep, newVertex.y));
+            }
+
+            for (x = 0; x < numSteps; x++)
+            {
+                // step top.
+                vertices.AddRange(new Vertex[] {
+                    new Vertex(vertexPositions[outerStart + (x * 2) + 2], Vector3.up, new Vector2(1, 1)),
+                    new Vertex(vertexPositions[outerStart + (x * 2) + 1], Vector3.up, new Vector2(0, 1)),
+                    new Vertex(vertexPositions[innerStart + (x * 2) + 1], Vector3.up, new Vector2(0, 0)),
+                    new Vertex(vertexPositions[innerStart + (x * 2) + 2], Vector3.up, new Vector2(1, 0))
+                });
+
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                vertices[(vertices.Count - 1) - 3].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[outerStart + (x * 2) + 2]);
+                vertices[(vertices.Count - 1) - 2].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[outerStart + (x * 2) + 1]);
+                vertices[(vertices.Count - 1) - 1].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[innerStart + (x * 2) + 1]);
+                vertices[(vertices.Count - 1) - 0].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[innerStart + (x * 2) + 2]);
+
+                // calculate a normal using a virtual plane.
+                plane = new Plane(vertexPositions[outerStart + (x * 2)], vertexPositions[innerStart + (x * 2)], vertexPositions[innerStart + (x * 2) + 1]);
+
+                // step front.
+                vertices.AddRange(new Vertex[] {
+                    new Vertex(vertexPositions[outerStart + (x * 2) + 1], plane.normal, new Vector2(1, 1)),
+                    new Vertex(vertexPositions[outerStart + (x * 2)], plane.normal, new Vector2(0, 1)),
+                    new Vertex(vertexPositions[innerStart + (x * 2)], plane.normal, new Vector2(0, 0)),
+                    new Vertex(vertexPositions[innerStart + (x * 2) + 1], plane.normal, new Vector2(1, 0))
+                });
+
+                // calculate a normal using a virtual plane.
+                plane = new Plane(vertexPositions[innerStart + (x * 2) + 2], vertexPositions[innerStart + (x * 2) + 1], vertexPositions[bottomInnerStart + x]);
+
+                // inner curve.
+                vertices.AddRange(new Vertex[] {
+                    new Vertex(vertexPositions[bottomInnerStart + x + 1], plane.normal, new Vector2(1, 1)),
+                    new Vertex(vertexPositions[innerStart + (x * 2) + 2], plane.normal, new Vector2(0, 1)),
+                    new Vertex(vertexPositions[innerStart + (x * 2) + 1], plane.normal, new Vector2(0, 0)),
+                    new Vertex(vertexPositions[bottomInnerStart + x], plane.normal, new Vector2(1, 0))
+                });
+
+                // calculate a normal using a virtual plane.
+                plane = new Plane(vertexPositions[bottomOuterStart + x + 1], vertexPositions[bottomOuterStart + x], vertexPositions[outerStart + (x * 2) + 1]);
+
+                // outer curve.
+                vertices.AddRange(new Vertex[] {
+                    new Vertex(vertexPositions[outerStart + (x * 2) + 2], plane.normal, new Vector2(1, 1)),
+                    new Vertex(vertexPositions[bottomOuterStart + x + 1], plane.normal, new Vector2(0, 1)),
+                    new Vertex(vertexPositions[bottomOuterStart + x], plane.normal, new Vector2(0, 0)),
+                    new Vertex(vertexPositions[outerStart + (x * 2) + 1], plane.normal, new Vector2(1, 0))
+                });
+
+                // bottom.
+                vertices.AddRange(new Vertex[] {
+                    new Vertex(vertexPositions[bottomOuterStart + x], Vector3.down, new Vector2(1, 1)),
+                    new Vertex(vertexPositions[bottomOuterStart + x + 1], Vector3.down, new Vector2(0, 1)),
+                    new Vertex(vertexPositions[bottomInnerStart + x + 1], Vector3.down, new Vector2(0, 0)),
+                    new Vertex(vertexPositions[bottomInnerStart + x], Vector3.down, new Vector2(1, 0))
+                });
+
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                vertices[(vertices.Count - 1) - 3].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[bottomOuterStart + x]);
+                vertices[(vertices.Count - 1) - 2].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[bottomOuterStart + x + 1]);
+                vertices[(vertices.Count - 1) - 1].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[bottomInnerStart + x + 1]);
+                vertices[(vertices.Count - 1) - 0].UV = GeometryHelper.GetUVForPosition(new Polygon(vertices.Skip(vertices.Count - 4).Take(4).ToArray(), null, false, false), vertexPositions[bottomInnerStart + x]);
+            }
+
+            // calculate a normal using a virtual plane.
+            plane = new Plane(vertexPositions[outerStart + (numSteps * 2)], vertexPositions[innerStart + (numSteps * 2)], vertexPositions[bottomInnerStart + numSteps]);
+
+            // back panel.
+            vertices.AddRange(new Vertex[] {
+                new Vertex(vertexPositions[bottomOuterStart + numSteps], plane.normal, new Vector2(1, 1)),
+                new Vertex(vertexPositions[outerStart + (numSteps * 2)], plane.normal, new Vector2(0, 1)),
+                new Vertex(vertexPositions[innerStart + (numSteps * 2)], plane.normal, new Vector2(0, 0)),
+                new Vertex(vertexPositions[bottomInnerStart + numSteps], plane.normal, new Vector2(1, 0))
+            });
+
+            // generate the final polygons.
+            for (int i = 0; i < vertices.Count; i += 4)
+            {
+                if (counterClockwise)
+                {
+                    polygons.Add(new Polygon(new Vertex[] { vertices[i + 2], vertices[i + 1], vertices[i + 0], vertices[i + 3] }, null, false, false));
+                }
+                else
+                {
+                    polygons.Add(new Polygon(new Vertex[] { vertices[i + 0], vertices[i + 1], vertices[i + 2], vertices[i + 3] }, null, false, false));
+                }
+            }
+
+            return polygons.ToArray();
+        }
+
+        /// <summary>
         /// Generates the polygons from a supplied convex mesh, preserving quads if the MeshImporter has <c>keepQuads</c> set.
         /// </summary>
         /// <returns>The polygons converted from the mesh.</returns>

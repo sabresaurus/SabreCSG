@@ -92,6 +92,8 @@ namespace Sabresaurus.SabreCSG
                 return ButtonSphereTexture;
             else if (brushType == PrimitiveBrushType.Cone)
                 return ButtonConeTexture;
+            else if (brushType == PrimitiveBrushType.CurvedStairs)
+                return ButtonCurvedStairsTexture;
             else
                 return ButtonCubeTexture;
 		}
@@ -242,6 +244,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
+            }
+        }
+		
+        public static Texture2D ButtonCurvedStairsTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCurvedStairs.png");
             }
         }
 
