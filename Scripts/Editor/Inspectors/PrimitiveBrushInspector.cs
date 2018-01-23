@@ -16,22 +16,10 @@ namespace Sabresaurus.SabreCSG
 		Mesh sourceMesh = null;
 
 		SerializedProperty prismSideCountProp;
-
 		SerializedProperty cylinderSideCountProp;
-
 		SerializedProperty sphereSideCountProp;
-
 		SerializedProperty icoSphereIterationCountProp;
-
         SerializedProperty coneSideCountProp;
-
-        SerializedProperty curvedStairsInnerRadius;
-        SerializedProperty curvedStairsStepHeight;
-        SerializedProperty curvedStairsStepWidth;
-        SerializedProperty curvedStairsAngleOfCurve;
-        SerializedProperty curvedStairsNumSteps;
-        SerializedProperty curvedStairsAddToFirstStep;
-        SerializedProperty curvedStairsCounterClockwise;
 
         float shellDistance = 0;
 
@@ -48,14 +36,6 @@ namespace Sabresaurus.SabreCSG
 			coneSideCountProp = serializedObject.FindProperty ("coneSideCount");
 
             icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
-
-            curvedStairsInnerRadius = serializedObject.FindProperty ("curvedStairsInnerRadius");
-            curvedStairsStepHeight = serializedObject.FindProperty ("curvedStairsStepHeight");
-            curvedStairsStepWidth = serializedObject.FindProperty ("curvedStairsStepWidth");
-            curvedStairsAngleOfCurve = serializedObject.FindProperty ("curvedStairsAngleOfCurve");
-            curvedStairsNumSteps = serializedObject.FindProperty ("curvedStairsNumSteps");
-            curvedStairsAddToFirstStep = serializedObject.FindProperty ("curvedStairsAddToFirstStep");
-            curvedStairsCounterClockwise = serializedObject.FindProperty("curvedStairsCounterClockwise");
         }
 
 		private void ChangeBrushesToType(PrimitiveBrushType newType)

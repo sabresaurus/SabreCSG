@@ -128,6 +128,21 @@ namespace Sabresaurus.SabreCSG
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z - addToFirstStep, newVertex.y));
             }
 
+            // vertex indices to easily flip faces for the counter clockwise mode.
+            int index0 = 0;
+            int index1 = 1;
+            int index2 = 2;
+            int index3 = 3;
+
+            // flip faces if counter clockwise mode is enabled.
+            if (counterClockwise)
+            {
+                index0 = 2;
+                index1 = 1;
+                index2 = 0;
+                index3 = 3;
+            }
+
             // iterate through the brushes we received:
             int brushCount = BrushCount;
             for (int i = 0; i < brushCount; i++)
@@ -153,16 +168,16 @@ namespace Sabresaurus.SabreCSG
                 Vertex[] vertices = polygons[5].Vertices;
 
                 // step top.
-                vertices[0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[1].Position = vertexPositions[outerStart + (i * 2) + 1];
-                vertices[2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                vertices[3].Position = vertexPositions[innerStart + (i * 2) + 2];
+                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
+                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
 
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                vertices[0].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 2]);
-                vertices[1].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 1]);
-                vertices[2].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 1]);
-                vertices[3].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 2]);
+                vertices[index0].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 2]);
+                vertices[index1].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 1]);
+                vertices[index2].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 1]);
+                vertices[index3].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 2]);
 
 
 
@@ -170,17 +185,17 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[3].Vertices;
 
                 // step front.
-                vertices[0].Position = vertexPositions[outerStart + (i * 2) + 1];
-                vertices[1].Position = vertexPositions[bottomOuterStart + i];
-                vertices[2].Position = vertexPositions[bottomInnerStart + i];
-                vertices[3].Position = vertexPositions[innerStart + (i * 2) + 1];
+                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
+                vertices[index1].Position = vertexPositions[bottomOuterStart + i];
+                vertices[index2].Position = vertexPositions[bottomInnerStart + i];
+                vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[1].Position, vertices[2].Position, vertices[3].Position);
-                vertices[0].Normal = plane.normal;
-                vertices[1].Normal = plane.normal;
-                vertices[2].Normal = plane.normal;
-                vertices[3].Normal = plane.normal;
+                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
+                vertices[index0].Normal = plane.normal;
+                vertices[index1].Normal = plane.normal;
+                vertices[index2].Normal = plane.normal;
+                vertices[index3].Normal = plane.normal;
 
 
 
@@ -188,17 +203,17 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[1].Vertices;
 
                 // inner curve.
-                vertices[0].Position = vertexPositions[bottomInnerStart + i + 1];
-                vertices[1].Position = vertexPositions[innerStart + (i * 2) + 2];
-                vertices[2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                vertices[3].Position = vertexPositions[bottomInnerStart + i];
+                vertices[index0].Position = vertexPositions[bottomInnerStart + i + 1];
+                vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
+                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                vertices[index3].Position = vertexPositions[bottomInnerStart + i];
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[1].Position, vertices[2].Position, vertices[3].Position);
-                vertices[0].Normal = plane.normal;
-                vertices[1].Normal = plane.normal;
-                vertices[2].Normal = plane.normal;
-                vertices[3].Normal = plane.normal;
+                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
+                vertices[index0].Normal = plane.normal;
+                vertices[index1].Normal = plane.normal;
+                vertices[index2].Normal = plane.normal;
+                vertices[index3].Normal = plane.normal;
 
 
 
@@ -206,17 +221,17 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[2].Vertices;
 
                 // outer curve.
-                vertices[0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[1].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[2].Position = vertexPositions[bottomOuterStart + i];
-                vertices[3].Position = vertexPositions[outerStart + (i * 2) + 1];
+                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                vertices[index2].Position = vertexPositions[bottomOuterStart + i];
+                vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[1].Position, vertices[2].Position, vertices[3].Position);
-                vertices[0].Normal = plane.normal;
-                vertices[1].Normal = plane.normal;
-                vertices[2].Normal = plane.normal;
-                vertices[3].Normal = plane.normal;
+                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
+                vertices[index0].Normal = plane.normal;
+                vertices[index1].Normal = plane.normal;
+                vertices[index2].Normal = plane.normal;
+                vertices[index3].Normal = plane.normal;
 
 
 
@@ -224,16 +239,16 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[4].Vertices;
 
                 // bottom.
-                vertices[0].Position = vertexPositions[bottomOuterStart + i];
-                vertices[1].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[2].Position = vertexPositions[bottomInnerStart + i + 1];
-                vertices[3].Position = vertexPositions[bottomInnerStart + i];
+                vertices[index0].Position = vertexPositions[bottomOuterStart + i];
+                vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                vertices[index2].Position = vertexPositions[bottomInnerStart + i + 1];
+                vertices[index3].Position = vertexPositions[bottomInnerStart + i];
 
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                vertices[0].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i]);
-                vertices[1].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i + 1]);
-                vertices[2].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i + 1]);
-                vertices[3].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i]);
+                vertices[index0].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i]);
+                vertices[index1].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i + 1]);
+                vertices[index2].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i + 1]);
+                vertices[index3].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i]);
 
 
 
@@ -241,17 +256,17 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[0].Vertices;
 
                 // back panel.
-                vertices[0].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[1].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[2].Position = vertexPositions[innerStart + (i * 2) + 2];
-                vertices[3].Position = vertexPositions[bottomInnerStart + i + 1];
+                vertices[index0].Position = vertexPositions[bottomOuterStart + i + 1];
+                vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
+                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
+                vertices[index3].Position = vertexPositions[bottomInnerStart + i + 1];
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[1].Position, vertices[2].Position, vertices[3].Position);
-                vertices[0].Normal = plane.normal;
-                vertices[1].Normal = plane.normal;
-                vertices[2].Normal = plane.normal;
-                vertices[3].Normal = plane.normal;
+                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
+                vertices[index0].Normal = plane.normal;
+                vertices[index1].Normal = plane.normal;
+                vertices[index2].Normal = plane.normal;
+                vertices[index3].Normal = plane.normal;
 
                 generatedBrushes[i].Invalidate(true);
             }
