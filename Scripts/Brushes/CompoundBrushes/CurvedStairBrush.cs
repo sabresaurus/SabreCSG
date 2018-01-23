@@ -47,9 +47,11 @@ namespace Sabresaurus.SabreCSG
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
         private Vector3 m_LastKnownPosition;
 
-        public CurvedStairBrush() : base()
+        void Awake()
         {
+            // get the last known extents and position (especially after scene changes).
             m_LastKnownExtents = localBounds.extents;
+            m_LastKnownPosition = transform.localPosition;
         }
 
         public override int BrushCount 
