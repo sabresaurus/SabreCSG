@@ -42,9 +42,19 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         bool counterClockwise = false;
 
+        /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
+        private Vector3 m_LastKnownExtents;
+        /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
+        private Vector3 m_LastKnownPosition;
+
+        public CurvedStairBrush() : base()
+        {
+            m_LastKnownExtents = localBounds.extents;
+        }
+
         public override int BrushCount 
 		{
-			get 
+			get
 			{
                 // calculate the amount of steps and use that as the brush count we need.
                 return numSteps;
@@ -59,9 +69,37 @@ namespace Sabresaurus.SabreCSG
 		{
 			base.Invalidate(polygonsChanged);
 
-            List<Vector3> vertexPositions = new List<Vector3>();
+            ////////////////////////////////////////////////////////////////////
+            // a little hack to detect the user manually resizing the bounds. //
+            // we use this to automatically add steps for barnaby.            //
+            // it's probably good to build a more 'official' way to detect    //
+            // user scaling events in compound brushes sometime.              //
+            if (m_LastKnownExtents != localBounds.extents)                    //
+            {                                                                 //
+                // undo any position movement.                                //
+                transform.localPosition = m_LastKnownPosition;                //
+                // user is trying to scale up.                                //
+                if (localBounds.extents.y > m_LastKnownExtents.y)             //
+                {                                                             //
+                    numSteps += 1;                                            //
+                    m_LastKnownExtents = localBounds.extents;                 //
+                    Invalidate(true); // recusion! <3                         //
+                    return;                                                   //
+                }                                                             //
+                // user is trying to scale down.                              //
+                if (localBounds.extents.y < m_LastKnownExtents.y)             //
+                {                                                             //
+                    numSteps -= 1;                                            //
+                    if (numSteps < 1) numSteps = 1;                           //
+                    m_LastKnownExtents = localBounds.extents;                 //
+                    Invalidate(true); // recusion! <3                         //
+                    return;                                                   //
+                }                                                             //
+            }                                                                 //
+            ////////////////////////////////////////////////////////////////////
 
             // local variables
+            List<Vector3> vertexPositions = new List<Vector3>();
             Plane plane;
             Vector3 rotateStep = new Vector3();
             Vector3 vertex = new Vector3(), newVertex = new Vector3();
@@ -277,6 +315,8 @@ namespace Sabresaurus.SabreCSG
 
             // apply the generated csg bounds.
             localBounds = csgBounds;
+            m_LastKnownExtents = localBounds.extents;
+            m_LastKnownPosition = transform.localPosition;
         }
     }
 }
