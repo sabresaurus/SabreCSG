@@ -143,6 +143,9 @@ namespace Sabresaurus.SabreCSG
                 index3 = 3;
             }
 
+            // we calculate the bounds of the output csg.
+            Bounds csgBounds = new Bounds();
+
             // iterate through the brushes we received:
             int brushCount = BrushCount;
             for (int i = 0; i < brushCount; i++)
@@ -269,7 +272,11 @@ namespace Sabresaurus.SabreCSG
                 vertices[index3].Normal = plane.normal;
 
                 generatedBrushes[i].Invalidate(true);
+                csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
             }
+
+            // apply the generated csg bounds.
+            localBounds = csgBounds;
         }
     }
 }
