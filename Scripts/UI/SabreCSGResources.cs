@@ -92,8 +92,6 @@ namespace Sabresaurus.SabreCSG
                 return ButtonSphereTexture;
             else if (brushType == PrimitiveBrushType.Cone)
                 return ButtonConeTexture;
-            else if (brushType == PrimitiveBrushType.CurvedStairs)
-                return ButtonCurvedStairsTexture;
             else
                 return ButtonCubeTexture;
 		}

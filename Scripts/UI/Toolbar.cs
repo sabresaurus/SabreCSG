@@ -281,7 +281,7 @@ namespace Sabresaurus.SabreCSG
 			
             if (GUI.Button(new Rect(90, 0, 30, createBrushStyle.fixedHeight), SabreCSGResources.ButtonCurvedStairsTexture, createBrushStyle))
             {
-                CreatePrimitiveBrush(PrimitiveBrushType.CurvedStairs);
+                CreateCompoundBrush<CurvedStairBrush>();
             }
 
             GUILayout.Space(92 + 30);
