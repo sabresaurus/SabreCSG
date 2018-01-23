@@ -28,11 +28,15 @@ namespace Sabresaurus.SabreCSG
 			base.OnEnable ();
 			// Setup the SerializedProperties.
 			prismSideCountProp = serializedObject.FindProperty ("prismSideCount");
+
 			cylinderSideCountProp = serializedObject.FindProperty ("cylinderSideCount");
+
 			sphereSideCountProp = serializedObject.FindProperty ("sphereSideCount");
+
 			coneSideCountProp = serializedObject.FindProperty ("coneSideCount");
+
             icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
-		}
+        }
 
 		private void ChangeBrushesToType(PrimitiveBrushType newType)
 		{
@@ -103,7 +107,7 @@ namespace Sabresaurus.SabreCSG
             {
                 name = "Cyl";
             }
-            
+
             GUI.Label(lastRect, name, labelStyle);
         }
 
@@ -140,7 +144,7 @@ namespace Sabresaurus.SabreCSG
                 DrawBrushButton(PrimitiveBrushType.Cylinder, activeType, brushButtonStyle, labelStyle, stretchButtonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.Sphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.IcoSphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
-
+				
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
 

@@ -244,6 +244,14 @@ namespace Sabresaurus.SabreCSG
                 return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
             }
         }
+		
+        public static Texture2D ButtonCurvedStairsTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCurvedStairs.png");
+            }
+        }
 
         public static Texture2D GroupHeaderTexture
         {

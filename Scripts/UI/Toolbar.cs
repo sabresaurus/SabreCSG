@@ -278,8 +278,13 @@ namespace Sabresaurus.SabreCSG
             {
                 CreateCompoundBrush<StairBrush>();
             }
+			
+            if (GUI.Button(new Rect(90, 0, 30, createBrushStyle.fixedHeight), SabreCSGResources.ButtonCurvedStairsTexture, createBrushStyle))
+            {
+                CreateCompoundBrush<CurvedStairBrush>();
+            }
 
-            GUILayout.Space(92);
+            GUILayout.Space(92 + 30);
 #if DEBUG_SABRECSG_PERF
 			// For debugging frame rate
 			GUILayout.Label(((int)(1 / csgModel.CurrentFrameDelta)).ToString(), SabreGUILayout.GetLabelStyle());

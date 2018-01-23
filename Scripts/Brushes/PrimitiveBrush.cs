@@ -13,7 +13,7 @@ namespace Sabresaurus.SabreCSG
 		Prism, 
 		Custom,
 		IcoSphere,
-        Cone
+        Cone,
 	};
 
 	/// <summary>
@@ -40,7 +40,7 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,HideInInspector]
 		int icoSphereIterationCount = 1;
 
-		[SerializeField,HideInInspector]
+        [SerializeField,HideInInspector]
 		PrimitiveBrushType brushType = PrimitiveBrushType.Cube;
 
 		[SerializeField,HideInInspector]
