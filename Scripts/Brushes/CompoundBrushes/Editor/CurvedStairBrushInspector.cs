@@ -18,6 +18,8 @@ namespace Sabresaurus.SabreCSG
         SerializedProperty numSteps;
         SerializedProperty addToFirstStep;
         SerializedProperty counterClockwise;
+        SerializedProperty fillToBottom;
+        SerializedProperty buildTorus;
 
         protected override void OnEnable()
         {
@@ -30,12 +32,16 @@ namespace Sabresaurus.SabreCSG
             numSteps = serializedObject.FindProperty("numSteps");
             addToFirstStep = serializedObject.FindProperty("addToFirstStep");
             counterClockwise = serializedObject.FindProperty("counterClockwise");
+            fillToBottom = serializedObject.FindProperty("fillToBottom");
+            buildTorus = serializedObject.FindProperty("buildTorus");
         }
 
         public override void OnInspectorGUI()
         {
             using (new NamedVerticalScope("Curved Stair"))
             {
+                bool oldBool;
+
                 EditorGUI.BeginChangeCheck();
                 {
                     EditorGUILayout.PropertyField(innerRadius);
@@ -75,17 +81,36 @@ namespace Sabresaurus.SabreCSG
                 if (EditorGUI.EndChangeCheck())
                     ApplyAndInvalidate();
 
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(addToFirstStep);
-                if (addToFirstStep.floatValue < 0.0f)
-                    addToFirstStep.floatValue = 0.0f;
-                if (EditorGUI.EndChangeCheck())
+                // can only use additional height if fill to bottom is enabled.
+                if (fillToBottom.boolValue)
+                {
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(addToFirstStep);
+                    if (addToFirstStep.floatValue < 0.0f)
+                        addToFirstStep.floatValue = 0.0f;
+                    if (EditorGUI.EndChangeCheck())
+                        ApplyAndInvalidate();
+                }
+
+                EditorGUILayout.Space();
+
+                EditorGUILayout.BeginHorizontal();
+
+                counterClockwise.boolValue = GUILayout.Toggle(oldBool = counterClockwise.boolValue, "Counter Clockwise", EditorStyles.toolbarButton);
+                if (counterClockwise.boolValue != oldBool)
                     ApplyAndInvalidate();
 
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(counterClockwise);
-                if (EditorGUI.EndChangeCheck())
+                fillToBottom.boolValue = GUILayout.Toggle(oldBool = fillToBottom.boolValue, "Fill To Bottom", EditorStyles.toolbarButton);
+                if (fillToBottom.boolValue != oldBool)
                     ApplyAndInvalidate();
+
+                buildTorus.boolValue = GUILayout.Toggle(oldBool = buildTorus.boolValue, "Build Torus", EditorStyles.toolbarButton);
+                if (buildTorus.boolValue != oldBool)
+                    ApplyAndInvalidate();
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space();
             }
 
             base.OnInspectorGUI();

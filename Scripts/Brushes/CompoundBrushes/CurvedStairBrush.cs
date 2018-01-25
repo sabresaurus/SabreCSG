@@ -42,6 +42,14 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         bool counterClockwise = false;
 
+        /// <summary>Whether the stairs reach down to the bottom.</summary>
+        [SerializeField]
+        bool fillToBottom = true;
+
+        /// <summary>Whether to generate stairs or a torus shape.</summary>
+        [SerializeField]
+        bool buildTorus = false;
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -102,7 +110,6 @@ namespace Sabresaurus.SabreCSG
 
             // local variables
             List<Vector3> vertexPositions = new List<Vector3>();
-            Plane plane;
             Vector3 rotateStep = new Vector3();
             Vector3 vertex = new Vector3(), newVertex = new Vector3();
             float adjustment;
@@ -128,7 +135,10 @@ namespace Sabresaurus.SabreCSG
 
                 newVertex = Quaternion.Euler(rotateStep * x) * vertex;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                vertex.z += stepHeight;
+                if (buildTorus)
+                    vertex.z = stepHeight * numSteps;
+                else
+                    vertex.z += stepHeight;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
             }
 
@@ -145,7 +155,10 @@ namespace Sabresaurus.SabreCSG
 
                 newVertex = Quaternion.Euler(rotateStep * x) * vertex;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                vertex.z += stepHeight;
+                if (buildTorus)
+                    vertex.z = stepHeight * numSteps;
+                else
+                    vertex.z += stepHeight;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
             }
 
@@ -207,6 +220,8 @@ namespace Sabresaurus.SabreCSG
                 // | Back   | Left   | Right  | Front  | Bottom | Top    |
                 // +--------+--------+--------+--------+--------+--------+
 
+
+
                 // retrieve the vertices of the top polygon.
                 Vertex[] vertices = polygons[5].Vertices;
 
@@ -216,11 +231,11 @@ namespace Sabresaurus.SabreCSG
                 vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
                 vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
 
+                // calculate a normal using a virtual plane.
+                GenerateNormals(polygons[3]);
+
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                vertices[index0].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 2]);
-                vertices[index1].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[outerStart + (i * 2) + 1]);
-                vertices[index2].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 1]);
-                vertices[index3].UV = GeometryHelper.GetUVForPosition(polygons[5], vertexPositions[innerStart + (i * 2) + 2]);
+                GenerateUvCoordinates(polygons[5]);
 
 
 
@@ -228,17 +243,25 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[3].Vertices;
 
                 // step front.
-                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
-                vertices[index1].Position = vertexPositions[bottomOuterStart + i];
-                vertices[index2].Position = vertexPositions[bottomInnerStart + i];
-                vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
+                if (fillToBottom)
+                {
+                    // fill downwards to the bottom.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index2].Position = vertexPositions[bottomInnerStart + i];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
+                }
+                else
+                {
+                    // fill downwards to the step height.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
+                }
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
-                vertices[index0].Normal = plane.normal;
-                vertices[index1].Normal = plane.normal;
-                vertices[index2].Normal = plane.normal;
-                vertices[index3].Normal = plane.normal;
+                GenerateNormals(polygons[3]);
 
 
 
@@ -246,17 +269,25 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[1].Vertices;
 
                 // inner curve.
-                vertices[index0].Position = vertexPositions[bottomInnerStart + i + 1];
-                vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
-                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                vertices[index3].Position = vertexPositions[bottomInnerStart + i];
+                if (fillToBottom)
+                {
+                    // fill downwards to the bottom.
+                    vertices[index0].Position = vertexPositions[bottomInnerStart + i + 1];
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
+                }
+                else
+                {
+                    // fill downwards to the step height.
+                    vertices[index0].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                }
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
-                vertices[index0].Normal = plane.normal;
-                vertices[index1].Normal = plane.normal;
-                vertices[index2].Normal = plane.normal;
-                vertices[index3].Normal = plane.normal;
+                GenerateNormals(polygons[1]);
 
 
 
@@ -264,17 +295,25 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[2].Vertices;
 
                 // outer curve.
-                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[index2].Position = vertexPositions[bottomOuterStart + i];
-                vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
+                if (fillToBottom)
+                {
+                    // fill downwards to the bottom.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index2].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
+                }
+                else
+                {
+                    // fill downwards to the step height.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
+                }
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
-                vertices[index0].Normal = plane.normal;
-                vertices[index1].Normal = plane.normal;
-                vertices[index2].Normal = plane.normal;
-                vertices[index3].Normal = plane.normal;
+                GenerateNormals(polygons[2]);
 
 
 
@@ -282,16 +321,28 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[4].Vertices;
 
                 // bottom.
-                vertices[index0].Position = vertexPositions[bottomOuterStart + i];
-                vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[index2].Position = vertexPositions[bottomInnerStart + i + 1];
-                vertices[index3].Position = vertexPositions[bottomInnerStart + i];
+                if (fillToBottom)
+                {
+                    // fill downwards to the bottom.
+                    vertices[index0].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index2].Position = vertexPositions[bottomInnerStart + i + 1];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
+                }
+                else
+                {
+                    // fill downwards to the step height.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                }
+
+                // calculate a normal using a virtual plane.
+                GenerateNormals(polygons[3]);
 
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                vertices[index0].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i]);
-                vertices[index1].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomOuterStart + i + 1]);
-                vertices[index2].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i + 1]);
-                vertices[index3].UV = GeometryHelper.GetUVForPosition(polygons[4], vertexPositions[bottomInnerStart + i]);
+                GenerateUvCoordinates(polygons[4]);
 
 
 
@@ -299,17 +350,27 @@ namespace Sabresaurus.SabreCSG
                 vertices = polygons[0].Vertices;
 
                 // back panel.
-                vertices[index0].Position = vertexPositions[bottomOuterStart + i + 1];
-                vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
-                vertices[index3].Position = vertexPositions[bottomInnerStart + i + 1];
+                if (fillToBottom)
+                {
+                    // fill downwards to the bottom.
+                    vertices[index0].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i + 1];
+                }
+                else
+                {
+                    // fill downwards to the step height.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                }
 
                 // calculate a normal using a virtual plane.
-                plane = new Plane(vertices[index1].Position, vertices[index2].Position, vertices[index3].Position);
-                vertices[index0].Normal = plane.normal;
-                vertices[index1].Normal = plane.normal;
-                vertices[index2].Normal = plane.normal;
-                vertices[index3].Normal = plane.normal;
+                GenerateNormals(polygons[0]);
+
+
 
                 generatedBrushes[i].Invalidate(true);
                 csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
@@ -319,6 +380,23 @@ namespace Sabresaurus.SabreCSG
             localBounds = csgBounds;
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
+        }
+
+        /// <summary>
+        /// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
+        /// </summary>
+        /// <param name="polygon">The polygon to be updated.</param>
+        private void GenerateUvCoordinates(Polygon polygon)
+        {
+            foreach (Vertex vertex in polygon.Vertices)
+                vertex.UV = GeometryHelper.GetUVForPosition(polygon, vertex.Position);
+        }
+
+        private void GenerateNormals(Polygon polygon)
+        {
+            Plane plane = new Plane(polygon.Vertices[1].Position, polygon.Vertices[2].Position, polygon.Vertices[3].Position);
+            foreach (Vertex vertex in polygon.Vertices)
+                vertex.Normal = plane.normal;
         }
     }
 }
