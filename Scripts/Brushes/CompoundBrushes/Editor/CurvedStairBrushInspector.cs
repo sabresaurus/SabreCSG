@@ -20,6 +20,7 @@ namespace Sabresaurus.SabreCSG
         SerializedProperty counterClockwise;
         SerializedProperty fillToBottom;
         SerializedProperty buildTorus;
+        SerializedProperty slopedFloor;
 
         protected override void OnEnable()
         {
@@ -34,14 +35,15 @@ namespace Sabresaurus.SabreCSG
             counterClockwise = serializedObject.FindProperty("counterClockwise");
             fillToBottom = serializedObject.FindProperty("fillToBottom");
             buildTorus = serializedObject.FindProperty("buildTorus");
+            slopedFloor = serializedObject.FindProperty("slopedFloor");
         }
 
         public override void OnInspectorGUI()
         {
+            bool oldBool;
+
             using (new NamedVerticalScope("Curved Stair"))
             {
-                bool oldBool;
-
                 EditorGUI.BeginChangeCheck();
                 {
                     EditorGUILayout.PropertyField(innerRadius);
@@ -109,8 +111,22 @@ namespace Sabresaurus.SabreCSG
                     ApplyAndInvalidate();
 
                 EditorGUILayout.EndHorizontal();
+            }
 
-                EditorGUILayout.Space();
+            // can only use nocsg slopes if build torus is disabled.
+            if (!buildTorus.boolValue)
+            {
+                using (new NamedVerticalScope("Curved Stair: NoCSG Operators"))
+                {
+                    if (slopedFloor.boolValue)
+                    {
+                        EditorGUILayout.HelpBox("The surface of the slope is non-planar. This means there are triangulated bumpy seams (look closely with your camera). NoCSG will be forced for this compound brush as the CSG engine cannot handle this shape properly.", MessageType.Warning);
+                    }
+
+                    slopedFloor.boolValue = GUILayout.Toggle(oldBool = slopedFloor.boolValue, "Sloped Floor", EditorStyles.toolbarButton);
+                    if (slopedFloor.boolValue != oldBool)
+                        ApplyAndInvalidate();
+                }
             }
 
             base.OnInspectorGUI();

@@ -50,6 +50,10 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         bool buildTorus = false;
 
+        /// <summary>Whether the floor is stairs or a smooth slope.</summary>
+        [SerializeField]
+        bool slopedFloor = false;
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -196,6 +200,13 @@ namespace Sabresaurus.SabreCSG
                 index3 = 3;
             }
 
+            // we force NoCSG mode if special NoCSG operators are used.
+            if (buildTorus) slopedFloor = false;
+            if (slopedFloor)
+            {
+                this.IsNoCSG = true;
+            }
+
             // we calculate the bounds of the output csg.
             Bounds csgBounds = new Bounds();
 
@@ -226,13 +237,25 @@ namespace Sabresaurus.SabreCSG
                 Vertex[] vertices = polygons[5].Vertices;
 
                 // step top.
-                vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
-                vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
+                if (slopedFloor)
+                {
+                    // create a smooth slope.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                }
+                else
+                {
+                    // create blocky stairs.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
+                }
 
                 // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[3]);
+                GenerateNormals(polygons[5]);
 
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
                 GenerateUvCoordinates(polygons[5]);
@@ -263,6 +286,9 @@ namespace Sabresaurus.SabreCSG
                 // calculate a normal using a virtual plane.
                 GenerateNormals(polygons[3]);
 
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                GenerateUvCoordinates(polygons[3]);
+
 
 
                 // retrieve the vertices of the left polygon.
@@ -285,9 +311,17 @@ namespace Sabresaurus.SabreCSG
                     vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
                     vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
                 }
+                if (slopedFloor)
+                {
+                    // create a smooth slope.
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                }
 
                 // calculate a normal using a virtual plane.
                 GenerateNormals(polygons[1]);
+
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                GenerateUvCoordinates(polygons[1]);
 
 
 
@@ -311,9 +345,17 @@ namespace Sabresaurus.SabreCSG
                     vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
                     vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
                 }
+                if (slopedFloor)
+                {
+                    // create a smooth slope.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                }
 
                 // calculate a normal using a virtual plane.
                 GenerateNormals(polygons[2]);
+
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                GenerateUvCoordinates(polygons[2]);
 
 
 
@@ -339,7 +381,7 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[3]);
+                GenerateNormals(polygons[4]);
 
                 // update uv coordinates to prevent distortions using barnaby's genius utilities.
                 GenerateUvCoordinates(polygons[4]);
@@ -366,9 +408,18 @@ namespace Sabresaurus.SabreCSG
                     vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
                     vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
                 }
+                if (slopedFloor)
+                {
+                    // create a smooth slope.
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                }
 
                 // calculate a normal using a virtual plane.
                 GenerateNormals(polygons[0]);
+
+                // update uv coordinates to prevent distortions using barnaby's genius utilities.
+                GenerateUvCoordinates(polygons[0]);
 
 
 
