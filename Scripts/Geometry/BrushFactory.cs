@@ -475,17 +475,47 @@ namespace Sabresaurus.SabreCSG
 		}
 
         /// <summary>
-        /// Generates a cone of height and radius 2
+        /// Generates a cone of height and radius 2. If the <see cref="sideCount"/> is 3, generates a triangular-based pyramid.
         /// </summary>
-		/// <param name="sideCount">Side count for the cone.</param>
+		/// <param name="sideCount">Side count for the cone (if 3, generates a triangular-based pyramid.).</param>
         /// <returns>Polygons to be supplied to a brush.</returns>
         public static Polygon[] GenerateCone(int sideCount = 20)
         {
             Polygon[] polygons = new Polygon[sideCount * 2];
 
-            float angleDelta = Mathf.PI * 2 / sideCount;
+            // the cone generator will create a slightly distorted off-center output for 3 sides.
+            // if the user sets the side count to 3 we will generate a triangular-based pyramid.
+            if (sideCount == 3)
+            {
+                polygons = new Polygon[sideCount + 1];
+                polygons[0] = new Polygon(new Vertex[]
+                {
+                    new Vertex(new Vector3( 0, -1, -1), new Vector3( 0.8402f, 0.2425f, -0.4851f), new Vector2(0.0000f, 0.0000f)),
+                    new Vertex(new Vector3( 0,  1,  0), new Vector3( 0.8402f, 0.2425f, -0.4851f), new Vector2(0.5000f, 1.0000f)),
+                    new Vertex(new Vector3( 1, -1,  1), new Vector3( 0.8402f, 0.2425f, -0.4851f), new Vector2(1.0000f, 0.0000f)),
+                }, null, false, false);
+                polygons[1] = new Polygon(new Vertex[]
+                {
+                    new Vertex(new Vector3( 1, -1,  1), new Vector3(-0.0000f, 0.2425f,  0.9701f), new Vector2(0.0000f, 0.0000f)),
+                    new Vertex(new Vector3( 0,  1,  0), new Vector3(-0.0000f, 0.2425f,  0.9701f), new Vector2(0.5000f, 1.0000f)),
+                    new Vertex(new Vector3(-1, -1,  1), new Vector3(-0.0000f, 0.2425f,  0.9701f), new Vector2(1.0000f, 0.0000f)),
+                }, null, false, false);
+                polygons[2] = new Polygon(new Vertex[]
+                {
+                    new Vertex(new Vector3(-1, -1,  1), new Vector3(-0.8402f, 0.2425f, -0.4851f), new Vector2(0.0000f, 0.0000f)),
+                    new Vertex(new Vector3( 0,  1,  0), new Vector3(-0.8402f, 0.2425f, -0.4851f), new Vector2(0.5000f, 1.0000f)),
+                    new Vertex(new Vector3( 0, -1, -1), new Vector3(-0.8402f, 0.2425f, -0.4851f), new Vector2(1.0000f, 0.0000f)),
+                }, null, false, false);
+                polygons[3] = new Polygon(new Vertex[]
+                {
+                    new Vertex(new Vector3( 0, -1, -1), Vector3.down, new Vector2(0.0000f, 0.0000f)),
+                    new Vertex(new Vector3( 1, -1,  1), Vector3.down, new Vector2(1.0000f, 1.0000f)),
+                    new Vertex(new Vector3(-1, -1,  1), Vector3.down, new Vector2(1.0000f, 0.0000f)),
+                }, null, false, false);
+                return polygons;
+            }
 
-            Vertex capCenterVertex = new Vertex(new Vector3(0, 1, 0), Vector3.up, new Vector2(0, 0));
+            float angleDelta = Mathf.PI * 2 / sideCount;
 
             for (int i = 0; i < sideCount; i++)
             {
@@ -505,7 +535,7 @@ namespace Sabresaurus.SabreCSG
                 }, null, false, false);
             }
 
-            capCenterVertex = new Vertex(new Vector3(0, -1, 0), Vector3.down, new Vector2(0, 0));
+            Vertex capCenterVertex = new Vertex(new Vector3(0, -1, 0), Vector3.down, new Vector2(0, 0));
 
             for (int i = 0; i < sideCount; i++)
             {
