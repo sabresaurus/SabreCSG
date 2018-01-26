@@ -54,6 +54,10 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         bool slopedFloor = false;
 
+        /// <summary>Whether the ceiling is stairs or a smooth slope.</summary>
+        [SerializeField]
+        bool slopedCeiling = false;
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -201,8 +205,9 @@ namespace Sabresaurus.SabreCSG
             }
 
             // we force NoCSG mode if special NoCSG operators are used.
-            if (buildTorus) slopedFloor = false;
-            if (slopedFloor)
+            if (buildTorus) { slopedFloor = false; slopedCeiling = false; }
+            if (fillToBottom) { slopedCeiling = false; }
+            if (slopedFloor || slopedCeiling)
             {
                 this.IsNoCSG = true;
             }
@@ -282,6 +287,12 @@ namespace Sabresaurus.SabreCSG
                     vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
                     vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
                 }
+                if (slopedCeiling)
+                {
+                    // create a smooth ceiling slope.
+                    vertices[index1].Position -= new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position -= new Vector3(0.0f, stepHeight, 0.0f);
+                }
 
                 // calculate a normal using a virtual plane.
                 GenerateNormals(polygons[3]);
@@ -313,8 +324,13 @@ namespace Sabresaurus.SabreCSG
                 }
                 if (slopedFloor)
                 {
-                    // create a smooth slope.
+                    // create a smooth floor slope.
                     vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                }
+                if (slopedCeiling)
+                {
+                    // create a smooth ceiling slope.
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -347,8 +363,13 @@ namespace Sabresaurus.SabreCSG
                 }
                 if (slopedFloor)
                 {
-                    // create a smooth slope.
+                    // create a smooth floor slope.
                     vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                }
+                if (slopedCeiling)
+                {
+                    // create a smooth ceiling slope.
+                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -378,6 +399,12 @@ namespace Sabresaurus.SabreCSG
                     vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
                     vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
                     vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                }
+                if (slopedCeiling)
+                {
+                    // create a smooth ceiling slope.
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -410,7 +437,7 @@ namespace Sabresaurus.SabreCSG
                 }
                 if (slopedFloor)
                 {
-                    // create a smooth slope.
+                    // create a smooth floor slope.
                     vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
                     vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
                 }
