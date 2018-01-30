@@ -19,7 +19,7 @@ namespace Sabresaurus.SabreCSG
         SerializedProperty addToFirstStep;
         SerializedProperty counterClockwise;
         SerializedProperty fillToBottom;
-        SerializedProperty buildTorus;
+        SerializedProperty curvedWall;
         SerializedProperty slopedFloor;
         SerializedProperty slopedCeiling;
 
@@ -35,7 +35,7 @@ namespace Sabresaurus.SabreCSG
             addToFirstStep = serializedObject.FindProperty("addToFirstStep");
             counterClockwise = serializedObject.FindProperty("counterClockwise");
             fillToBottom = serializedObject.FindProperty("fillToBottom");
-            buildTorus = serializedObject.FindProperty("buildTorus");
+            curvedWall = serializedObject.FindProperty("curvedWall");
             slopedFloor = serializedObject.FindProperty("slopedFloor");
             slopedCeiling = serializedObject.FindProperty("slopedCeiling");
         }
@@ -108,15 +108,15 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom.boolValue != oldBool)
                     ApplyAndInvalidate();
 
-                buildTorus.boolValue = GUILayout.Toggle(oldBool = buildTorus.boolValue, "Build Torus", EditorStyles.toolbarButton);
-                if (buildTorus.boolValue != oldBool)
+                curvedWall.boolValue = GUILayout.Toggle(oldBool = curvedWall.boolValue, "Curved Wall", EditorStyles.toolbarButton);
+                if (curvedWall.boolValue != oldBool)
                     ApplyAndInvalidate();
 
                 EditorGUILayout.EndHorizontal();
             }
 
             // can only use nocsg slopes if build torus is disabled.
-            if (!buildTorus.boolValue)
+            if (!curvedWall.boolValue)
             {
                 using (new NamedVerticalScope("Curved Stair: NoCSG Operators"))
                 {

@@ -46,9 +46,9 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         bool fillToBottom = true;
 
-        /// <summary>Whether to generate stairs or a torus shape.</summary>
+        /// <summary>Whether to generate stairs or a curved wall.</summary>
         [SerializeField]
-        bool buildTorus = false;
+        bool curvedWall = false;
 
         /// <summary>Whether the floor is stairs or a smooth slope.</summary>
         [SerializeField]
@@ -143,7 +143,7 @@ namespace Sabresaurus.SabreCSG
 
                 newVertex = Quaternion.Euler(rotateStep * x) * vertex;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                if (buildTorus)
+                if (curvedWall)
                     vertex.z = stepHeight * numSteps;
                 else
                     vertex.z += stepHeight;
@@ -163,7 +163,7 @@ namespace Sabresaurus.SabreCSG
 
                 newVertex = Quaternion.Euler(rotateStep * x) * vertex;
                 vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                if (buildTorus)
+                if (curvedWall)
                     vertex.z = stepHeight * numSteps;
                 else
                     vertex.z += stepHeight;
@@ -205,7 +205,7 @@ namespace Sabresaurus.SabreCSG
             }
 
             // we force NoCSG mode if special NoCSG operators are used.
-            if (buildTorus) { slopedFloor = false; slopedCeiling = false; }
+            if (curvedWall) { slopedFloor = false; slopedCeiling = false; }
             if (fillToBottom) { slopedCeiling = false; }
             if (slopedFloor || slopedCeiling)
             {
