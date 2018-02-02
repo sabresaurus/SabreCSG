@@ -34,6 +34,13 @@ namespace Sabresaurus.SabreCSG
 
 		Plane translationPlane;
 
+        /// <summary>Whether the user is using the vertex snapping tool by holding down V.</summary>
+        bool vertexSnapping = false;
+        bool vertexSnapping_HasVertex = false;
+        Vector3 vertexSnapping_VertexWorldPosition = Vector3.zero;
+
+        bool isLeftMouseButtonDown = false;
+
 		Vector3 originalPosition; // For duplicating when translating
 
 		bool moveCancelled = false;
@@ -76,6 +83,18 @@ namespace Sabresaurus.SabreCSG
         public override void OnSceneGUI(SceneView sceneView, Event e)
         {
 			base.OnSceneGUI(sceneView, e); // Allow the base logic to calculate first
+
+            if (e.button == 0)
+            {
+                if (e.type == EventType.MouseDown)
+                {
+                    isLeftMouseButtonDown = true;
+                }
+                if (e.type == EventType.MouseUp)
+                {
+                    isLeftMouseButtonDown = false;
+                }
+            }
 
 			if (e.type == EventType.KeyDown || e.type == EventType.KeyUp)
 			{
@@ -139,8 +158,47 @@ namespace Sabresaurus.SabreCSG
 			Vector3 sourceWorldPosition = GetBrushesPivotPoint();//targetBrushTransform.position;
 
 			EditorGUI.BeginChangeCheck();
-			// Display a handle and allow the user to determine a new position in world space
-			Vector3 newWorldPosition = Handles.PositionHandle(sourceWorldPosition, handleDirection);
+
+            Vector3 newWorldPosition = sourceWorldPosition;
+
+            // display a handle on the vertex and allow the user to determine a new position in world space
+            if (vertexSnapping)
+            {
+                // cancel vertex snapping if the lest mouse button isn't pressed.
+                if (!isLeftMouseButtonDown)
+                {
+                    vertexSnapping_HasVertex = false;
+                    vertexSnapping_VertexWorldPosition = Vector3.zero;
+                }
+
+                // we are already snapping a vertex, move it around.
+                if (vertexSnapping_HasVertex)
+                {
+                    // use the vertex we started snapping with earlier while the mouse is still down.
+                    newWorldPosition = Handles.PositionHandle(vertexSnapping_VertexWorldPosition, handleDirection);
+                    sourceWorldPosition = vertexSnapping_VertexWorldPosition;
+                    vertexSnapping_VertexWorldPosition = newWorldPosition;
+                }
+
+                // find a vertex to snap at the current mouse position.
+                else if (FindVertexAtMousePosition(out vertexSnapping_VertexWorldPosition))
+                {
+                    // keep track of this vertex.
+                    vertexSnapping_HasVertex = true;
+
+                    newWorldPosition = Handles.PositionHandle(vertexSnapping_VertexWorldPosition, handleDirection);
+                    sourceWorldPosition = vertexSnapping_VertexWorldPosition;
+
+                    // disable the marquee.
+                    isMarqueeSelection = false;
+                    marqueeCancelled = true;
+                }
+            }
+            else
+            {
+                // Display a handle and allow the user to determine a new position in world space
+                newWorldPosition = Handles.PositionHandle(sourceWorldPosition, handleDirection);
+            }
 
 			if(EditorGUI.EndChangeCheck())
 			{
@@ -292,6 +350,12 @@ namespace Sabresaurus.SabreCSG
 
 			if(!CameraPanInProgress)
 			{
+                // check for vertex snapping in translate mode.
+                if (e.keyCode == KeyCode.V)
+                {
+                    vertexSnapping = e.type == EventType.KeyDown;
+                }
+
 				if(KeyMappings.EventsMatch(e, EditorKeyMappings.GetToolViewMapping()))
 				{
                     if (e.type == EventType.KeyDown && !csgModel.MouseIsHeldOrRecent)
@@ -499,7 +563,7 @@ namespace Sabresaurus.SabreCSG
 
         void OnMouseDown(SceneView sceneView, Event e)
 		{
-			if(primaryTargetBrushBase != null && widgetMode == WidgetMode.Bounds)
+            if (primaryTargetBrushBase != null && widgetMode == WidgetMode.Bounds)
 			{
 				duplicationOccured = false;
 				moveCancelled = false;
@@ -998,7 +1062,7 @@ namespace Sabresaurus.SabreCSG
 		
 		void OnMouseUp(SceneView sceneView, Event e)
 		{
-			duplicationOccured = false;
+            duplicationOccured = false;
 			moveCancelled = false;
 			
 			// Just let go of the mouse button, the resize operation has finished
@@ -2036,6 +2100,50 @@ namespace Sabresaurus.SabreCSG
 				targetBrushBases[brushIndex].Invalidate(true);
 			}
 		}
+
+        /// <summary>Finds a vertex at the current mouse position.</summary>
+        /// <param name="closestVertexWorldPosition">The closest vertex world position.</param>
+        /// <returns>True if a vertex was found else false.</returns>
+        private bool FindVertexAtMousePosition(out Vector3 closestVertexWorldPosition)
+        {
+            // find a vertex close to the mouse cursor.
+            Transform sceneViewTransform = SceneView.currentDrawingSceneView.camera.transform;
+            Vector3 sceneViewPosition = sceneViewTransform.position;
+            Vector2 mousePosition = Event.current.mousePosition;
+
+            bool foundAnyPoints = false;
+            //						Vertex closestVertexFound = null;
+            closestVertexWorldPosition = Vector3.zero;
+            float closestDistanceSquare = float.PositiveInfinity;
+
+            foreach (PrimitiveBrush brush in targetBrushes)
+            {
+                Polygon[] polygons = brush.GetPolygons();
+                for (int i = 0; i < polygons.Length; i++)
+                {
+                    Polygon polygon = polygons[i];
+
+                    for (int j = 0; j < polygon.Vertices.Length; j++)
+                    {
+                        Vertex vertex = polygon.Vertices[j];
+
+                        Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
+
+                        float vertexDistanceSquare = (sceneViewPosition - worldPosition).sqrMagnitude;
+
+                        if (EditorHelper.InClickZone(mousePosition, worldPosition) && vertexDistanceSquare < closestDistanceSquare)
+                        {
+                            //										closestVertexFound = vertex;
+                            closestVertexWorldPosition = worldPosition;
+                            foundAnyPoints = true;
+                            closestDistanceSquare = vertexDistanceSquare;
+                        }
+                    }
+                }
+            }
+
+            return foundAnyPoints;
+        }
 
         private void OnMessageWindow(int id)
         {
