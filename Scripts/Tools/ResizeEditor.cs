@@ -164,7 +164,7 @@ namespace Sabresaurus.SabreCSG
             // display a handle on the vertex and allow the user to determine a new position in world space
             if (vertexSnapping)
             {
-                // cancel vertex snapping if the lest mouse button isn't pressed.
+                // cancel vertex snapping if the left mouse button isn't pressed.
                 if (!isLeftMouseButtonDown)
                 {
                     vertexSnapping_HasVertex = false;
