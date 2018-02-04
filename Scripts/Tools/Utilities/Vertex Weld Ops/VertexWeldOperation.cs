@@ -76,7 +76,7 @@ namespace Sabresaurus.SabreCSG
 					for (int j = 0; j < vertexCount; j++) 
 					{
 						Vertex vertex = polygons[i].Vertices[j];
-						vertex.normal = normalRotation * vertex.normal;
+						vertex.Normal = normalRotation * vertex.Normal;
 					}
 				}
 			}

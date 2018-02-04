@@ -468,11 +468,11 @@ namespace Sabresaurus.SabreCSG
 			{
 				for (int j = 0; j < translationBoxCollider[i].Vertices.Length; j++) 
 				{
-					Vector3 position = translationBoxCollider[i].Vertices[j].position;
+					Vector3 position = translationBoxCollider[i].Vertices[j].Position;
 					position = position.Multiply(bounds.extents) + bounds.center;
 
 					position = TransformPoint(position); // Also transform the positions if in local mode
-					translationBoxCollider[i].Vertices[j].position = position;
+					translationBoxCollider[i].Vertices[j].Position = position;
                 }
 				translationBoxCollider[i].CalculatePlane();
 			}
@@ -1043,7 +1043,7 @@ namespace Sabresaurus.SabreCSG
 									Vertex[] vertices = transformedPolygons[polygonIndex].Vertices;
 									for (int vertexIndex = 0; vertexIndex < vertices.Length && brushInsideMarquee; vertexIndex++) 
 									{
-										screenPoint = sceneView.camera.WorldToScreenPoint(vertices[vertexIndex].position);
+										screenPoint = sceneView.camera.WorldToScreenPoint(vertices[vertexIndex].Position);
 										if(!SabreMouse.MarqueeContainsPoint(marqueeStart, marqueeEnd, screenPoint))
 										{
 											brushInsideMarquee = false;
@@ -1281,15 +1281,15 @@ namespace Sabresaurus.SabreCSG
 
 		                for (int j = 0; j < vertexCount; j++)
 		                {
-		                    newPositions[j] = polygon.Vertices[j].position;
-		                    newUV[j] = polygon.Vertices[j].uv;
+		                    newPositions[j] = polygon.Vertices[j].Position;
+		                    newUV[j] = polygon.Vertices[j].UV;
 		                }
 
 		                for (int j = 0; j < vertexCount; j++)
 		                {
 		                    Vertex vertex = polygon.Vertices[j];
 
-		                    Vector3 newPosition = vertex.position;
+		                    Vector3 newPosition = vertex.Position;
 
 							// Start transform
 							newPosition = targetBrushes[brushIndex].transform.TransformPoint(newPosition);
@@ -1316,16 +1316,16 @@ namespace Sabresaurus.SabreCSG
 		                    newPositions[j] = newPosition;
 
 		                    // Update UVs
-		                    Vector3 p1 = polygon.Vertices[0].position;
-		                    Vector3 p2 = polygon.Vertices[1].position;
-		                    Vector3 p3 = polygon.Vertices[2].position;
+		                    Vector3 p1 = polygon.Vertices[0].Position;
+		                    Vector3 p2 = polygon.Vertices[1].Position;
+		                    Vector3 p3 = polygon.Vertices[2].Position;
 
 		                    UnityEngine.Plane plane = new UnityEngine.Plane(p1, p2, p3);
 		                    Vector3 f = MathHelper.ClosestPointOnPlane(newPosition, plane);
 
-		                    Vector2 uv1 = polygon.Vertices[0].uv;
-		                    Vector2 uv2 = polygon.Vertices[1].uv;
-		                    Vector2 uv3 = polygon.Vertices[2].uv;
+		                    Vector2 uv1 = polygon.Vertices[0].UV;
+		                    Vector2 uv2 = polygon.Vertices[1].UV;
+		                    Vector2 uv3 = polygon.Vertices[2].UV;
 
 		                    // calculate vectors from point f to vertices p1, p2 and p3:
 		                    Vector3 f1 = p1 - f;
@@ -1355,8 +1355,8 @@ namespace Sabresaurus.SabreCSG
 		                for (int j = 0; j < vertexCount; j++)
 		                {
 		                    Vertex vertex = polygon.Vertices[j];
-		                    vertex.position = newPositions[j];
-		                    vertex.uv = newUV[j];
+		                    vertex.Position = newPositions[j];
+		                    vertex.UV = newUV[j];
 		                }
 
 						// Polygon geometry has changed, inform the polygon that it needs to recalculate its cached plane
@@ -1371,7 +1371,7 @@ namespace Sabresaurus.SabreCSG
 						for (int j = 0; j < vertexCount; j++) 
 						{
 							Vertex vertex = polygon.Vertices[j];
-							vertex.normal = normalRotation * vertex.normal;
+							vertex.Normal = normalRotation * vertex.Normal;
 						}
 		            }
 				}

@@ -385,24 +385,24 @@ namespace Sabresaurus.SabreCSG
 					{
 						int sourceIndex = 0;
 
-						positions[vertexOffset + j*3] = polygon.Vertices[sourceIndex].position;
-						normals[vertexOffset + j*3] = polygon.Vertices[sourceIndex].normal;
-						uv[vertexOffset + j*3] = polygon.Vertices[sourceIndex].uv;
-						colors[vertexOffset + j*3] = polygon.Vertices[sourceIndex].color;
+						positions[vertexOffset + j*3] = polygon.Vertices[sourceIndex].Position;
+						normals[vertexOffset + j*3] = polygon.Vertices[sourceIndex].Normal;
+						uv[vertexOffset + j*3] = polygon.Vertices[sourceIndex].UV;
+						colors[vertexOffset + j*3] = polygon.Vertices[sourceIndex].Color;
 
 						sourceIndex = j + 1;
 
-						positions[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].position;
-						normals[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].normal;
-						uv[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].uv;
-						colors[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].color;
+						positions[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].Position;
+						normals[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].Normal;
+						uv[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].UV;
+						colors[vertexOffset + j*3 + 1] = polygon.Vertices[sourceIndex].Color;
 
 						sourceIndex = j + 2;
 
-						positions[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].position;
-						normals[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].normal;
-						uv[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].uv;
-						colors[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].color;
+						positions[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].Position;
+						normals[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].Normal;
+						uv[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].UV;
+						colors[vertexOffset + j*3 + 2] = polygon.Vertices[sourceIndex].Color;
 					}
 
 					for (int j = 0; j < triangleCount; j++) 
@@ -445,10 +445,10 @@ namespace Sabresaurus.SabreCSG
 
 					for (int j = 0; j < vertexCount; j++) 
 					{
-						positions[vertexOffset + j] = polygon.Vertices[j].position;
-						normals[vertexOffset + j] = polygon.Vertices[j].normal;
-						uv[vertexOffset + j] = polygon.Vertices[j].uv;
-						colors[vertexOffset + j] = polygon.Vertices[j].color;
+						positions[vertexOffset + j] = polygon.Vertices[j].Position;
+						normals[vertexOffset + j] = polygon.Vertices[j].Normal;
+						uv[vertexOffset + j] = polygon.Vertices[j].UV;
+						colors[vertexOffset + j] = polygon.Vertices[j].Color;
 					}
 
 					for (int j = 2; j < vertexCount; j++) 

@@ -155,8 +155,8 @@ namespace Sabresaurus.SabreCSG
 
                 for (int j = 0; j < polygonEdges.Length; j++)
                 {
-                    Vector3 position1 = polygonEdges[j].Vertex1.position;
-                    Vector3 position2 = polygonEdges[j].Vertex2.position;
+                    Vector3 position1 = polygonEdges[j].Vertex1.Position;
+                    Vector3 position2 = polygonEdges[j].Vertex2.Position;
                     //int foundIndex = edges.FindIndex(item => item.Matches(position1, position2));
                     List<SimpleEdge> found = edges.FindAll(item => item.CollinearIntersects(position1, position2));
 

@@ -114,10 +114,10 @@ namespace Sabresaurus.SabreCSG
 //					Vector3 normal = Vector3.Cross(vector1, vector2).normalized;
 //
 //					Vector3 thirdPoint = newPolygons[i].Vertices[matchedIndex1].Position + normal;
-					Vector3 thirdPoint = newPolygons[i].Vertices[matchedIndex1].position + newPolygons[i].Plane.normal;
+					Vector3 thirdPoint = newPolygons[i].Vertices[matchedIndex1].Position + newPolygons[i].Plane.normal;
 
 					// First split the shared polygon
-					Plane splitPlane = new Plane(newPolygons[i].Vertices[matchedIndex1].position, newPolygons[i].Vertices[matchedIndex2].position, thirdPoint);
+					Plane splitPlane = new Plane(newPolygons[i].Vertices[matchedIndex1].Position, newPolygons[i].Vertices[matchedIndex2].Position, thirdPoint);
 
 					Polygon splitPolygon1;
 					Polygon splitPolygon2;
@@ -270,7 +270,7 @@ namespace Sabresaurus.SabreCSG
 
 				for (int j = 0; j < groupedVertices[i].Count; j++) 
 				{
-					Vector3 position = groupedVertices[i][j].position;
+					Vector3 position = groupedVertices[i][j].Position;
 					for (int k = 0; k < groupedNormals[i].Count; k++) 
 					{
 						position += groupedNormals[i][k] * distance;
@@ -289,8 +289,8 @@ namespace Sabresaurus.SabreCSG
 				for (int j = 0; j < groupedVertices[i].Count; j++) 
 				{
 					Vertex vertex = groupedVertices[i][j];
-					vertex.position = groupedPositions[i][j];
-					vertex.uv = groupedUV[i][j];
+					vertex.Position = groupedPositions[i][j];
+					vertex.UV = groupedUV[i][j];
 				}
 			}
 
@@ -312,7 +312,7 @@ namespace Sabresaurus.SabreCSG
 			Polygon.Vector3ComparerEpsilon positionComparer = new Polygon.Vector3ComparerEpsilon();
 
 			// Cache the positions as the position of vertices will change while in the for loop
-			List<Vector3> specifiedPositions = specifiedVertices.Select(item => item.position).ToList();
+			List<Vector3> specifiedPositions = specifiedVertices.Select(item => item.Position).ToList();
 
 			// So we know which polygons need to have their normals recalculated
 			List<Polygon> affectedPolygons = new List<Polygon>();
@@ -330,8 +330,8 @@ namespace Sabresaurus.SabreCSG
 
 				for (int j = 0; j < vertexCount; j++) 
 				{
-					newPositions[j] = polygon.Vertices[j].position;
-					newUV[j] = polygon.Vertices[j].uv;
+					newPositions[j] = polygon.Vertices[j].Position;
+					newUV[j] = polygon.Vertices[j].UV;
 				}
 
 				bool polygonAffected = false;
@@ -339,9 +339,9 @@ namespace Sabresaurus.SabreCSG
 				for (int j = 0; j < vertexCount; j++) 
 				{
 					Vertex vertex = polygon.Vertices[j];
-					if(specifiedPositions.Contains(vertex.position, positionComparer))
+					if(specifiedPositions.Contains(vertex.Position, positionComparer))
 					{
-						Vector3 newPosition = vertex.position + localDelta;
+						Vector3 newPosition = vertex.Position + localDelta;
 
 						newPositions[j] = newPosition;
 
@@ -360,8 +360,8 @@ namespace Sabresaurus.SabreCSG
 				for (int j = 0; j < vertexCount; j++) 
 				{
 					Vertex vertex = polygon.Vertices[j];
-					vertex.position = newPositions[j];
-					vertex.uv = newUV[j];
+					vertex.Position = newPositions[j];
+					vertex.UV = newUV[j];
 				}
 
 				polygon.CalculatePlane();

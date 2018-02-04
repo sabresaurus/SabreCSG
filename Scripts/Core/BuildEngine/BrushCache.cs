@@ -335,14 +335,14 @@ namespace Sabresaurus.SabreCSG
 					Vertex vertex2A = polygon2.Vertices[j];
 					Vertex vertex2B = polygon2.Vertices[(j+1) % polygon2.Vertices.Length];
 
-					if((vertex1A.position.EqualsWithEpsilon(vertex2A.position)
-						&& vertex1B.position.EqualsWithEpsilon(vertex2B.position))
-						|| (vertex1A.position.EqualsWithEpsilon(vertex2B.position)
-							&& vertex1B.position.EqualsWithEpsilon(vertex2A.position)))
+					if((vertex1A.Position.EqualsWithEpsilon(vertex2A.Position)
+						&& vertex1B.Position.EqualsWithEpsilon(vertex2B.Position))
+						|| (vertex1A.Position.EqualsWithEpsilon(vertex2B.Position)
+							&& vertex1B.Position.EqualsWithEpsilon(vertex2A.Position)))
 					{
-						Vector3 thirdPoint = vertex1A.position + polygon1.Plane.normal;
+						Vector3 thirdPoint = vertex1A.Position + polygon1.Plane.normal;
 
-						plane = new Plane(vertex1A.position, vertex1B.position, thirdPoint);
+						plane = new Plane(vertex1A.Position, vertex1B.Position, thirdPoint);
 
 						return true;
 					}

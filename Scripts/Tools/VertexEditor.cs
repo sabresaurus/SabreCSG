@@ -175,8 +175,8 @@ namespace Sabresaurus.SabreCSG
 
 					for (int j = 0; j < vertexCount; j++) 
 					{
-						newPositions[j] = polygon.Vertices[j].position;
-						newUV[j] = polygon.Vertices[j].uv;
+						newPositions[j] = polygon.Vertices[j].Position;
+						newUV[j] = polygon.Vertices[j].UV;
 					}
 
 					bool polygonAffected = false;
@@ -185,7 +185,7 @@ namespace Sabresaurus.SabreCSG
 						Vertex vertex = polygon.Vertices[j];
 						if(selectedVertices.ContainsKey(vertex))
 						{
-							Vector3 newPosition = vertex.position;
+							Vector3 newPosition = vertex.Position;
 							newPosition = brush.transform.TransformPoint(newPosition);
 							newPosition -= scalarCenter;
 							newPosition *= scalar;
@@ -210,8 +210,8 @@ namespace Sabresaurus.SabreCSG
 					for (int j = 0; j < vertexCount; j++) 
 					{
 						Vertex vertex = polygon.Vertices[j];
-						vertex.position = newPositions[j];
-						vertex.uv = newUV[j];
+						vertex.Position = newPositions[j];
+						vertex.UV = newUV[j];
 					}
 
 					polygon.CalculatePlane();
@@ -257,8 +257,8 @@ namespace Sabresaurus.SabreCSG
 
 					for (int j = 0; j < vertexCount; j++) 
 					{
-						newPositions[j] = polygon.Vertices[j].position;
-						newUV[j] = polygon.Vertices[j].uv;
+						newPositions[j] = polygon.Vertices[j].Position;
+						newUV[j] = polygon.Vertices[j].UV;
 					}
 
 					bool polygonAffected = false;
@@ -269,7 +269,7 @@ namespace Sabresaurus.SabreCSG
 						if(selectedVertices.ContainsKey(vertex))
 						{
 							Vector3 startPosition = startPositions[vertex];
-							Vector3 newPosition = vertex.position + localDelta;
+							Vector3 newPosition = vertex.Position + localDelta;
 
 							Vector3 accumulatedDelta = newPosition - startPosition;
 
@@ -299,8 +299,8 @@ namespace Sabresaurus.SabreCSG
 					for (int j = 0; j < vertexCount; j++) 
 					{
 						Vertex vertex = polygon.Vertices[j];
-						vertex.position = newPositions[j];
-						vertex.uv = newUV[j];
+						vertex.Position = newPositions[j];
+						vertex.UV = newUV[j];
 					}
 
 					if(polygonAffected)
@@ -317,7 +317,7 @@ namespace Sabresaurus.SabreCSG
 						for (int j = 0; j < vertexCount; j++) 
 						{
 							Vertex vertex = polygon.Vertices[j];
-							vertex.normal = normalRotation * vertex.normal;
+							vertex.Normal = normalRotation * vertex.Normal;
 						}
 					}
 				}
@@ -353,8 +353,8 @@ namespace Sabresaurus.SabreCSG
 					
 					for (int j = 0; j < vertexCount; j++) 
 					{
-						newPositions[j] = polygon.Vertices[j].position;
-						newUV[j] = polygon.Vertices[j].uv;
+						newPositions[j] = polygon.Vertices[j].Position;
+						newUV[j] = polygon.Vertices[j].UV;
 					}
 
 					bool polygonAffected = false;
@@ -363,7 +363,7 @@ namespace Sabresaurus.SabreCSG
 						Vertex vertex = polygon.Vertices[j];
 						if(selectedVertices.ContainsKey(vertex))
 						{
-							Vector3 newPosition = vertex.position;
+							Vector3 newPosition = vertex.Position;
 							
 							float snapDistance = CurrentSettings.PositionSnapDistance;
 							if(isAbsoluteGrid)
@@ -393,8 +393,8 @@ namespace Sabresaurus.SabreCSG
 					for (int j = 0; j < vertexCount; j++) 
 					{
 						Vertex vertex = polygon.Vertices[j];
-						vertex.position = newPositions[j];
-						vertex.uv = newUV[j];
+						vertex.Position = newPositions[j];
+						vertex.UV = newUV[j];
 					}
 
 					polygon.CalculatePlane();
@@ -440,7 +440,7 @@ namespace Sabresaurus.SabreCSG
 
 			foreach (KeyValuePair<Vertex, Brush> selectedVertex in selectedVertices) 
 			{
-				Vector3 worldPosition = selectedVertex.Value.transform.TransformPoint(selectedVertex.Key.position);
+				Vector3 worldPosition = selectedVertex.Value.transform.TransformPoint(selectedVertex.Key.Position);
 				average += worldPosition;
 				numberFound++;
 			}
@@ -470,7 +470,7 @@ namespace Sabresaurus.SabreCSG
 				{
 					foreach (KeyValuePair<Vertex, Brush> selectedVertex in selectedVertices) 
 					{
-						startPositions.Add(selectedVertex.Key, selectedVertex.Key.position);
+						startPositions.Add(selectedVertex.Key, selectedVertex.Key.Position);
 					}				
 				}
 
@@ -588,8 +588,8 @@ namespace Sabresaurus.SabreCSG
 				{
 					Vertex vertex = polygon.Vertices[j];
 
-					if(newEdge.Vertex1.position.EqualsWithEpsilon(vertex.position)
-						|| newEdge.Vertex2.position.EqualsWithEpsilon(vertex.position))
+					if(newEdge.Vertex1.Position.EqualsWithEpsilon(vertex.Position)
+						|| newEdge.Vertex2.Position.EqualsWithEpsilon(vertex.Position))
 					{
 						if(!selectedVertices.ContainsKey(vertex))
 						{
@@ -613,7 +613,7 @@ namespace Sabresaurus.SabreCSG
 
 					for (int k = 0; k < newSelectedVertices.Count; k++) 
 					{
-						if(newSelectedVertices[k].position == vertex.position)
+						if(newSelectedVertices[k].Position == vertex.Position)
 						{
 							if(!selectedVertices.ContainsKey(vertex))
 							{
@@ -996,7 +996,7 @@ namespace Sabresaurus.SabreCSG
 								{
 									Vertex vertex = polygon.Vertices[j];
 									
-									Vector3 worldPosition = brush.transform.TransformPoint(vertex.position);
+									Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
 									Vector3 screenPoint = sceneView.camera.WorldToScreenPoint(worldPosition);
 									
 									// Point is contained within marquee box
@@ -1046,7 +1046,7 @@ namespace Sabresaurus.SabreCSG
 								{
 									Vertex vertex = polygon.Vertices[j];
 
-									Vector3 worldPosition = brush.transform.TransformPoint(vertex.position);
+									Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
 
 									float vertexDistanceSquare = (sceneViewPosition - worldPosition).sqrMagnitude;
 
@@ -1076,7 +1076,7 @@ namespace Sabresaurus.SabreCSG
 								for (int j = 0; j < polygon.Vertices.Length; j++) 
 								{
 									Vertex vertex = polygon.Vertices[j];
-									Vector3 worldPosition = brush.transform.TransformPoint(vertex.position);
+									Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
 									if(clickedAnyPoints && worldPosition == closestVertexWorldPosition)
 									{
 										if(EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
@@ -1125,8 +1125,8 @@ namespace Sabresaurus.SabreCSG
 									Polygon polygon = polygons[i];
 									for (int j = 0; j < polygon.Vertices.Length; j++) 
 									{
-										Vector3 worldPoint1 = brush.transform.TransformPoint(polygon.Vertices[j].position);
-										Vector3 worldPoint2 = brush.transform.TransformPoint(polygon.Vertices[(j+1) % polygon.Vertices.Length].position);
+										Vector3 worldPoint1 = brush.transform.TransformPoint(polygon.Vertices[j].Position);
+										Vector3 worldPoint2 = brush.transform.TransformPoint(polygon.Vertices[(j+1) % polygon.Vertices.Length].Position);
 
 										// Distance from the mid point of the edge to the camera
 										float squareDistance = (Vector3.Lerp(worldPoint1,worldPoint2,0.5f) - Camera.current.transform.position).sqrMagnitude;
@@ -1165,7 +1165,7 @@ namespace Sabresaurus.SabreCSG
 										{
 											Vertex vertex = polygon.Vertices[j];
 
-											Vector3 worldPosition = brush.transform.TransformPoint(vertex.position);
+											Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
 											if(worldPosition == selectedEdgeWorldPosition1
 												|| worldPosition == selectedEdgeWorldPosition2)
 											{
@@ -1226,7 +1226,7 @@ namespace Sabresaurus.SabreCSG
 							GL.Color(Color.white);
 						}
 
-						target = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(vertex.position));
+						target = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(vertex.Position));
 						if(target.z > 0)
 						{
 							// Make it pixel perfect
@@ -1253,8 +1253,8 @@ namespace Sabresaurus.SabreCSG
 				{
 					Brush brush = selectedVertices[edge.Vertex1];
 
-					Vector3 target1 = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(edge.Vertex1.position));
-					Vector3 target2 = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(edge.Vertex2.position));
+					Vector3 target1 = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(edge.Vertex1.Position));
+					Vector3 target2 = sceneViewCamera.WorldToScreenPoint(brush.transform.TransformPoint(edge.Vertex2.Position));
 
 					if(target1.z > 0 && target2.z > 0)
 					{

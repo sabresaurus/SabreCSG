@@ -200,10 +200,10 @@ namespace Sabresaurus.SabreCSG
 
 								for (int l = 0; l < vertices.Length; l++) 
 								{
-									Vertex interpolatedVertex = CalculateInterpolated(triangles, vertices[l].position);
-									vertices[l].normal = -interpolatedVertex.normal; // Flip normal as face is flipped
-									vertices[l].color = interpolatedVertex.color;
-									vertices[l].uv = interpolatedVertex.uv;
+									Vertex interpolatedVertex = CalculateInterpolated(triangles, vertices[l].Position);
+									vertices[l].Normal = -interpolatedVertex.Normal; // Flip normal as face is flipped
+									vertices[l].Color = interpolatedVertex.Color;
+									vertices[l].UV = interpolatedVertex.UV;
 								}
 
                                 currentPolygons[j] = previousPolygon;
@@ -250,8 +250,8 @@ namespace Sabresaurus.SabreCSG
 			Vector3 planeNormal = polygon.Plane.normal;
 			for (int i = 0; i < vertices.Length; i++) 
 			{
-				Vector3 point1 = vertices[i].position;
-				Vector3 point2 = vertices[(i+1)%vertices.Length].position;
+				Vector3 point1 = vertices[i].Position;
+				Vector3 point2 = vertices[(i+1)%vertices.Length].Position;
 
 				Vector3 edge = point2 - point1; // Direction from a vertex to the next
 				Vector3 polygonNormal = planeNormal;
@@ -281,9 +281,9 @@ namespace Sabresaurus.SabreCSG
 		public static Vertex GetVertexForPosition(Vertex vertex1, Vertex vertex2, Vertex vertex3,
 			Vector3 newPosition)
 		{
-			Vector3 pos1 = vertex1.position;
-			Vector3 pos2 = vertex2.position;
-			Vector3 pos3 = vertex3.position;
+			Vector3 pos1 = vertex1.Position;
+			Vector3 pos2 = vertex2.Position;
+			Vector3 pos3 = vertex3.Position;
 
 			//Plane plane = new Plane(pos1,pos2,pos3); // TODO Is it safe to replace this with the polygon Plane property?
 			//Vector3 planePoint = MathHelper.ClosestPointOnPlane(newPosition, plane);
@@ -308,13 +308,13 @@ namespace Sabresaurus.SabreCSG
 
 			Vertex vertex = vertex1.DeepCopy();
 			// Interpolate normal and UV based on the barycentric coordinates
-			vertex.normal = vertex1.normal * a1 + vertex2.normal * a2 + vertex3.normal * a3;
-			vertex.uv = vertex1.uv * a1 + vertex2.uv * a2 + vertex3.uv * a3;
+			vertex.Normal = vertex1.Normal * a1 + vertex2.Normal * a2 + vertex3.Normal * a3;
+			vertex.UV = vertex1.UV * a1 + vertex2.UV * a2 + vertex3.UV * a3;
 			// Interpolate the color, slightly more complex as need to implicit cast from Color32 to Color and back for interpolation
-			Color color1 = vertex1.color;
-			Color color2 = vertex1.color;
-			Color color3 = vertex1.color;
-			vertex.color = color1 * a1 + color2 * a2 + color3 * a3;
+			Color color1 = vertex1.Color;
+			Color color2 = vertex1.Color;
+			Color color3 = vertex1.Color;
+			vertex.Color = color1 * a1 + color2 * a2 + color3 * a3;
 
 			return vertex;
 		}

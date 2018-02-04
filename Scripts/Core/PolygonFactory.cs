@@ -79,7 +79,7 @@ namespace Sabresaurus.SabreCSG
 					// construction
 					for (int vertexIndex = 0; vertexIndex < polygons[polygonIndex].Vertices.Length; vertexIndex++) 
 					{
-						if(Polygon.ComparePointToPlane(polygons[polygonIndex].Vertices[vertexIndex].position, splitPlane) == Polygon.PointPlaneRelation.On)
+						if(Polygon.ComparePointToPlane(polygons[polygonIndex].Vertices[vertexIndex].Position, splitPlane) == Polygon.PointPlaneRelation.On)
 //						if(Polygon.ComparePointToPlane2(polygons[polygonIndex].Vertices[vertexIndex].Position, splitPlane) == Polygon.PointPlaneRelation.On)
 						{
 							newVertices.Add(polygons[polygonIndex].Vertices[vertexIndex]);
@@ -107,7 +107,7 @@ namespace Sabresaurus.SabreCSG
 				List<Vector3> positions = new List<Vector3>(newVertices.Count);
 				for (int i = 0; i < newVertices.Count; i++) 
 				{
-					positions.Add(newVertices[i].position);
+					positions.Add(newVertices[i].Position);
 				}
 
                 Polygon newPolygon = PolygonFactory.ConstructPolygon(positions, true);
@@ -364,7 +364,7 @@ namespace Sabresaurus.SabreCSG
 
                     for (int j = 0; j < vertices.Count; j++)
                     {
-                        if (vertices[j].position.EqualsWithEpsilonLower(sourceVertex.position))
+                        if (vertices[j].Position.EqualsWithEpsilonLower(sourceVertex.Position))
                         {
                             contained = true;
                             break;
@@ -394,11 +394,11 @@ namespace Sabresaurus.SabreCSG
             }
 
             // Find center point, so we can sort the positions around it
-            Vector3 center = vertices[0].position;
+            Vector3 center = vertices[0].Position;
 
             for (int i = 1; i < vertices.Count; i++)
             {
-                center += vertices[i].position;
+                center += vertices[i].Position;
             }
 
             center *= 1f / vertices.Count;
@@ -436,10 +436,10 @@ namespace Sabresaurus.SabreCSG
             {
                 List<Vertex> positionsCopy = new List<Vertex>();
 
-                Vector3 lastDirection = (vertices[0].position - vertices[vertices.Count - 1].position).normalized;
+                Vector3 lastDirection = (vertices[0].Position - vertices[vertices.Count - 1].Position).normalized;
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    Vector3 nextDirection = (vertices[(i + 1) % vertices.Count].position - vertices[i].position).normalized;
+                    Vector3 nextDirection = (vertices[(i + 1) % vertices.Count].Position - vertices[i].Position).normalized;
 
                     if (Vector3.Dot(lastDirection, nextDirection) < 0.99f)
                     {
@@ -471,7 +471,7 @@ namespace Sabresaurus.SabreCSG
 
             for (int i = 0; i < positions.Count; i++)
             {
-                positionsComplex.Add(new KeyValuePair<Vertex, Vector3>(positions[i], cancellingRotation * positions[i].position));
+                positionsComplex.Add(new KeyValuePair<Vertex, Vector3>(positions[i], cancellingRotation * positions[i].Position));
             }
 
             // Sort from left to right, then from bottom to top for values with the same X
@@ -526,7 +526,7 @@ namespace Sabresaurus.SabreCSG
 
                 for (int j = 0; j < vertices.Count; j++)
                 {
-                    if (vertices[j].position.EqualsWithEpsilonLower(sourceVertex.position))
+                    if (vertices[j].Position.EqualsWithEpsilonLower(sourceVertex.Position))
                     {
                         contained = true;
                         break;
@@ -584,8 +584,8 @@ namespace Sabresaurus.SabreCSG
             public int Compare(Vertex vertex1, Vertex vertex2)
             {
                 // Rotate the positions and subtract the center, so they become vectors from the center point on the plane
-                Vector3 vector1 = (cancellingRotation * vertex1.position) - rotatedCenter;
-                Vector3 vector2 = (cancellingRotation * vertex2.position) - rotatedCenter;
+                Vector3 vector1 = (cancellingRotation * vertex1.Position) - rotatedCenter;
+                Vector3 vector2 = (cancellingRotation * vertex2.Position) - rotatedCenter;
 
                 // Find the angle of each vector on the plane
                 float angle1 = Mathf.Atan2(vector1.x, vector1.y);
@@ -749,8 +749,8 @@ namespace Sabresaurus.SabreCSG
 			int index3 = 4;
 			int index4 = 3;
 			
-			Vector3 originalNormal = vertices[index1 - 1].normal;
-			Vector3 newNormal = Vector3.Cross(vertices[index1 - 1].position - vertices[index2 - 1].position, vertices[index1 - 1].position - vertices[index4 - 1].position).normalized;
+			Vector3 originalNormal = vertices[index1 - 1].Normal;
+			Vector3 newNormal = Vector3.Cross(vertices[index1 - 1].Position - vertices[index2 - 1].Position, vertices[index1 - 1].Position - vertices[index4 - 1].Position).normalized;
 			
 			// Flip if necessary - unsure if the requirement of this step is a result of a mistake earlier in the process (TODO: Investigate)
 			if (newNormal != originalNormal)
@@ -856,9 +856,9 @@ namespace Sabresaurus.SabreCSG
 			// Create the relevant buffers from the vertex array
 			for (int i = 0; i < vertexList.Vertices.Count; i++)
 			{
-				vertices.Add(vertexList.Vertices[i].position);
-				normals.Add(vertexList.Vertices[i].normal);
-				uvs.Add(vertexList.Vertices[i].uv);
+				vertices.Add(vertexList.Vertices[i].Position);
+				normals.Add(vertexList.Vertices[i].Normal);
+				uvs.Add(vertexList.Vertices[i].UV);
 				//	                colors.Add(((SharedBrushData)indexer.Vertices[i].Shared).BrushTintColor);
 			}
 

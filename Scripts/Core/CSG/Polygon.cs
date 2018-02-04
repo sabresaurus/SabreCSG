@@ -118,7 +118,7 @@ namespace Sabresaurus.SabreCSG
 			{
 				return;
 			}
-	        cachedPlane = new Plane(vertices[0].position, vertices[1].position, vertices[2].position);
+	        cachedPlane = new Plane(vertices[0].Position, vertices[1].Position, vertices[2].Position);
 
 			// HACK: If the normal is zero and there's room to try another, then try alternate vertices
 			if(cachedPlane.Value.normal == Vector3.zero && vertices.Length > 3)
@@ -128,15 +128,15 @@ namespace Sabresaurus.SabreCSG
 				int vertexIndex3 = 3;
 
 				// Update UVs
-				Vector3 pos1 = vertices[vertexIndex1].position;
-				Vector3 pos2 = vertices[vertexIndex2].position;
+				Vector3 pos1 = vertices[vertexIndex1].Position;
+				Vector3 pos2 = vertices[vertexIndex2].Position;
 				Vector3 pos3 = Vector3.zero;
 
 				for (int i = 3; i < vertices.Length; i++) 
 				{
 					vertexIndex3 = i;
 
-					pos3 = vertices[vertexIndex3].position;
+					pos3 = vertices[vertexIndex3].Position;
 
 					cachedPlane = new Plane(pos1,pos2,pos3);
 
@@ -161,7 +161,7 @@ namespace Sabresaurus.SabreCSG
 			// Flip each vertex normal
 	        for (int i = 0; i < this.vertices.Length; i++)
 	        {
-	            this.vertices[i].normal *= -1;
+	            this.vertices[i].Normal *= -1;
 	        }
 
 			// Flip the cached plane
@@ -183,7 +183,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++) 
 			{
-				vertices[vertexIndex].normal = Plane.normal;
+				vertices[vertexIndex].Normal = Plane.normal;
 			}
 		}
 
@@ -191,11 +191,11 @@ namespace Sabresaurus.SabreCSG
 		{
 			if(vertices.Length > 0)
 			{
-				Bounds polygonBounds = new Bounds(vertices[0].position, Vector3.zero);
+				Bounds polygonBounds = new Bounds(vertices[0].Position, Vector3.zero);
 				
 				for (int j = 1; j < vertices.Length; j++)
 				{
-					polygonBounds.Encapsulate(vertices[j].position);
+					polygonBounds.Encapsulate(vertices[j].Position);
 				}
 				return polygonBounds;
 			}
@@ -222,10 +222,10 @@ namespace Sabresaurus.SabreCSG
 
 		public Vector3 GetCenterPoint()
 		{
-			Vector3 center = vertices[0].position;
+			Vector3 center = vertices[0].Position;
 			for (int i = 1; i < vertices.Length; i++) 
 			{
-				center += vertices[i].position;
+				center += vertices[i].Position;
 			}
 			center /= vertices.Length;
 			return center;
@@ -233,10 +233,10 @@ namespace Sabresaurus.SabreCSG
 
 		public Vector3 GetCenterUV()
 		{
-			Vector2 centerUV = vertices[0].uv;
+			Vector2 centerUV = vertices[0].UV;
 			for (int i = 1; i < vertices.Length; i++) 
 			{
-				centerUV += vertices[i].uv;
+				centerUV += vertices[i].UV;
 			}
 			centerUV *= 1f/vertices.Length;
 			return centerUV;
@@ -244,7 +244,7 @@ namespace Sabresaurus.SabreCSG
 
 		public float GetArea()
 		{
-			Vector3 normal = Vector3.Normalize (Vector3.Cross (vertices[1].position - vertices[0].position, vertices[2].position - vertices[0].position));
+			Vector3 normal = Vector3.Normalize (Vector3.Cross (vertices[1].Position - vertices[0].Position, vertices[2].Position - vertices[0].Position));
 			Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(normal));
 
 			float totalArea = 0;
@@ -252,8 +252,8 @@ namespace Sabresaurus.SabreCSG
 			int j = vertices.Length-1;
 			for (int i = 0; i < vertices.Length; i++) 
 			{
-				Vector3 positionI = cancellingRotation * vertices[i].position;
-				Vector3 positionJ = cancellingRotation * vertices[j].position;
+				Vector3 positionI = cancellingRotation * vertices[i].Position;
+				Vector3 positionJ = cancellingRotation * vertices[j].Position;
 				totalArea += (positionJ.x+positionI.x) * (positionJ.y-positionI.y); 
 
 				j=i;
@@ -265,7 +265,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			for (int i = 0; i < vertices.Length; i++) 
 			{
-				vertices[i].color = newColor;
+				vertices[i].Color = newColor;
 			}
 		}
 
@@ -294,7 +294,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			public bool Equals (Vertex x, Vertex y)
 			{
-				return x.position.EqualsWithEpsilon(y.position);
+				return x.Position.EqualsWithEpsilon(y.Position);
 			}
 			
 			public int GetHashCode (Vertex obj)
@@ -341,7 +341,7 @@ namespace Sabresaurus.SabreCSG
 
 	        for (int i = 0; i < polygon.Vertices.Length; i++)
 	        {
-				float distance = testPlane.GetDistanceToPoint(polygon.Vertices[i].position);
+				float distance = testPlane.GetDistanceToPoint(polygon.Vertices[i].Position);
 				if (distance < -EPSILON_LOWER) // Is the point in front of the plane (with thickness)
 	            {
 	                verticesInFront++;
@@ -382,7 +382,7 @@ namespace Sabresaurus.SabreCSG
 				bool alreadyContained = false;
 				
 				for (int j = 0; j < newVertices.Count; j++) {
-					if(vertices[i].position.EqualsWithEpsilonLower(newVertices[j].position))
+					if(vertices[i].Position.EqualsWithEpsilonLower(newVertices[j].Position))
 					{
 						alreadyContained = true;
 						break;
@@ -421,8 +421,8 @@ namespace Sabresaurus.SabreCSG
 				Vertex currentVertex = polygon.vertices[i];
 				Vertex previousVertex = polygon.vertices[previousIndex];
 
-				PointPlaneRelation currentRelation = ComparePointToPlane(currentVertex.position, clipPlane);
-				PointPlaneRelation previousRelation = ComparePointToPlane(previousVertex.position, clipPlane);
+				PointPlaneRelation currentRelation = ComparePointToPlane(currentVertex.Position, clipPlane);
+				PointPlaneRelation previousRelation = ComparePointToPlane(previousVertex.Position, clipPlane);
 
 				if(previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.InFront)
 				{
@@ -431,7 +431,7 @@ namespace Sabresaurus.SabreCSG
 				}
 				else if(previousRelation == PointPlaneRelation.Behind && currentRelation == PointPlaneRelation.InFront)
 				{
-					float interpolant = Edge.IntersectsPlane(clipPlane, previousVertex.position, currentVertex.position);
+					float interpolant = Edge.IntersectsPlane(clipPlane, previousVertex.Position, currentVertex.Position);
 					Vertex intersection = Vertex.Lerp(previousVertex, currentVertex, interpolant);
 
 					// Front add intersection, add current
@@ -446,7 +446,7 @@ namespace Sabresaurus.SabreCSG
 				else if(previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.Behind)
 				{
 					// Reverse order here so that clipping remains consistent for either CW or CCW testing
-					float interpolant = Edge.IntersectsPlane(clipPlane, currentVertex.position, previousVertex.position);
+					float interpolant = Edge.IntersectsPlane(clipPlane, currentVertex.Position, previousVertex.Position);
 					Vertex intersection = Vertex.Lerp(currentVertex, previousVertex, interpolant);
 
 					// Front add intersection
@@ -544,23 +544,23 @@ namespace Sabresaurus.SabreCSG
 				Vertex currentVertex = polygon.vertices[i];
 				Vertex previousVertex = polygon.vertices[previousIndex];
 
-				PointPlaneRelation currentRelation = ComparePointToPlane(currentVertex.position, testPlane);
-				PointPlaneRelation previousRelation = ComparePointToPlane(previousVertex.position, testPlane);
+				PointPlaneRelation currentRelation = ComparePointToPlane(currentVertex.Position, testPlane);
+				PointPlaneRelation previousRelation = ComparePointToPlane(previousVertex.Position, testPlane);
 
 				if(previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.InFront)
 				{
 				}
 				else if(previousRelation == PointPlaneRelation.Behind && currentRelation == PointPlaneRelation.InFront)
 				{
-					float interpolant = Edge.IntersectsPlane(testPlane, previousVertex.position, currentVertex.position);
-					position2 = Vector3.Lerp(previousVertex.position, currentVertex.position, interpolant);
+					float interpolant = Edge.IntersectsPlane(testPlane, previousVertex.Position, currentVertex.Position);
+					position2 = Vector3.Lerp(previousVertex.Position, currentVertex.Position, interpolant);
 					position2Set = true;
 				}
 				else if(previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.Behind)
 				{
 					// Reverse order here so that clipping remains consistent for either CW or CCW testing
-					float interpolant = Edge.IntersectsPlane(testPlane, currentVertex.position, previousVertex.position);
-					position1 = Vector3.Lerp(currentVertex.position, previousVertex.position, interpolant);
+					float interpolant = Edge.IntersectsPlane(testPlane, currentVertex.Position, previousVertex.Position);
+					position1 = Vector3.Lerp(currentVertex.Position, previousVertex.Position, interpolant);
 					position1Set = true;
 				}
 				else if(previousRelation == PointPlaneRelation.Behind && currentRelation == PointPlaneRelation.Behind)
@@ -570,12 +570,12 @@ namespace Sabresaurus.SabreCSG
 				{
 					if(previousRelation == PointPlaneRelation.InFront)
 					{
-						position1 = currentVertex.position;
+						position1 = currentVertex.Position;
 						position1Set = true;
 					}
 					else if(previousRelation == PointPlaneRelation.Behind)
 					{
-						position2 = currentVertex.position;
+						position2 = currentVertex.Position;
 						position2Set = true;
 					}
 					else
@@ -638,11 +638,11 @@ namespace Sabresaurus.SabreCSG
 			// Check if any of the edges in the polygon match the candidate edge (including reversed order)
 			for (int i = 0; i < polygon.Vertices.Length; i++) 
 			{
-				Vector3 position1 = polygon.Vertices[i].position;
-				Vector3 position2 = polygon.Vertices[(i+1) % polygon.Vertices.Length].position;
+				Vector3 position1 = polygon.Vertices[i].Position;
+				Vector3 position2 = polygon.Vertices[(i+1) % polygon.Vertices.Length].Position;
 				
-				if((candidateEdge.Vertex1.position == position1 && candidateEdge.Vertex2.position == position2)
-				   || (candidateEdge.Vertex2.position == position1 && candidateEdge.Vertex1.position == position2))
+				if((candidateEdge.Vertex1.Position == position1 && candidateEdge.Vertex2.Position == position2)
+				   || (candidateEdge.Vertex2.Position == position1 && candidateEdge.Vertex1.Position == position2))
 				{
 					return true;
 				}

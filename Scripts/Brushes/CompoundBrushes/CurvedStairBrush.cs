@@ -245,18 +245,18 @@ namespace Sabresaurus.SabreCSG
                 if (slopedFloor)
                 {
                     // create a smooth slope.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2 + 1];
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
                 }
                 else
                 {
                     // create blocky stairs.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
                 }
 
                 // calculate a normal using a virtual plane.
@@ -274,24 +274,24 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom)
                 {
                     // fill downwards to the bottom.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index1].position = vertexPositions[bottomOuterStart + i];
-                    vertices[index2].position = vertexPositions[bottomInnerStart + i];
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index2].Position = vertexPositions[bottomInnerStart + i];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
                 }
                 else
                 {
                     // fill downwards to the step height.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
                 }
                 if (slopedCeiling)
                 {
                     // create a smooth ceiling slope.
-                    vertices[index1].position -= new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].position -= new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position -= new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position -= new Vector3(0.0f, stepHeight, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -309,28 +309,28 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom)
                 {
                     // fill downwards to the bottom.
-                    vertices[index0].position = vertexPositions[bottomInnerStart + i + 1];
-                    vertices[index1].position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].position = vertexPositions[bottomInnerStart + i];
+                    vertices[index0].Position = vertexPositions[bottomInnerStart + i + 1];
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
                 }
                 else
                 {
                     // fill downwards to the step height.
-                    vertices[index0].position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index0].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
                 }
                 if (slopedFloor)
                 {
                     // create a smooth floor slope.
-                    vertices[index1].position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
                 }
                 if (slopedCeiling)
                 {
                     // create a smooth ceiling slope.
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -348,28 +348,28 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom)
                 {
                     // fill downwards to the bottom.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index2].position = vertexPositions[bottomOuterStart + i];
-                    vertices[index3].position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index2].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
                 }
                 else
                 {
                     // fill downwards to the step height.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].position = vertexPositions[outerStart + (i * 2) + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
                 }
                 if (slopedFloor)
                 {
                     // create a smooth floor slope.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
                 }
                 if (slopedCeiling)
                 {
                     // create a smooth ceiling slope.
-                    vertices[index2].position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
+                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -387,24 +387,24 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom)
                 {
                     // fill downwards to the bottom.
-                    vertices[index0].position = vertexPositions[bottomOuterStart + i];
-                    vertices[index1].position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index2].position = vertexPositions[bottomInnerStart + i + 1];
-                    vertices[index3].position = vertexPositions[bottomInnerStart + i];
+                    vertices[index0].Position = vertexPositions[bottomOuterStart + i];
+                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index2].Position = vertexPositions[bottomInnerStart + i + 1];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
                 }
                 else
                 {
                     // fill downwards to the step height.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
                 }
                 if (slopedCeiling)
                 {
                     // create a smooth ceiling slope.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
                 }
 
                 // calculate a normal using a virtual plane.
@@ -422,24 +422,24 @@ namespace Sabresaurus.SabreCSG
                 if (fillToBottom)
                 {
                     // fill downwards to the bottom.
-                    vertices[index0].position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index3].position = vertexPositions[bottomInnerStart + i + 1];
+                    vertices[index0].Position = vertexPositions[bottomOuterStart + i + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index3].Position = vertexPositions[bottomInnerStart + i + 1];
                 }
                 else
                 {
                     // fill downwards to the step height.
-                    vertices[index0].position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index3].position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
+                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
                 }
                 if (slopedFloor)
                 {
                     // create a smooth floor slope.
-                    vertices[index1].position = vertexPositions[outerStart + (i * 2) + 2 + 1];
-                    vertices[index2].position = vertexPositions[innerStart + (i * 2) + 2 + 1];
+                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
+                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
                 }
 
                 // calculate a normal using a virtual plane.
@@ -467,14 +467,14 @@ namespace Sabresaurus.SabreCSG
         private void GenerateUvCoordinates(Polygon polygon)
         {
             foreach (Vertex vertex in polygon.Vertices)
-                vertex.uv = GeometryHelper.GetUVForPosition(polygon, vertex.position);
+                vertex.UV = GeometryHelper.GetUVForPosition(polygon, vertex.Position);
         }
 
         private void GenerateNormals(Polygon polygon)
         {
-            Plane plane = new Plane(polygon.Vertices[1].position, polygon.Vertices[2].position, polygon.Vertices[3].position);
+            Plane plane = new Plane(polygon.Vertices[1].Position, polygon.Vertices[2].Position, polygon.Vertices[3].Position);
             foreach (Vertex vertex in polygon.Vertices)
-                vertex.normal = plane.normal;
+                vertex.Normal = plane.normal;
         }
     }
 }

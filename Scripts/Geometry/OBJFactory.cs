@@ -49,8 +49,8 @@ namespace Sabresaurus.SabreCSG
 					for (int vertexIndex = 0; vertexIndex < polygon.Vertices.Length; vertexIndex++) 
 					{
 						Vertex vertex = polygon.Vertices[vertexIndex];
-						vertex.position = transform.InverseTransformPoint(vertex.position);
-						vertex.normal = transform.InverseTransformDirection(vertex.normal);
+						vertex.Position = transform.InverseTransformPoint(vertex.Position);
+						vertex.Normal = transform.InverseTransformDirection(vertex.Normal);
 					}
 				}
 			}

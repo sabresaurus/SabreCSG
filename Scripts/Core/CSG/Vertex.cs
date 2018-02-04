@@ -17,28 +17,24 @@ namespace Sabresaurus.SabreCSG
     public class Vertex : IDeepCopyable<Vertex>, IEquatable<Vertex>
     {
         /// <summary>The position of the <see cref="Vertex"/>.</summary>
-        [FormerlySerializedAs("Position")]
-        public Vector3 position;
+        public Vector3 Position;
 
         /// <summary>
         /// The uv coordinates of the <see cref="Vertex"/>. Determines how a texture is mapped onto a
         /// <see cref="Polygon"/>.
         /// </summary>
-        [FormerlySerializedAs("UV")]
-        public Vector2 uv;
+        public Vector2 UV;
 
         /// <summary>
         /// The normal direction of the <see cref="Vertex"/>. Used in lighting calculations to
         /// determine the direction a <see cref="Polygon"/> is facing.
         /// </summary>
-        [FormerlySerializedAs("Normal")]
-        public Vector3 normal;
+        public Vector3 Normal;
 
         /// <summary>
         /// The color of the <see cref="Vertex"/>. Shaders can use this color to tint the model.
         /// </summary>
-        [FormerlySerializedAs("Color")]
-        public Color32 color = UnityEngine.Color.white;
+        public Color32 Color = UnityEngine.Color.white;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vertex"/> class.
@@ -53,9 +49,9 @@ namespace Sabresaurus.SabreCSG
         /// <param name="uv">The uv coordinates.</param>
         public Vertex(Vector3 position, Vector3 normal, Vector2 uv)
         {
-            this.position = position;
-            this.uv = uv;
-            this.normal = normal;
+            this.Position = position;
+            this.UV = uv;
+            this.Normal = normal;
         }
 
         /// <summary>
@@ -67,25 +63,25 @@ namespace Sabresaurus.SabreCSG
         /// <param name="color">The tinting color.</param>
         public Vertex(Vector3 position, Vector3 normal, Vector2 uv, Color32 color)
         {
-            this.position = position;
-            this.uv = uv;
-            this.normal = normal;
-            this.color = color;
+            this.Position = position;
+            this.UV = uv;
+            this.Normal = normal;
+            this.Color = color;
         }
 
         /// <summary>
-        /// Flips the <see cref="normal"/> direction.
+        /// Flips the <see cref="Normal"/> direction.
         /// </summary>
         public void FlipNormal()
         {
-            normal = -normal;
+            Normal = -Normal;
         }
 
         /// <summary>
         /// Linearly interpolates between two vertices.
         /// <para>
-        /// Note that all of the vertex components (i.e. <see cref="position"/>, <see cref="uv"/>,
-        /// <see cref="normal"/>, <see cref="color"/>) will be lerped.
+        /// Note that all of the vertex components (i.e. <see cref="Position"/>, <see cref="UV"/>,
+        /// <see cref="Normal"/>, <see cref="Color"/>) will be lerped.
         /// </para>
         /// </summary>
         /// <param name="a">The initial <see cref="Vertex"/>.</param>
@@ -100,10 +96,10 @@ namespace Sabresaurus.SabreCSG
         {
             return new Vertex()
             {
-                position = Vector3.Lerp(a.position, b.position, t),
-                uv = Vector2.Lerp(a.uv, b.uv, t),
-                normal = Vector3.Lerp(a.normal, b.normal, t),
-                color = Color32.Lerp(a.color, b.color, t),
+                Position = Vector3.Lerp(a.Position, b.Position, t),
+                UV = Vector2.Lerp(a.UV, b.UV, t),
+                Normal = Vector3.Lerp(a.Normal, b.Normal, t),
+                Color = Color32.Lerp(a.Color, b.Color, t),
             };
         }
 
@@ -114,7 +110,7 @@ namespace Sabresaurus.SabreCSG
         /// <returns>The newly created <see cref="Vertex"/> copy with the same values.</returns>
         public Vertex DeepCopy()
         {
-            return new Vertex(position, normal, uv, color);
+            return new Vertex(Position, Normal, UV, Color);
         }
 
         /// <summary>
@@ -123,7 +119,7 @@ namespace Sabresaurus.SabreCSG
         /// <returns>A <see cref="string"/> that represents this <see cref="Vertex"/>.</returns>
         public override string ToString()
         {
-            return string.Format(string.Format("[Vertex] Pos: {0},{1},{2}", position.x, position.y, position.z));
+            return string.Format(string.Format("[Vertex] Pos: {0},{1},{2}", Position.x, Position.y, Position.z));
         }
 
         /// <summary>
@@ -149,10 +145,10 @@ namespace Sabresaurus.SabreCSG
         public bool Equals(Vertex other)
         {
             return other != null &&
-                   EqualityComparer<Vector3>.Default.Equals(position, other.position) &&
-                   EqualityComparer<Vector2>.Default.Equals(uv, other.uv) &&
-                   EqualityComparer<Vector3>.Default.Equals(normal, other.normal) &&
-                   EqualityComparer<Color32>.Default.Equals(color, other.color);
+                   EqualityComparer<Vector3>.Default.Equals(Position, other.Position) &&
+                   EqualityComparer<Vector2>.Default.Equals(UV, other.UV) &&
+                   EqualityComparer<Vector3>.Default.Equals(Normal, other.Normal) &&
+                   EqualityComparer<Color32>.Default.Equals(Color, other.Color);
         }
 
         /// <summary>
@@ -165,10 +161,10 @@ namespace Sabresaurus.SabreCSG
         public override int GetHashCode()
         {
             var hashCode = -414430010;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(position);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector2>.Default.GetHashCode(uv);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(normal);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Color32>.Default.GetHashCode(color);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(Position);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Vector2>.Default.GetHashCode(UV);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(Normal);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Color32>.Default.GetHashCode(Color);
             return hashCode;
         }
 
@@ -183,7 +179,7 @@ namespace Sabresaurus.SabreCSG
                 return false;
             }
 
-            return lhs.position == rhs.position && lhs.uv == rhs.uv && lhs.normal == rhs.normal && lhs.color.Equals(rhs.color);
+            return lhs.Position == rhs.Position && lhs.UV == rhs.UV && lhs.Normal == rhs.Normal && lhs.Color.Equals(rhs.Color);
         }
 
         public static bool operator !=(Vertex lhs, Vertex rhs)

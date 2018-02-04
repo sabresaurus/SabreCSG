@@ -67,7 +67,7 @@ namespace Sabresaurus.SabreCSG
 
 
 			int count = 1;
-			centerPoint = polygons[0].Vertices[0].position;
+			centerPoint = polygons[0].Vertices[0].Position;
 
 			for (int i = 0; i < polygons.Count; i++) 
 			{
@@ -79,7 +79,7 @@ namespace Sabresaurus.SabreCSG
 						continue;
 					}
 
-					centerPoint += polygons[i].Vertices[j].position;
+					centerPoint += polygons[i].Vertices[j].Position;
 					
 					count++;
 				}
@@ -93,13 +93,13 @@ namespace Sabresaurus.SabreCSG
 		{
 			if (polygons.Count > 0)
 			{
-				bounds = new Bounds(polygons[0].Vertices[0].position, Vector3.zero);
+				bounds = new Bounds(polygons[0].Vertices[0].Position, Vector3.zero);
 				
 				for (int i = 0; i < polygons.Count; i++)
 				{
 					for (int j = 0; j < polygons[i].Vertices.Length; j++)
 					{
-						bounds.Encapsulate(polygons[i].Vertices[j].position);
+						bounds.Encapsulate(polygons[i].Vertices[j].Position);
 					}
 				}
 			}

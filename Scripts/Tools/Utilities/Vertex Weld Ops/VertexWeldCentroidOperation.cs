@@ -22,7 +22,7 @@ namespace Sabresaurus.SabreCSG
 			Vector3 newPosition = Vector3.zero;
 			for (int i = 0; i < sourceVertices.Count; i++) 
 			{
-				newPosition += sourceVertices[i].position;
+				newPosition += sourceVertices[i].Position;
 			}
 			newPosition /= sourceVertices.Count;
 
@@ -30,13 +30,13 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < sourceVertices.Count; i++) 
 			{
 				Polygon polygon = vertexPolygonMappings[sourceVertices[i]];
-				sourceVertices[i].uv = GeometryHelper.GetUVForPosition(polygon, newPosition);
+				sourceVertices[i].UV = GeometryHelper.GetUVForPosition(polygon, newPosition);
 			}
 
 			// Update all the selected vertices to their new position
 			for (int i = 0; i < sourceVertices.Count; i++) 
 			{
-				sourceVertices[i].position = newPosition;
+				sourceVertices[i].Position = newPosition;
 			}
 		}
 	}
