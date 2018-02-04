@@ -37,6 +37,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>Whether the user is using the vertex snapping tool by holding down V.</summary>
         bool vertexSnapping = false;
         bool vertexSnapping_HasVertex = false;
+        bool vertexSnapping_Cancel = false;
         Vector3 vertexSnapping_VertexWorldPosition = Vector3.zero;
 
         bool isLeftMouseButtonDown = false;
@@ -146,6 +147,20 @@ namespace Sabresaurus.SabreCSG
 			{
 				return;
 			}
+
+            // cancel the translation if we come out of vertex snapping.
+            if (vertexSnapping_Cancel)
+            {
+                // once the user lets go of the left mouse button we become functional again.
+                if (!isLeftMouseButtonDown)
+                {
+                    vertexSnapping_Cancel = false;
+                }
+                else
+                {
+                    return;
+                }
+            }
 
 			// Make the handle respect the Unity Editor's Local/World orientation mode
 			Quaternion handleDirection = Quaternion.identity;
@@ -353,7 +368,9 @@ namespace Sabresaurus.SabreCSG
                 // check for vertex snapping in translate mode.
                 if (e.keyCode == KeyCode.V)
                 {
-                    vertexSnapping = e.type == EventType.KeyDown;
+                    vertexSnapping = (e.type == EventType.KeyDown);
+                    // force the user to let go so we don't continue dragging the poor brush around.
+                    vertexSnapping_Cancel = !vertexSnapping;
                 }
 
 				if(KeyMappings.EventsMatch(e, EditorKeyMappings.GetToolViewMapping()))
