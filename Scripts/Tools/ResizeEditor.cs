@@ -158,6 +158,9 @@ namespace Sabresaurus.SabreCSG
                 }
                 else
                 {
+                    // have a handle that's frozen in place.
+                    // if we don't do this hack Unity has a bug and it will never leave vertex snap mode.
+                    Handles.PositionHandle(vertexSnapping_VertexWorldPosition, Quaternion.identity);
                     return;
                 }
             }
