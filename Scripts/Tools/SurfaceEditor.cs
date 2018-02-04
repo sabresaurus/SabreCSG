@@ -225,7 +225,7 @@ namespace Sabresaurus.SabreCSG
 
                     for (int j = 0; j < currentPolygon.Vertices.Length; j++)
                     {
-                        transformedPositions[j] = brushTransform.TransformPoint(currentPolygon.Vertices[j].Position);
+                        transformedPositions[j] = brushTransform.TransformPoint(currentPolygon.Vertices[j].position);
                     }
 
                     // Calculate the diameter of the the bounding circle for the transformed polygon (polygon aligned), used for rotation mode
@@ -245,9 +245,9 @@ namespace Sabresaurus.SabreCSG
                     Vertex vertex3;
                     // Get the three non-colinear vertices which will give us a valid plane
                     SurfaceUtility.GetPrimaryPolygonDescribers(currentPolygon, out vertex1, out vertex2, out vertex3);
-                    Plane plane = new Plane(brushTransform.TransformPoint(vertex1.Position),
-                        brushTransform.TransformPoint(vertex2.Position),
-                        brushTransform.TransformPoint(vertex3.Position));
+                    Plane plane = new Plane(brushTransform.TransformPoint(vertex1.position),
+                        brushTransform.TransformPoint(vertex2.position),
+                        brushTransform.TransformPoint(vertex3.position));
 
                     float rayDistance;
 
@@ -404,9 +404,9 @@ namespace Sabresaurus.SabreCSG
 				Vertex vertex3;
 				// Get the three non-colinear vertices which will give us a valid plane
 				SurfaceUtility.GetPrimaryPolygonDescribers(currentPolygon, out vertex1, out vertex2, out vertex3);
-				Plane plane = new Plane(brushTransform.TransformPoint(vertex1.Position), 
-					brushTransform.TransformPoint(vertex2.Position), 
-					brushTransform.TransformPoint(vertex3.Position));
+				Plane plane = new Plane(brushTransform.TransformPoint(vertex1.position), 
+					brushTransform.TransformPoint(vertex2.position), 
+					brushTransform.TransformPoint(vertex3.position));
 
 				float distance;
 
@@ -475,9 +475,9 @@ namespace Sabresaurus.SabreCSG
 				Vertex vertex3;
 				// Get the three non-colinear vertices which will give us a valid plane
 				SurfaceUtility.GetPrimaryPolygonDescribers(currentPolygon, out vertex1, out vertex2, out vertex3);
-				Plane plane = new Plane(brushTransform.TransformPoint(vertex1.Position), 
-					brushTransform.TransformPoint(vertex2.Position), 
-					brushTransform.TransformPoint(vertex3.Position));
+				Plane plane = new Plane(brushTransform.TransformPoint(vertex1.position), 
+					brushTransform.TransformPoint(vertex2.position), 
+					brushTransform.TransformPoint(vertex3.position));
 
 				// Rotation will be around this axis
 				Vector3 rotationAxis = plane.normal;
@@ -770,8 +770,8 @@ namespace Sabresaurus.SabreCSG
 
 						Brush brush = csgModel.FindBrushFromPolygon(sourceTargetPolygon);
 
-						Vector3 edge1Vector = (matchedEdge1.Vertex2.Position - matchedEdge1.Vertex1.Position).normalized;
-						Vector3 sourcePosition = matchedEdge1.Vertex1.Position - Vector3.Cross(edge1Vector, chosenTemplatePolygon.Plane.normal);
+						Vector3 edge1Vector = (matchedEdge1.Vertex2.position - matchedEdge1.Vertex1.position).normalized;
+						Vector3 sourcePosition = matchedEdge1.Vertex1.position - Vector3.Cross(edge1Vector, chosenTemplatePolygon.Plane.normal);
 //						VisualDebug.AddPoint(sourcePosition);
 						Vector2 sourceUV = GeometryHelper.GetUVForPosition(chosenTemplatePolygon, sourcePosition);
 
@@ -786,14 +786,14 @@ namespace Sabresaurus.SabreCSG
 							&& MathHelper.PlaneEqualsLooser(chosenTemplatePolygon.Plane, chosenTargetPolygon.Plane))
 						{
 							// Special logic for handling two coplanar triangles
-							targetPosition1 = chosenTargetPolygon.Vertices[0].Position;
-							targetPosition2 = chosenTargetPolygon.Vertices[1].Position;
-							targetPosition3 = chosenTargetPolygon.Vertices[2].Position;
+							targetPosition1 = chosenTargetPolygon.Vertices[0].position;
+							targetPosition2 = chosenTargetPolygon.Vertices[1].position;
+							targetPosition3 = chosenTargetPolygon.Vertices[2].position;
 
 
-							targetUV1 = chosenTemplatePolygon.Vertices[0].UV;
-							targetUV2 = chosenTemplatePolygon.Vertices[1].UV;
-							targetUV3 = chosenTemplatePolygon.Vertices[2].UV;
+							targetUV1 = chosenTemplatePolygon.Vertices[0].uv;
+							targetUV2 = chosenTemplatePolygon.Vertices[1].uv;
+							targetUV3 = chosenTemplatePolygon.Vertices[2].uv;
 
 							Vector2 uvDelta = targetUV1-targetUV2;
 							targetUV1 += uvDelta;
@@ -802,13 +802,13 @@ namespace Sabresaurus.SabreCSG
 						}
 						else
 						{
-							targetPosition1 = matchedEdge1.Vertex1.Position;
-							targetPosition2 = matchedEdge1.Vertex1.Position + (matchedEdge1.Vertex2.Position-matchedEdge1.Vertex1.Position);
-							targetPosition3 = matchedEdge1.Vertex1.Position - Vector3.Cross(edge1Vector, chosenTargetPolygon.Plane.normal);
+							targetPosition1 = matchedEdge1.Vertex1.position;
+							targetPosition2 = matchedEdge1.Vertex1.position + (matchedEdge1.Vertex2.position-matchedEdge1.Vertex1.position);
+							targetPosition3 = matchedEdge1.Vertex1.position - Vector3.Cross(edge1Vector, chosenTargetPolygon.Plane.normal);
 
 
-							targetUV1 = matchedEdge1.Vertex1.UV;
-							targetUV2 = matchedEdge1.Vertex2.UV;
+							targetUV1 = matchedEdge1.Vertex1.uv;
+							targetUV2 = matchedEdge1.Vertex2.uv;
 							targetUV3 = sourceUV;
 						}
 						bool flipY = false;
@@ -818,8 +818,8 @@ namespace Sabresaurus.SabreCSG
 						// Flip Y if there's been a 90 degree angle change
 						if(angleBetweenFaces >= 89.99f)
 						{
-							if(matchedEdge1.Vertex1.UV.y.EqualsWithEpsilon(1)
-								&& matchedEdge1.Vertex2.UV.y.EqualsWithEpsilon(1))
+							if(matchedEdge1.Vertex1.uv.y.EqualsWithEpsilon(1)
+								&& matchedEdge1.Vertex2.uv.y.EqualsWithEpsilon(1))
 							{
 								flipY = true;
 							}
@@ -828,7 +828,7 @@ namespace Sabresaurus.SabreCSG
 						// Update the source polygons
 						for (int i = 0; i < sourceTargetPolygon.Vertices.Length; i++) 
 						{
-							Vector3 inputPosition = sourceTargetPolygon.Vertices[i].Position;
+							Vector3 inputPosition = sourceTargetPolygon.Vertices[i].position;
 							inputPosition = brush.transform.TransformPoint(inputPosition);
 							Vector2 newUV = GeometryHelper.GetUVForPosition(targetPosition1,
 								targetPosition2,
@@ -841,7 +841,7 @@ namespace Sabresaurus.SabreCSG
 							{
 								newUV.y = 1 - newUV.y;
 							}
-							sourceTargetPolygon.Vertices[i].UV = newUV;
+							sourceTargetPolygon.Vertices[i].uv = newUV;
 						}
 
 						// Update the cached built polygons, so other operations like Align still work
@@ -850,7 +850,7 @@ namespace Sabresaurus.SabreCSG
 							Polygon builtPolygon = targetBuiltPolygons[builtPolygonIndex];
 							for (int vertexIndex = 0; vertexIndex < builtPolygon.Vertices.Length; vertexIndex++) 
 							{
-								Vector3 position = builtPolygon.Vertices[vertexIndex].Position;
+								Vector3 position = builtPolygon.Vertices[vertexIndex].position;
 
 								Vector2 newUV = GeometryHelper.GetUVForPosition(targetPosition1,
 									targetPosition2,
@@ -863,7 +863,7 @@ namespace Sabresaurus.SabreCSG
 								{
 									newUV.y = 1 - newUV.y;
 								}
-								builtPolygon.Vertices[vertexIndex].UV = newUV;
+								builtPolygon.Vertices[vertexIndex].uv = newUV;
 							}
 						}
 
@@ -922,8 +922,8 @@ namespace Sabresaurus.SabreCSG
 
 		float FindAngle(Vertex vertex1, Vertex vertex2, Vertex vertex3, Plane polygonPlane)
 		{
-			Vector3 vector1 = vertex1.Position - vertex2.Position;
-			Vector3 vector2 = vertex1.Position - vertex3.Position;
+			Vector3 vector1 = vertex1.position - vertex2.position;
+			Vector3 vector2 = vertex1.position - vertex3.position;
 			Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(polygonPlane.normal));
 			vector1 = cancellingRotation * vector1;
 			vector2 = cancellingRotation * vector2;
@@ -1001,7 +1001,7 @@ namespace Sabresaurus.SabreCSG
 
 				float radius = rotationDiameter * .5f;
 
-				Vector3 initialRotationDirection = 5 * (brushTransform.TransformPoint(currentPolygon.Vertices[1].Position) - brushTransform.TransformPoint(currentPolygon.Vertices[1].Position)).normalized;
+				Vector3 initialRotationDirection = 5 * (brushTransform.TransformPoint(currentPolygon.Vertices[1].position) - brushTransform.TransformPoint(currentPolygon.Vertices[1].position)).normalized;
 
 				// Draw the actual rotation gizmo
 				SabreGraphics.DrawRotationCircle(worldCenterPoint, normal, radius, initialRotationDirection);
@@ -1157,7 +1157,7 @@ namespace Sabresaurus.SabreCSG
 			for (int vertexIndex = 0; vertexIndex < polygon.Vertices.Length; vertexIndex++) 
 			{
 				Vertex vertex = polygon.Vertices[vertexIndex];
-				vertex.UV = transformationMethod(vertex.UV, transformData);
+				vertex.uv = transformationMethod(vertex.uv, transformData);
 //				polygon.Vertices[vertexIndex].UV = transformationMethod(polygon.Vertices[vertexIndex].UV, transformData);
 			}
 
@@ -1168,7 +1168,7 @@ namespace Sabresaurus.SabreCSG
 				Polygon builtPolygon = builtPolygons[polygonIndex];
 				for (int vertexIndex = 0; vertexIndex < builtPolygon.Vertices.Length; vertexIndex++) 
 				{
-					builtPolygon.Vertices[vertexIndex].UV = transformationMethod(builtPolygon.Vertices[vertexIndex].UV, transformData);
+					builtPolygon.Vertices[vertexIndex].uv = transformationMethod(builtPolygon.Vertices[vertexIndex].uv, transformData);
 				}
 			}
 
@@ -1209,9 +1209,9 @@ namespace Sabresaurus.SabreCSG
 				
 				Vector2 centerUV = polygon.GetCenterUV();
 				
-				Vector2 uvDelta1 = (polygon.Vertices[2].UV - polygon.Vertices[1].UV).normalized;
+				Vector2 uvDelta1 = (polygon.Vertices[2].uv - polygon.Vertices[1].uv).normalized;
 				// Find the UV delta along an adjacent edge too (so we can detect flipping)
-				Vector2 uvDelta2 = (polygon.Vertices[0].UV - polygon.Vertices[1].UV).normalized;
+				Vector2 uvDelta2 = (polygon.Vertices[0].uv - polygon.Vertices[1].uv).normalized;
 				
 				Vector3 uvNormal = Vector3.Cross(uvDelta1,uvDelta2).normalized;
 				
@@ -1270,7 +1270,7 @@ namespace Sabresaurus.SabreCSG
 					}
 				}
 				lastMaterial = material;
-				lastColor = selectedSourcePolygons[0].Vertices[0].Color;
+				lastColor = selectedSourcePolygons[0].Vertices[0].color;
 			}
 
 			if(material == null)
@@ -1590,7 +1590,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			if(selectedSourcePolygons.Count > 0)
 			{
-				return selectedSourcePolygons[0].Vertices[0].Color;
+				return selectedSourcePolygons[0].Vertices[0].color;
 			}
 			else
 			{
@@ -2198,29 +2198,29 @@ namespace Sabresaurus.SabreCSG
 						{
 							Vertex testVertex = builtPolygons[builtIndex].Vertices[i];
 
-							float dotCurrent = Vector3.Dot(northernVertex.Position-polygonCenterWorld, worldVectorNorth);
-							float dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, worldVectorNorth);
+							float dotCurrent = Vector3.Dot(northernVertex.position-polygonCenterWorld, worldVectorNorth);
+							float dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, worldVectorNorth);
 							if(dotTest > dotCurrent)
 							{
 								northernVertex = testVertex;
 							}
 
-							dotCurrent = Vector3.Dot(southernVertex.Position-polygonCenterWorld, -worldVectorNorth);
-							dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, -worldVectorNorth);
+							dotCurrent = Vector3.Dot(southernVertex.position-polygonCenterWorld, -worldVectorNorth);
+							dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, -worldVectorNorth);
 							if(dotTest > dotCurrent)
 							{
 								southernVertex = testVertex;
 							}
 
-							dotCurrent = Vector3.Dot(easternVertex.Position-polygonCenterWorld, worldVectorEast);
-							dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, worldVectorEast);
+							dotCurrent = Vector3.Dot(easternVertex.position-polygonCenterWorld, worldVectorEast);
+							dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, worldVectorEast);
 							if(dotTest > dotCurrent)
 							{
 								easternVertex = testVertex;
 							}
 
-							dotCurrent = Vector3.Dot(westernVertex.Position-polygonCenterWorld, -worldVectorEast);
-							dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, -worldVectorEast);
+							dotCurrent = Vector3.Dot(westernVertex.position-polygonCenterWorld, -worldVectorEast);
+							dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, -worldVectorEast);
 							if(dotTest > dotCurrent)
 							{
 								westernVertex = testVertex;
@@ -2228,16 +2228,16 @@ namespace Sabresaurus.SabreCSG
 						}
 					}
 
-					float northernDistance = Vector3.Dot(northernVertex.Position - polygonCenterWorld, worldVectorNorth);
-					float southernDistance = Vector3.Dot(southernVertex.Position - polygonCenterWorld, worldVectorNorth);
+					float northernDistance = Vector3.Dot(northernVertex.position - polygonCenterWorld, worldVectorNorth);
+					float southernDistance = Vector3.Dot(southernVertex.position - polygonCenterWorld, worldVectorNorth);
 
-					float easternDistance = Vector3.Dot(easternVertex.Position - polygonCenterWorld, worldVectorEast);
-					float westernDistance = Vector3.Dot(westernVertex.Position - polygonCenterWorld, worldVectorEast);
+					float easternDistance = Vector3.Dot(easternVertex.position - polygonCenterWorld, worldVectorEast);
+					float westernDistance = Vector3.Dot(westernVertex.position - polygonCenterWorld, worldVectorEast);
 
 					// Update the source polygons
 					for (int i = 0; i < polygon.Vertices.Length; i++) 
 					{
-						Vector3 localPosition = polygon.Vertices[i].Position;
+						Vector3 localPosition = polygon.Vertices[i].position;
 						Vector3 worldPosition = brushTransform.TransformPoint(localPosition);
 
 						float thisNorthDistance = Vector3.Dot(worldPosition - polygonCenterWorld, worldVectorNorth);
@@ -2246,7 +2246,7 @@ namespace Sabresaurus.SabreCSG
 						Vector2 uv = new Vector2(MathHelper.InverseLerpNoClamp(westernDistance, easternDistance, thisEastDistance),
 							MathHelper.InverseLerpNoClamp(southernDistance, northernDistance, thisNorthDistance));
 						
-						polygon.Vertices[i].UV = uv;
+						polygon.Vertices[i].uv = uv;
 					}
 
 					// Update the built polygons in case we need to use them for something else
@@ -2255,7 +2255,7 @@ namespace Sabresaurus.SabreCSG
 						Polygon builtPolygon = builtPolygons[builtPolygonIndex];
 						for (int vertexIndex = 0; vertexIndex < builtPolygon.Vertices.Length; vertexIndex++) 
 						{
-							Vector3 worldPosition = builtPolygon.Vertices[vertexIndex].Position;
+							Vector3 worldPosition = builtPolygon.Vertices[vertexIndex].position;
 
 							float thisNorthDistance = Vector3.Dot(worldPosition - polygonCenterWorld, worldVectorNorth);
 							float thisEastDistance = Vector3.Dot(worldPosition - polygonCenterWorld, worldVectorEast);
@@ -2263,7 +2263,7 @@ namespace Sabresaurus.SabreCSG
 							Vector2 uv = new Vector2(MathHelper.InverseLerpNoClamp(westernDistance, easternDistance, thisEastDistance),
 								MathHelper.InverseLerpNoClamp(southernDistance, northernDistance, thisNorthDistance));
 
-							builtPolygon.Vertices[vertexIndex].UV = uv;
+							builtPolygon.Vertices[vertexIndex].uv = uv;
 						}
 					}
 
@@ -2320,14 +2320,14 @@ namespace Sabresaurus.SabreCSG
 				// Sets the UV at each point to the position on the plane
 				for (int i = 0; i < polygon.Vertices.Length; i++) 
 				{
-					Vector3 position = polygon.Vertices[i].Position;
+					Vector3 position = polygon.Vertices[i].position;
 					if(useWorldSpace)
 					{
 						position = brushTransform.TransformPoint(position);
 					}
 
 					Vector2 uv = (cancellingRotation * position) * 0.5f;
-					polygon.Vertices[i].UV = uv;
+					polygon.Vertices[i].uv = uv;
 				}
 
 
@@ -2338,7 +2338,7 @@ namespace Sabresaurus.SabreCSG
 					Polygon builtPolygon = builtPolygons[builtPolygonIndex];
 					for (int vertexIndex = 0; vertexIndex < builtPolygon.Vertices.Length; vertexIndex++) 
 					{
-						Vector3 position = builtPolygon.Vertices[vertexIndex].Position;
+						Vector3 position = builtPolygon.Vertices[vertexIndex].position;
 
 						if(!useWorldSpace)
 						{
@@ -2346,7 +2346,7 @@ namespace Sabresaurus.SabreCSG
 						}
 
 						Vector2 uv = (cancellingRotation * position) * 0.5f;
-						builtPolygon.Vertices[vertexIndex].UV = uv;
+						builtPolygon.Vertices[vertexIndex].uv = uv;
 					}
 				}
 
@@ -2418,11 +2418,11 @@ namespace Sabresaurus.SabreCSG
 				// Sets the UV at each point to the position on the plane
 				for (int i = 0; i < polygon.Vertices.Length; i++) 
 				{
-					Vector3 position = polygon.Vertices[i].Position;
+					Vector3 position = polygon.Vertices[i].position;
 					position = brushTransform.TransformPoint(position);
 
 					Vector2 uv = (cancellingRotation * position) * 0.5f;
-					polygon.Vertices[i].UV = uv;
+					polygon.Vertices[i].uv = uv;
 				}
 
 
@@ -2433,10 +2433,10 @@ namespace Sabresaurus.SabreCSG
 					Polygon builtPolygon = builtPolygons[builtPolygonIndex];
 					for (int vertexIndex = 0; vertexIndex < builtPolygon.Vertices.Length; vertexIndex++) 
 					{
-						Vector3 position = builtPolygon.Vertices[vertexIndex].Position;
+						Vector3 position = builtPolygon.Vertices[vertexIndex].position;
 
 						Vector2 uv = (cancellingRotation * position) * 0.5f;
-						builtPolygon.Vertices[vertexIndex].UV = uv;
+						builtPolygon.Vertices[vertexIndex].uv = uv;
 					}
 				}
 
@@ -2502,29 +2502,29 @@ namespace Sabresaurus.SabreCSG
 					{
 						Vertex testVertex = builtPolygons[builtIndex].Vertices[i];
 
-						float dotCurrent = Vector3.Dot(northernVertex.Position-polygonCenterWorld, worldVectorNorth);
-						float dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, worldVectorNorth);
+						float dotCurrent = Vector3.Dot(northernVertex.position-polygonCenterWorld, worldVectorNorth);
+						float dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, worldVectorNorth);
 						if(dotTest > dotCurrent)
 						{
 							northernVertex = testVertex;
 						}
 
-						dotCurrent = Vector3.Dot(southernVertex.Position-polygonCenterWorld, -worldVectorNorth);
-						dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, -worldVectorNorth);
+						dotCurrent = Vector3.Dot(southernVertex.position-polygonCenterWorld, -worldVectorNorth);
+						dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, -worldVectorNorth);
 						if(dotTest > dotCurrent)
 						{
 							southernVertex = testVertex;
 						}
 
-						dotCurrent = Vector3.Dot(easternVertex.Position-polygonCenterWorld, worldVectorEast);
-						dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, worldVectorEast);
+						dotCurrent = Vector3.Dot(easternVertex.position-polygonCenterWorld, worldVectorEast);
+						dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, worldVectorEast);
 						if(dotTest > dotCurrent)
 						{
 							easternVertex = testVertex;
 						}
 
-						dotCurrent = Vector3.Dot(westernVertex.Position-polygonCenterWorld, -worldVectorEast);
-						dotTest = Vector3.Dot(testVertex.Position-polygonCenterWorld, -worldVectorEast);
+						dotCurrent = Vector3.Dot(westernVertex.position-polygonCenterWorld, -worldVectorEast);
+						dotTest = Vector3.Dot(testVertex.position-polygonCenterWorld, -worldVectorEast);
 						if(dotTest > dotCurrent)
 						{
 							westernVertex = testVertex;
@@ -2536,24 +2536,24 @@ namespace Sabresaurus.SabreCSG
 
 				if(direction == AlignDirection.Top)
 				{
-					offset.y = 1-northernVertex.UV.y;
+					offset.y = 1-northernVertex.uv.y;
 				}
 				else if(direction == AlignDirection.Bottom)
 				{
-					offset.y = 0-southernVertex.UV.y;
+					offset.y = 0-southernVertex.uv.y;
 				}
 				else if(direction == AlignDirection.Left)
 				{
-					offset.x = 0-westernVertex.UV.x;
+					offset.x = 0-westernVertex.uv.x;
 				}
 				else if(direction == AlignDirection.Right)
 				{
-					offset.x = 1-easternVertex.UV.x;
+					offset.x = 1-easternVertex.uv.x;
 				}
 				else if(direction == AlignDirection.Center)
 				{
-					offset.x = (0-westernVertex.UV.x + 1-easternVertex.UV.x) * .5f;
-					offset.y = (1-northernVertex.UV.y + 0-southernVertex.UV.y) * .5f;
+					offset.x = (0-westernVertex.uv.x + 1-easternVertex.uv.x) * .5f;
+					offset.y = (1-northernVertex.uv.y + 0-southernVertex.uv.y) * .5f;
 				}
 
 				TransformUVs(polygon, UVUtility.TranslateUV, new UVUtility.TransformData(offset,0), true);
@@ -2850,7 +2850,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			for (int j = 0; j < polygon.Vertices.Length; j++) 
 			{
-				polygon.Vertices[j].Color = color;
+				polygon.Vertices[j].color = color;
 
 				PolygonEntry entry = csgModel.GetVisualPolygonEntry(polygon.UniqueIndex);
 				if(entry != null)

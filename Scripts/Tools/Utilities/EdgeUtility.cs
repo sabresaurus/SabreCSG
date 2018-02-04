@@ -136,11 +136,11 @@ namespace Sabresaurus.SabreCSG
 			List<Vertex> vertices = new List<Vertex>(polygon.Vertices);
 			for (int i = 0; i < polygon.Vertices.Length; i++) 
 			{
-				Vector3 position1 = polygon.Vertices[i].Position;
-				Vector3 position2 = polygon.Vertices[(i+1)%polygon.Vertices.Length].Position;
+				Vector3 position1 = polygon.Vertices[i].position;
+				Vector3 position2 = polygon.Vertices[(i+1)%polygon.Vertices.Length].position;
 
-				if((edge.Vertex1.Position.EqualsWithEpsilon(position1) && edge.Vertex2.Position.EqualsWithEpsilon(position2))
-					|| (edge.Vertex1.Position.EqualsWithEpsilon(position2) && edge.Vertex2.Position.EqualsWithEpsilon(position1)))
+				if((edge.Vertex1.position.EqualsWithEpsilon(position1) && edge.Vertex2.position.EqualsWithEpsilon(position2))
+					|| (edge.Vertex1.position.EqualsWithEpsilon(position2) && edge.Vertex2.position.EqualsWithEpsilon(position1)))
 				{
 					newVertex = Vertex.Lerp(polygon.Vertices[i], polygon.Vertices[(i+1) % polygon.Vertices.Length], 0.5f);
 					vertices.Insert(i+1, newVertex);
@@ -206,8 +206,8 @@ namespace Sabresaurus.SabreCSG
 		{
 			// First of all determine if the two lines are collinear
 
-			Vector3 direction1 = edge1.Vertex2.Position - edge1.Vertex1.Position;
-			Vector3 direction2 = edge2.Vertex2.Position - edge2.Vertex1.Position;
+			Vector3 direction1 = edge1.Vertex2.position - edge1.Vertex1.position;
+			Vector3 direction2 = edge2.Vertex2.position - edge2.Vertex1.position;
 
 			Vector3 direction1Normalized = direction1.normalized;
 			Vector3 direction2Normalized = direction2.normalized;
@@ -237,7 +237,7 @@ namespace Sabresaurus.SabreCSG
 				Vector3 tangent = Vector3.Cross(normal, direction1);
 
 				// Take the offset from a point on each line
-				Vector3 offset = edge2.Vertex2.Position - edge1.Vertex1.Position;
+				Vector3 offset = edge2.Vertex2.position - edge1.Vertex1.position;
 
 				// Find the perpendicular distance between the lines along both normal and tangent directions
 				float normalDistance = Vector3.Dot(normal, offset);
@@ -252,57 +252,57 @@ namespace Sabresaurus.SabreCSG
 
 					float signedDistance = 0;
 
-					Plane edge1Plane1 = new Plane(direction1Normalized, edge1.Vertex2.Position);
+					Plane edge1Plane1 = new Plane(direction1Normalized, edge1.Vertex2.position);
 
-					signedDistance = edge1Plane1.GetDistanceToPoint(edge2.Vertex1.Position);
+					signedDistance = edge1Plane1.GetDistanceToPoint(edge2.Vertex1.position);
 					if(signedDistance >= 0)
 					{
 						return true;
 					}
 
-					signedDistance = edge1Plane1.GetDistanceToPoint(edge2.Vertex2.Position);
+					signedDistance = edge1Plane1.GetDistanceToPoint(edge2.Vertex2.position);
 					if(signedDistance >= 0)
 					{
 						return true;
 					}
 
-					Plane edge1Plane2 = new Plane(-direction1Normalized, edge1.Vertex1.Position);
+					Plane edge1Plane2 = new Plane(-direction1Normalized, edge1.Vertex1.position);
 
-					signedDistance = edge1Plane2.GetDistanceToPoint(edge2.Vertex1.Position);
+					signedDistance = edge1Plane2.GetDistanceToPoint(edge2.Vertex1.position);
 					if(signedDistance <= 0)
 					{
 						return true;
 					}
 
-					signedDistance = edge1Plane2.GetDistanceToPoint(edge2.Vertex2.Position);
+					signedDistance = edge1Plane2.GetDistanceToPoint(edge2.Vertex2.position);
 					if(signedDistance <= 0)
 					{
 						return true;
 					}
 
-					Plane edge2Plane1 = new Plane(direction2Normalized, edge2.Vertex2.Position);
+					Plane edge2Plane1 = new Plane(direction2Normalized, edge2.Vertex2.position);
 
-					signedDistance = edge2Plane1.GetDistanceToPoint(edge1.Vertex1.Position);
+					signedDistance = edge2Plane1.GetDistanceToPoint(edge1.Vertex1.position);
 					if(signedDistance <= 0)
 					{
 						return true;
 					}
 
-					signedDistance = edge2Plane1.GetDistanceToPoint(edge1.Vertex2.Position);
+					signedDistance = edge2Plane1.GetDistanceToPoint(edge1.Vertex2.position);
 					if(signedDistance <= 0)
 					{
 						return true;
 					}
 
-					Plane edge2Plane2 = new Plane(-direction2Normalized, edge2.Vertex1.Position);
+					Plane edge2Plane2 = new Plane(-direction2Normalized, edge2.Vertex1.position);
 
-					signedDistance = edge2Plane2.GetDistanceToPoint(edge1.Vertex1.Position);
+					signedDistance = edge2Plane2.GetDistanceToPoint(edge1.Vertex1.position);
 					if(signedDistance >= 0)
 					{
 						return true;
 					}
 
-					signedDistance = edge2Plane2.GetDistanceToPoint(edge1.Vertex2.Position);
+					signedDistance = edge2Plane2.GetDistanceToPoint(edge1.Vertex2.position);
 					if(signedDistance >= 0)
 					{
 						return true;

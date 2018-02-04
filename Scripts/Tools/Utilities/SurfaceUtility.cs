@@ -31,7 +31,7 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < polygon.Vertices.Length; i++) 
 			{
 				Vertex vertex = polygon.Vertices[i];
-				vertex.Normal = polygon.Plane.normal;
+				vertex.normal = polygon.Plane.normal;
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace Sabresaurus.SabreCSG
 						for (int k = 0; k < otherPolygon.Vertices.Length; k++) 
 						{
 							Vertex otherVertex = otherPolygon.Vertices[k];
-							if(otherVertex.Position == vertex.Position)
+							if(otherVertex.position == vertex.position)
 							{
 								if(Vector3.Angle(sourceNormal, otherPolygon.Plane.normal) <= smoothingAngle)
 								{
@@ -73,7 +73,7 @@ namespace Sabresaurus.SabreCSG
 					}
 				}
 
-				vertex.Normal = newNormal * (1f / totalNormalCount);
+				vertex.normal = newNormal * (1f / totalNormalCount);
 			} 
 		}
 
@@ -105,9 +105,9 @@ namespace Sabresaurus.SabreCSG
 
 			for (int i = 0; i < vertices.Length; i++) 
 			{
-				vertices[i].Position = cancellingRotation * vertices[i].Position;
+				vertices[i].position = cancellingRotation * vertices[i].position;
 
-				vertices[i].Normal = cancellingRotation * vertices[i].Normal;
+				vertices[i].normal = cancellingRotation * vertices[i].normal;
 			}
 
 			basePolygon.SetVertices(vertices);
@@ -122,7 +122,7 @@ namespace Sabresaurus.SabreCSG
 			vertices = oppositePolygon.Vertices;
 			for (int i = 0; i < vertices.Length; i++) 
 			{
-				vertices[i].Position += normal * extrusionDistance;
+				vertices[i].position += normal * extrusionDistance;
 //				vertices[i].UV.x *= -1; // Flip UVs
 			}
 			oppositePolygon.SetVertices(vertices);
@@ -137,32 +137,32 @@ namespace Sabresaurus.SabreCSG
 
 				// Create new UVs for the sides, otherwise we'll get distortion
 
-				float sourceDistance = Vector3.Distance(vertex1.Position, vertex2.Position);
-				float uvDistance = Vector2.Distance(vertex1.UV, vertex2.UV);
+				float sourceDistance = Vector3.Distance(vertex1.position, vertex2.position);
+				float uvDistance = Vector2.Distance(vertex1.uv, vertex2.uv);
 
 				float uvScale = sourceDistance / uvDistance;
 
-				vertex1.UV = Vector2.zero;
+				vertex1.uv = Vector2.zero;
 				if(flipped)
 				{
-					vertex2.UV = new Vector2(-sourceDistance / uvScale,0);
+					vertex2.uv = new Vector2(-sourceDistance / uvScale,0);
 				}
 				else
 				{
-					vertex2.UV = new Vector2(sourceDistance / uvScale,0);
+					vertex2.uv = new Vector2(sourceDistance / uvScale,0);
 				}
 
-				Vector2 uvDelta = vertex2.UV - vertex1.UV;
+				Vector2 uvDelta = vertex2.uv - vertex1.uv;
 
 				Vector2 rotatedUVDelta = uvDelta.Rotate(90) * (extrusionDistance / sourceDistance);
 
 				Vertex vertex3 = vertex1.DeepCopy();
-				vertex3.Position += normal * extrusionDistance;
-				vertex3.UV += rotatedUVDelta;
+				vertex3.position += normal * extrusionDistance;
+				vertex3.uv += rotatedUVDelta;
 
 				Vertex vertex4 = vertex2.DeepCopy();
-				vertex4.Position += normal * extrusionDistance;
-				vertex4.UV += rotatedUVDelta;
+				vertex4.position += normal * extrusionDistance;
+				vertex4.uv += rotatedUVDelta;
 
 				Vertex[] newVertices = new Vertex[] { vertex1, vertex2, vertex4, vertex3 };
 
@@ -193,9 +193,9 @@ namespace Sabresaurus.SabreCSG
 			int vertexIndex2 = 1;
 			int vertexIndex3 = 2;
 
-			Vector3 pos1 = polygon.Vertices[vertexIndex1].Position;
-			Vector3 pos2 = polygon.Vertices[vertexIndex2].Position;
-			Vector3 pos3 = polygon.Vertices[vertexIndex3].Position;
+			Vector3 pos1 = polygon.Vertices[vertexIndex1].position;
+			Vector3 pos2 = polygon.Vertices[vertexIndex2].position;
+			Vector3 pos3 = polygon.Vertices[vertexIndex3].position;
 
 			Plane testPlane = new Plane(pos1, pos2, pos3);
 
@@ -205,7 +205,7 @@ namespace Sabresaurus.SabreCSG
 				// Walk through the remaining vertices until we find one that produces a valid normal, or there are no further vertices
 				for (vertexIndex3 = 3; vertexIndex3 < polygon.Vertices.Length; vertexIndex3++) 
 				{
-					pos3 = polygon.Vertices[vertexIndex3].Position;
+					pos3 = polygon.Vertices[vertexIndex3].position;
 
 					testPlane = new Plane(pos1, pos2, pos3);
 
@@ -238,13 +238,13 @@ namespace Sabresaurus.SabreCSG
 			GetPrimaryPolygonDescribers(polygon, out vertex1, out vertex2, out vertex3);
 
 			// Take 3 positions and their corresponding UVs
-			Vector3 pos1 = brushTransform.TransformPoint(vertex1.Position);
-			Vector3 pos2 = brushTransform.TransformPoint(vertex2.Position);
-			Vector3 pos3 = brushTransform.TransformPoint(vertex3.Position);
+			Vector3 pos1 = brushTransform.TransformPoint(vertex1.position);
+			Vector3 pos2 = brushTransform.TransformPoint(vertex2.position);
+			Vector3 pos3 = brushTransform.TransformPoint(vertex3.position);
 
-			Vector2 uv1 = vertex1.UV;
-			Vector2 uv2 = vertex2.UV;
-			Vector2 uv3 = vertex3.UV;
+			Vector2 uv1 = vertex1.uv;
+			Vector2 uv2 = vertex2.uv;
+			Vector2 uv3 = vertex3.uv;
 
 			// Construct a matrix to map to the triangle's UV space
 			Matrix2x2 uvMatrix = new Matrix2x2()
@@ -294,12 +294,12 @@ namespace Sabresaurus.SabreCSG
 			// Get three vertices which will reliably give us good UV information (i.e. not collinear)
 			SurfaceUtility.GetPrimaryPolygonDescribers(polygon, out vertex1, out vertex2, out vertex3);
 
-			Vector2 newUV = GeometryHelper.GetUVForPosition(vertex1.Position,
-				vertex2.Position,
-				vertex3.Position,
-				vertex1.UV,
-				vertex2.UV,
-				vertex3.UV,
+			Vector2 newUV = GeometryHelper.GetUVForPosition(vertex1.position,
+				vertex2.position,
+				vertex3.position,
+				vertex1.uv,
+				vertex2.uv,
+				vertex3.uv,
 				polygon.GetCenterPoint());
 
 			return newUV;

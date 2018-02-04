@@ -48,12 +48,12 @@ namespace Sabresaurus.SabreCSG
 						Polygon polygon = polygons[i];
 						for (int z = 2; z < polygon.Vertices.Length; z++) 
 						{
-							Plane polygonPlane = new Plane(polygon.Vertices[0].Position, 
-								polygon.Vertices[z-1].Position, 
-								polygon.Vertices[z].Position);
+							Plane polygonPlane = new Plane(polygon.Vertices[0].position, 
+								polygon.Vertices[z-1].position, 
+								polygon.Vertices[z].position);
 
 
-							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].Position) + polygonPlane.distance;
+							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].position) + polygonPlane.distance;
 
 							if(dot > CONVEX_EPSILON)
 							{
@@ -63,12 +63,12 @@ namespace Sabresaurus.SabreCSG
 
 						for (int z = 0; z < polygon.Vertices.Length; z++) 
 						{
-							Plane polygonPlane = new Plane(polygon.Vertices[z].Position, 
-								polygon.Vertices[(z+1)%polygon.Vertices.Length].Position, 
-								polygon.Vertices[(z+2)%polygon.Vertices.Length].Position);
+							Plane polygonPlane = new Plane(polygon.Vertices[z].position, 
+								polygon.Vertices[(z+1)%polygon.Vertices.Length].position, 
+								polygon.Vertices[(z+2)%polygon.Vertices.Length].position);
 
 
-							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].Position) + polygonPlane.distance;
+							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].position) + polygonPlane.distance;
 
 							if(dot > CONVEX_EPSILON)
 							{
@@ -218,8 +218,8 @@ namespace Sabresaurus.SabreCSG
 				// Now find out if the point on the polygon plane is behind each polygon edge
 				for (int i = 0; i < polygon.Vertices.Length; i++) 
 				{
-					Vector3 point1 = polygon.Vertices[i].Position;
-					Vector3 point2 = polygon.Vertices[(i+1)%polygon.Vertices.Length].Position;
+					Vector3 point1 = polygon.Vertices[i].position;
+					Vector3 point2 = polygon.Vertices[(i+1)%polygon.Vertices.Length].position;
 
 					Vector3 edge = point2 - point1; // Direction from a vertex to the next
 					Vector3 polygonNormal = plane.normal;
@@ -269,7 +269,7 @@ namespace Sabresaurus.SabreCSG
 			{
 				for (int vertexIndex = 0; vertexIndex < polygons[polygonIndex].Vertices.Length; vertexIndex++) 
 				{
-					Vector3 point = polygons[polygonIndex].Vertices[vertexIndex].Position;
+					Vector3 point = polygons[polygonIndex].Vertices[vertexIndex].position;
 
 					float distance = testPlane.GetDistanceToPoint(point);
 
@@ -313,7 +313,7 @@ namespace Sabresaurus.SabreCSG
 			// Account for overlapping vertices
 			for (int i = vertexIndex1+1; i < polygon.Vertices.Length; i++) 
 			{
-				if(!polygon.Vertices[i].Position.EqualsWithEpsilon(polygon.Vertices[vertexIndex1].Position))
+				if(!polygon.Vertices[i].position.EqualsWithEpsilon(polygon.Vertices[vertexIndex1].position))
 				{
 					vertexIndex2 = i;
 					break;
@@ -322,7 +322,7 @@ namespace Sabresaurus.SabreCSG
 
 			for (int i = vertexIndex2+1; i < polygon.Vertices.Length; i++) 
 			{
-				if(!polygon.Vertices[i].Position.EqualsWithEpsilon(polygon.Vertices[vertexIndex2].Position))
+				if(!polygon.Vertices[i].position.EqualsWithEpsilon(polygon.Vertices[vertexIndex2].position))
 				{
 					vertexIndex3 = i;
 					break;
@@ -330,9 +330,9 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Now account for the fact that the picked three vertices might be collinear
-			Vector3 pos1 = polygon.Vertices[vertexIndex1].Position;
-			Vector3 pos2 = polygon.Vertices[vertexIndex2].Position;
-			Vector3 pos3 = polygon.Vertices[vertexIndex3].Position;
+			Vector3 pos1 = polygon.Vertices[vertexIndex1].position;
+			Vector3 pos2 = polygon.Vertices[vertexIndex2].position;
+			Vector3 pos3 = polygon.Vertices[vertexIndex3].position;
 
 			Plane plane = new Plane(pos1,pos2,pos3);
 			if(plane.normal == Vector3.zero)
@@ -341,7 +341,7 @@ namespace Sabresaurus.SabreCSG
 				{
 					vertexIndex3 = i;
 
-					pos3 = polygon.Vertices[vertexIndex3].Position;
+					pos3 = polygon.Vertices[vertexIndex3].position;
 
 					Plane tempPlane = new Plane(pos1,pos2,pos3);
 
@@ -357,9 +357,9 @@ namespace Sabresaurus.SabreCSG
 
 			Vector3 planePoint = MathHelper.ClosestPointOnPlane(newPosition, plane);
 
-			Vector2 uv1 = polygon.Vertices[vertexIndex1].UV;
-			Vector2 uv2 = polygon.Vertices[vertexIndex2].UV;
-			Vector2 uv3 = polygon.Vertices[vertexIndex3].UV;
+			Vector2 uv1 = polygon.Vertices[vertexIndex1].uv;
+			Vector2 uv2 = polygon.Vertices[vertexIndex2].uv;
+			Vector2 uv3 = polygon.Vertices[vertexIndex3].uv;
 
 			// calculate vectors from point f to vertices p1, p2 and p3:
 			Vector3 f1 = pos1-planePoint;
@@ -480,7 +480,7 @@ namespace Sabresaurus.SabreCSG
             {
                 for (int v = 0; v < polygons2[i2].Vertices.Length; v++)
                 {
-                    Vector3 point = polygons2[i2].Vertices[v].Position;
+                    Vector3 point = polygons2[i2].Vertices[v].position;
 
                     for (int i1 = 0; i1 < polygons1.Length; i1++)
                     {
@@ -504,7 +504,7 @@ namespace Sabresaurus.SabreCSG
             {
                 for (int v = 0; v < polygons2[i2].Vertices.Length; v++)
                 {
-                    Vector3 point = polygons2[i2].Vertices[v].Position;
+                    Vector3 point = polygons2[i2].Vertices[v].position;
 
                     for (int i1 = 0; i1 < polygons1.Length; i1++)
                     {
@@ -663,7 +663,7 @@ namespace Sabresaurus.SabreCSG
                     Vertex vertexStart = polygons1[polygonIndex].Vertices[vertexIndex];
                     Vertex vertexEnd = polygons1[polygonIndex].Vertices[(vertexIndex + 1) % vertexCount];
 
-                    if (PolyhedronIntersectsLine(polygons2, vertexStart.Position, vertexEnd.Position))
+                    if (PolyhedronIntersectsLine(polygons2, vertexStart.position, vertexEnd.position))
                     {
                         return true;
                     }
@@ -679,7 +679,7 @@ namespace Sabresaurus.SabreCSG
                     Vertex vertexStart = polygons2[polygonIndex].Vertices[vertexIndex];
                     Vertex vertexEnd = polygons2[polygonIndex].Vertices[(vertexIndex + 1) % vertexCount];
 
-                    if (PolyhedronIntersectsLine(polygons1, vertexStart.Position, vertexEnd.Position))
+                    if (PolyhedronIntersectsLine(polygons1, vertexStart.position, vertexEnd.position))
                     {
                         return true;
                     }
@@ -726,8 +726,8 @@ namespace Sabresaurus.SabreCSG
                 Plane plane = container.Plane;
                 for (int j = 0; j < container.Vertices.Length; j++)
                 {
-                    Vector3 point1 = container.Vertices[j].Position;
-                    Vector3 point2 = container.Vertices[(j + 1) % container.Vertices.Length].Position;
+                    Vector3 point1 = container.Vertices[j].position;
+                    Vector3 point2 = container.Vertices[(j + 1) % container.Vertices.Length].position;
 
                     Vector3 edge = point2 - point1; // Direction from a vertex to the next
                     Vector3 polygonNormal = plane.normal;
@@ -746,7 +746,7 @@ namespace Sabresaurus.SabreCSG
 
                     for (int i = 0; i < containee.Vertices.Length; i++)
                     {
-                        Vector3 point = containee.Vertices[i].Position;
+                        Vector3 point = containee.Vertices[i].position;
                         Vector3 pointToEdgeCentroid = edgeCenter - point;
 
                         // If the point is outside an edge this will return a negative value

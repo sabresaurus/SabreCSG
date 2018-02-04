@@ -54,7 +54,7 @@ namespace Sabresaurus.SabreCSG
 			// Position
 			for (int i = 0; i < positions.Count; i++)
 			{
-				if (positions[i] == vertex.Position)
+				if (positions[i] == vertex.position)
 				{
 					face.PositionIndex = i+1;
 				}
@@ -62,14 +62,14 @@ namespace Sabresaurus.SabreCSG
 
 			if(face.PositionIndex == 0)
 			{
-				positions.Add(vertex.Position);
+				positions.Add(vertex.position);
 				face.PositionIndex = positions.Count;
 			}
 
 			// UV
 			for (int i = 0; i < uvs.Count; i++)
 			{
-				if (uvs[i] == vertex.UV)
+				if (uvs[i] == vertex.uv)
 				{
 					face.UVIndex = i+1;
 				}
@@ -77,14 +77,14 @@ namespace Sabresaurus.SabreCSG
 			
 			if(face.UVIndex == 0)
 			{
-				uvs.Add(vertex.UV);
+				uvs.Add(vertex.uv);
 				face.UVIndex = uvs.Count;
 			}
 
 			// Normal
 			for (int i = 0; i < normals.Count; i++)
 			{
-				if (normals[i] == vertex.Normal)
+				if (normals[i] == vertex.normal)
 				{
 					face.NormalIndex = i+1;
 				}
@@ -92,7 +92,7 @@ namespace Sabresaurus.SabreCSG
 			
 			if(face.NormalIndex == 0)
 			{
-				normals.Add(vertex.Normal);
+				normals.Add(vertex.normal);
 				face.NormalIndex = normals.Count;
 			}
 

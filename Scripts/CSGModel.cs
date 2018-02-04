@@ -454,17 +454,17 @@ namespace Sabresaurus.SabreCSG
 
 							for (int j = 0; j < polygon.Vertices.Length; j++)
 							{
-								Vector3 position = brushTransform.TransformPoint(polygon.Vertices[j].Position);
+								Vector3 position = brushTransform.TransformPoint(polygon.Vertices[j].position);
 								GL.Vertex(position);
 
 								if (j < polygon.Vertices.Length - 1)
 								{
-									Vector3 position2 = brushTransform.TransformPoint(polygon.Vertices[j + 1].Position);
+									Vector3 position2 = brushTransform.TransformPoint(polygon.Vertices[j + 1].position);
 									GL.Vertex(position2);
 								}
 								else
 								{
-									Vector3 position2 = brushTransform.TransformPoint(polygon.Vertices[0].Position);
+									Vector3 position2 = brushTransform.TransformPoint(polygon.Vertices[0].position);
 									GL.Vertex(position2);
 								}
 							}

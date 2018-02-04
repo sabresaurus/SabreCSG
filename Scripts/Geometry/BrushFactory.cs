@@ -265,9 +265,9 @@ namespace Sabresaurus.SabreCSG
 					Vertex b = Vertex.Lerp(polygons[j].Vertices[1], polygons[j].Vertices[2], 0.5f);
 					Vertex c = Vertex.Lerp(polygons[j].Vertices[2], polygons[j].Vertices[0], 0.5f);
 
-					a.Position = a.Position.normalized;
-					b.Position = b.Position.normalized;
-					c.Position = c.Position.normalized;
+					a.position = a.position.normalized;
+					b.position = b.position.normalized;
+					c.position = c.position.normalized;
 
 					newPolygons[j*4+0] = new Polygon(new Vertex[] { polygons[j].Vertices[0].DeepCopy(), a.DeepCopy(), c.DeepCopy()}, null, false, false);
 					newPolygons[j*4+1] = new Polygon(new Vertex[] { polygons[j].Vertices[1].DeepCopy(), b.DeepCopy(), a.DeepCopy()}, null, false, false);
@@ -283,8 +283,8 @@ namespace Sabresaurus.SabreCSG
 
                 for (int j = 0; j < polygons[i].Vertices.Length; j++)
                 {
-                    Vector3 normal = polygons[i].Vertices[j].Position.normalized;
-                    polygons[i].Vertices[j].Normal = normal;
+                    Vector3 normal = polygons[i].Vertices[j].position.normalized;
+                    polygons[i].Vertices[j].normal = normal;
                     float piReciprocal = 1f / Mathf.PI;
                     float u = 0.5f - 0.5f * Mathf.Atan2(normal.x, -normal.z) * piReciprocal;
                     float v = 1f - Mathf.Acos(normal.y) * piReciprocal;
@@ -308,7 +308,7 @@ namespace Sabresaurus.SabreCSG
                     }
 
                     //Debug.Log(u);
-                    polygons[i].Vertices[j].UV = new Vector2(u, v);
+                    polygons[i].Vertices[j].uv = new Vector2(u, v);
 
                     //const float kOneOverPi = 1.0 / 3.14159265;
                     //float u = 0.5 - 0.5 * atan(N.x, -N.z) * kOneOverPi;
@@ -319,12 +319,12 @@ namespace Sabresaurus.SabreCSG
                 {
                     for (int j = 0; j < polygons[i].Vertices.Length; j++)
                     {
-                        Vector2 uv = polygons[i].Vertices[j].UV;
+                        Vector2 uv = polygons[i].Vertices[j].uv;
                         if (uv.x < 0.5f)
                         {
                             uv.x += 1;
                         }
-                        polygons[i].Vertices[j].UV = uv;
+                        polygons[i].Vertices[j].uv = uv;
 
                     }
                 }
@@ -464,7 +464,7 @@ namespace Sabresaurus.SabreCSG
 
 					for (int d = 0; d < vertices.Length; d++)
 					{
-						vertices[d].UV = new Vector2(vertices[d].UV.y, 1 - vertices[d].UV.x);
+						vertices[d].uv = new Vector2(vertices[d].uv.y, 1 - vertices[d].uv.x);
 					}
 
 					polygons[i + j * lateralCount] = new Polygon(vertices, null, false, false);
@@ -661,9 +661,9 @@ namespace Sabresaurus.SabreCSG
 			// Create the relevant buffers from the vertex array
 			for (int i = 0; i < vertexList.Vertices.Count; i++)
 			{
-				vertices.Add(vertexList.Vertices[i].Position);
-				normals.Add(vertexList.Vertices[i].Normal);
-				uvs.Add(vertexList.Vertices[i].UV);
+				vertices.Add(vertexList.Vertices[i].position);
+				normals.Add(vertexList.Vertices[i].normal);
+				uvs.Add(vertexList.Vertices[i].uv);
 				//	                colors.Add(((SharedBrushData)indexer.Vertices[i].Shared).BrushTintColor);
 			}
 

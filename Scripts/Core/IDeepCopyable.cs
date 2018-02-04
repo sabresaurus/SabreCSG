@@ -4,9 +4,16 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
-	public interface IDeepCopyable<T>
+    /// <summary>Supports deep copying, which creates a new instance of a class with the same value as an existing instance.</summary>
+    /// <typeparam name="T">The class type.</typeparam>
+    public interface IDeepCopyable<T>
 	{
-		T DeepCopy();
+        /// <summary>
+        /// Creates a deep copy of the <typeparamref name="T"/>. Returns a new instance of a
+        /// <typeparamref name="T"/> with the same value as this instance.
+        /// </summary>
+        /// <returns>The newly created <typeparamref name="T"/> copy with the same values.</returns>
+        T DeepCopy();
 	}
 
 	public static class DeepCopyableExtensions

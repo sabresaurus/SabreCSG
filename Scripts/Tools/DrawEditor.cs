@@ -593,8 +593,8 @@ namespace Sabresaurus.SabreCSG
             {
                 for (int i = 0; i < sourcePolygon.Vertices.Length; i++)
                 {
-                    Vector2 newUV = GeometryHelper.GetUVForPosition(activePolygon, sourcePolygon.Vertices[i].Position);
-                    sourcePolygon.Vertices[i].UV = newUV;
+                    Vector2 newUV = GeometryHelper.GetUVForPosition(activePolygon, sourcePolygon.Vertices[i].position);
+                    sourcePolygon.Vertices[i].uv = newUV;
                 }
             }
 
@@ -610,9 +610,9 @@ namespace Sabresaurus.SabreCSG
 				// Need to flip the UVs across the U (X) direction
 				for (int i = 0; i < sourcePolygon.Vertices.Length; i++) 
 				{
-					Vector2 uv = sourcePolygon.Vertices[i].UV;
+					Vector2 uv = sourcePolygon.Vertices[i].uv;
 					uv.x = 1 - uv.x;
-					sourcePolygon.Vertices[i].UV = uv;
+					sourcePolygon.Vertices[i].uv = uv;
 				}
 			}
 

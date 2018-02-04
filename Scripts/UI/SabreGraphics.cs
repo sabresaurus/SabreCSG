@@ -336,11 +336,11 @@ namespace Sabresaurus.SabreCSG
 				Polygon polygon = polygons[j];
 				for (int i = 0; i < polygon.Vertices.Length - 1; i++)
 				{
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].Position));
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].Position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].position));
 				}
-				GL.Vertex(transform.TransformPoint(polygon.Vertices[polygon.Vertices.Length - 1].Position));
-				GL.Vertex(transform.TransformPoint(polygon.Vertices[0].Position));
+				GL.Vertex(transform.TransformPoint(polygon.Vertices[polygon.Vertices.Length - 1].position));
+				GL.Vertex(transform.TransformPoint(polygon.Vertices[0].position));
 			}
 			
 			GL.End();
@@ -352,13 +352,13 @@ namespace Sabresaurus.SabreCSG
 			for (int j = 0; j < polygons.Length; j++) 
 			{
 				Polygon polygon = polygons[j];
-				Vector3 position1 = polygon.Vertices[0].Position;
+				Vector3 position1 = polygon.Vertices[0].position;
 				
 				for (int i = 1; i < polygon.Vertices.Length - 1; i++)
 				{
 					GL.Vertex(transform.TransformPoint(position1));
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].Position));
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].Position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].position));
 				}
 			}
 			GL.End();
@@ -376,11 +376,11 @@ namespace Sabresaurus.SabreCSG
                 Polygon polygon = polygons[j];
 				for (int i = 0; i < polygon.Vertices.Length - 1; i++)
 				{
-					GL.Vertex(polygon.Vertices[i].Position + offset);
-					GL.Vertex(polygon.Vertices[i + 1].Position + offset);
+					GL.Vertex(polygon.Vertices[i].position + offset);
+					GL.Vertex(polygon.Vertices[i + 1].position + offset);
 				}
-				GL.Vertex(polygon.Vertices[polygon.Vertices.Length - 1].Position + offset);
-				GL.Vertex(polygon.Vertices[0].Position + offset);
+				GL.Vertex(polygon.Vertices[polygon.Vertices.Length - 1].position + offset);
+				GL.Vertex(polygon.Vertices[0].position + offset);
 			}
 			
 			GL.End();
@@ -395,13 +395,13 @@ namespace Sabresaurus.SabreCSG
                 Vector3 offset = polygons[j].Plane.normal * 0.001f;
 
                 Polygon polygon = polygons[j];
-				Vector3 position1 = polygon.Vertices[0].Position;
+				Vector3 position1 = polygon.Vertices[0].position;
 				
 				for (int i = 1; i < polygon.Vertices.Length - 1; i++)
 				{
 					GL.Vertex(position1 + offset);
-					GL.Vertex(polygon.Vertices[i].Position + offset);
-					GL.Vertex(polygon.Vertices[i + 1].Position + offset);
+					GL.Vertex(polygon.Vertices[i].position + offset);
+					GL.Vertex(polygon.Vertices[i + 1].position + offset);
 				}
 			}
 			GL.End();
@@ -416,13 +416,13 @@ namespace Sabresaurus.SabreCSG
 			for (int j = 0; j < polygons.Length; j++) 
 			{
 				Polygon polygon = polygons[j];
-				Vector3 position1 = polygon.Vertices[0].Position;
+				Vector3 position1 = polygon.Vertices[0].position;
 
 				for (int i = 1; i < polygon.Vertices.Length - 1; i++)
 				{
 					GL.Vertex(position1);
-					GL.Vertex(polygon.Vertices[i].Position);
-					GL.Vertex(polygon.Vertices[i + 1].Position);
+					GL.Vertex(polygon.Vertices[i].position);
+					GL.Vertex(polygon.Vertices[i + 1].position);
 				}
 			}
 			GL.End();
@@ -441,8 +441,8 @@ namespace Sabresaurus.SabreCSG
 
 				for (int i = 0; i < polygon.Vertices.Length; i++)
 				{
-					Vector3 currentPosition = polygon.Vertices[i].Position + depthAdjust;
-					Vector3 nextPosition = polygon.Vertices[(i + 1)%polygon.Vertices.Length].Position + depthAdjust;
+					Vector3 currentPosition = polygon.Vertices[i].position + depthAdjust;
+					Vector3 nextPosition = polygon.Vertices[(i + 1)%polygon.Vertices.Length].position + depthAdjust;
 
 					GL.Vertex(currentPosition);
 					GL.Vertex(nextPosition);
@@ -465,8 +465,8 @@ namespace Sabresaurus.SabreCSG
 
 				for (int i = 0; i < polygon.Vertices.Length; i++)
 				{
-					Vector3 currentPosition = polygon.Vertices[i].Position + depthAdjust;
-					Vector3 nextPosition = polygon.Vertices[(i + 1)%polygon.Vertices.Length].Position + depthAdjust;
+					Vector3 currentPosition = polygon.Vertices[i].position + depthAdjust;
+					Vector3 nextPosition = polygon.Vertices[(i + 1)%polygon.Vertices.Length].position + depthAdjust;
 
 					GL.TexCoord2(0,0);
 					GL.Vertex(currentPosition);

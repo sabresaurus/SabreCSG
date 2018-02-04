@@ -443,8 +443,8 @@ namespace Sabresaurus.SabreCSG
 						// Rotate positions and vertices so they remain in their original place
 						for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++) 
 						{
-							vertices[vertexIndex].Position = inverseRotation * vertices[vertexIndex].Position;
-							vertices[vertexIndex].Normal = inverseRotation * vertices[vertexIndex].Normal;
+							vertices[vertexIndex].position = inverseRotation * vertices[vertexIndex].position;
+							vertices[vertexIndex].normal = inverseRotation * vertices[vertexIndex].normal;
 						}
 					}
 

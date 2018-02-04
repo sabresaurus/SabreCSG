@@ -234,13 +234,13 @@ namespace Sabresaurus.SabreCSG
 			for (int j = 0; j < polygons.Length; j++) 
 			{
 				Polygon polygon = polygons[j];
-				Vector3 position1 = polygon.Vertices[0].Position;
+				Vector3 position1 = polygon.Vertices[0].position;
 				
 				for (int i = 1; i < polygon.Vertices.Length - 1; i++)
 				{
 					GL.Vertex(transform.TransformPoint(position1));
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].Position));
-					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].Position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i].position));
+					GL.Vertex(transform.TransformPoint(polygon.Vertices[i + 1].position));
 				}
 			}
 			GL.End();
@@ -270,8 +270,8 @@ namespace Sabresaurus.SabreCSG
 			{
 				for (int j = 0; j < polygons[i].Vertices.Length; j++)
 				{
-					polygonsCopy[i].Vertices[j].Position = rotation * polygonsCopy[i].Vertices[j].Position.Multiply(scale) + center;
-					polygonsCopy[i].Vertices[j].Normal = rotation * polygonsCopy[i].Vertices[j].Normal;
+					polygonsCopy[i].Vertices[j].position = rotation * polygonsCopy[i].Vertices[j].position.Multiply(scale) + center;
+					polygonsCopy[i].Vertices[j].normal = rotation * polygonsCopy[i].Vertices[j].normal;
 				}
 
 				// Just updated a load of vertex positions, so make sure the cached plane is updated
@@ -688,13 +688,13 @@ namespace Sabresaurus.SabreCSG
         {
 			if (polygons.Length > 0)
 			{
-				Bounds bounds = new Bounds(polygons[0].Vertices[0].Position, Vector3.zero);
+				Bounds bounds = new Bounds(polygons[0].Vertices[0].position, Vector3.zero);
 				
 				for (int i = 0; i < polygons.Length; i++)
 				{
 					for (int j = 0; j < polygons[i].Vertices.Length; j++)
 					{
-						bounds.Encapsulate(polygons[i].Vertices[j].Position);
+						bounds.Encapsulate(polygons[i].Vertices[j].position);
 					}
 				}
 				return bounds;
@@ -714,13 +714,13 @@ namespace Sabresaurus.SabreCSG
 		{
 			if (polygons.Length > 0)
 			{
-				Bounds bounds = new Bounds(transform.TransformPoint(polygons[0].Vertices[0].Position), Vector3.zero);
+				Bounds bounds = new Bounds(transform.TransformPoint(polygons[0].Vertices[0].position), Vector3.zero);
 
 				for (int i = 0; i < polygons.Length; i++)
 				{
 					for (int j = 0; j < polygons[i].Vertices.Length; j++)
 					{
-						bounds.Encapsulate(transform.TransformPoint(polygons[i].Vertices[j].Position));
+						bounds.Encapsulate(transform.TransformPoint(polygons[i].Vertices[j].position));
 					}
 				}
 				return bounds;
@@ -735,13 +735,13 @@ namespace Sabresaurus.SabreCSG
         {
             if (polygons.Length > 0)
             {
-                Bounds bounds = new Bounds(otherTransform.InverseTransformPoint(transform.TransformPoint(polygons[0].Vertices[0].Position)), Vector3.zero);
+                Bounds bounds = new Bounds(otherTransform.InverseTransformPoint(transform.TransformPoint(polygons[0].Vertices[0].position)), Vector3.zero);
 
                 for (int i = 0; i < polygons.Length; i++)
                 {
                     for (int j = 0; j < polygons[i].Vertices.Length; j++)
                     {
-                        bounds.Encapsulate(otherTransform.InverseTransformPoint(transform.TransformPoint(polygons[i].Vertices[j].Position)));
+                        bounds.Encapsulate(otherTransform.InverseTransformPoint(transform.TransformPoint(polygons[i].Vertices[j].position)));
                     }
                 }
                 return bounds;
@@ -757,14 +757,14 @@ namespace Sabresaurus.SabreCSG
 			// Transform the world axis direction to local
 			Vector3 localAxis = transform.InverseTransformDirection(worldAxis);
 
-			float minDot = Vector3.Dot(polygons[0].Vertices[0].Position, localAxis);
+			float minDot = Vector3.Dot(polygons[0].Vertices[0].position, localAxis);
 			float maxDot = minDot;
 
 			for (int i = 0; i < polygons.Length; i++)
 			{
 				for (int j = 0; j < polygons[i].Vertices.Length; j++)
 				{
-					float dot = Vector3.Dot(polygons[i].Vertices[j].Position, localAxis);
+					float dot = Vector3.Dot(polygons[i].Vertices[j].position, localAxis);
 					minDot = Mathf.Min(dot, minDot);
 					maxDot = Mathf.Max(dot, maxDot);
 				}
@@ -812,7 +812,7 @@ namespace Sabresaurus.SabreCSG
 			{
 				for (int j = 0; j < polygons[i].Vertices.Length; j++) 
 				{
-					polygons[i].Vertices[j].Position -= delta;
+					polygons[i].Vertices[j].position -= delta;
 				}
 			}
 

@@ -59,7 +59,7 @@ namespace Sabresaurus.SabreCSG
 					Vector3 newPosition = Vector3.zero;
 					for (int vertexIndex = 0; vertexIndex < vertices.Count; vertexIndex++) 
 					{
-						newPosition += vertices[vertexIndex].Position;
+						newPosition += vertices[vertexIndex].position;
 					}
 					newPosition /= vertices.Count;
 
@@ -67,13 +67,13 @@ namespace Sabresaurus.SabreCSG
 					for (int vertexIndex = 0; vertexIndex < vertices.Count; vertexIndex++) 
 					{
 						Polygon polygon = vertexPolygonMappings[vertices[vertexIndex]];
-						vertices[vertexIndex].UV = GeometryHelper.GetUVForPosition(polygon, newPosition);
+						vertices[vertexIndex].uv = GeometryHelper.GetUVForPosition(polygon, newPosition);
 					}
 
 					// Update all the selected vertices to their new position
 					for (int vertexIndex = 0; vertexIndex < vertices.Count; vertexIndex++) 
 					{
-						vertices[vertexIndex].Position = newPosition;
+						vertices[vertexIndex].position = newPosition;
 					}
 				}
 			}
@@ -90,7 +90,7 @@ namespace Sabresaurus.SabreCSG
 
 			public bool Equals (Vertex x, Vertex y)
 			{
-				float squareMagnitude = (x.Position - y.Position).sqrMagnitude;
+				float squareMagnitude = (x.position - y.position).sqrMagnitude;
 				return (squareMagnitude <= squareTolerance);
 			}
 

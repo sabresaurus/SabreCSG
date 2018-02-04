@@ -40,15 +40,15 @@ namespace Sabresaurus.SabreCSG
 
                 for (int j = 0; j < vertexCount; j++)
                 {
-                    newPositions[j] = polygon.Vertices[j].Position;
-                    newUV[j] = polygon.Vertices[j].UV;
+                    newPositions[j] = polygon.Vertices[j].position;
+                    newUV[j] = polygon.Vertices[j].uv;
                 }
 
                 for (int j = 0; j < vertexCount; j++)
                 {
                     Vertex vertex = polygon.Vertices[j];
 
-                    Vector3 newPosition = vertex.Position.Multiply(scaleValue);
+                    Vector3 newPosition = vertex.position.Multiply(scaleValue);
                     newPositions[j] = newPosition;
 
                     newUV[j] = GeometryHelper.GetUVForPosition(polygon, newPosition);
@@ -58,8 +58,8 @@ namespace Sabresaurus.SabreCSG
                 for (int j = 0; j < vertexCount; j++)
                 {
                     Vertex vertex = polygon.Vertices[j];
-                    vertex.Position = newPositions[j];
-                    vertex.UV = newUV[j];
+                    vertex.position = newPositions[j];
+                    vertex.uv = newUV[j];
                 }
 
                 // Polygon geometry has changed, inform the polygon that it needs to recalculate its cached plane
@@ -74,7 +74,7 @@ namespace Sabresaurus.SabreCSG
                 for (int j = 0; j < vertexCount; j++)
                 {
                     Vertex vertex = polygon.Vertices[j];
-                    vertex.Normal = normalRotation * vertex.Normal;
+                    vertex.normal = normalRotation * vertex.normal;
                 }
             }
 #if UNITY_EDITOR
@@ -116,8 +116,8 @@ namespace Sabresaurus.SabreCSG
                     {
                         Vertex vertex = polygons[i].Vertices[j];
 
-                        Vector3 position = vertex.Position;
-                        Vector3 normal = vertex.Normal;
+                        Vector3 position = vertex.position;
+                        Vector3 normal = vertex.normal;
 
                         if (localToPrimaryBrush)
                         {
@@ -150,8 +150,8 @@ namespace Sabresaurus.SabreCSG
                         }
 
                         // Set the vertex position and normal to their new values
-                        vertex.Position = position;
-                        vertex.Normal = normal;
+                        vertex.position = position;
+                        vertex.normal = normal;
                     }
                     // Because a flip has occurred we need to reverse the winding order
                     Array.Reverse(polygons[i].Vertices);
@@ -213,9 +213,9 @@ namespace Sabresaurus.SabreCSG
                         Vertex vertex1, vertex2, vertex3;
                         SurfaceUtility.GetPrimaryPolygonDescribers(polygon, out vertex1, out vertex2, out vertex3);
 
-                        Vector3 position1 = vertex1.Position;
-                        Vector3 position2 = vertex2.Position;
-                        Vector3 position3 = vertex3.Position;
+                        Vector3 position1 = vertex1.position;
+                        Vector3 position2 = vertex2.position;
+                        Vector3 position3 = vertex3.position;
 
                         // Transform from local to brush to local to intersectingBrush
                         position1 = intersectingBrush.transform.InverseTransformPoint(brush.transform.TransformPoint(position1));

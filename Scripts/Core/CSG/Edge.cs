@@ -29,7 +29,7 @@ namespace Sabresaurus.SabreCSG
 
 		public Vector3 GetCenterPoint()
 		{
-			return (vertex1.Position + vertex2.Position) * 0.5f;
+			return (vertex1.position + vertex2.position) * 0.5f;
 		}
 
         // TODO: Should track entire Vertex here? May be necessary for edge collapse where positions align but UV's don't. Currently unsure if that will be a problem.		
@@ -41,13 +41,13 @@ namespace Sabresaurus.SabreCSG
 
         public bool Matches(Edge otherEdge)
         {
-            if (vertex1.Position.EqualsWithEpsilon(otherEdge.vertex1.Position) 
-				&& vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex2.Position))
+            if (vertex1.position.EqualsWithEpsilon(otherEdge.vertex1.position) 
+				&& vertex2.position.EqualsWithEpsilon(otherEdge.Vertex2.position))
             {
                 return true;
             } // Check if the edge is the other way around
-            else if (vertex1.Position.EqualsWithEpsilon(otherEdge.vertex2.Position) 
-				&& vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex1.Position))
+            else if (vertex1.position.EqualsWithEpsilon(otherEdge.vertex2.position) 
+				&& vertex2.position.EqualsWithEpsilon(otherEdge.Vertex1.position))
             {
                 return true;
             }
@@ -59,8 +59,8 @@ namespace Sabresaurus.SabreCSG
 
 		public bool Intersects(Edge otherEdge)
 		{
-			Vector3 vector1 = vertex2.Position - vertex1.Position;
-			Vector3 vector2 = otherEdge.Vertex2.Position - otherEdge.Vertex1.Position;
+			Vector3 vector1 = vertex2.position - vertex1.position;
+			Vector3 vector2 = otherEdge.Vertex2.position - otherEdge.Vertex1.position;
 
 			float dot = (Vector3.Dot(vector1.normalized, vector2.normalized));
 
@@ -76,29 +76,29 @@ namespace Sabresaurus.SabreCSG
             Vector3 delta1 = Vector3.zero; // Delta from the matched point on this edge to the other point on this edge
             Vector3 delta2 = Vector3.zero; // Delta from the matched point on otherEdge to the other point on otherEdge
 
-            if (vertex1.Position.EqualsWithEpsilon(otherEdge.Vertex1.Position))
+            if (vertex1.position.EqualsWithEpsilon(otherEdge.Vertex1.position))
 			{
 				matchedPoint = true;
-                delta1 = vertex2.Position - vertex1.Position;
-                delta2 = otherEdge.Vertex2.Position - otherEdge.Vertex1.Position;
+                delta1 = vertex2.position - vertex1.position;
+                delta2 = otherEdge.Vertex2.position - otherEdge.Vertex1.position;
             }
-			else if (vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex2.Position))
+			else if (vertex2.position.EqualsWithEpsilon(otherEdge.Vertex2.position))
 			{
 				matchedPoint = true;
-                delta1 = vertex1.Position - vertex2.Position;
-                delta2 = otherEdge.Vertex1.Position - otherEdge.Vertex2.Position;
+                delta1 = vertex1.position - vertex2.position;
+                delta2 = otherEdge.Vertex1.position - otherEdge.Vertex2.position;
             }
-			else if (vertex1.Position.EqualsWithEpsilon(otherEdge.Vertex2.Position))
+			else if (vertex1.position.EqualsWithEpsilon(otherEdge.Vertex2.position))
 			{
 				matchedPoint = true;
-                delta1 = vertex2.Position - vertex1.Position;
-                delta2 = otherEdge.Vertex1.Position - otherEdge.Vertex2.Position;
+                delta1 = vertex2.position - vertex1.position;
+                delta2 = otherEdge.Vertex1.position - otherEdge.Vertex2.position;
             }
-			else if (vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex1.Position))
+			else if (vertex2.position.EqualsWithEpsilon(otherEdge.Vertex1.position))
 			{
 				matchedPoint = true;
-                delta1 = vertex1.Position - vertex2.Position;
-                delta2 = otherEdge.Vertex2.Position - otherEdge.Vertex1.Position;
+                delta1 = vertex1.position - vertex2.position;
+                delta2 = otherEdge.Vertex2.position - otherEdge.Vertex1.position;
             }
 
             // No points matched, assume not collinear
@@ -117,8 +117,8 @@ namespace Sabresaurus.SabreCSG
         /// <param name="otherEdge">Other edge.</param>
         public bool Collinear(Edge otherEdge)
         {
-            Vector3 vector1 = vertex2.Position - vertex1.Position;
-            Vector3 vector2 = otherEdge.Vertex2.Position - otherEdge.Vertex1.Position;
+            Vector3 vector1 = vertex2.position - vertex1.position;
+            Vector3 vector2 = otherEdge.Vertex2.position - otherEdge.Vertex1.position;
 
             float dot = (Vector3.Dot(vector1.normalized, vector2.normalized));
 
@@ -128,19 +128,19 @@ namespace Sabresaurus.SabreCSG
             // TODO: Hacky way of finding out if they are on the same line because we know two points must be the same
             bool matchedPoint = false;
 
-            if (vertex1.Position.EqualsWithEpsilon(otherEdge.Vertex1.Position))
+            if (vertex1.position.EqualsWithEpsilon(otherEdge.Vertex1.position))
             {
                 matchedPoint = true;
             }
-            else if (vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex2.Position))
+            else if (vertex2.position.EqualsWithEpsilon(otherEdge.Vertex2.position))
             {
                 matchedPoint = true;
             }
-            else if (vertex1.Position.EqualsWithEpsilon(otherEdge.Vertex2.Position))
+            else if (vertex1.position.EqualsWithEpsilon(otherEdge.Vertex2.position))
             {
                 matchedPoint = true;
             }
-            else if (vertex2.Position.EqualsWithEpsilon(otherEdge.Vertex1.Position))
+            else if (vertex2.position.EqualsWithEpsilon(otherEdge.Vertex1.position))
             {
                 matchedPoint = true;
             }
@@ -149,7 +149,7 @@ namespace Sabresaurus.SabreCSG
 
 		public override string ToString ()
 		{
-			return string.Format (string.Format("[Edge] V1: {0} V2: {1}", vertex1.Position, vertex2.Position));
+			return string.Format (string.Format("[Edge] V1: {0} V2: {1}", vertex1.position, vertex2.position));
 		}
 
         #region Static Methods
