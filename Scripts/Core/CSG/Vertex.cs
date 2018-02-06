@@ -157,23 +157,6 @@ namespace Sabresaurus.SabreCSG
                    EqualityComparer<Color32>.Default.Equals(Color, other.Color);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
-        /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures
-        /// like a hash table.
-        /// </returns>
-        public override int GetHashCode()
-        {
-            var hashCode = -414430010;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(Position);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector2>.Default.GetHashCode(UV);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(Normal);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Color32>.Default.GetHashCode(Color);
-            return hashCode;
-        }
-
         public static bool operator ==(Vertex lhs, Vertex rhs)
         {
             if (ReferenceEquals(lhs, rhs))
