@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || RUNTIME_CSG
 
+using System;
 using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
@@ -64,8 +65,14 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="vertex1">The first vertex of the edge.</param>
         /// <param name="vertex2">The last vertex of the edge.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="vertex1"/> or <paramref name="vertex2"/> is null.
+        /// </exception>
         public Edge(Vertex vertex1, Vertex vertex2)
         {
+            if (vertex1 == null) throw new ArgumentNullException("vertex1");
+            if (vertex2 == null) throw new ArgumentNullException("vertex2");
+
             this.vertex1 = vertex1;
             this.vertex2 = vertex2;
         }
@@ -79,8 +86,13 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to compare this edge to.</param>
         /// <returns><c>true</c> if this edge matches the other edge; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="other"/> is null.
+        /// </exception>
         public bool Matches(Edge other)
         {
+            if (other == null) throw new ArgumentNullException("other");
+
             // check whether we approximately match the other edge:
             if (vertex1.Position.EqualsWithEpsilon(other.vertex1.Position)
                 && vertex2.Position.EqualsWithEpsilon(other.Vertex2.Position))
@@ -102,8 +114,13 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to check for parallelity.</param>
         /// <returns><c>true</c> if both edges are parallel; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="other"/> is null.
+        /// </exception>
         public bool Parallel(Edge other)
         {
+            if (other == null) throw new ArgumentNullException("other");
+
             Vector3 direction1 = vertex2.Position - vertex1.Position;
             Vector3 direction2 = other.Vertex2.Position - other.Vertex1.Position;
 
@@ -121,8 +138,13 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to check for intersection.</param>
         /// <returns><c>true</c> if both edges intersect; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="other"/> is null.
+        /// </exception>
         public bool Intersects(Edge other)
         {
+            if (other == null) throw new ArgumentNullException("other");
+
             // early out: if the edges aren't parallel to each other, they can't be collinear.
             if (!Parallel(other))
                 return false;
@@ -179,8 +201,13 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">Other edge that may be collinear.</param>
         /// <returns><c>true</c> if both edges are collinear; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="other"/> is null.
+        /// </exception>
         public bool Collinear(Edge other)
         {
+            if (other == null) throw new ArgumentNullException("other");
+
             return EdgeUtility.EdgeMatches(this, other);
         }
 

@@ -92,8 +92,14 @@ namespace Sabresaurus.SabreCSG
         /// midway between <paramref name="a"/> and <paramref name="b"/>.
         /// </param>
         /// <returns>The new interpolated <see cref="Vertex"/>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="a"/> or <paramref name="b"/> is null.
+        /// </exception>
         public static Vertex Lerp(Vertex a, Vertex b, float t)
         {
+            if (a == null) throw new ArgumentNullException("a");
+            if (b == null) throw new ArgumentNullException("b");
+
             return new Vertex()
             {
                 Position = Vector3.Lerp(a.Position, b.Position, t),
