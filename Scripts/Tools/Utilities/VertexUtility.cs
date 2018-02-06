@@ -212,9 +212,9 @@ namespace Sabresaurus.SabreCSG
 		public static void DisplacePolygons(Polygon[] polygons, float distance)
 		{
 			// Used for determining if two vertices are the same
-			Polygon.VertexComparerEpsilon vertexComparer = new Polygon.VertexComparerEpsilon();
+			VertexComparerEpsilon vertexComparer = new VertexComparerEpsilon();
 			// Used for determining if two positions or normals are the same
-			Polygon.Vector3ComparerEpsilon vectorComparer = new Polygon.Vector3ComparerEpsilon();
+			Vector3ComparerEpsilon vectorComparer = new Vector3ComparerEpsilon();
 
 			// Group overlapping positions and also track their normals
 			List<List<Vertex>> groupedVertices = new List<List<Vertex>>();
@@ -309,7 +309,7 @@ namespace Sabresaurus.SabreCSG
 		/// <param name="localDelta">Local positional delta.</param>
 		public static void TranslateSpecifiedVertices(Brush brush, List<Vertex> specifiedVertices, Vector3 localDelta)
 		{
-			Polygon.Vector3ComparerEpsilon positionComparer = new Polygon.Vector3ComparerEpsilon();
+			Vector3ComparerEpsilon positionComparer = new Vector3ComparerEpsilon();
 
 			// Cache the positions as the position of vertices will change while in the for loop
 			List<Vector3> specifiedPositions = specifiedVertices.Select(item => item.Position).ToList();

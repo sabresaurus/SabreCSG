@@ -106,7 +106,7 @@ namespace Sabresaurus.SabreCSG
 			// Sort the built polygons into those that are selected and those that aren't
 			// This starts off with all the polygons in the unselected list then picks out all those that are actually
 			// selected.
-			IEqualityComparer<Polygon> comparer = new Polygon.PolygonUIDComparer();
+			IEqualityComparer<Polygon> comparer = new PolygonUIDComparer();
 			for (int i = 0; i < unselectedPolygons.Count; i++) 
 			{
 				if(selectedSourcePolygons.Contains(unselectedPolygons[i], comparer))

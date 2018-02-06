@@ -129,8 +129,7 @@ namespace Sabresaurus.SabreCSG
 					
 					polygonsFront.Add(newPolygon);
 					
-					newPolygon = newPolygon.DeepCopy();
-					newPolygon.Flip();
+					newPolygon = newPolygon.Flipped;
 					
 					newPolygon.ExcludeFromFinal = excludeNewPolygons;
 					

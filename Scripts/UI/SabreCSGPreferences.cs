@@ -11,7 +11,9 @@ namespace Sabresaurus.SabreCSG
 	public class SabreCSGPreferences : EditorWindow
 	{
 		const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
-		static readonly Vector2 WINDOW_SIZE = new Vector2(370,360);
+        const string SABRE_CSG_DEBUG_DEFINE = "SABRE_CSG_DEBUG";
+
+        static readonly Vector2 WINDOW_SIZE = new Vector2(370,360);
 
 		static Event cachedEvent;
 
@@ -124,7 +126,39 @@ namespace Sabresaurus.SabreCSG
 			}
 
 
-			GUILayout.FlexibleSpace();
+
+            GUILayout.Space(20);
+
+            GUILayout.Label("Debug mode executes additional code for verbose error checking. Used by SabreCSG developers.", style);
+            buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            definesSplit = defines.Split(';').ToList();
+            enabled = definesSplit.Contains(SABRE_CSG_DEBUG_DEFINE);
+
+            if (enabled)
+            {
+                if (GUILayout.Button("Disable Debug Mode (Recommended)"))
+                {
+                    definesSplit.Remove(SABRE_CSG_DEBUG_DEFINE);
+                    defines = string.Join(";", definesSplit.ToArray());
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Enable Debug Mode (Not Recommended)"))
+                {
+                    if (!definesSplit.Contains(SABRE_CSG_DEBUG_DEFINE))
+                    {
+                        definesSplit.Add(SABRE_CSG_DEBUG_DEFINE);
+                    }
+                    defines = string.Join(";", definesSplit.ToArray());
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
+                }
+            }
+
+
+            GUILayout.FlexibleSpace();
 
 			GUILayout.Label("SabreCSG Version " + CSGModel.VERSION_STRING, SabreGUILayout.GetForeStyle());
 		}
