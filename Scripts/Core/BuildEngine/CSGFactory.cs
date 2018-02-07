@@ -397,7 +397,15 @@ namespace Sabresaurus.SabreCSG
 
 				bool useIndividualVertices = buildSettings.GenerateLightmapUVs; // Generate individual vertices for unwrapped geometry
 
-				MeshGroupManager.TriangulateNewPolygons(useIndividualVertices, allGroupedPolygons, buildContext.VisualPolygonIndex);
+                ///////////////////////////////////////////////////////////////////////////////////
+                // FIX T-JUNCTIONS - The competition is real!                                    //
+                ///////////////////////////////////////////////////////////////////////////////////
+                
+                TJunctions.FixTJunctions(allGroupedPolygons);
+
+                ///////////////////////////////////////////////////////////////////////////////////
+
+                MeshGroupManager.TriangulateNewPolygons(useIndividualVertices, allGroupedPolygons, buildContext.VisualPolygonIndex);
 
 				if(buildSettings.GenerateCollisionMeshes)
 				{
