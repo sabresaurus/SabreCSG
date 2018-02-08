@@ -24,42 +24,12 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
-        /// A vertex of a polygon. See <see cref="SabreCSG.Vertex"/>.
-        /// </summary>
-        private class TVertex
-        {
-            public Vertex Vertex;
-            public Polygon Parent;
-        }
-
-        /// <summary>
         /// Represents a T-Junction. This is a vertex that lies upon but is not attached to an edge.
         /// </summary>
         private class TJunction
         {
-            public TVertex Vertex;
+            public Vertex Vertex;
             public TEdge DisconnectedEdge;
-        }
-
-        /// <summary>
-        /// Compares whether a TVertex is identical (position only) to another TVertex.
-        /// </summary>
-        /// <seealso cref="System.Collections.Generic.IEqualityComparer{Sabresaurus.SabreCSG.TJunctions.TVertex}"/>
-        private class TVertexComparerEpsilon : IEqualityComparer<TVertex>
-        {
-            public bool Equals(TVertex x, TVertex y)
-            {
-                return x.Vertex.Position.EqualsWithEpsilon(y.Vertex.Position);
-            }
-
-            public int GetHashCode(TVertex obj)
-            {
-                // The similarity or difference between two positions can only be calculated if both are supplied
-                // when Distinct is called GetHashCode is used to determine which values are in collision first
-                // therefore we return the same hash code for all values to ensure all comparisons must use 
-                // our Equals method to properly determine which values are actually considered equal
-                return 1;
-            }
         }
 
         // todo: this is a useful function, maybe move this to an appropriate utility class.
@@ -99,55 +69,47 @@ namespace Sabresaurus.SabreCSG
             // todo: this algorithm was scuffed together after a toilet session. I bet you can optimize this.
             // if this comment is still here, it means you can do it. please! contribute! :)
 
+            int totalTJunctions = 0;
             int giveup = 0;
             bool done = false;
             while (!done)
             {
                 List<TEdge> edges = new List<TEdge>();
-                List<TVertex> vertices = new List<TVertex>();
+                List<Vertex> vertices = new List<Vertex>();
 
                 foreach (var groupedPolygon in allGroupedPolygons)
                 {
-                    int pid = 0;
                     foreach (Polygon polygon in groupedPolygon.Value)
                     {
-                        // build a collection of all edges.
+                        // build a collection of all edges and vertices.
                         foreach (Edge edge in polygon.GetEdges())
                         {
                             edges.Add(new TEdge { Edge = edge, Parent = polygon });
+                            vertices.Add(edge.Vertex1);
                         }
-
-                        // build a collection of all vertices.
-                        foreach (Vertex vertex in polygon.Vertices)
-                        {
-                            vertices.Add(new TVertex { Vertex = vertex, Parent = polygon });
-                        }
-
-                        pid++;
                     }
                 }
 
                 // get list of unique vertices.
-                List<TVertex> unique = new List<TVertex>();
+                List<Vertex> unique = new List<Vertex>();
                 List<TJunction> tjunctions = new List<TJunction>();
-                TVertexComparerEpsilon vertexComparerEpsilon = new TVertexComparerEpsilon();
+                Polygon.VertexComparerEpsilon vertexComparerEpsilon = new Polygon.VertexComparerEpsilon();
 
                 foreach (TEdge edge in edges)
                 {
-                    foreach (TVertex vertex in vertices)
+                    foreach (Vertex vertex in vertices)
                     {
                         // this vertex can not be part of the edge.
-                        if (vertex.Vertex.Position.EqualsWithEpsilon(edge.Edge.Vertex1.Position) || vertex.Vertex.Position.EqualsWithEpsilon(edge.Edge.Vertex2.Position)) continue;
-                        // this vertex can not be part of the same polygon as the edge.
-                        //if (vertex.Parent == edge.Parent) continue;
+                        if (vertex.Position.EqualsWithEpsilon(edge.Edge.Vertex1.Position) || vertex.Position.EqualsWithEpsilon(edge.Edge.Vertex2.Position)) continue;
 
-                        if (IsVertexOnEdge(vertex.Vertex, edge.Edge))
+                        if (IsVertexOnEdge(vertex, edge.Edge))
                         {
                             if (!unique.Contains(vertex, vertexComparerEpsilon))
                             {
                                 //Debug.Log("Yes Vertex on edge!");
                                 unique.Add(vertex);
                                 tjunctions.Add(new TJunction { Vertex = vertex, DisconnectedEdge = edge });
+                                totalTJunctions++;
                             }
                         }
                     }
@@ -157,8 +119,7 @@ namespace Sabresaurus.SabreCSG
                 foreach (TJunction tjunction in tjunctions)
                 {
                     // split the edge that the vertex is on top of (but not connected to).
-                    Vertex vertex;
-                    SplitPolygonAtEdge(tjunction.DisconnectedEdge.Parent, tjunction.DisconnectedEdge.Edge, tjunction.Vertex.Vertex.Position, out vertex);
+                    SplitPolygonAtEdge(tjunction.DisconnectedEdge.Parent, tjunction.DisconnectedEdge.Edge, tjunction.Vertex.Position);
                 }
 
                 done = tjunctions.Count == 0;
@@ -170,6 +131,9 @@ namespace Sabresaurus.SabreCSG
                     done = true;
                 }
             }
+
+            if (totalTJunctions != 0)
+                Debug.Log("(SabreCSG) FixTJunctions: Removed " + totalTJunctions.ToString() + " T-Junctions after " + giveup.ToString() + " iteration(s).");
         }
 
         /// <summary>
@@ -178,11 +142,8 @@ namespace Sabresaurus.SabreCSG
         /// <returns><c>true</c>, if the edge was matched in the polygon and a vertex was added, <c>false</c> otherwise.</returns>
         /// <param name="polygon">Source polygon to add a vertex to.</param>
         /// <param name="edge">Edge to match and at a vertex to</param>
-        /// <param name="newVertex">New vertex if one was created (first check the method returned <c>true</c>)</param>
-        public static bool SplitPolygonAtEdge(Polygon polygon, Edge edge, Vector3 futurePosition, out Vertex newVertex)
+        public static bool SplitPolygonAtEdge(Polygon polygon, Edge edge, Vector3 futurePosition)
         {
-            newVertex = null;
-
             List<Vertex> vertices = new List<Vertex>(polygon.Vertices);
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
@@ -200,8 +161,7 @@ namespace Sabresaurus.SabreCSG
                     float newlength = (edge.Vertex1.Position - futurePosition).magnitude;
                     float interpolant = newlength / originalLength;
 
-                    newVertex = Vertex.Lerp(begin, end, interpolant);
-                    vertices.Insert(i + 1, newVertex);
+                    vertices.Insert(i + 1, Vertex.Lerp(begin, end, interpolant));
                     break;
                 }
             }
