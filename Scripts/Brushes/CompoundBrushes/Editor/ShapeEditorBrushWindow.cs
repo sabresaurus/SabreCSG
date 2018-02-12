@@ -477,7 +477,7 @@ namespace Sabresaurus.SabreCSG
 
                 if (lineMaterial == null)
                 {
-                    var shader = Shader.Find("SabreCSG/Line");
+                    var shader = Shader.Find("SabreCSG/ShapeEditorLine");
                     lineMaterial = new Material(shader);
                 }
 
