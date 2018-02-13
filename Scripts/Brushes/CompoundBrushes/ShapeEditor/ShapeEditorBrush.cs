@@ -2,65 +2,50 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.ShapeEditor
 {
     /// <summary>
-    /// 2D Shape Editor. Inspired by Unreal Editor 2 (1998).
+    /// The 2D Shape Editor Brush.
     /// </summary>
-    /// <seealso cref="Sabresaurus.SabreCSG.CompoundBrush" />
+    /// <remarks>
+    /// Inspired by Unreal Editor 1 (1998). Created by Henry de Jongh for SabreCSG. Special Thanks:
+    /// Mark Bayazit for your implementation of Mark Keil's Algorithm https://mpen.ca/406/keil.
+    /// </remarks>
+    /// <seealso cref="Sabresaurus.SabreCSG.CompoundBrush"/>
     [ExecuteInEditMode]
     public class ShapeEditorBrush : CompoundBrush
     {
-        /// <summary>The radius in meters in the center of the staircase.</summary>
-        [SerializeField]
-        float innerRadius = 1.0f;
+        public enum ExtrudeMode
+        {
+            ExtrudeShape
+        }
 
-        /// <summary>The height of each step.</summary>
+        /// <summary>The 2D Shape Editor Project (latest project used to build this brush).</summary>
         [SerializeField]
-        float stepHeight = 0.0625f;
+        Project project = new Project();
 
-        /// <summary>The width of each step.</summary>
         [SerializeField]
-        float stepWidth = 1.0f;
+        ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
 
-        /// <summary>The amount of curvature in degrees.</summary>
-        [SerializeField]
-        float angleOfCurve = 90.0f;
+        public void ExtrudeShape(Project project)
+        {
+            this.project = project;
+            extrudeMode = ExtrudeMode.ExtrudeShape;
 
-        /// <summary>The amount of steps on the staircase.</summary>
-        [SerializeField]
-        int numSteps = 4;
+            m_LastBuiltPolygons = BuildConvexPolygons();
 
-        /// <summary>An amount of height to add to the first stair step.</summary>
-        [SerializeField]
-        float addToFirstStep = 0.0f;
-
-        /// <summary>Whether the stairs are mirrored counter-clockwise.</summary>
-        [SerializeField]
-        bool counterClockwise = false;
-
-        /// <summary>Whether the stairs reach down to the bottom.</summary>
-        [SerializeField]
-        bool fillToBottom = true;
-
-        /// <summary>Whether to generate stairs or a curved wall.</summary>
-        [SerializeField]
-        bool curvedWall = false;
-
-        /// <summary>Whether the floor is stairs or a smooth slope.</summary>
-        [SerializeField]
-        bool slopedFloor = false;
-
-        /// <summary>Whether the ceiling is stairs or a smooth slope.</summary>
-        [SerializeField]
-        bool slopedCeiling = false;
+            Invalidate(true);
+        }
 
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
         private Vector3 m_LastKnownPosition;
+
+        private List<Polygon> m_LastBuiltPolygons;
 
         void Awake()
         {
@@ -74,7 +59,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             get
             {
                 // calculate the amount of steps and use that as the brush count we need.
-                return numSteps;
+                if (m_LastBuiltPolygons == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return m_LastBuiltPolygons.Count;
+                }
             }
         }
 
@@ -84,6 +76,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         public override void Invalidate(bool polygonsChanged)
         {
+            if (m_LastBuiltPolygons == null) return;
+
             base.Invalidate(polygonsChanged);
 
             ////////////////////////////////////////////////////////////////////
@@ -95,359 +89,45 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             {                                                                 //
                 // undo any position movement.                                //
                 transform.localPosition = m_LastKnownPosition;                //
-                // user is trying to scale up.                                //
-                if (localBounds.extents.y > m_LastKnownExtents.y)             //
-                {                                                             //
-                    numSteps += 1;                                            //
-                    m_LastKnownExtents = localBounds.extents;                 //
-                    Invalidate(true); // recusion! <3                         //
-                    return;                                                   //
-                }                                                             //
-                // user is trying to scale down.                              //
-                if (localBounds.extents.y < m_LastKnownExtents.y)             //
-                {                                                             //
-                    numSteps -= 1;                                            //
-                    if (numSteps < 1) numSteps = 1;                           //
-                    m_LastKnownExtents = localBounds.extents;                 //
-                    Invalidate(true); // recusion! <3                         //
-                    return;                                                   //
-                }                                                             //
             }                                                                 //
             ////////////////////////////////////////////////////////////////////
 
-            // local variables
-            List<Vector3> vertexPositions = new List<Vector3>();
-            Vector3 rotateStep = new Vector3();
-            Vector3 vertex = new Vector3(), newVertex = new Vector3();
-            float adjustment;
-            int innerStart, outerStart, bottomInnerStart, bottomOuterStart;
-
-            // begin
-            rotateStep.z = angleOfCurve / numSteps;
-
-            if (counterClockwise)
-            {
-                rotateStep.z *= -1;
-            }
-
-            // generate the inner curve points.
-            innerStart = vertexPositions.Count;
-            vertex.x = innerRadius;
-            for (int x = 0; x < (numSteps + 1); x++)
-            {
-                if (x == 0)
-                    adjustment = addToFirstStep;
-                else
-                    adjustment = 0;
-
-                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                if (curvedWall)
-                    vertex.z = stepHeight * numSteps;
-                else
-                    vertex.z += stepHeight;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
-            }
-
-            // generate the outer curve points.
-            outerStart = vertexPositions.Count;
-            vertex.x = innerRadius + stepWidth;
-            vertex.z = 0;
-            for (int x = 0; x < (numSteps + 1); x++)
-            {
-                if (x == 0)
-                    adjustment = addToFirstStep;
-                else
-                    adjustment = 0;
-
-                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - adjustment, newVertex.y));
-                if (curvedWall)
-                    vertex.z = stepHeight * numSteps;
-                else
-                    vertex.z += stepHeight;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z, newVertex.y));
-            }
-
-            // generate the bottom inner curve points.
-            bottomInnerStart = vertexPositions.Count;
-            vertex.x = innerRadius;
-            vertex.z = 0;
-            for (int x = 0; x < (numSteps + 1); x++)
-            {
-                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - addToFirstStep, newVertex.y));
-            }
-
-            // generate the bottom outer curve points.
-            bottomOuterStart = vertexPositions.Count;
-            vertex.x = innerRadius + stepWidth;
-            for (int x = 0; x < (numSteps + 1); x++)
-            {
-                newVertex = Quaternion.Euler(rotateStep * x) * vertex;
-                vertexPositions.Add(new Vector3(newVertex.x, vertex.z - addToFirstStep, newVertex.y));
-            }
-
-            // vertex indices to easily flip faces for the counter clockwise mode.
-            int index0 = 0;
-            int index1 = 1;
-            int index2 = 2;
-            int index3 = 3;
-
-            // flip faces if counter clockwise mode is enabled.
-            if (counterClockwise)
-            {
-                index0 = 2;
-                index1 = 1;
-                index2 = 0;
-                index3 = 3;
-            }
-
-            // we force NoCSG mode if special NoCSG operators are used.
-            if (curvedWall) { slopedFloor = false; slopedCeiling = false; }
-            if (fillToBottom) { slopedCeiling = false; }
-            if (slopedFloor || slopedCeiling)
-            {
-                this.IsNoCSG = true;
-            }
-
-            // we calculate the bounds of the output csg.
-            Bounds csgBounds = new Bounds();
-
             // iterate through the brushes we received:
             int brushCount = BrushCount;
+
+            Bounds csgBounds = new Bounds();
             for (int i = 0; i < brushCount; i++)
             {
                 // copy our csg information to our child brushes.
                 generatedBrushes[i].Mode = this.Mode;
-                generatedBrushes[i].IsNoCSG = this.IsNoCSG;
+                generatedBrushes[i].IsNoCSG = true;//this.IsNoCSG;
                 generatedBrushes[i].IsVisible = this.IsVisible;
                 generatedBrushes[i].HasCollision = this.HasCollision;
 
                 // retrieve the polygons from the current cube brush.
-                Polygon[] polygons = generatedBrushes[i].GetPolygons();
-
-                // +-----------------------------------------------------+
-                // | Cube Polygons                                       |
-                // +--------+--------+--------+--------+--------+--------+
-                // | Poly:0 | Poly:1 | Poly:2 | Poly:3 | Poly:4 | Poly:5 |
-                // +-----------------------------------------------------+
-                // | Back   | Left   | Right  | Front  | Bottom | Top    |
-                // +--------+--------+--------+--------+--------+--------+
 
 
 
-                // retrieve the vertices of the top polygon.
-                Vertex[] vertices = polygons[5].Vertices;
 
-                // step top.
-                if (slopedFloor)
-                {
-                    // create a smooth slope.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
-                }
-                else
-                {
-                    // create blocky stairs.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2];
-                }
+                //List<Polygon> polygons = new List<Polygon>();//generatedBrushes[i].GetPolygons().ToList();
 
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[5]);
+                ////Debug.Log("here");
 
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[5]);
+                //// decompose concave shape from project into convex polygons.
+                //for (int j = 0; i < project.shapes[i].segments.Count; i+=3)
+                //{
+                //    polygons.Add(new Polygon(
+                //        new Vertex[] {
+                //            new Vertex((Vector2)project.shapes[i].segments[j + 0].position, Vector3.up, Vector3.zero),
+                //            new Vertex((Vector2)project.shapes[i].segments[j + 1].position, Vector3.up, Vector3.zero),
+                //            new Vertex((Vector2)project.shapes[i].segments[j + 2].position, Vector3.up, Vector3.zero)
+                //        },
+                //        null, false, false
+                //    ));
+                //}
+                //KeilPolygonDecomposition()
 
-
-
-                // retrieve the vertices of the front polygon.
-                vertices = polygons[3].Vertices;
-
-                // step front.
-                if (fillToBottom)
-                {
-                    // fill downwards to the bottom.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index1].Position = vertexPositions[bottomOuterStart + i];
-                    vertices[index2].Position = vertexPositions[bottomInnerStart + i];
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
-                }
-                else
-                {
-                    // fill downwards to the step height.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1];
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1];
-                }
-                if (slopedCeiling)
-                {
-                    // create a smooth ceiling slope.
-                    vertices[index1].Position -= new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].Position -= new Vector3(0.0f, stepHeight, 0.0f);
-                }
-
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[3]);
-
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[3]);
-
-
-
-                // retrieve the vertices of the left polygon.
-                vertices = polygons[1].Vertices;
-
-                // inner curve.
-                if (fillToBottom)
-                {
-                    // fill downwards to the bottom.
-                    vertices[index0].Position = vertexPositions[bottomInnerStart + i + 1];
-                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
-                }
-                else
-                {
-                    // fill downwards to the step height.
-                    vertices[index0].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 1];
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                }
-                if (slopedFloor)
-                {
-                    // create a smooth floor slope.
-                    vertices[index1].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
-                }
-                if (slopedCeiling)
-                {
-                    // create a smooth ceiling slope.
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
-                }
-
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[1]);
-
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[1]);
-
-
-
-                // retrieve the vertices of the right polygon.
-                vertices = polygons[2].Vertices;
-
-                // outer curve.
-                if (fillToBottom)
-                {
-                    // fill downwards to the bottom.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index2].Position = vertexPositions[bottomOuterStart + i];
-                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
-                }
-                else
-                {
-                    // fill downwards to the step height.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].Position = vertexPositions[outerStart + (i * 2) + 1];
-                }
-                if (slopedFloor)
-                {
-                    // create a smooth floor slope.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
-                }
-                if (slopedCeiling)
-                {
-                    // create a smooth ceiling slope.
-                    vertices[index2].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
-                }
-
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[2]);
-
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[2]);
-
-
-
-                // retrieve the vertices of the bottom polygon.
-                vertices = polygons[4].Vertices;
-
-                // bottom.
-                if (fillToBottom)
-                {
-                    // fill downwards to the bottom.
-                    vertices[index0].Position = vertexPositions[bottomOuterStart + i];
-                    vertices[index1].Position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index2].Position = vertexPositions[bottomInnerStart + i + 1];
-                    vertices[index3].Position = vertexPositions[bottomInnerStart + i];
-                }
-                else
-                {
-                    // fill downwards to the step height.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight, 0.0f);
-                }
-                if (slopedCeiling)
-                {
-                    // create a smooth ceiling slope.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 1] - new Vector3(0.0f, stepHeight * 2.0f, 0.0f);
-                }
-
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[4]);
-
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[4]);
-
-
-
-                // retrieve the vertices of the back polygon.
-                vertices = polygons[0].Vertices;
-
-                // back panel.
-                if (fillToBottom)
-                {
-                    // fill downwards to the bottom.
-                    vertices[index0].Position = vertexPositions[bottomOuterStart + i + 1];
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index3].Position = vertexPositions[bottomInnerStart + i + 1];
-                }
-                else
-                {
-                    // fill downwards to the step height.
-                    vertices[index0].Position = vertexPositions[outerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2];
-                    vertices[index3].Position = vertexPositions[innerStart + (i * 2) + 2] - new Vector3(0.0f, stepHeight, 0.0f);
-                }
-                if (slopedFloor)
-                {
-                    // create a smooth floor slope.
-                    vertices[index1].Position = vertexPositions[outerStart + (i * 2) + 2 + 1];
-                    vertices[index2].Position = vertexPositions[innerStart + (i * 2) + 2 + 1];
-                }
-
-                // calculate a normal using a virtual plane.
-                GenerateNormals(polygons[0]);
-
-                // update uv coordinates to prevent distortions using barnaby's genius utilities.
-                GenerateUvCoordinates(polygons[0]);
-
-
+                generatedBrushes[i].SetPolygons(new Polygon[] { m_LastBuiltPolygons[i] });
 
                 generatedBrushes[i].Invalidate(true);
                 csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
@@ -458,6 +138,89 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
         }
+
+        /// <summary>
+        /// Gets the next segment.
+        /// </summary>
+        /// <param name="segment">The segment to find the next segment for.</param>
+        /// <returns>The next segment (wraps around).</returns>
+        private Segment GetNextSegment(Shape parent, Segment segment)
+        {
+            int index = parent.segments.IndexOf(segment);
+            if (index + 1 > parent.segments.Count - 1)
+                return parent.segments[0];
+            return parent.segments[index + 1];
+        }
+
+        private List<Polygon> BuildConvexPolygons()
+        {
+            Polygon polygon = new Polygon(new Vertex[] { new Vertex(), new Vertex(), new Vertex() }, null, false, false);
+            List<Vertex> vertices = new List<Vertex>();
+
+            foreach (Segment segment in project.shapes[0].segments)
+            {
+                if (segment.type == SegmentType.Linear)
+                {
+                    vertices.Add(new Vertex((Vector2)segment.position, Vector3.zero, Vector2.zero));
+                }
+                else
+                {
+                    foreach(Edge edge in GetBezierEdges(segment, GetNextSegment(project.shapes[0], segment)))
+                    {
+                        vertices.Add(new Vertex(edge.Vertex1.Position, Vector3.zero, Vector2.zero));
+                    }
+                }
+            }
+
+            polygon.Vertices = vertices.ToArray();
+
+            List<Edge> edges = KeilPolygonDecomposition(polygon);
+
+            makeCCW(polygon);
+            List<Polygon> polygons = new List<Polygon>();
+
+            if (edges.Count == 0)
+            {
+                polygons.Add(polygon);
+            }
+            else
+            {
+                //List<Polygon> resultPolygons = new List<Polygon>();
+                //SplitThem(resultPolygons, polygon.Vertices.ToList(), edges.ToList(), edges[0]);
+                foreach (Edge edge in edges)
+                {
+                    Polygon frontPolygon;
+                    Polygon backPolygon;
+                    Vertex v1;
+                    Vertex v2;
+                    if (Polygon.SplitPolygon(polygon, out frontPolygon, out backPolygon, out v1, out v2, new Plane(edge.Vertex1.Position, edge.Vertex2.Position, Vector3.forward)))
+                    {
+                        polygons.Add(frontPolygon);
+                        polygons.Add(backPolygon);
+                    }
+                    else
+                    {
+                        Debug.Log("Polygon.SplitPolygon Failure");
+                    }
+                }
+            }
+
+            Debug.Log(polygons.Count.ToString() + " x " + edges.Count.ToString());
+            return polygons;
+        }
+
+        //private void SplitThem(List<Polygon> resultPolygons, List<Vertex> polygonVertices, List<Edge> keilEdges, Edge currentEdge)
+        //{
+        //    // follow the vertices left until we reach the other end of our edge.
+        //    bool start = false;
+        //    foreach (var v in polygonVertices)
+        //    {
+        //        if (v == currentEdge.Vertex1)
+        //            start = true;
+        //        if (v == currentEdge.Vertex2)
+        //    }
+
+        //}
 
         /// <summary>
         /// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
@@ -474,6 +237,199 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             Plane plane = new Plane(polygon.Vertices[1].Position, polygon.Vertices[2].Position, polygon.Vertices[3].Position);
             foreach (Vertex vertex in polygon.Vertices)
                 vertex.Normal = plane.normal;
+        }
+
+        private static float Area(Vector2 a, Vector2 b, Vector2 c) {
+            return (((b.x - a.x)*(c.y - a.y))-((c.x - a.x)*(b.y - a.y)));
+        }
+
+        private static bool left(Vector2 a, Vector2 b, Vector2 c) {
+            return Area(a, b, c) > 0;
+        }
+
+        private static bool leftOn(Vector2 a, Vector2 b, Vector2 c) {
+            return Area(a, b, c) >= 0;
+        }
+
+        private static bool right(Vector2 a, Vector2 b, Vector2 c) {
+            return Area(a, b, c) < 0;
+        }
+
+        private static bool rightOn(Vector2 a, Vector2 b, Vector2 c) {
+            return Area(a, b, c) <= 0;
+        }
+
+        private static bool collinear(Vector2 a, Vector2 b, Vector2 c) {
+            return Area(a, b, c) == 0;
+        }
+
+        private static float sqdist(Vector2 a, Vector2 b) {
+            float dx = b.x - a.x;
+            float dy = b.y - a.y;
+            return dx * dx + dy * dy;
+        }
+
+        private static Vector2 at(Polygon polygon, int i) {
+            int s = polygon.Vertices.Length;
+            return polygon.Vertices[i < 0 ? i % s + s : i % s].Position;
+        }
+
+        private static bool isReflex(Polygon polygon, int i) {
+            return right(at(polygon, i - 1), at(polygon, i), at(polygon, i + 1));
+        }
+
+        private static bool eq(float a, float b) {
+            return Mathf.Abs(a - b) <= 1e-5f;
+        }
+
+        private static Vector2 lineInt(Edge l1, Edge l2) {
+            Vector2 i = new Vector2();
+            float a1, b1, c1, a2, b2, c2, det;
+            a1 = l1.Vertex2.Position.y - l1.Vertex1.Position.y;
+            b1 = l1.Vertex1.Position.x - l1.Vertex2.Position.x;
+            c1 = a1 * l1.Vertex1.Position.x + b1 * l1.Vertex1.Position.y;
+            a2 = l2.Vertex2.Position.y - l2.Vertex1.Position.y;
+            b2 = l2.Vertex1.Position.x - l2.Vertex2.Position.x;
+            c2 = a2 * l2.Vertex1.Position.x + b2 * l2.Vertex1.Position.y;
+            det = a1 * b2 - a2*b1;
+            if (!eq(det, 0)) { // lines are not parallel
+                i.x = (b2 * c1 - b1 * c2) / det;
+                i.y = (a1 * c2 - a2 * c1) / det;
+            }
+            return i;
+        }
+
+        private static Edge Line(Vector2 a, Vector2 b)
+        {
+            return new Edge(new Vertex(a, Vector3.zero, Vector2.zero), new Vertex(b, Vector3.zero, Vector2.zero));
+        }
+
+        private static bool canSee(Polygon polygon, int a, int b) {
+            Vector2 p;
+            float dist;
+
+            if (leftOn(at(polygon, a + 1), at(polygon, a), at(polygon, b)) && rightOn(at(polygon, a - 1), at(polygon, a), at(polygon, b))) {
+                return false;
+            }
+            dist = sqdist(at(polygon, a), at(polygon, b));
+            for (int i = 0; i < polygon.Vertices.Length; ++i) { // for each edge
+                if ((i + 1) % polygon.Vertices.Length == a || i == a) // ignore incident edges
+                    continue;
+                if (leftOn(at(polygon, a), at(polygon, b), at(polygon, i + 1)) && rightOn(at(polygon, a), at(polygon, b), at(polygon, i))) { // if diag intersects an edge
+                    p = lineInt(Line(at(polygon, a), at(polygon, b)), Line(at(polygon, i), at(polygon, i + 1)));
+                    if (sqdist(at(polygon, a), p) < dist) { // if edge is blocking visibility to b
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static Polygon copy(Polygon polygon, int i, int j) {
+            Polygon p = new Polygon(new Vertex[] { new Vertex(), new Vertex(), new Vertex() }, null, false, false);
+            if (i < j) {
+                //p.v.insert(p.v.begin(), v.begin() + i, v.begin() + j + 1);
+                List<Vertex> v = new List<Vertex>();//polygon.Vertices.ToList();
+                v.InsertRange(0, polygon.Vertices.Skip(i).Take(j + 1));
+                p.Vertices = v.ToArray();
+            } else {
+                //p.v.insert(p.v.begin(), v.begin() + i, v.end());
+                //p.v.insert(p.v.end(), v.begin(), v.begin() + j + 1);
+                List<Vertex> v = new List<Vertex>();
+                v.InsertRange(0, polygon.Vertices.Skip(i));
+                v.AddRange(polygon.Vertices.Take(j + 1));
+                p.Vertices = v.ToArray();
+            }
+            return p;
+        }
+
+        private static void makeCCW(Polygon polygon)
+        {
+            int br = 0;
+
+            // find bottom right point
+            for (int i = 1; i < polygon.Vertices.Length; ++i)
+            {
+                if (polygon.Vertices[i].Position.y < polygon.Vertices[br].Position.y || (polygon.Vertices[i].Position.y == polygon.Vertices[br].Position.y && polygon.Vertices[i].Position.x > polygon.Vertices[br].Position.x))
+                {
+                    br = i;
+                }
+            }
+
+            // reverse poly if clockwise
+            if (!left(at(polygon, br - 1), at(polygon, br), at(polygon, br + 1)))
+            {
+                reverse(polygon);
+            }
+        }
+
+        private static void reverse(Polygon polygon)
+        {
+            polygon.Vertices = polygon.Vertices.Reverse().ToArray();
+        }
+
+        private static List<Edge> KeilPolygonDecomposition(Polygon polygon)
+        {
+            List<Edge> min = new List<Edge>();
+            List<Edge> tmp1 = new List<Edge>();
+            List<Edge> tmp2 = new List<Edge>();
+            int ndiags = int.MaxValue;
+
+            for (int i = 0; i < polygon.Vertices.Length; ++i)
+            {
+                if (isReflex(polygon, i))
+                {
+                    for (int j = 0; j < polygon.Vertices.Length; ++j)
+                    {
+                        if (canSee(polygon, i, j))
+                        {
+                            tmp1 = KeilPolygonDecomposition(copy(polygon, i, j));
+                            tmp2 = KeilPolygonDecomposition(copy(polygon, j, i));
+                            //tmp1.insert(tmp1.end(), tmp2.begin(), tmp2.end());
+                            tmp1.AddRange(tmp2);
+                            if (tmp1.Count < ndiags)
+                            {
+                                min = tmp1;
+                                ndiags = tmp1.Count;
+                                min.Add(Line(at(polygon, i), at(polygon, j)));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return min;
+        }
+
+        private static List<Edge> GetBezierEdges(Segment segment, Segment next)
+        {
+            List<Edge> edges = new List<Edge>();
+            Vector3 lineStart = Bezier.GetPoint(new Vector3(segment.position.x, segment.position.y), new Vector3(segment.bezierPivot1.position.x, segment.bezierPivot1.position.y), new Vector3(segment.bezierPivot2.position.x, segment.bezierPivot2.position.y), new Vector3(next.position.x, next.position.y), 0f);
+            for (int i = 1; i <= segment.bezierDetail + 1; i++)
+            {
+                Vector3 lineEnd = Bezier.GetPoint(new Vector3(segment.position.x, segment.position.y), new Vector3(segment.bezierPivot1.position.x, segment.bezierPivot1.position.y), new Vector3(segment.bezierPivot2.position.x, segment.bezierPivot2.position.y), new Vector3(next.position.x, next.position.y), i / (float)(segment.bezierDetail + 1));
+                edges.Add(new Edge(new Vertex(new Vector3(lineStart.x, lineStart.y), Vector3.zero, Vector2.zero), new Vertex(new Vector3(lineEnd.x, lineEnd.y), Vector3.zero, Vector2.zero)));
+                lineStart = lineEnd;
+            }
+            return edges;
+        }
+
+        /// <summary>
+        /// Provides methods for calculating bezier splines.
+        /// </summary>
+        private static class Bezier
+        {
+            public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+            {
+                t = Mathf.Clamp01(t);
+                float OneMinusT = 1f - t;
+                return
+                    OneMinusT * OneMinusT * OneMinusT * p0 +
+                    3f * OneMinusT * OneMinusT * t * p1 +
+                    3f * OneMinusT * t * t * p2 +
+                    t * t * t * p3;
+            }
         }
     }
 }

@@ -157,18 +157,18 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (segment != null)
                     return segment.bezierPivot2;
             }
-            // the shape pivots have medium-low priority.
-            foreach (Shape shape in project.shapes)
-            {
-                if (shape.pivot.position == position)
-                    return shape.pivot;
-            }
-            // the segments have the lowest priority.
+            // the segments have the medium-low priority.
             foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.position == position);
                 if (segment != null)
                     return segment;
+            }
+            // the shape pivots have lowest priority.
+            foreach (Shape shape in project.shapes)
+            {
+                if (shape.pivot.position == position)
+                    return shape.pivot;
             }
             // nothing was found.
             return null;
@@ -179,8 +179,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             // get existing open window or if none, make a new one:
             ShapeEditorBrushWindow window = GetWindow<ShapeEditorBrushWindow>();
+            window.minSize = new Vector2(800, 600);
             window.Show();
             window.titleContent = new GUIContent("Shape Editor");
+            window.minSize = new Vector2(128, 128);
         }
 
         private void OnGUI()
@@ -273,14 +275,64 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // implement keyboard shortcuts.
             if (Event.current.type == EventType.KeyDown)
             {
-                if (Event.current.keyCode == KeyCode.Delete)
+                if (Event.current.keyCode == KeyCode.N)
                 {
-                    OnDelete();
+                    OnNew();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.O)
+                {
+                    OnOpen();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.S)
+                {
+                    OnSave();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.R && Event.current.modifiers != 0)
+                {
+                    OnRotate90Left();
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.R)
+                {
+                    OnRotate90Right();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.H)
+                {
+                    OnFlipHorizontally();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.V)
+                {
+                    OnFlipVertically();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Plus || Event.current.keyCode == KeyCode.KeypadPlus)
+                {
+                    OnZoomIn();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Minus || Event.current.keyCode == KeyCode.KeypadMinus)
+                {
+                    OnZoomOut();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.A)
+                {
+                    OnShapeCreate();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.I)
                 {
                     OnSegmentInsert();
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Delete)
+                {
+                    OnDelete();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.L)
@@ -296,36 +348,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (Event.current.keyCode == KeyCode.D)
                 {
                     OnSegmentBezierDetail();
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.Plus || Event.current.keyCode == KeyCode.KeypadPlus)
-                {
-                    OnZoomIn();
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.Minus || Event.current.keyCode == KeyCode.KeypadMinus)
-                {
-                    OnZoomOut();
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.V)
-                {
-                    OnFlipVertically();
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.H)
-                {
-                    OnFlipHorizontally();
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.R && Event.current.modifiers != 0)
-                {
-                    OnRotate90Left();
-                    Event.current.Use();
-                }
-                else if (Event.current.keyCode == KeyCode.R)
-                {
-                    OnRotate90Right();
                     Event.current.Use();
                 }
             }
@@ -468,92 +490,92 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
             GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorNewTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorNewTexture, "New Project (N)"), createBrushStyle))
             {
                 OnNew();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorOpenTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorOpenTexture, "Open Project (O)"), createBrushStyle))
             {
                 OnOpen();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorSaveTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSaveTexture, "Save Project (S)"), createBrushStyle))
             {
                 OnSave();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorRotate90LeftTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorRotate90LeftTexture, "Rotate 90° Left Around Pivot (SHIFT + R)"), createBrushStyle))
             {
                 OnRotate90Left();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorRotate90RightTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorRotate90RightTexture, "Rotate 90° Right Around Pivot (R)"), createBrushStyle))
             {
                 OnRotate90Right();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorFlipVerticallyTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorFlipVerticallyTexture, "Flip Vertically At Pivot (V)"), createBrushStyle))
             {
                 OnFlipVertically();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorFlipHorizontallyTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorFlipHorizontallyTexture, "Flip Horizontally At Pivot (H)"), createBrushStyle))
             {
                 OnFlipHorizontally();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorZoomInTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorZoomInTexture, "Zoom In (+)"), createBrushStyle))
             {
                 OnZoomIn();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorZoomOutTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorZoomOutTexture, "Zoom Out (-)"), createBrushStyle))
             {
                 OnZoomOut();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorShapeCreateTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeCreateTexture, "Add New Shape (A)"), createBrushStyle))
             {
                 OnShapeCreate();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorSegmentInsertTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentInsertTexture, "Split Segment(s) (I)"), createBrushStyle))
             {
                 OnSegmentInsert();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorDeleteTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorDeleteTexture, "Delete Segment(s) or Shape(s) (DEL)"), createBrushStyle))
             {
                 OnDelete();
             }
 
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorSegmentLinearTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentLinearTexture, "Linear Segment (L)"), createBrushStyle))
             {
                 OnSegmentLinear();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorSegmentBezierTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentBezierTexture, "Bezier Segment (B)"), createBrushStyle))
             {
                 OnSegmentBezier();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorSegmentBezierDetailTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentBezierDetailTexture, "Bezier Detail Settings (D)"), createBrushStyle))
             {
                 OnSegmentBezierDetail();
             }
 
             GUI.enabled = (Selection.activeGameObject && Selection.activeGameObject.HasComponent<ShapeEditor.ShapeEditorBrush>());
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorCreatePolygonTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorCreatePolygonTexture, "Create Polygon"), createBrushStyle))
             {
                 OnCreatePolygon();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, "Revolve Shape"), createBrushStyle))
             {
                 OnExtrudeRevolve();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorExtrudeShapeTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeShapeTexture, "Extrude Shape"), createBrushStyle))
             {
                 OnExtrudeShape();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorExtrudePointTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudePointTexture, "Extrude To Point"), createBrushStyle))
             {
                 OnExtrudePoint();
             }
-            if (GUILayout.Button(SabreCSGResources.ShapeEditorExtrudeBevelTexture, createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeBevelTexture, "Extrude Bevelled"), createBrushStyle))
             {
                 OnExtrudeBevel();
             }
@@ -911,7 +933,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudeShape()
         {
-            ShowCenteredPopupWindowContent(new ShapeEditorExtrudeShapePopupWindowContent());
+            //ShowCenteredPopupWindowContent(new ShapeEditorExtrudeShapePopupWindowContent());
+            Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(
+                // we use the json utility to clone the project.
+                JsonUtility.FromJson<Project>(JsonUtility.ToJson(project))
+            );
         }
 
         /// <summary>
