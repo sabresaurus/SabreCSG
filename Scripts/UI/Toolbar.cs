@@ -392,7 +392,7 @@ namespace Sabresaurus.SabreCSG
 
             if (GUI.Button(new Rect(90, createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), SabreCSGResources.ButtonShapeEditorTexture, createBrushStyle))
             {
-                CreateCompoundBrush<ShapeEditorBrush>();
+                CreateCompoundBrush<ShapeEditor.ShapeEditorBrush>();
             }
 
             if (GUI.Button(new Rect(120,createBrushStyle.fixedHeight, 30, createBrushStyle.fixedHeight), "...", createBrushStyle))

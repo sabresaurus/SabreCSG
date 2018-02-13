@@ -2,11 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.ShapeEditor
 {
     /// <summary>
     /// The 2D Shape Editor Window.
@@ -15,154 +16,15 @@ namespace Sabresaurus.SabreCSG
     /// <seealso cref="UnityEditor.EditorWindow"/>
     public class ShapeEditorBrushWindow : EditorWindow
     {
-        /// <summary>
-        /// The type of segment.
-        /// </summary>
-        public enum SegmentType
-        {
-            Linear,
-            Bezier
-        }
-
-        /// <summary>
-        /// Any object that can be selected in the 2D Shape Editor.
-        /// </summary>
-        public interface ISelectable
-        {
-            /// <summary>
-            /// The position of the object on the grid.
-            /// </summary>
-            Vector2Int position { get; set; }
-        }
-
-        /// <summary>
-        /// A 2D Shape Editor Shape.
-        /// </summary>
-        [Serializable]
-        public class Shape
-        {
-            /// <summary>
-            /// The segments of the shape.
-            /// </summary>
-            [SerializeField]
-            public List<Segment> segments = new List<Segment>() {
-                new Segment(-8, -8),
-                new Segment( 8, -8),
-                new Segment( 8,  8),
-                new Segment(-8,  8),
-            };
-
-            /// <summary>
-            /// The center pivot of the shape.
-            /// </summary>
-            public Pivot pivot = new Pivot();
-
-            /// <summary>
-            /// Calculates the pivot position so that it's centered on the shape.
-            /// </summary>
-            public void CalculatePivotPosition()
-            {
-                Vector2Int center = new Vector2Int();
-                foreach (Segment segment in segments)
-                    center += segment.position;
-                pivot.position = new Vector2Int(center.x / segments.Count, center.y / segments.Count);
-            }
-        }
-
-        /// <summary>
-        /// A 2D Shape Editor Segment.
-        /// </summary>
-        [Serializable]
-        public class Segment : ISelectable
-        {
-            /// <summary>
-            /// The position of the segment on the grid.
-            /// </summary>
-            [SerializeField]
-            private Vector2Int _position;
-
-            /// <summary>
-            /// The position of the segment on the grid.
-            /// </summary>
-            public Vector2Int position
-            {
-                get { return _position; }
-                set { _position = value; }
-            }
-
-            /// <summary>
-            /// The segment type.
-            /// </summary>
-            [SerializeField]
-            public SegmentType type = SegmentType.Linear;
-
-            /// <summary>
-            /// The first bezier pivot (see <see cref="SegmentType.Bezier"/>).
-            /// </summary>
-            [SerializeField]
-            public Pivot bezierPivot1 = new Pivot();
-
-            /// <summary>
-            /// The second bezier pivot (see <see cref="SegmentType.Bezier"/>).
-            /// </summary>
-            [SerializeField]
-            public Pivot bezierPivot2 = new Pivot();
-
-            [SerializeField]
-            public int bezierDetail = 3;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Segment"/> class.
-            /// </summary>
-            /// <param name="x">The x-coordinate on the grid.</param>
-            /// <param name="y">The y-coordinate on the grid.</param>
-            public Segment(int x, int y)
-            {
-                this.position = new Vector2Int(x, y);
-            }
-        }
-
-        /// <summary>
-        /// A 2D Shape Editor Pivot.
-        /// </summary>
-        [Serializable]
-        public class Pivot : ISelectable
-        {
-            /// <summary>
-            /// The position of the pivot on the grid.
-            /// </summary>
-            [SerializeField]
-            private Vector2Int _position;
-
-            /// <summary>
-            /// The position of the pivot on the grid.
-            /// </summary>
-            public Vector2Int position
-            {
-                get { return _position; }
-                set { _position = value; }
-            }
-        }
-
-        /// <summary>
-        /// The shapes in the project.
-        /// </summary>
-        [SerializeField]
-        private List<Shape> shapes = new List<Shape>()
-        {
-            new Shape()
-        };
-
-        /// <summary>
-        /// The global pivot in the project.
-        /// </summary>
-        [SerializeField]
-        private Pivot globalPivot = new Pivot();
-
         //private class FakeUndoObject : UnityEngine.Object
         //{
         //    // todo
         //}
+
+        /// <summary>
+        /// The currently loaded project.
+        /// </summary>
+        public Project project = new Project();
 
         /// <summary>
         /// The viewport scroll position.
@@ -213,7 +75,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-                return IsObjectSelected(globalPivot);
+                return IsObjectSelected(project.globalPivot);
             }
         }
 
@@ -243,7 +105,7 @@ namespace Sabresaurus.SabreCSG
         /// <returns>The shape that the segment belongs to.</returns>
         private Shape GetShapeOfSegment(Segment segment)
         {
-            return shapes.Where((shape) => shape.segments.Contains(segment)).FirstOrDefault();
+            return project.shapes.Where((shape) => shape.segments.Contains(segment)).FirstOrDefault();
         }
 
         /// <summary>
@@ -283,10 +145,10 @@ namespace Sabresaurus.SabreCSG
         private ISelectable GetObjectAtGridPosition(Vector2Int position)
         {
             // the global pivot point has the highest selection priority.
-            if (globalPivot.position == position)
-                return globalPivot;
+            if (project.globalPivot.position == position)
+                return project.globalPivot;
             // the bezier segment pivots have medium-high priority.
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.type == SegmentType.Bezier && s.bezierPivot1.position == position);
                 if (segment != null)
@@ -296,13 +158,13 @@ namespace Sabresaurus.SabreCSG
                     return segment.bezierPivot2;
             }
             // the shape pivots have medium-low priority.
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 if (shape.pivot.position == position)
                     return shape.pivot;
             }
             // the segments have the lowest priority.
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.position == position);
                 if (segment != null)
@@ -334,11 +196,11 @@ namespace Sabresaurus.SabreCSG
                         // move the global pivot.
                         if (isGlobalPivotSelected)
                         {
-                            globalPivot.position = grid;
+                            project.globalPivot.position = grid;
                             this.Repaint();
                         }
                         // move an entire shape by its pivot.
-                        foreach (Shape shape in shapes)
+                        foreach (Shape shape in project.shapes)
                         {
                             if (IsObjectSelected(shape.pivot))
                             {
@@ -531,7 +393,7 @@ namespace Sabresaurus.SabreCSG
                 GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.height);
 
                 // draw all of the segments:
-                foreach (Shape shape in shapes)
+                foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
                     {
@@ -575,7 +437,7 @@ namespace Sabresaurus.SabreCSG
 
                 // draw the handles on the corners of the segments.
                 Handles.color = Color.white;
-                foreach (Shape shape in shapes)
+                foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
                     {
@@ -599,7 +461,7 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 // draw the global pivot point.
-                Vector2 pivotScreenPosition = GridPointToScreen(globalPivot.position);
+                Vector2 pivotScreenPosition = GridPointToScreen(project.globalPivot.position);
                 Handles.DrawSolidRectangleWithOutline(new Rect(pivotScreenPosition.x - 4.0f, pivotScreenPosition.y - 4.0f, 8.0f, 8.0f), Color.white, isGlobalPivotSelected ? Color.red : Color.green);
             }
 
@@ -674,7 +536,7 @@ namespace Sabresaurus.SabreCSG
                 OnSegmentBezierDetail();
             }
 
-            GUI.enabled = (Selection.activeGameObject && Selection.activeGameObject.HasComponent<ShapeEditorBrush>());
+            GUI.enabled = (Selection.activeGameObject && Selection.activeGameObject.HasComponent<ShapeEditor.ShapeEditorBrush>());
             if (GUILayout.Button(SabreCSGResources.ShapeEditorCreatePolygonTexture, createBrushStyle))
             {
                 OnCreatePolygon();
@@ -709,7 +571,7 @@ namespace Sabresaurus.SabreCSG
         /// <param name="pivot">The pivot to rotate around.</param>
         private void RotateSegments(float degrees, Vector2Int pivot)
         {
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 foreach (Segment segment in shape.segments)
                 {
@@ -753,10 +615,8 @@ namespace Sabresaurus.SabreCSG
         {
             if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to create a new project?", "Yes", "No"))
             {
-                // reset the shapes to the default cube.
-                shapes = new List<Shape>() { new Shape() };
-                // reset the global pivot point.
-                globalPivot = new Pivot();
+                // create a new project.
+                project = new Project();
             }
         }
 
@@ -765,7 +625,30 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnOpen()
         {
-            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "Aww!");
+            try
+            {
+                string path = EditorUtility.OpenFilePanel("Load 2D Shape Editor Project", "", "sabre2d");
+                if (path.Length != 0)
+                {
+                    Project proj = JsonUtility.FromJson<Project>(File.ReadAllText(path));
+                    // incompatible project version detected!
+                    if (proj.version != 1)
+                    {
+                        if (EditorUtility.DisplayDialog("2D Shape Editor", "Unsupported project version! Would you like to try loading it anyway?", "Yes", "No"))
+                            project = proj;
+                        Repaint();
+                    }
+                    else
+                    {
+                        project = proj;
+                        Repaint();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "An exception occured while loading the project:\r\n" + ex.Message, "Ohno!");
+            }
         }
 
         /// <summary>
@@ -773,7 +656,19 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnSave()
         {
-            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "Aww!");
+            try
+            {
+                string path = EditorUtility.SaveFilePanel("Save 2D Shape Editor Project", "", "Project", "sabre2d");
+                if (path.Length != 0)
+                {
+                    string json = JsonUtility.ToJson(project);
+                    File.WriteAllText(path, json);
+                }
+            }
+            catch (Exception ex)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "An exception occured while saving the project:\r\n" + ex.Message, "Ohno!");
+            }
         }
 
         /// <summary>
@@ -781,7 +676,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnRotate90Left()
         {
-            RotateSegments(-90, globalPivot.position);
+            RotateSegments(-90, project.globalPivot.position);
         }
 
         /// <summary>
@@ -789,7 +684,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnRotate90Right()
         {
-            RotateSegments(90, globalPivot.position);
+            RotateSegments(90, project.globalPivot.position);
         }
 
         /// <summary>
@@ -797,15 +692,15 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnFlipVertically()
         {
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 foreach (Segment segment in shape.segments)
                 {
                     // flip segment.
-                    segment.position = new Vector2Int(segment.position.x, -segment.position.y + (globalPivot.position.y * 2));
+                    segment.position = new Vector2Int(segment.position.x, -segment.position.y + (project.globalPivot.position.y * 2));
                     // flip bezier pivot handles.
-                    segment.bezierPivot1.position = new Vector2Int(segment.bezierPivot1.position.x, -segment.bezierPivot1.position.y + (globalPivot.position.y * 2));
-                    segment.bezierPivot2.position = new Vector2Int(segment.bezierPivot2.position.x, -segment.bezierPivot2.position.y + (globalPivot.position.y * 2));
+                    segment.bezierPivot1.position = new Vector2Int(segment.bezierPivot1.position.x, -segment.bezierPivot1.position.y + (project.globalPivot.position.y * 2));
+                    segment.bezierPivot2.position = new Vector2Int(segment.bezierPivot2.position.x, -segment.bezierPivot2.position.y + (project.globalPivot.position.y * 2));
                 }
 
                 // recalculate the pivot position of the shape.
@@ -818,15 +713,15 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnFlipHorizontally()
         {
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 foreach (Segment segment in shape.segments)
                 {
                     // flip segment.
-                    segment.position = new Vector2Int(-segment.position.x + (globalPivot.position.x * 2), segment.position.y);
+                    segment.position = new Vector2Int(-segment.position.x + (project.globalPivot.position.x * 2), segment.position.y);
                     // flip bezier pivot handles.
-                    segment.bezierPivot1.position = new Vector2Int(-segment.bezierPivot1.position.x + (globalPivot.position.x * 2), segment.bezierPivot1.position.y);
-                    segment.bezierPivot2.position = new Vector2Int(-segment.bezierPivot2.position.x + (globalPivot.position.x * 2), segment.bezierPivot2.position.y);
+                    segment.bezierPivot1.position = new Vector2Int(-segment.bezierPivot1.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot1.position.y);
+                    segment.bezierPivot2.position = new Vector2Int(-segment.bezierPivot2.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot2.position.y);
                 }
 
                 // recalculate the pivot position of the shape.
@@ -873,7 +768,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnShapeCreate()
         {
-            shapes.Add(new Shape());
+            project.shapes.Add(new Shape());
         }
 
         /// <summary>
@@ -903,7 +798,7 @@ namespace Sabresaurus.SabreCSG
         private void OnDelete()
         {
             // prevent the user from deleting too much.
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 if (shape.segments.Count - selectedSegments.Count() < 3)
                 {
@@ -921,11 +816,11 @@ namespace Sabresaurus.SabreCSG
                 parent.CalculatePivotPosition();
             }
             // remove all selected shapes.
-            foreach (Shape shape in shapes.ToArray()) // use .ToArray() to iterate a clone.
+            foreach (Shape shape in project.shapes.ToArray()) // use .ToArray() to iterate a clone.
             {
                 if (IsObjectSelected(shape.pivot))
                 {
-                    shapes.Remove(shape);
+                    project.shapes.Remove(shape);
                     selectedObjects.Remove(shape.pivot);
                 }
             }
@@ -937,7 +832,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private void OnSegmentLinear()
         {
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in project.shapes)
             {
                 foreach (Segment segment in shape.segments)
                 {
@@ -981,7 +876,7 @@ namespace Sabresaurus.SabreCSG
         {
             // let the user choose the amount of bezier curve detail.
             ShowCenteredPopupWindowContent(new ShapeEditorBezierDetailPopupWindowContent((customDetail) => {
-                foreach (Shape shape in shapes)
+                foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
                     {

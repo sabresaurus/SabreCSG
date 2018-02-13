@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+using Sabresaurus.SabreCSG.ShapeEditor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
