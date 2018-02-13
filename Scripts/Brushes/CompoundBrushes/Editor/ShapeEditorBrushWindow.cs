@@ -170,6 +170,11 @@ namespace Sabresaurus.SabreCSG
         private Vector2 viewportScroll = new Vector2(100.0f, 100.0f);
 
         /// <summary>
+        /// The initialized flag, used to scroll the project into the center of the window.
+        /// </summary>
+        private bool initialized = false;
+
+        /// <summary>
         /// The grid scale.
         /// </summary>
         private int gridScale = 16;
@@ -183,6 +188,11 @@ namespace Sabresaurus.SabreCSG
         /// The line material.
         /// </summary>
         private Material lineMaterial;
+
+        /// <summary>
+        /// The grid material.
+        /// </summary>
+        private Material gridMaterial;
 
         /// <summary>
         /// The currently selected segments.
@@ -468,12 +478,16 @@ namespace Sabresaurus.SabreCSG
 
             if (Event.current.type == EventType.Repaint)
             {
+                if (!initialized)
+                {
+                    initialized = true;
+                    // scroll to the center of the screen.
+                    viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
+                }
+
                 GUI.color = Color.white;
                 GUI.DrawTexture(GetViewportRect(), EditorGUIUtility.whiteTexture);
                 EditorGUIUtility.AddCursorRect(GetViewportRect(), MouseCursor.MoveArrow);
-
-                GL.Begin(GL.QUADS);
-                GL.LoadIdentity();
 
                 if (lineMaterial == null)
                 {
@@ -481,9 +495,40 @@ namespace Sabresaurus.SabreCSG
                     lineMaterial = new Material(shader);
                 }
 
+                if (gridMaterial == null)
+                {
+                    var shader = Shader.Find("SabreCSG/ShapeEditorGrid");
+                    gridMaterial = new Material(shader);
+                }
+
+                // draw the grid using the special grid shader:
+                gridMaterial.SetFloat("_OffsetX", GetViewportRect().x);
+                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + 3);
+                gridMaterial.SetFloat("_ScrollX", viewportScroll.x);
+                gridMaterial.SetFloat("_ScrollY", viewportScroll.y);
+                gridMaterial.SetFloat("_Zoom", gridScale);
+                gridMaterial.SetPass(0);
+
+                GL.Begin(GL.QUADS);
+                GL.LoadIdentity();
+                Rect viewportRect = GetViewportRect();
+                GL.Color(Color.red);
+                GlDrawRectangle(viewportRect.x, viewportRect.y, viewportRect.width, viewportRect.height);
+                GL.End();
+                ///////////////////////////////////////////////////////////////////////////////////
+
                 lineMaterial.SetPass(0);
 
-                DrawGrid();
+                GL.Begin(GL.QUADS);
+                GL.LoadIdentity();
+
+                // this should be done in the shader instead:
+                // draw the center lines of the grid:
+
+                Vector2 center = GridPointToScreen(new Vector2Int(0, 0));
+                GL.Color(new Color(0.882f, 0.882f, 0.882f));
+                GlDrawLine(3.0f, 0.0f, center.y, viewportRect.width, center.y);
+                GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.height);
 
                 // draw all of the segments:
                 foreach (Shape shape in shapes)
@@ -710,6 +755,8 @@ namespace Sabresaurus.SabreCSG
             {
                 // reset the shapes to the default cube.
                 shapes = new List<Shape>() { new Shape() };
+                // reset the global pivot point.
+                globalPivot = new Pivot();
             }
         }
 
@@ -989,7 +1036,7 @@ namespace Sabresaurus.SabreCSG
         private Rect GetViewportRect()
         {
             Rect viewportRect = Screen.safeArea;
-            viewportRect.y += 17;
+            viewportRect.y += 18;
             viewportRect.height -= 40;
             return viewportRect;
         }
@@ -1076,48 +1123,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        private void DrawGrid()
+        private void GlDrawRectangle(float x, float y, float w, float h)
         {
-            Rect viewportRect = GetViewportRect();
-            viewportRect.width += (gridScale * 8.0f);
-            viewportRect.height += (gridScale * 8.0f);
-
-            float ix = (-gridScale * 8.0f) + viewportScroll.x % (gridScale * 8.0f);
-            float iy = (-gridScale * 8.0f) + viewportScroll.y % (gridScale * 8.0f);
-
-            for (int x = 0; x < viewportRect.width / gridScale; x++)
-            {
-                for (int y = 0; y < viewportRect.height / gridScale; y++)
-                {
-
-                    if (x % 8 == 0 || y % 8 == 7)
-                    {
-                        GL.Color(new Color(0.843f, 0.843f, 0.843f));
-                    }
-                    else
-                    {
-                        GL.Color(new Color(0.922f, 0.922f, 0.922f));
-                    }
-                    float x1 = ix + x; x1 = x1 < 0.0f ? 0.0f : x1;
-                    float y1 = iy + (viewportRect.y + (y * gridScale)); y1 = y1 < viewportRect.y ? viewportRect.y : y1;
-                    float x2 = ix + (x + viewportRect.width); x2 = x2 > viewportRect.width ? viewportRect.width : x2;
-                    float y2 = iy + (viewportRect.y + (y * gridScale)); y2 = y2 < viewportRect.y ? viewportRect.y : y2;
-                    GlDrawLine(1.0f, x1, y1, x2, y2);
-
-                    x1 = ix + (x * gridScale); x1 = x1 < 0.0f ? 0.0f : x1;
-                    y1 = iy + (viewportRect.y + y); y1 = y1 < viewportRect.y ? viewportRect.y : y1;
-                    x2 = ix + (x * gridScale); x2 = x2 > viewportRect.width ? viewportRect.width : x2;
-                    y2 = iy + (viewportRect.y + y + viewportRect.height); y2 = y2 < viewportRect.y ? viewportRect.y : y2;
-                    GlDrawLine(1.0f, x1, y1, x2, y2);
-                }
-            }
-
-            Vector2 center = GridPointToScreen(new Vector2Int(0, 0));
-            GL.Color(new Color(0.882f, 0.882f, 0.882f));
-
-            GlDrawLine(3.0f, 0.0f, center.y, viewportRect.width, center.y);
-
-            GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.height);
+            w += x;
+            h += y;
+            GL.Vertex3(x, y, 0);
+            GL.Vertex3(x, h, 0);
+            GL.Vertex3(w, h, 0);
+            GL.Vertex3(w, y, 0);
         }
 
         /// <summary>
