@@ -228,7 +228,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // create convex polygons:
                 Vector2[] outputVertices;
                 int[] indices;
-                Triangulator.Triangulator.Triangulate(vertices.ToArray(), Triangulator.WindingOrder.CounterClockwise, out outputVertices, out indices);
+
+                // in project v1 we use the horizontal and vertical flags to keep track of the correct winding order.
+                Vector2[] inputVertices = vertices.ToArray();
+                if (project.flipHorizontally && !project.flipVertically)
+                    inputVertices = Triangulator.Triangulator.ReverseWindingOrder(inputVertices);
+                if (!project.flipHorizontally && project.flipVertically)
+                    inputVertices = Triangulator.Triangulator.ReverseWindingOrder(inputVertices);
+
+                Triangulator.Triangulator.Triangulate(inputVertices, Triangulator.WindingOrder.CounterClockwise, out outputVertices, out indices);
 
                 for (int i = 0; i < indices.Length; i += 3)
                 {

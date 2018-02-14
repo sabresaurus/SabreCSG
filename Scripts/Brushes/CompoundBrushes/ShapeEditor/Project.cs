@@ -35,6 +35,16 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public Pivot globalPivot = new Pivot();
 
         /// <summary>
+        /// Whether the project was flipped horizontally.
+        /// </summary>
+        public bool flipHorizontally = false;
+
+        /// <summary>
+        /// Whether the project was flipped vertically.
+        /// </summary>
+        public bool flipVertically = false;
+
+        /// <summary>
         /// Clones this project and returns the copy.
         /// </summary>
         /// <returns>A copy of the project.</returns>
