@@ -733,6 +733,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     segment.bezierPivot2.position = new Vector2Int(segment.bezierPivot2.position.x, -segment.bezierPivot2.position.y + (project.globalPivot.position.y * 2));
                 }
 
+                // invert the shape segments to make it clockwise again.
+                shape.segments.Reverse();
+
                 // recalculate the pivot position of the shape.
                 shape.CalculatePivotPosition();
             }
@@ -753,6 +756,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     segment.bezierPivot1.position = new Vector2Int(-segment.bezierPivot1.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot1.position.y);
                     segment.bezierPivot2.position = new Vector2Int(-segment.bezierPivot2.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot2.position.y);
                 }
+
+                // invert the shape segments to make it clockwise again.
+                shape.segments.Reverse();
 
                 // recalculate the pivot position of the shape.
                 shape.CalculatePivotPosition();
