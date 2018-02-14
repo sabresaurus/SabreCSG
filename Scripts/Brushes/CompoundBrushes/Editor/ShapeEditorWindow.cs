@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -392,8 +393,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 }
 
                 // draw the grid using the special grid shader:
-                gridMaterial.SetFloat("_OffsetX", GetViewportRect().x);
-                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + 3);
+                bool docked = isDocked;
+                gridMaterial.SetFloat("_OffsetX", GetViewportRect().x + (docked ? 2 : 0)); // why is this neccesary, what's moving?
+                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 0 : 3)); // why is this neccesary, what's moving?
                 gridMaterial.SetFloat("_ScrollX", viewportScroll.x);
                 gridMaterial.SetFloat("_ScrollY", viewportScroll.y);
                 gridMaterial.SetFloat("_Zoom", gridScale);
@@ -418,7 +420,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 Vector2 center = GridPointToScreen(new Vector2Int(0, 0));
                 GL.Color(new Color(0.882f, 0.882f, 0.882f));
                 GlDrawLine(3.0f, 0.0f, center.y, viewportRect.width, center.y);
-                GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.height);
+                GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.y + viewportRect.height);
 
                 // draw all of the segments:
                 foreach (Shape shape in project.shapes)
@@ -1102,6 +1104,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             // we have to repaint in case the user selects a shape editor brush.
             Repaint();
+        }
+
+        private MethodInfo isDockedMethod = null;
+
+        /// <summary>
+        /// Gets a value indicating whether this window is docked.
+        /// </summary>
+        /// <value><c>true</c> if this window is docked; otherwise, <c>false</c>.</value>
+        private bool isDocked
+        {
+            get
+            {
+                if (isDockedMethod == null)
+                    isDockedMethod = typeof(EditorWindow).GetProperty("docked", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).GetGetMethod(true);
+                return (bool)isDockedMethod.Invoke(this, null);
+            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
