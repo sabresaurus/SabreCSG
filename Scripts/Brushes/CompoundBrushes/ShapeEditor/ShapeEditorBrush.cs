@@ -245,6 +245,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         new Vertex(outputVertices[indices[i+1]], Vector3.zero, Vector3.zero),
                         new Vertex(outputVertices[indices[i+2]], Vector3.zero, Vector3.zero)
                     }, null, false, false);
+                    if (polygon.Plane.normal.EqualsWithEpsilon(Vector3.zero)) continue; // invalid polygon
                     polygons.Add(polygon);
                 }
 
