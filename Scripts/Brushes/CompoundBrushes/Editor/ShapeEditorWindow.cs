@@ -933,6 +933,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudeRevolve()
         {
+            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
 
         /// <summary>
@@ -940,7 +941,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudeShape()
         {
-            //ShowCenteredPopupWindowContent(new ShapeEditorExtrudeShapePopupWindowContent());
+            // let the user choose the extrude parameters.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, (self) => {
+                // extrude the shape.
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project, self.extrudeShape_Height);
+            }));
         }
 
         /// <summary>
@@ -948,6 +953,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudePoint()
         {
+            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
 
         /// <summary>
@@ -955,6 +961,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudeBevel()
         {
+            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
 
         private Rect GetViewportRect()

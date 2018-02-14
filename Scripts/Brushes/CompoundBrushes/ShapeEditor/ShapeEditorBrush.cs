@@ -53,7 +53,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// The extrude mode (latest operation used to build this brush).
         /// </summary>
         [SerializeField]
-        ExtrudeMode extrudeMode = ExtrudeMode.CreatePolygon;
+        ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
+
+        /// <summary>
+        /// The extrude height (set by latest operation used to build this brush).
+        /// </summary>
+        [SerializeField]
+        float extrudeHeight = 1.0f;
 
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
@@ -66,6 +72,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private List<Polygon> m_LastBuiltPolygons;
 
+        /// <summary>
+        /// The last built polygons determine the <see cref="BrushCount"/> needed to build the
+        /// compound brush.
+        /// </summary>
+        private int m_DesiredBrushCount;
+
         void Awake()
         {
             // get the last known extents and position (especially after scene changes).
@@ -77,10 +89,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             get
             {
+                // build the polygons from the project to determine the brush count.
                 if (m_LastBuiltPolygons == null)
                     m_LastBuiltPolygons = BuildConvexPolygons();
 
-                return m_LastBuiltPolygons.Count;
+                return m_DesiredBrushCount;
             }
         }
 
@@ -90,6 +103,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         public override void Invalidate(bool polygonsChanged)
         {
+            // build the polygons from the project.
             if (m_LastBuiltPolygons == null)
                 m_LastBuiltPolygons = BuildConvexPolygons();
 
@@ -123,7 +137,37 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 generatedBrushes[i].IsVisible = this.IsVisible;
                 generatedBrushes[i].HasCollision = this.HasCollision;
 
-                generatedBrushes[i].SetPolygons(new Polygon[] { m_LastBuiltPolygons[i] });
+                switch (extrudeMode)
+                {
+                    // generate a flat 2d polygon.
+                    case ExtrudeMode.CreatePolygon:
+                        GenerateNormals(m_LastBuiltPolygons[i]);
+                        GenerateUvCoordinates(m_LastBuiltPolygons[i], false);
+                        Polygon poly1 = m_LastBuiltPolygons[i].DeepCopy();
+                        poly1.Flip();
+                        generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
+                        break;
+
+                    case ExtrudeMode.ExtrudeRevolve:
+                        break;
+
+                    // generate a 3d cube-ish shape.
+                    case ExtrudeMode.ExtrudeShape:
+                        GenerateNormals(m_LastBuiltPolygons[i]);
+                        Polygon[] outputPolygons;
+                        Quaternion rot;
+                        SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], extrudeHeight, out outputPolygons, out rot);
+                        foreach (Polygon poly in outputPolygons)
+                            GenerateUvCoordinates(poly, false);
+                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        break;
+
+                    case ExtrudeMode.ExtrudePoint:
+                        break;
+
+                    case ExtrudeMode.ExtrudeBevel:
+                        break;
+                }
 
                 generatedBrushes[i].Invalidate(true);
                 csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
@@ -184,7 +228,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // create convex polygons:
                 Vector2[] outputVertices;
                 int[] indices;
-                Triangulator.Triangulator.Triangulate(vertices.ToArray(), Triangulator.WindingOrder.Clockwise, out outputVertices, out indices);
+                Triangulator.Triangulator.Triangulate(vertices.ToArray(), Triangulator.WindingOrder.CounterClockwise, out outputVertices, out indices);
 
                 for (int i = 0; i < indices.Length; i += 3)
                 {
@@ -193,9 +237,25 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         new Vertex(outputVertices[indices[i+1]], Vector3.zero, Vector3.zero),
                         new Vertex(outputVertices[indices[i+2]], Vector3.zero, Vector3.zero)
                     }, null, false, false);
-                    GenerateNormals(polygon);
-                    GenerateUvCoordinates(polygon);
                     polygons.Add(polygon);
+                }
+
+                switch (extrudeMode)
+                {
+                    case ExtrudeMode.CreatePolygon:
+                        // we make a brush for every polgon.
+                        m_DesiredBrushCount = polygons.Count;
+                        break;
+                    case ExtrudeMode.ExtrudeRevolve:
+                        break;
+                    case ExtrudeMode.ExtrudeShape:
+                        // every brush has 6 polgons (6 sides).
+                        m_DesiredBrushCount = polygons.Count;// * 6;
+                        break;
+                    case ExtrudeMode.ExtrudePoint:
+                        break;
+                    case ExtrudeMode.ExtrudeBevel:
+                        break;
                 }
             }
 
@@ -206,10 +266,26 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
         /// </summary>
         /// <param name="polygon">The polygon to be updated.</param>
-        private void GenerateUvCoordinates(Polygon polygon)
+        private void GenerateUvCoordinates(Polygon polygon, bool helper)
         {
-            foreach (Vertex vertex in polygon.Vertices)
-                vertex.UV = GeometryHelper.GetUVForPosition(polygon, vertex.Position);
+            if (helper)
+            {
+                foreach (Vertex vertex in polygon.Vertices)
+                    vertex.UV = GeometryHelper.GetUVForPosition(polygon, vertex.Position);
+            }
+            else
+            {
+                // stolen code from the surface editor "AutoUV".
+                Vector3 planeNormal = polygon.Plane.normal;
+                Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(-planeNormal));
+                // Sets the UV at each point to the position on the plane
+                for (int i = 0; i < polygon.Vertices.Length; i++)
+                {
+                    Vector3 position = polygon.Vertices[i].Position;
+                    Vector2 uv = (cancellingRotation * position) * 0.5f;
+                    polygon.Vertices[i].UV = uv;
+                }
+            }
         }
 
         private void GenerateNormals(Polygon polygon)
@@ -247,7 +323,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Creates a flat polygon in NoCSG mode. Called by the 2D Shape Editor window.
+        /// Creates a flat polygon in NoCSG mode. Also called by the 2D Shape Editor window.
         /// </summary>
         /// <param name="project">The project to be copied into the brush.</param>
         public void CreatePolygon(Project project)
@@ -256,6 +332,25 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.CreatePolygon;
+            // build the polygons out of the project.
+            m_LastBuiltPolygons = BuildConvexPolygons();
+            // build the brush.
+            Invalidate(true);
+        }
+
+        /// <summary>
+        /// Creates an extruded shape. Also called by the 2D Shape Editor window.
+        /// </summary>
+        /// <param name="project">The project to be copied into the brush.</param>
+        /// <param name="height">The 3D height of the extruded shape.</param>
+        public void ExtrudeShape(Project project, float height)
+        {
+            // store a project copy inside of this brush.
+            this.project = project.Clone();
+            // store the extrude mode inside of this brush.
+            extrudeMode = ExtrudeMode.ExtrudeShape;
+            extrudeHeight = height;
+            this.IsNoCSG = false;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.

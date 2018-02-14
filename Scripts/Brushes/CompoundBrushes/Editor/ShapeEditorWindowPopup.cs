@@ -16,12 +16,14 @@ namespace Sabresaurus.SabreCSG
     {
         public enum PopupMode
         {
-            BezierDetailLevel
+            BezierDetailLevel,
+            ExtrudeShape
         }
 
         private PopupMode popupMode;
 
         public int bezierDetailLevel_Detail = 3;
+        public float extrudeShape_Height = 1.0f;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -37,6 +39,8 @@ namespace Sabresaurus.SabreCSG
             {
                 case PopupMode.BezierDetailLevel:
                     return new Vector2(205, 140);
+                case PopupMode.ExtrudeShape:
+                    return new Vector2(205, 68);
                 default:
                     return new Vector2(200, 150);
             }
@@ -44,10 +48,13 @@ namespace Sabresaurus.SabreCSG
 
         public override void OnGUI(Rect rect)
         {
+            string accept = "";
             switch (popupMode)
             {
                 case PopupMode.BezierDetailLevel:
                     GUILayout.Label("Bezier Detail Level", EditorStyles.boldLabel);
+                    accept = "Apply";
+
                     GUILayout.BeginHorizontal(EditorStyles.toolbar);
                     if (GUILayout.Button("1", EditorStyles.toolbarButton, GUILayout.MinWidth(24), GUILayout.MaxWidth(24))) { bezierDetailLevel_Detail = 1; onApply(this); }
                     if (GUILayout.Button("2", EditorStyles.toolbarButton, GUILayout.MinWidth(24), GUILayout.MaxWidth(24))) { bezierDetailLevel_Detail = 2; onApply(this); }
@@ -96,14 +103,17 @@ namespace Sabresaurus.SabreCSG
                     if (bezierDetailLevel_Detail < 1) bezierDetailLevel_Detail = 1;
                     if (bezierDetailLevel_Detail > 999) bezierDetailLevel_Detail = 999;
                     break;
+
+                case PopupMode.ExtrudeShape:
+                    GUILayout.Label("Extrude Shape", EditorStyles.boldLabel);
+                    accept = "Extrude";
+
+                    extrudeShape_Height = EditorGUILayout.FloatField("Height", extrudeShape_Height);
+                    if (extrudeShape_Height < 0.01f) extrudeShape_Height = 0.01f;
+                    break;
             }
 
-            /*
-                GUILayout.Label("Extrude Shape", EditorStyles.boldLabel);
-                height = EditorGUILayout.FloatField("Height", height);
-             */
-
-            if (GUILayout.Button("Apply"))
+            if (GUILayout.Button(accept))
             {
                 onApply(this);
             }
