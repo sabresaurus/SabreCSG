@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
     /// </summary>
     /// <remarks>Inspired by Unreal Editor 1 (1998). Created by Henry de Jongh for SabreCSG.</remarks>
     /// <seealso cref="UnityEditor.EditorWindow"/>
-    public class ShapeEditorBrushWindow : EditorWindow
+    public class ShapeEditorWindow : EditorWindow
     {
         //private class FakeUndoObject : UnityEngine.Object
         //{
@@ -24,7 +24,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// The currently loaded project.
         /// </summary>
-        public Project project = new Project();
+        private Project project = new Project();
 
         /// <summary>
         /// The viewport scroll position.
@@ -178,11 +178,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public static void Init()
         {
             // get existing open window or if none, make a new one:
-            ShapeEditorBrushWindow window = GetWindow<ShapeEditorBrushWindow>();
+            ShapeEditorWindow window = GetWindow<ShapeEditorWindow>();
             window.minSize = new Vector2(800, 600);
             window.Show();
             window.titleContent = new GUIContent("Shape Editor");
             window.minSize = new Vector2(128, 128);
+        }
+
+        public static ShapeEditorWindow InitAndGetHandle()
+        {
+            Init();
+            return GetWindow<ShapeEditorWindow>();
         }
 
         private void OnGUI()
@@ -897,7 +903,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnSegmentBezierDetail()
         {
             // let the user choose the amount of bezier curve detail.
-            ShowCenteredPopupWindowContent(new ShapeEditorBezierDetailPopupWindowContent((customDetail) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, (self) => {
                 foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
@@ -905,7 +911,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         if (segment.type == SegmentType.Linear) continue;
                         // the segment or any of its bezier pivots can be used to select it.
                         if (IsObjectSelected(segment) || IsObjectSelected(segment.bezierPivot1) || IsObjectSelected(segment.bezierPivot2))
-                            segment.bezierDetail = customDetail;
+                            segment.bezierDetail = self.bezierDetailLevel_Detail;
                     }
                 }
 
@@ -919,6 +925,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnCreatePolygon()
         {
+            Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
         }
 
         /// <summary>
@@ -934,10 +941,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnExtrudeShape()
         {
             //ShowCenteredPopupWindowContent(new ShapeEditorExtrudeShapePopupWindowContent());
-            Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(
-                // we use the json utility to clone the project.
-                JsonUtility.FromJson<Project>(JsonUtility.ToJson(project))
-            );
         }
 
         /// <summary>
@@ -1076,23 +1079,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Provides methods for calculating bezier splines.
-        /// </summary>
-        private static class Bezier
-        {
-            public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-            {
-                t = Mathf.Clamp01(t);
-                float OneMinusT = 1f - t;
-                return
-                    OneMinusT * OneMinusT * OneMinusT * p0 +
-                    3f * OneMinusT * OneMinusT * t * p1 +
-                    3f * OneMinusT * t * t * p2 +
-                    t * t * t * p3;
-            }
-        }
-
-        /// <summary>
         /// Shows the a popup in the center of the editor window.
         /// </summary>
         /// <param name="popup">The popup to show.</param>
@@ -1108,6 +1094,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnSelectionChange()
         {
             // we have to repaint in case the user selects a shape editor brush.
+            Repaint();
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // PUBLIC API                                                                            //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /// <summary>
+        /// Creates a copy of the specified project and loads it into the 2D Shape Editor.
+        /// </summary>
+        /// <param name="project">The project to make a copy of and load into the 2D Shape Editor.</param>
+        public void LoadProject(Project project)
+        {
+            // load the project into the editor.
+            this.project = project.Clone();
+            // update the viewport so that the user can see the changes.
             Repaint();
         }
     }

@@ -33,6 +33,16 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         [SerializeField]
         public Pivot globalPivot = new Pivot();
+
+        /// <summary>
+        /// Clones this project and returns the copy.
+        /// </summary>
+        /// <returns>A copy of the project.</returns>
+        public Project Clone()
+        {
+            // create a copy of the given project using JSON.
+            return JsonUtility.FromJson<Project>(JsonUtility.ToJson(this));
+        }
     }
 }
 #endif

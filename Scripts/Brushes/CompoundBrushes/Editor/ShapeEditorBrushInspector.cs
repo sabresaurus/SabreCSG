@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
-    [CanEditMultipleObjects]
     [CustomEditor(typeof(ShapeEditorBrush), true)]
     public class ShapeEditorBrushInspector : CompoundBrushInspector
     {
@@ -17,10 +16,24 @@ namespace Sabresaurus.SabreCSG
         {
             using (new NamedVerticalScope("Shape Editor Brush"))
             {
-                if (GUILayout.Button("Show 2D Shape Editor"))
+                GUILayout.BeginHorizontal(EditorStyles.toolbar);
+                GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
+                if (GUILayout.Button(new GUIContent(" Show Editor", SabreCSGResources.ButtonShapeEditorTexture, "Show 2D Shape Editor"), createBrushStyle))
                 {
-                    ShapeEditorBrushWindow.Init();
+                    // display the 2d shape ditor.
+                    ShapeEditorWindow.Init();
                 }
+                if (GUILayout.Button(new GUIContent(" Load Project", SabreCSGResources.ShapeEditorOpenTexture, "Load Embedded Project Into 2D Shape Editor"), createBrushStyle))
+                {
+                    if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to load the embedded project?\r\nAny unsaved work in the 2D Shape Editor will be lost!", "Yes", "No"))
+                    {
+                        // display the 2d shape ditor.
+                        ShapeEditorWindow window = ShapeEditorWindow.InitAndGetHandle();
+                        // load a copy of the embedded project into the editor.
+                        window.LoadProject(BrushTarget.GetComponent<ShapeEditorBrush>().GetEmbeddedProject());
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
 
             base.OnInspectorGUI();
