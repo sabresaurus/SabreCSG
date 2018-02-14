@@ -350,7 +350,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.ExtrudeShape;
             extrudeHeight = height;
-            this.IsNoCSG = false;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
