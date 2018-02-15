@@ -327,6 +327,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     OnZoomOut();
                     Event.current.Use();
                 }
+                if (Event.current.keyCode == KeyCode.F)
+                {
+                    OnHome();
+                    Event.current.Use();
+                }
                 if (Event.current.keyCode == KeyCode.A)
                 {
                     OnShapeCreate();
@@ -357,6 +362,56 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     OnSegmentBezierDetail();
                     Event.current.Use();
                 }
+                if (Event.current.keyCode == KeyCode.Alpha1 && Event.current.modifiers != 0)
+                {
+                    OnCreatePolygon(false);
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.Alpha1)
+                {
+                    OnCreatePolygon(true);
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Alpha2 && Event.current.modifiers != 0)
+                {
+                    OnExtrudeRevolve(false);
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.Alpha2)
+                {
+                    OnExtrudeRevolve(true);
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Alpha3 && Event.current.modifiers != 0)
+                {
+                    OnExtrudeShape(false);
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.Alpha3)
+                {
+                    OnExtrudeShape(true);
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Alpha4 && Event.current.modifiers != 0)
+                {
+                    OnExtrudePoint(false);
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.Alpha4)
+                {
+                    OnExtrudePoint(true);
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Alpha5 && Event.current.modifiers != 0)
+                {
+                    OnExtrudeBevel(false);
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.Alpha5)
+                {
+                    OnExtrudeBevel(true);
+                    Event.current.Use();
+                }
             }
 
             //if(Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed")
@@ -373,7 +428,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 {
                     initialized = true;
                     // scroll to the center of the screen.
-                    viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
+                    OnHome();
                 }
 
                 GUI.color = Color.white;
@@ -538,6 +593,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             {
                 OnZoomOut();
             }
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorHomeTexture, "Reset Camera To Center (F)"), createBrushStyle))
+            {
+                OnHome();
+            }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeCreateTexture, "Add New Shape (A)"), createBrushStyle))
             {
@@ -567,25 +626,25 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
 
             GUI.enabled = (Selection.activeGameObject && Selection.activeGameObject.HasComponent<ShapeEditor.ShapeEditorBrush>());
-            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorCreatePolygonTexture, "Create Polygon"), createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorCreatePolygonTexture, "Create Polygon (1 or SHIFT + 1 to skip popup)"), createBrushStyle))
             {
-                OnCreatePolygon();
+                OnCreatePolygon(true);
             }
-            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, "Revolve Shape"), createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, "Revolve Shape (2 or SHIFT + 2 to skip popup)"), createBrushStyle))
             {
-                OnExtrudeRevolve();
+                OnExtrudeRevolve(true);
             }
-            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeShapeTexture, "Extrude Shape"), createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeShapeTexture, "Extrude Shape (3 or SHIFT + 3 to skip popup)"), createBrushStyle))
             {
-                OnExtrudeShape();
+                OnExtrudeShape(true);
             }
-            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudePointTexture, "Extrude To Point"), createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudePointTexture, "Extrude To Point (4 or SHIFT + 4 to skip popup)"), createBrushStyle))
             {
-                OnExtrudePoint();
+                OnExtrudePoint(true);
             }
-            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeBevelTexture, "Extrude Bevelled"), createBrushStyle))
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeBevelTexture, "Extrude Bevelled (5 or SHIFT + 5 to skip popup)"), createBrushStyle))
             {
-                OnExtrudeBevel();
+                OnExtrudeBevel(true);
             }
             GUI.enabled = true;
 
@@ -772,9 +831,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             switch (gridScale)
             {
-                case 2: gridScale = 4; break;
-                case 4: gridScale = 8; break;
-                case 8: gridScale = 16; break;
+                case 2 : gridScale = 4 ; break;
+                case 4 : gridScale = 8 ; break;
+                case 8 : gridScale = 16; break;
                 case 16: gridScale = 32; break;
                 case 32: gridScale = 64; break;
                 case 64: gridScale = 64; break;
@@ -797,6 +856,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 case 64: gridScale = 32; break;
                 default: gridScale = 16; break;
             }
+        }
+
+        /// <summary>
+        /// Called when the home button is pressed. Will reset the camera to the center.
+        /// </summary>
+        private void OnHome()
+        {
+            // scroll to the center of the screen.
+            viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
         }
 
         /// <summary>
@@ -931,19 +999,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// Called when the create polygon button is pressed.
         /// </summary>
-        private void OnCreatePolygon()
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnCreatePolygon(bool popup)
         {
-            // let the user choose the creation parameters.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) => {
+            if (popup)
+            {
+                // let the user choose the creation parameters.
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) => {
+                    // create the polygon.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
+                }));
+            }
+            else
+            {
                 // create the polygon.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
-            }));
+            }
+
         }
 
         /// <summary>
         /// Called when the extrude revolved button is pressed.
         /// </summary>
-        private void OnExtrudeRevolve()
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnExtrudeRevolve(bool popup)
         {
             EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
@@ -951,31 +1030,50 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// Called when the extrude shape button is pressed.
         /// </summary>
-        private void OnExtrudeShape()
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnExtrudeShape(bool popup)
         {
-            // let the user choose the extrude parameters.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) => {
+            if (popup)
+            {
+                // let the user choose the extrude parameters.
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) => {
+                    // extrude the shape.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project);
+                }));
+            }
+            else
+            {
                 // extrude the shape.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project);
-            }));
+            }
         }
 
         /// <summary>
         /// Called when the extrude point button is pressed.
         /// </summary>
-        private void OnExtrudePoint()
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnExtrudePoint(bool popup)
         {
-            // let the user choose the extrude parameters.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) => {
+            if (popup)
+            {
+                // let the user choose the extrude parameters.
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) => {
+                    // extrude the shape to a point.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project);
+                }));
+            }
+            else
+            {
                 // extrude the shape to a point.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project);
-            }));
+            }
         }
 
         /// <summary>
         /// Called when the extrude bevelled button is pressed.
         /// </summary>
-        private void OnExtrudeBevel()
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnExtrudeBevel(bool popup)
         {
             EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }

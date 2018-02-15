@@ -445,6 +445,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ShapeEditorHomeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorHome.png");
+            }
+        }
+
         public static Material GetExcludedMaterial()
 		{
 			if (excludedMaterial == null)
