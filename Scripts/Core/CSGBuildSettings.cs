@@ -40,16 +40,16 @@ namespace Sabresaurus.SabreCSG
 
               Dynamic
             Light Source
-                X    +------+
-                 X   |      |
-                  X  |      |
-                   X |      |
-                    X+------+
-             +------+X
+               X    
+                X   +------+
+                 X  |      |
+                  X |      |
+                   X|      |
+             +------+------+
+             |      |X
              |      | X
              |      |  X
-             |      |   X
-             +------+    X
+             +------+   X
                      Light Leaks Through
                         Causes Seam
 
