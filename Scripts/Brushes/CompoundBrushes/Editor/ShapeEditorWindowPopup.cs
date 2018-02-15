@@ -17,13 +17,15 @@ namespace Sabresaurus.SabreCSG
         public enum PopupMode
         {
             BezierDetailLevel,
-            ExtrudeShape
+            ExtrudeShape,
+            ExtrudePoint
         }
 
         private PopupMode popupMode;
 
         public int bezierDetailLevel_Detail = 3;
         public float extrudeShape_Height = 1.0f;
+        public float extrudePoint_Height = 1.0f;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -40,6 +42,8 @@ namespace Sabresaurus.SabreCSG
                 case PopupMode.BezierDetailLevel:
                     return new Vector2(205, 140);
                 case PopupMode.ExtrudeShape:
+                    return new Vector2(205, 68);
+                case PopupMode.ExtrudePoint:
                     return new Vector2(205, 68);
                 default:
                     return new Vector2(200, 150);
@@ -108,8 +112,16 @@ namespace Sabresaurus.SabreCSG
                     GUILayout.Label("Extrude Shape", EditorStyles.boldLabel);
                     accept = "Extrude";
 
-                    extrudeShape_Height = EditorGUILayout.FloatField("Height", extrudeShape_Height);
+                    extrudeShape_Height = EditorGUILayout.FloatField("Depth", extrudeShape_Height);
                     if (extrudeShape_Height < 0.01f) extrudeShape_Height = 0.01f;
+                    break;
+
+                case PopupMode.ExtrudePoint:
+                    GUILayout.Label("Extrude Point", EditorStyles.boldLabel);
+                    accept = "Extrude";
+
+                    extrudePoint_Height = EditorGUILayout.FloatField("Depth", extrudePoint_Height);
+                    if (extrudePoint_Height < 0.01f) extrudePoint_Height = 0.01f;
                     break;
             }
 

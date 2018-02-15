@@ -137,6 +137,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 generatedBrushes[i].IsVisible = this.IsVisible;
                 generatedBrushes[i].HasCollision = this.HasCollision;
 
+                // local variables.
+                Quaternion rot;
+                Polygon[] outputPolygons;
+
                 switch (extrudeMode)
                 {
                     // generate a flat 2d polygon.
@@ -154,15 +158,19 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // generate a 3d cube-ish shape.
                     case ExtrudeMode.ExtrudeShape:
                         GenerateNormals(m_LastBuiltPolygons[i]);
-                        Polygon[] outputPolygons;
-                        Quaternion rot;
                         SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], extrudeHeight, out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
                         generatedBrushes[i].SetPolygons(outputPolygons);
                         break;
 
+                    // generate a 3d cone-ish shape.
                     case ExtrudeMode.ExtrudePoint:
+                        GenerateNormals(m_LastBuiltPolygons[i]);
+                        ExtrudePolygonToPoint(m_LastBuiltPolygons[i], extrudeHeight, new Vector2(project.globalPivot.position.x / 8.0f, -project.globalPivot.position.y / 8.0f), out outputPolygons, out rot);
+                        foreach (Polygon poly in outputPolygons)
+                            GenerateUvCoordinates(poly, false);
+                        generatedBrushes[i].SetPolygons(outputPolygons);
                         break;
 
                     case ExtrudeMode.ExtrudeBevel:
@@ -258,10 +266,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     case ExtrudeMode.ExtrudeRevolve:
                         break;
                     case ExtrudeMode.ExtrudeShape:
-                        // every brush has 6 polgons (6 sides).
-                        m_DesiredBrushCount = polygons.Count;// * 6;
+                        // we make a brush for every polgon.
+                        m_DesiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudePoint:
+                        // we make a brush for every polgon.
+                        m_DesiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudeBevel:
                         break;
@@ -317,6 +327,103 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             return edges;
         }
 
+        /// <summary>
+        /// Creates a brush by extruding a supplied polygon by a specified extrusion distance and end it in a point.
+        /// </summary>
+        /// <param name="sourcePolygon">Source polygon, typically transformed into world space.</param>
+        /// <param name="extrusionDistance">Extrusion distance, this is the height (or depth) of the created geometry perpendicular to the source polygon.</param>
+        /// <param name="offset">The offset of the point.</param>
+        /// <param name="outputPolygons">Output brush polygons.</param>
+        /// <param name="rotation">The rotation to be supplied to the new brush transform.</param>
+        private static void ExtrudePolygonToPoint(Polygon sourcePolygon, float extrusionDistance, Vector2 offset, out Polygon[] outputPolygons, out Quaternion rotation)
+        {
+            bool flipped = false;
+            if (extrusionDistance < 0)
+            {
+                sourcePolygon.Flip();
+                extrusionDistance = -extrusionDistance;
+                flipped = true;
+            }
+
+            // Create base polygon
+            Polygon basePolygon = sourcePolygon.DeepCopy();
+            basePolygon.UniqueIndex = -1;
+
+            rotation = Quaternion.LookRotation(basePolygon.Plane.normal);
+            Quaternion cancellingRotation = Quaternion.Inverse(rotation);
+
+            Vertex[] vertices = basePolygon.Vertices;
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].Position = cancellingRotation * vertices[i].Position;
+
+                vertices[i].Normal = cancellingRotation * vertices[i].Normal;
+            }
+
+            basePolygon.SetVertices(vertices);
+
+            // Create the opposite polygon by duplicating the base polygon, offsetting and flipping
+            Vector3 normal = basePolygon.Plane.normal;
+
+            basePolygon.Flip();
+
+            // Now create each of the brush side polygons
+            Polygon[] brushSides = new Polygon[sourcePolygon.Vertices.Length];
+
+            for (int i = 0; i < basePolygon.Vertices.Length; i++)
+            {
+                Vertex vertex1 = basePolygon.Vertices[i].DeepCopy();
+                Vertex vertex2 = basePolygon.Vertices[(i + 1) % basePolygon.Vertices.Length].DeepCopy();
+
+                // Create new UVs for the sides, otherwise we'll get distortion
+
+                float sourceDistance = Vector3.Distance(vertex1.Position, vertex2.Position);
+                float uvDistance = Vector2.Distance(vertex1.UV, vertex2.UV);
+
+                float uvScale = sourceDistance / uvDistance;
+
+                vertex1.UV = Vector2.zero;
+                if (flipped)
+                {
+                    vertex2.UV = new Vector2(-sourceDistance / uvScale, 0);
+                }
+                else
+                {
+                    vertex2.UV = new Vector2(sourceDistance / uvScale, 0);
+                }
+
+                Vector2 uvDelta = vertex2.UV - vertex1.UV;
+
+                Vector2 rotatedUVDelta = uvDelta.Rotate(90) * (extrusionDistance / sourceDistance);
+
+                Vertex vertex3 = vertex1.DeepCopy();
+                vertex3.Position += normal * extrusionDistance;
+                vertex3.UV += rotatedUVDelta;
+
+                Vertex vertex4 = vertex2.DeepCopy();
+                vertex4.Position += normal * extrusionDistance;
+                vertex4.UV += rotatedUVDelta;
+
+                // end in a point.
+                vertex3.Position.x = ((normal * extrusionDistance).x * 0.5f) + offset.x;
+                vertex3.Position.y = ((normal * extrusionDistance).y * 0.5f) + offset.y;
+
+                Vertex[] newVertices = new Vertex[] { vertex1, vertex2, vertex3 };
+
+                brushSides[i] = new Polygon(newVertices, sourcePolygon.Material, false, false);
+                brushSides[i].Flip();
+                brushSides[i].ResetVertexNormals();
+            }
+
+            List<Polygon> polygons = new List<Polygon>();
+            polygons.Add(basePolygon);
+            //polygons.Add(oppositePolygon);
+            polygons.AddRange(brushSides);
+
+            outputPolygons = polygons.ToArray();
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // PUBLIC API                                                                            //
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -358,6 +465,23 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.ExtrudeShape;
+            extrudeHeight = height;
+            // build the polygons out of the project.
+            m_LastBuiltPolygons = BuildConvexPolygons();
+            // build the brush.
+            Invalidate(true);
+        }
+
+        /// <summary>
+        /// Creates an extruded shape that ends in a point like a cone. Also called by the 2D Shape Editor window.
+        /// </summary>
+        /// <param name="project">The project to be copied into the brush.</param>
+        public void ExtrudePoint(Project project, float height)
+        {
+            // store a project copy inside of this brush.
+            this.project = project.Clone();
+            // store the extrude mode inside of this brush.
+            extrudeMode = ExtrudeMode.ExtrudePoint;
             extrudeHeight = height;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();

@@ -961,7 +961,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnExtrudePoint()
         {
-            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
+            // let the user choose the extrude parameters.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, (self) => {
+                // extrude the shape to a point.
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project, self.extrudePoint_Height);
+            }));
         }
 
         /// <summary>
