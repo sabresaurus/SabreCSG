@@ -17,6 +17,7 @@ namespace Sabresaurus.SabreCSG
         public enum PopupMode
         {
             BezierDetailLevel,
+            CreatePolygon,
             ExtrudeShape,
             ExtrudePoint
         }
@@ -24,15 +25,41 @@ namespace Sabresaurus.SabreCSG
         private PopupMode popupMode;
 
         public int bezierDetailLevel_Detail = 3;
-        public float extrudeShape_Height = 1.0f;
-        public float extrudePoint_Height = 1.0f;
+        public float extrudeDepth = 1.0f;
+        public Vector2 extrudeScale = Vector2.one;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
-        public ShapeEditorWindowPopup(PopupMode popupMode, Action<ShapeEditorWindowPopup> onApply) : base()
+        public ShapeEditorWindowPopup(PopupMode popupMode, ShapeEditor.Project project, Action<ShapeEditorWindowPopup> onApply) : base()
         {
             this.popupMode = popupMode;
-            this.onApply = (self) => { onApply(self); editorWindow.Close(); EditorWindow.FocusWindowIfItsOpen<ShapeEditor.ShapeEditorWindow>(); };
+
+            // read the extrude settings from the project.
+            extrudeDepth = project.extrudeDepth;
+            extrudeScale = project.extrudeScale;
+
+            this.onApply = (self) => {
+
+                // store the extrude settings in the project.
+                switch (popupMode)
+                {
+                    case PopupMode.CreatePolygon:
+                        project.extrudeScale = extrudeScale;
+                        break;
+                    case PopupMode.ExtrudeShape:
+                        project.extrudeScale = extrudeScale;
+                        project.extrudeDepth = extrudeDepth;
+                        break;
+                    case PopupMode.ExtrudePoint:
+                        project.extrudeScale = extrudeScale;
+                        project.extrudeDepth = extrudeDepth;
+                        break;
+                }
+
+                onApply(self);
+                editorWindow.Close();
+                EditorWindow.FocusWindowIfItsOpen<ShapeEditor.ShapeEditorWindow>();
+            };
         }
 
         public override Vector2 GetWindowSize()
@@ -40,18 +67,21 @@ namespace Sabresaurus.SabreCSG
             switch (popupMode)
             {
                 case PopupMode.BezierDetailLevel:
-                    return new Vector2(205, 140);
+                    return new Vector2(300, 140 + 18);
+                case PopupMode.CreatePolygon:
+                    return new Vector2(300, 50 + 18);
                 case PopupMode.ExtrudeShape:
-                    return new Vector2(205, 68);
+                    return new Vector2(300, 68 + 18);
                 case PopupMode.ExtrudePoint:
-                    return new Vector2(205, 68);
+                    return new Vector2(300, 68 + 18);
                 default:
-                    return new Vector2(200, 150);
+                    return new Vector2(300, 150);
             }
         }
 
         public override void OnGUI(Rect rect)
         {
+            bool hasScale = true;
             string accept = "";
             switch (popupMode)
             {
@@ -108,21 +138,35 @@ namespace Sabresaurus.SabreCSG
                     if (bezierDetailLevel_Detail > 999) bezierDetailLevel_Detail = 999;
                     break;
 
+                case PopupMode.CreatePolygon:
+                    GUILayout.Label("Create Polygon", EditorStyles.boldLabel);
+                    accept = "Create";
+                    break;
+
                 case PopupMode.ExtrudeShape:
                     GUILayout.Label("Extrude Shape", EditorStyles.boldLabel);
                     accept = "Extrude";
 
-                    extrudeShape_Height = EditorGUILayout.FloatField("Depth", extrudeShape_Height);
-                    if (extrudeShape_Height < 0.01f) extrudeShape_Height = 0.01f;
+                    extrudeDepth = EditorGUILayout.FloatField("Depth", extrudeDepth);
+                    if (extrudeDepth < 0.01f) extrudeDepth = 0.01f;
                     break;
 
                 case PopupMode.ExtrudePoint:
                     GUILayout.Label("Extrude Point", EditorStyles.boldLabel);
                     accept = "Extrude";
 
-                    extrudePoint_Height = EditorGUILayout.FloatField("Depth", extrudePoint_Height);
-                    if (extrudePoint_Height < 0.01f) extrudePoint_Height = 0.01f;
+                    extrudeDepth = EditorGUILayout.FloatField("Depth", extrudeDepth);
+                    if (extrudeDepth < 0.01f) extrudeDepth = 0.01f;
                     break;
+            }
+
+            if (hasScale)
+            {
+                EditorGUIUtility.wideMode = true;
+                extrudeScale = EditorGUILayout.Vector2Field("Scale", extrudeScale);
+                EditorGUIUtility.wideMode = false;
+                if (extrudeScale.x < 0.01f) extrudeScale.x = 0.01f;
+                if (extrudeScale.y < 0.01f) extrudeScale.y = 0.01f;
             }
 
             if (GUILayout.Button(accept))

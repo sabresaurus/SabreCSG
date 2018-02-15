@@ -55,12 +55,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         [SerializeField]
         ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
 
-        /// <summary>
-        /// The extrude height (set by latest operation used to build this brush).
-        /// </summary>
-        [SerializeField]
-        float extrudeHeight = 1.0f;
-
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -158,7 +152,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // generate a 3d cube-ish shape.
                     case ExtrudeMode.ExtrudeShape:
                         GenerateNormals(m_LastBuiltPolygons[i]);
-                        SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], extrudeHeight, out outputPolygons, out rot);
+                        SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], project.extrudeDepth, out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
                         generatedBrushes[i].SetPolygons(outputPolygons);
@@ -167,7 +161,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // generate a 3d cone-ish shape.
                     case ExtrudeMode.ExtrudePoint:
                         GenerateNormals(m_LastBuiltPolygons[i]);
-                        ExtrudePolygonToPoint(m_LastBuiltPolygons[i], extrudeHeight, new Vector2(project.globalPivot.position.x / 8.0f, -project.globalPivot.position.y / 8.0f), out outputPolygons, out rot);
+                        ExtrudePolygonToPoint(m_LastBuiltPolygons[i], project.extrudeDepth, new Vector2(project.globalPivot.position.x / 8.0f, -project.globalPivot.position.y / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
                         generatedBrushes[i].SetPolygons(outputPolygons);
@@ -220,7 +214,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // linear segment:
                     if (segment.type == SegmentType.Linear)
                     {
-                        vertices.Add(new Vector2(segment.position.x, segment.position.y * -1.0f) / 8.0f);
+                        vertices.Add(new Vector2(segment.position.x * project.extrudeScale.x, segment.position.y * -1.0f * project.extrudeScale.y) / 8.0f);
                     }
 
                     // bezier segment:
@@ -228,7 +222,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     {
                         foreach (Edge edge in GetBezierEdges(segment, GetNextSegment(shape, segment)))
                         {
-                            vertices.Add(new Vector2(edge.Vertex1.Position.x, edge.Vertex1.Position.y * -1.0f) / 8.0f);
+                            vertices.Add(new Vector2(edge.Vertex1.Position.x * project.extrudeScale.x, edge.Vertex1.Position.y * -1.0f * project.extrudeScale.y) / 8.0f);
                         }
                     }
                 }
@@ -458,14 +452,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// Creates an extruded shape. Also called by the 2D Shape Editor window.
         /// </summary>
         /// <param name="project">The project to be copied into the brush.</param>
-        /// <param name="height">The 3D height of the extruded shape.</param>
-        public void ExtrudeShape(Project project, float height)
+        public void ExtrudeShape(Project project)
         {
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.ExtrudeShape;
-            extrudeHeight = height;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
@@ -476,13 +468,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// Creates an extruded shape that ends in a point like a cone. Also called by the 2D Shape Editor window.
         /// </summary>
         /// <param name="project">The project to be copied into the brush.</param>
-        public void ExtrudePoint(Project project, float height)
+        public void ExtrudePoint(Project project)
         {
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.ExtrudePoint;
-            extrudeHeight = height;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.

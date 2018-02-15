@@ -911,7 +911,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnSegmentBezierDetail()
         {
             // let the user choose the amount of bezier curve detail.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) => {
                 foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
@@ -933,7 +933,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnCreatePolygon()
         {
-            Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
+            // let the user choose the creation parameters.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) => {
+                // create the polygon.
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
+            }));
         }
 
         /// <summary>
@@ -950,9 +954,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnExtrudeShape()
         {
             // let the user choose the extrude parameters.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) => {
                 // extrude the shape.
-                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project, self.extrudeShape_Height);
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project);
             }));
         }
 
@@ -962,9 +966,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnExtrudePoint()
         {
             // let the user choose the extrude parameters.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) => {
                 // extrude the shape to a point.
-                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project, self.extrudePoint_Height);
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project);
             }));
         }
 

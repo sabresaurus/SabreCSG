@@ -37,12 +37,26 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// Whether the project was flipped horizontally.
         /// </summary>
+        [SerializeField]
         public bool flipHorizontally = false;
 
         /// <summary>
         /// Whether the project was flipped vertically.
         /// </summary>
+        [SerializeField]
         public bool flipVertically = false;
+
+        /// <summary>
+        /// The extrude depth used on the most recent extrude.
+        /// </summary>
+        [SerializeField]
+        public float extrudeDepth = 1.0f;
+
+        /// <summary>
+        /// The scale modifier values used on the most recent extrude.
+        /// </summary>
+        [SerializeField]
+        public Vector2 extrudeScale = Vector2.one;
 
         /// <summary>
         /// Clones this project and returns the copy.
