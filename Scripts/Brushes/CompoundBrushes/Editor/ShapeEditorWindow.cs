@@ -864,7 +864,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnHome()
         {
             // scroll to the center of the screen.
+#if UNITY_5_4_OR_NEWER
+            viewportScroll = new Vector2(Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint, Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint);
+#else
             viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
+#endif
         }
 
         /// <summary>
@@ -1206,7 +1210,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void ShowCenteredPopupWindowContent(PopupWindowContent popup)
         {
             Vector2 size = popup.GetWindowSize();
+#if UNITY_5_4_OR_NEWER
+            PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
+#else
             PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
+#endif
         }
 
         /// <summary>
