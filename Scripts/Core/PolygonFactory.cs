@@ -441,7 +441,7 @@ namespace Sabresaurus.SabreCSG
                 {
                     Vector3 nextDirection = (vertices[(i + 1) % vertices.Count].Position - vertices[i].Position).normalized;
 
-                    if (Vector3.Dot(lastDirection, nextDirection) < 0.99f)
+                    if (Vector3.Dot(lastDirection, nextDirection) < 0.999f)
                     {
                         positionsCopy.Add(vertices[i]);
                     }
