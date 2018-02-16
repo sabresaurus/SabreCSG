@@ -55,6 +55,19 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         [SerializeField]
         ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
 
+        /// <summary>
+        /// The last built polygons determine the <see cref="BrushCount"/> needed to build the
+        /// compound brush.
+        /// </summary>
+        [SerializeField]
+        int desiredBrushCount;
+
+        /// <summary>
+        /// Whether the geometry has been changed through one of the extrude methods.
+        /// </summary>
+        [SerializeField]
+        bool isDirty = true;
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -65,12 +78,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// the compound brush.
         /// </summary>
         private List<Polygon> m_LastBuiltPolygons;
-
-        /// <summary>
-        /// The last built polygons determine the <see cref="BrushCount"/> needed to build the
-        /// compound brush.
-        /// </summary>
-        private int m_DesiredBrushCount;
 
         void Awake()
         {
@@ -83,11 +90,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             get
             {
+                // we already know the amount of brushes we need.
+                if (!isDirty)
+                    return desiredBrushCount;
+
                 // build the polygons from the project to determine the brush count.
                 if (m_LastBuiltPolygons == null)
                     m_LastBuiltPolygons = BuildConvexPolygons();
 
-                return m_DesiredBrushCount;
+                return desiredBrushCount;
             }
         }
 
@@ -97,12 +108,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         public override void Invalidate(bool polygonsChanged)
         {
-            // build the polygons from the project.
-            if (m_LastBuiltPolygons == null)
-                m_LastBuiltPolygons = BuildConvexPolygons();
-
-            base.Invalidate(polygonsChanged);
-
             ////////////////////////////////////////////////////////////////////
             // a little hack to detect the user manually resizing the bounds. //
             // we use this to automatically add steps for barnaby.            //
@@ -114,6 +119,33 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 transform.localPosition = m_LastKnownPosition;                //
             }                                                                 //
             ////////////////////////////////////////////////////////////////////
+            Bounds csgBounds = new Bounds();
+
+            // nothing to do except copy csg information to our child brushes.
+            if (!isDirty)
+            {
+                for (int i = 0; i < BrushCount; i++)
+                {
+                    generatedBrushes[i].Mode = this.Mode;
+                    generatedBrushes[i].IsNoCSG = this.IsNoCSG;
+                    generatedBrushes[i].IsVisible = this.IsVisible;
+                    generatedBrushes[i].HasCollision = this.HasCollision;
+                    generatedBrushes[i].Invalidate(true);
+                    csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
+                }
+                // apply the generated csg bounds.
+                localBounds = csgBounds;
+                m_LastKnownExtents = localBounds.extents;
+                m_LastKnownPosition = transform.localPosition;
+                return;
+            }
+
+            base.Invalidate(polygonsChanged);
+            isDirty = false;
+
+            // build the polygons from the project.
+            if (m_LastBuiltPolygons == null)
+                m_LastBuiltPolygons = BuildConvexPolygons();
 
             // iterate through the brushes we received:
             int brushCount = BrushCount;
@@ -122,7 +154,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (extrudeMode == ExtrudeMode.CreatePolygon)
                 this.IsNoCSG = true;
 
-            Bounds csgBounds = new Bounds();
             for (int i = 0; i < brushCount; i++)
             {
                 // copy our csg information to our child brushes.
@@ -255,17 +286,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 {
                     case ExtrudeMode.CreatePolygon:
                         // we make a brush for every polgon.
-                        m_DesiredBrushCount = polygons.Count;
+                        desiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudeRevolve:
                         break;
                     case ExtrudeMode.ExtrudeShape:
                         // we make a brush for every polgon.
-                        m_DesiredBrushCount = polygons.Count;
+                        desiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudePoint:
                         // we make a brush for every polgon.
-                        m_DesiredBrushCount = polygons.Count;
+                        desiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudeBevel:
                         break;
@@ -445,6 +476,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
+            isDirty = true;
             Invalidate(true);
         }
 
@@ -461,6 +493,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
+            isDirty = true;
             Invalidate(true);
         }
 
@@ -477,6 +510,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
+            isDirty = true;
             Invalidate(true);
         }
     }
