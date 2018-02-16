@@ -67,7 +67,7 @@ namespace Sabresaurus.SabreCSG
             switch (popupMode)
             {
                 case PopupMode.BezierDetailLevel:
-                    return new Vector2(300, 140 + 18);
+                    return new Vector2(205, 140);
                 case PopupMode.CreatePolygon:
                     return new Vector2(300, 50 + 18);
                 case PopupMode.ExtrudeShape:
@@ -87,6 +87,7 @@ namespace Sabresaurus.SabreCSG
             {
                 case PopupMode.BezierDetailLevel:
                     GUILayout.Label("Bezier Detail Level", EditorStyles.boldLabel);
+                    hasScale = false;
                     accept = "Apply";
 
                     GUILayout.BeginHorizontal(EditorStyles.toolbar);

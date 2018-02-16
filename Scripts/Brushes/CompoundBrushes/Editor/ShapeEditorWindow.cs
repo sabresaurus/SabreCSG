@@ -1006,6 +1006,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
         private void OnCreatePolygon(bool popup)
         {
+            if (project.shapes.Count == 0)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The project must have at least one shape!", "Okay");
+                return;
+            }
+
             if (popup)
             {
                 // let the user choose the creation parameters.
@@ -1019,7 +1025,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // create the polygon.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
             }
-
         }
 
         /// <summary>
@@ -1028,6 +1033,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
         private void OnExtrudeRevolve(bool popup)
         {
+            if (project.shapes.Count == 0)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The project must have at least one shape!", "Okay");
+                return;
+            }
+
             EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
 
@@ -1037,6 +1048,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
         private void OnExtrudeShape(bool popup)
         {
+            if (project.shapes.Count == 0)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The project must have at least one shape!", "Okay");
+                return;
+            }
+
             if (popup)
             {
                 // let the user choose the extrude parameters.
@@ -1058,6 +1075,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
         private void OnExtrudePoint(bool popup)
         {
+            if (project.shapes.Count == 0)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The project must have at least one shape!", "Okay");
+                return;
+            }
+
             if (popup)
             {
                 // let the user choose the extrude parameters.
@@ -1079,6 +1102,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
         private void OnExtrudeBevel(bool popup)
         {
+            if (project.shapes.Count == 0)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The project must have at least one shape!", "Okay");
+                return;
+            }
+
             EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
         }
 
