@@ -906,7 +906,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnDelete()
         {
             // prevent the user from deleting too much.
-            foreach (Shape shape in project.shapes)
+            foreach (Shape shape in project.shapes.Where(shape => shape.segments.Exists(segment => selectedSegments.Contains(segment))))
             {
                 if (shape.segments.Count - selectedSegments.Count() < 3)
                 {
