@@ -475,14 +475,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GL.Begin(GL.QUADS);
                 GL.LoadIdentity();
 
-                // this should be done in the shader instead:
-                // draw the center lines of the grid:
-
-                Vector2 center = GridPointToScreen(new Vector2Int(0, 0));
-                GL.Color(new Color(0.882f, 0.882f, 0.882f));
-                GlDrawLine(3.0f, 0.0f, center.y, viewportRect.width, center.y);
-                GlDrawLine(3.0f, center.x, viewportRect.y, center.x, viewportRect.y + viewportRect.height);
-
                 // draw all of the segments:
                 foreach (Shape shape in project.shapes)
                 {
