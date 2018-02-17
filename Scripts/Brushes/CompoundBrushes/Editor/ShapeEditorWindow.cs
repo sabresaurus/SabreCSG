@@ -472,8 +472,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 lineMaterial.SetPass(0);
 
-                GL.Begin(GL.QUADS);
+                GL.PushMatrix();
                 GL.LoadIdentity();
+
+                GL.Begin(GL.QUADS);
 
                 // draw all of the segments:
                 foreach (Shape shape in project.shapes)
@@ -517,6 +519,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 }
 
                 GL.End();
+                GL.PopMatrix();
 
                 // draw the handles on the corners of the segments.
                 Handles.color = Color.white;
