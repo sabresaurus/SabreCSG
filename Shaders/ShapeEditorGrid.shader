@@ -7,6 +7,7 @@
 		_ScrollX ("Scroll X", Float) = 0.0
 		_ScrollY ("Scroll Y", Float) = 0.0
 		_Zoom ("Zoom", Float) = 16.0
+		_Background ("Background", 2D) = "white" { }
 	}
 
 	SubShader
@@ -49,6 +50,8 @@
 				float _ScrollX;
 				float _ScrollY;
 				float _Zoom;
+				float4 _Background_TexelSize;
+				sampler2D _Background;
 
 				// fragment shader
 				fixed4 frag(v2f IN) : SV_Target
@@ -83,7 +86,13 @@
 
 					// discard 15x15 pixels causing the white boxes for the grid.
 					if (abs(x2) >= 1.0f && abs(y2) >= 1.0f)
-						discard;
+						col = fixed4(1.0f, 1.0f, 1.0f, 1.0f);
+
+					// draw the user background.
+					fixed2 offset = fixed2(pos.x + (_Background_TexelSize.z * (_Zoom / 16) / 2.0f), pos.y + (_Background_TexelSize.w * (_Zoom / 16) / 2.0f));
+					fixed2 size = fixed2(_Background_TexelSize.z * (_Zoom / 16), _Background_TexelSize.w * (_Zoom / 16));
+					if (offset.x > 0 && offset.y > 0 && offset.x < size.x && offset.y < size.y)
+						col = tex2D(_Background, fixed2(offset.x / size.x, offset.y / -size.y)).rgba;
 						
 					return col;
 				}

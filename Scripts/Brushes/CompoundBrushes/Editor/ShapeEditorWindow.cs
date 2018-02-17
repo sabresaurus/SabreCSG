@@ -58,6 +58,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private Material gridMaterial;
 
         /// <summary>
+        /// The background image shown in the editor (loaded by the user).
+        /// </summary>
+        private Texture2D backgroundImage;
+
+        /// <summary>
         /// The currently selected segments.
         /// </summary>
         private IEnumerable<Segment> selectedSegments
@@ -182,7 +187,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             ShapeEditorWindow window = GetWindow<ShapeEditorWindow>();
             window.minSize = new Vector2(800, 600);
             window.Show();
-            window.titleContent = new GUIContent("Shape Editor");
+            window.titleContent = new GUIContent("Shape Editor", SabreCSGResources.ButtonShapeEditorTexture);
             window.minSize = new Vector2(128, 128);
         }
 
@@ -454,6 +459,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 gridMaterial.SetFloat("_ScrollX", viewportScroll.x);
                 gridMaterial.SetFloat("_ScrollY", viewportScroll.y);
                 gridMaterial.SetFloat("_Zoom", gridScale);
+                gridMaterial.SetTexture("_Background", backgroundImage);
                 gridMaterial.SetPass(0);
 
                 GL.Begin(GL.QUADS);
@@ -649,6 +655,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             GUI.enabled = true;
 
             GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Tools", EditorStyles.toolbarDropDown))
+            {
+                GenericMenu toolsMenu = new GenericMenu();
+                toolsMenu.AddItem(new GUIContent("Background/Load Image..."), false, OnToolsBackgroundLoadImage);
+                toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
+                toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
+                EditorGUIUtility.ExitGUI();
+            }
 
             GUILayout.EndHorizontal();
         }
@@ -1109,6 +1124,34 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
 
             EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
+        }
+
+        /// <summary>
+        /// Called when the tools 'menu/background/load image' item is pressed.
+        /// </summary>
+        private void OnToolsBackgroundLoadImage()
+        {
+            try
+            {
+                string path = EditorUtility.OpenFilePanelWithFilters("Load Background Image", "", new string[] { "Image Files", "png,jpg,jpeg" });
+                if (path.Length != 0)
+                {
+                    backgroundImage = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                    backgroundImage.LoadImage(File.ReadAllBytes(path));
+                }
+            }
+            catch (Exception ex)
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "An exception occured while loading the project:\r\n" + ex.Message, "Ohno!");
+            }
+        }
+
+        /// <summary>
+        /// Called when the tools 'menu/background/clear background' item is pressed.
+        /// </summary>
+        private void OnToolsBackgroundClearBackground()
+        {
+            backgroundImage = null;
         }
 
         private Rect GetViewportRect()
