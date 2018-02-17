@@ -50,7 +50,7 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,HideInInspector]
 		Brush lastSelectedBrush = null;
 
-		float currentFrameTimestamp = 0;
+        float currentFrameTimestamp = 0;
 		float currentFrameDelta = 0;
 
 		static bool anyCSGModelsInEditMode = false;
@@ -205,12 +205,12 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-        public override void Build(bool forceRebuild, bool buildInBackground)
+        public override void Build(bool forceRebuild, bool buildInBackground, bool finalBuild)
         {
             // Build can take place if meshes are not saved to the DB, or if the scene is saved
             if(!buildSettings.SaveMeshesAsAssets || EnsureUntitledSceneHasBeenSaved("Scene must be saved for SaveMeshesAsAssets to work"))
             {
-                base.Build(forceRebuild, buildInBackground);
+                base.Build(forceRebuild, buildInBackground, finalBuild);
             }
         }
 
@@ -1111,6 +1111,24 @@ namespace Sabresaurus.SabreCSG
 
 			if(gameObject != null)
 			{
+                CSGModelBase csgModel = gameObject.GetComponent<CSGModelBase>();
+                if (csgModel != null)
+                {
+                    drawRect.xMax -= 2;
+                    drawRect.xMin = drawRect.xMax - 16;
+                    drawRect.height = 16;
+
+                    Material iconMaterial = null;
+                    if (csgModel.IsFinalBuild)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.FinalBuildIconTexture, iconMaterial);
+                    }
+                    else
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.PreviewBuildIconTexture, iconMaterial);
+                    }
+                }
+
 				BrushBase brushBase = gameObject.GetComponent<BrushBase>();
 				if(brushBase != null)
 				{
@@ -1177,7 +1195,7 @@ namespace Sabresaurus.SabreCSG
 				{
 //					if(frameIndex % 30 == 0)
 					{
-						Build(false, false);
+						Build(false, false, false);
 					}
 				}
 

@@ -37,7 +37,7 @@ namespace Sabresaurus.SabreCSG
 
             if(activeCSGModel != null)
             {
-                activeCSGModel.Build(false, false);
+                activeCSGModel.Build(false, false, false);
             }
 		}
 

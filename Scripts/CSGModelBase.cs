@@ -43,7 +43,10 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,HideInInspector]
 		protected CSGBuildSettings lastBuildSettings = new CSGBuildSettings();
 
-		[NonSerialized]
+        [SerializeField, HideInInspector]
+        bool isFinalBuild = false;
+
+        [NonSerialized]
 		protected CSGBuildContext buildContextBehaviour;
 
 		// A reference to a component which holds a lot of build time data that helps change built geometry on the fly
@@ -87,8 +90,19 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+        /// <summary>
+        /// Gets whether this model has been unmodified since the last final build.
+        /// </summary>
+        /// <value><c>true</c> if this csg model is a final build; otherwise, <c>false</c>.</value>
+        public bool IsFinalBuild
+        {
+            get
+            {
+                return isFinalBuild;
+            }
+        }
 
-		public PolygonEntry GetVisualPolygonEntry(int index)
+        public PolygonEntry GetVisualPolygonEntry(int index)
 		{
 			int entryCount = BuildContext.VisualPolygonIndex.Length;
 
@@ -163,13 +177,17 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		/// <summary>
-		/// Builds the brushes into final meshes
-		/// </summary>
-		/// <param name="forceRebuild">If set to <c>true</c> all brushes will be built and cached data ignored, otherwise SabreCSG will only rebuild brushes it knows have changed</param>
-		/// <param name="buildInBackground">If set to <c>true</c> the majority of the build will occur in a background thread</param>
-		public virtual void Build (bool forceRebuild, bool buildInBackground)
+        /// <summary>
+        /// Builds the brushes into final meshes.
+        /// </summary>
+        /// <param name="forceRebuild">If set to <c>true</c> all brushes will be built and cached data ignored, otherwise SabreCSG will only rebuild brushes it knows have changed</param>
+        /// <param name="buildInBackground">If set to <c>true</c> the majority of the build will occur in a background thread</param>
+        /// <param name="finalRebuild">If set to <c>true</c> will remove T-Junctions and do other very time intensive cleaning.</param>
+        public virtual void Build (bool forceRebuild, bool buildInBackground, bool finalRebuild)
 		{
+            // Store whether this is a final build.
+            isFinalBuild = finalRebuild;
+
 			// If any of the build settings have changed, force all brushes to rebuild
 			if(!lastBuildSettings.IsBuilt || CSGBuildSettings.AreDifferent(buildSettings, lastBuildSettings))
 			{
@@ -204,7 +222,8 @@ namespace Sabresaurus.SabreCSG
 				OnBuildProgressChanged,
 				OnFinalizeVisualMesh,
 				OnFinalizeCollisionMesh,
-				buildInBackground);
+				buildInBackground,
+                finalRebuild);
 
 			if(buildStatus == BuildStatus.Complete)
 			{

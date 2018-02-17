@@ -173,7 +173,7 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static Texture2D NoCSGIconTexture 
+        public static Texture2D NoCSGIconTexture 
 		{
 			get 
 			{
@@ -181,7 +181,23 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static Texture2D DialogOverlayTexture 
+        public static Texture2D PreviewBuildIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/PreviewBuild.png");
+            }
+        }
+
+        public static Texture2D FinalBuildIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/FinalBuild.png");
+            }
+        }
+
+        public static Texture2D DialogOverlayTexture 
 		{
 			get 
 			{

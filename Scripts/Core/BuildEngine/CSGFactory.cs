@@ -21,7 +21,8 @@ namespace Sabresaurus.SabreCSG
 		static List<Mesh> collisionMeshDictionary;
 		static bool polygonsRemoved;
 		static bool forceRebuild;
-		static Action<float> onProgressChange;
+		static bool finalRebuild;
+        static Action<float> onProgressChange;
 		static Action<GameObject, Mesh> onFinalizeVisualMesh;
 		static Action<GameObject, Mesh> onFinalizeCollisionMesh;
 
@@ -64,7 +65,8 @@ namespace Sabresaurus.SabreCSG
 			Action<float> onProgressChange,
 			Action<GameObject, Mesh> onFinalizeVisualMesh,
 			Action<GameObject, Mesh> onFinalizeCollisionMesh,
-			bool multithreaded)
+			bool multithreaded,
+            bool finalRebuild)
 		{
 			CSGFactory.brushes = brushes;
 			CSGFactory.buildSettings = buildSettings;
@@ -74,7 +76,9 @@ namespace Sabresaurus.SabreCSG
 			CSGFactory.collisionMeshDictionary = collisionMeshDictionary;
 			CSGFactory.polygonsRemoved = polygonsRemoved;
 			CSGFactory.forceRebuild = forceRebuild;
-			CSGFactory.onProgressChange = onProgressChange;
+            CSGFactory.finalRebuild = finalRebuild;
+
+            CSGFactory.onProgressChange = onProgressChange;
 			CSGFactory.onFinalizeVisualMesh = onFinalizeVisualMesh;
 			CSGFactory.onFinalizeCollisionMesh = onFinalizeCollisionMesh;
 
@@ -400,8 +404,11 @@ namespace Sabresaurus.SabreCSG
                 ///////////////////////////////////////////////////////////////////////////////////
                 // FIX T-JUNCTIONS - The competition is real!                                    //
                 ///////////////////////////////////////////////////////////////////////////////////
-                
-                TJunctions.FixTJunctions(allGroupedPolygons);
+
+                if (finalRebuild)
+                {
+                    TJunctions.FixTJunctions(allGroupedPolygons);
+                }
 
                 ///////////////////////////////////////////////////////////////////////////////////
 
