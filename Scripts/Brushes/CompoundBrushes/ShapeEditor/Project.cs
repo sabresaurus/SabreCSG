@@ -71,6 +71,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public int revolveSteps = 4;
 
         /// <summary>
+        /// The revolve distance as determined by the project's global pivot.
+        /// </summary>
+        [SerializeField]
+        public int revolveDistance = 1;
+
+        /// <summary>
         /// The revolve radius as determined by the project's global pivot.
         /// </summary>
         [SerializeField]

@@ -1107,11 +1107,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     {
                         project.revolveDirection = true;
                         project.revolveRadius = project.globalPivot.position.x - minX;
+                        project.revolveDistance = minX;
+                        Debug.Log(minX);
                     }
                     else
                     {
                         project.revolveDirection = false;
                         project.revolveRadius = maxX - project.globalPivot.position.x;
+                        project.revolveDistance = maxX;
                     }
                     // extrude the shape revolved.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
@@ -1124,11 +1127,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 {
                     project.revolveDirection = true;
                     project.revolveRadius = project.globalPivot.position.x - minX;
+                    project.revolveDistance = minX;
                 }
                 else
                 {
                     project.revolveDirection = false;
                     project.revolveRadius = maxX - project.globalPivot.position.x;
+                    project.revolveDistance = maxX;
                 }
                 // extrude the shape revolved.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);

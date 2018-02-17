@@ -187,14 +187,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         foreach (Vertex v in poly2.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(project.extrudeScale.x + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
                         }
                         Polygon nextPoly = m_LastBuiltPolygons[labpIndex].DeepCopy();
                         nextPoly.Flip();
                         foreach (Vertex v in nextPoly.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(project.extrudeScale.x + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
                         }
                         GenerateNormals(poly2);
                         List<Polygon> polygons = new List<Polygon>() { poly2 };
