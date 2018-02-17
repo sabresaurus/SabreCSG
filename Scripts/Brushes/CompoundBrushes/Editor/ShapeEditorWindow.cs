@@ -1108,7 +1108,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         project.revolveDirection = true;
                         project.revolveRadius = project.globalPivot.position.x - minX;
                         project.revolveDistance = minX;
-                        Debug.Log(minX);
                     }
                     else
                     {

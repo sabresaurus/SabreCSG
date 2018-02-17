@@ -218,7 +218,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             if (newPoly.Plane.normal == Vector3.zero) continue; // discard single line, can happen in the center of the shape.
                             GenerateUvCoordinates(newPoly, false);
                             polygons.Add(newPoly);
-
                         }
 
                         Polygon backPoly = new Polygon(backPolyVertices.ToArray(), null, false, false);
