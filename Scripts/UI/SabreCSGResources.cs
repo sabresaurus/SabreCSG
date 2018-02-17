@@ -229,7 +229,15 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static Texture2D ButtonStairsTexture 
+        public static Texture2D ButtonIcoSphereTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonIcoSphere.png");
+            }
+        }
+
+        public static Texture2D ButtonStairsTexture 
 		{
 			get 
 			{
@@ -253,6 +261,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ButtonShapeEditorTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonShapeEditor.png");
+            }
+        }
+
         public static Texture2D GroupHeaderTexture
         {
             get
@@ -269,7 +285,175 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-		public static Material GetExcludedMaterial()
+        public static Texture2D ShapeEditorCreatePolygonTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorCreatePolygon.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorShapeCreateTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorShapeCreate.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorExtrudeBevelTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorExtrudeBevel.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorExtrudePointTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorExtrudePoint.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorExtrudeRevolveTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorExtrudeRevolve.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorExtrudeShapeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorExtrudeShape.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorFlipHorizontallyTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorFlipHorizontally.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorFlipVerticallyTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorFlipVertically.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorNewTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorNew.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorOpenTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorOpen.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorRotate90LeftTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRotate90Left.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorRotate90RightTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRotate90Right.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSaveTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSave.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentBezierTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentBezier.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentBezierDetailTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentBezierDetail.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorDeleteTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorDelete.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentInsertTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentInsert.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentLinearTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentLinear.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorZoomInTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorZoomIn.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorZoomOutTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorZoomOut.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorHomeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorHome.png");
+            }
+        }
+
+        public static Material GetExcludedMaterial()
 		{
 			if (excludedMaterial == null)
 			{
