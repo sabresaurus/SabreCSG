@@ -180,6 +180,48 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             return null;
         }
 
+        /// <summary>
+        /// Determines whether the global pivot is on the right side or the left side of the project
+        /// but not inside of any shapes.
+        /// </summary>
+        /// <param name="extremeRight">
+        /// If set to <c>true</c> the pivot is on the extreme right of the project else on the
+        /// extreme left.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the pivot is on the left or right extreme of the project; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsGlobalPivotExtreme(out bool extremeRight, out int minX, out int minY, out int maxX, out int maxY)
+        {
+            extremeRight = false;
+            minX = int.MinValue;
+            minY = int.MinValue;
+            maxX = int.MaxValue;
+            maxY = int.MaxValue;
+            foreach (Shape shape in project.shapes)
+            {
+                foreach (Segment segment in shape.segments)
+                {
+                    if (segment.position.x > minX) minX = segment.position.x;
+                    if (segment.position.x < maxX) maxX = segment.position.x;
+                    if (segment.position.y > minY) minY = segment.position.y;
+                    if (segment.position.y < maxY) maxY = segment.position.y;
+                }
+            }
+
+            if (project.globalPivot.position.x >= minX)
+            {
+                extremeRight = true;
+                return true;
+            }
+            if (project.globalPivot.position.x <= maxX)
+            {
+                extremeRight = false;
+                return true;
+            }
+            return false;
+        }
+
         [MenuItem("Window/SabreCSG/2D Shape Editor")]
         public static void Init()
         {
@@ -379,12 +421,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 }
                 if (Event.current.keyCode == KeyCode.Alpha2 && Event.current.modifiers != 0)
                 {
-                    OnExtrudeRevolve(false);
+                    OnRevolveShape(false);
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha2)
                 {
-                    OnExtrudeRevolve(true);
+                    OnRevolveShape(true);
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha3 && Event.current.modifiers != 0)
@@ -633,7 +675,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, "Revolve Shape (2 or SHIFT + 2 to skip popup)"), createBrushStyle))
             {
-                OnExtrudeRevolve(true);
+                OnRevolveShape(true);
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeShapeTexture, "Extrude Shape (3 or SHIFT + 3 to skip popup)"), createBrushStyle))
             {
@@ -1038,10 +1080,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Called when the extrude revolved button is pressed.
+        /// Called when the revolve shape button is pressed.
         /// </summary>
         /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
-        private void OnExtrudeRevolve(bool popup)
+        private void OnRevolveShape(bool popup)
         {
             if (project.shapes.Count == 0)
             {
@@ -1049,7 +1091,48 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 return;
             }
 
-            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
+            bool extremeRight; int minX; int minY; int maxX; int maxY;
+            if (!IsGlobalPivotExtreme(out extremeRight, out minX, out minY, out maxX, out maxY))
+            {
+                EditorUtility.DisplayDialog("2D Shape Editor", "The global pivot must be completely to the left or right side of all the shapes!", "Okay");
+                return;
+            }
+
+            if (popup)
+            {
+                // let the user choose the extrude parameters.
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.RevolveShape, project, (self) => {
+                    // store generated parameters.
+                    if (extremeRight)
+                    {
+                        project.revolveDirection = true;
+                        project.revolveRadius = project.globalPivot.position.x - minX;
+                    }
+                    else
+                    {
+                        project.revolveDirection = false;
+                        project.revolveRadius = maxX - project.globalPivot.position.x;
+                    }
+                    // extrude the shape revolved.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
+                }));
+            }
+            else
+            {
+                // store generated parameters.
+                if (extremeRight)
+                {
+                    project.revolveDirection = true;
+                    project.revolveRadius = project.globalPivot.position.x - minX;
+                }
+                else
+                {
+                    project.revolveDirection = false;
+                    project.revolveRadius = maxX - project.globalPivot.position.x;
+                }
+                // extrude the shape revolved.
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
+            }
         }
 
         /// <summary>

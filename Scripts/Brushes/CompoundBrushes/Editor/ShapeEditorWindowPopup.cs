@@ -18,6 +18,7 @@ namespace Sabresaurus.SabreCSG
         {
             BezierDetailLevel,
             CreatePolygon,
+            RevolveShape,
             ExtrudeShape,
             ExtrudePoint
         }
@@ -27,6 +28,8 @@ namespace Sabresaurus.SabreCSG
         public int bezierDetailLevel_Detail = 3;
         public float extrudeDepth = 1.0f;
         public Vector2 extrudeScale = Vector2.one;
+        public int revolve360 = 8;
+        public int revolveSteps = 4;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -37,6 +40,8 @@ namespace Sabresaurus.SabreCSG
             // read the extrude settings from the project.
             extrudeDepth = project.extrudeDepth;
             extrudeScale = project.extrudeScale;
+            revolve360 = project.revolve360;
+            revolveSteps = project.revolveSteps;
 
             this.onApply = (self) => {
 
@@ -45,6 +50,11 @@ namespace Sabresaurus.SabreCSG
                 {
                     case PopupMode.CreatePolygon:
                         project.extrudeScale = extrudeScale;
+                        break;
+                    case PopupMode.RevolveShape:
+                        project.extrudeScale = extrudeScale;
+                        project.revolve360 = revolve360;
+                        project.revolveSteps = revolveSteps;
                         break;
                     case PopupMode.ExtrudeShape:
                         project.extrudeScale = extrudeScale;
@@ -70,6 +80,8 @@ namespace Sabresaurus.SabreCSG
                     return new Vector2(205, 140);
                 case PopupMode.CreatePolygon:
                     return new Vector2(300, 50 + 18);
+                case PopupMode.RevolveShape:
+                    return new Vector2(300, 86 + 18);
                 case PopupMode.ExtrudeShape:
                     return new Vector2(300, 68 + 18);
                 case PopupMode.ExtrudePoint:
@@ -142,6 +154,19 @@ namespace Sabresaurus.SabreCSG
                 case PopupMode.CreatePolygon:
                     GUILayout.Label("Create Polygon", EditorStyles.boldLabel);
                     accept = "Create";
+                    break;
+
+                case PopupMode.RevolveShape:
+                    GUILayout.Label("Revolve Shape", EditorStyles.boldLabel);
+                    accept = "Revolve";
+
+                    revolve360 = EditorGUILayout.IntField("Per 360", revolve360);
+                    if (revolve360 < 3) revolve360 = 3;
+                    revolveSteps = EditorGUILayout.IntField("Steps", revolveSteps);
+                    if (revolveSteps < 1) revolveSteps = 1;
+
+                    // steps can't be more than 360.
+                    if (revolveSteps > revolve360) revolveSteps = revolve360;
                     break;
 
                 case PopupMode.ExtrudeShape:

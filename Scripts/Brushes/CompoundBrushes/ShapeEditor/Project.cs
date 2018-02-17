@@ -59,6 +59,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public Vector2 extrudeScale = Vector2.one;
 
         /// <summary>
+        /// The how many steps it takes to revolve 360 degrees.
+        /// </summary>
+        [SerializeField]
+        public int revolve360 = 8;
+
+        /// <summary>
+        /// The amount of steps used.
+        /// </summary>
+        [SerializeField]
+        public int revolveSteps = 4;
+
+        /// <summary>
+        /// The revolve radius as determined by the project's global pivot.
+        /// </summary>
+        [SerializeField]
+        public int revolveRadius = 1;
+
+        /// <summary>
+        /// The revolve direction (true is right, false is left).
+        /// </summary>
+        [SerializeField]
+        public bool revolveDirection = true;
+
+        /// <summary>
         /// Clones this project and returns the copy.
         /// </summary>
         /// <returns>A copy of the project.</returns>

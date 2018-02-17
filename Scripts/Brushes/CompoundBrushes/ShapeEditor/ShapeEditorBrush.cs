@@ -30,7 +30,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             /// <summary>
             /// Revolves the shapes.
             /// </summary>
-            ExtrudeRevolve,
+            RevolveShape,
             /// <summary>
             /// Extrudes the shapes.
             /// </summary>
@@ -177,7 +177,58 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
                         break;
 
-                    case ExtrudeMode.ExtrudeRevolve:
+                    // generate 3d cube-ish shapes that revolve around the pivot.
+                    case ExtrudeMode.RevolveShape:
+                        int labpIndex = i % m_LastBuiltPolygons.Count;
+
+                        Polygon poly2 = m_LastBuiltPolygons[labpIndex].DeepCopy();
+                        poly2.Flip();
+                        GenerateUvCoordinates(poly2, false);
+                        foreach (Vertex v in poly2.Vertices)
+                        {
+                            float step = 360.0f / project.revolve360;
+                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(project.extrudeScale.x + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                        }
+                        Polygon nextPoly = m_LastBuiltPolygons[labpIndex].DeepCopy();
+                        nextPoly.Flip();
+                        foreach (Vertex v in nextPoly.Vertices)
+                        {
+                            float step = 360.0f / project.revolve360;
+                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(project.extrudeScale.x + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                        }
+                        GenerateNormals(poly2);
+                        List<Polygon> polygons = new List<Polygon>() { poly2 };
+                        List<Vertex> backPolyVertices = new List<Vertex>();
+                        Edge[] myEdges = poly2.GetEdges();
+                        Edge[] nextEdges = nextPoly.GetEdges();
+                        for (int j = 0; j < myEdges.Length; j++)
+                        {
+                            Edge myEdge = myEdges[j];
+                            Edge nextEdge = nextEdges[j];
+
+                            Polygon newPoly = new Polygon(new Vertex[] {
+                                new Vertex(myEdge.Vertex1.Position, Vector3.zero, Vector2.zero),
+                                new Vertex(nextEdge.Vertex1.Position, Vector3.zero, Vector2.zero),
+                                new Vertex(nextEdge.Vertex2.Position, Vector3.zero, Vector2.zero),
+                                new Vertex(myEdge.Vertex2.Position, Vector3.zero, Vector2.zero),
+                            }, null, false, false);
+
+                            backPolyVertices.Add(nextEdge.Vertex1);
+                            GenerateNormals(newPoly);
+                            if (newPoly.Plane.normal == Vector3.zero) continue; // discard single line, can happen in the center of the shape.
+                            GenerateUvCoordinates(newPoly, false);
+                            polygons.Add(newPoly);
+
+                        }
+
+                        Polygon backPoly = new Polygon(backPolyVertices.ToArray(), null, false, false);
+
+                        backPoly.Flip();
+                        GenerateNormals(backPoly);
+                        GenerateUvCoordinates(backPoly, false);
+                        polygons.Add(backPoly);
+
+                        generatedBrushes[i].SetPolygons(polygons.ToArray());
                         break;
 
                     // generate a 3d cube-ish shape.
@@ -288,7 +339,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         // we make a brush for every polgon.
                         desiredBrushCount = polygons.Count;
                         break;
-                    case ExtrudeMode.ExtrudeRevolve:
+                        // we need another brush for every revolve step.
+                    case ExtrudeMode.RevolveShape:
+                        desiredBrushCount = polygons.Count * project.revolveSteps;
                         break;
                     case ExtrudeMode.ExtrudeShape:
                         // we make a brush for every polgon.
@@ -449,6 +502,113 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             outputPolygons = polygons.ToArray();
         }
 
+        /// <summary>
+        /// Creates a brush by extruding a supplied polygon by a specified extrusion distance.
+        /// </summary>
+        /// <param name="sourcePolygon">Source polygon, typically transformed into world space.</param>
+        /// <param name="extrusionDistance">Extrusion distance, this is the height (or depth) of the created geometry perpendicular to the source polygon.</param>
+        /// <param name="outputPolygons">Output brush polygons.</param>
+        /// <param name="rotation">The rotation to be supplied to the new brush transform.</param>
+        private static void ExtrudePolygonAgainstPlane(Polygon sourcePolygon, float extrusionDistance, out Polygon[] outputPolygons, out Quaternion rotation)
+        {
+            bool flipped = false;
+            if (extrusionDistance < 0)
+            {
+                sourcePolygon.Flip();
+                extrusionDistance = -extrusionDistance;
+                flipped = true;
+            }
+
+            // Create base polygon
+            Polygon basePolygon = sourcePolygon.DeepCopy();
+            basePolygon.UniqueIndex = -1;
+
+            rotation = Quaternion.LookRotation(basePolygon.Plane.normal);
+            Quaternion cancellingRotation = Quaternion.Inverse(rotation);
+
+            Vertex[] vertices = basePolygon.Vertices;
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].Position = cancellingRotation * vertices[i].Position;
+
+                vertices[i].Normal = cancellingRotation * vertices[i].Normal;
+            }
+
+            basePolygon.SetVertices(vertices);
+
+            // Create the opposite polygon by duplicating the base polygon, offsetting and flipping
+            Vector3 normal = basePolygon.Plane.normal;
+            Polygon oppositePolygon = basePolygon.DeepCopy();
+            oppositePolygon.UniqueIndex = -1;
+
+            basePolygon.Flip();
+
+            vertices = oppositePolygon.Vertices;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].Position += normal * extrusionDistance;
+                //				vertices[i].UV.x *= -1; // Flip UVs
+            }
+            oppositePolygon.SetVertices(vertices);
+
+            // Now create each of the brush side polygons
+            Polygon[] brushSides = new Polygon[sourcePolygon.Vertices.Length];
+
+            for (int i = 0; i < basePolygon.Vertices.Length; i++)
+            {
+                Vertex vertex1 = basePolygon.Vertices[i].DeepCopy();
+                Vertex vertex2 = basePolygon.Vertices[(i + 1) % basePolygon.Vertices.Length].DeepCopy();
+
+                // Create new UVs for the sides, otherwise we'll get distortion
+
+                float sourceDistance = Vector3.Distance(vertex1.Position, vertex2.Position);
+                float uvDistance = Vector2.Distance(vertex1.UV, vertex2.UV);
+
+                float uvScale = sourceDistance / uvDistance;
+
+                vertex1.UV = Vector2.zero;
+                if (flipped)
+                {
+                    vertex2.UV = new Vector2(-sourceDistance / uvScale, 0);
+                }
+                else
+                {
+                    vertex2.UV = new Vector2(sourceDistance / uvScale, 0);
+                }
+
+                Vector2 uvDelta = vertex2.UV - vertex1.UV;
+
+                Vector2 rotatedUVDelta = uvDelta.Rotate(90) * (extrusionDistance / sourceDistance);
+
+                Vertex vertex3 = vertex1.DeepCopy();
+                vertex3.Position += normal * extrusionDistance;
+                vertex3.UV += rotatedUVDelta;
+
+                Vertex vertex4 = vertex2.DeepCopy();
+                vertex4.Position += normal * extrusionDistance;
+                vertex4.UV += rotatedUVDelta;
+
+                Vertex[] newVertices = new Vertex[] { vertex1, vertex2, vertex4, vertex3 };
+
+                brushSides[i] = new Polygon(newVertices, sourcePolygon.Material, false, false);
+                brushSides[i].Flip();
+                brushSides[i].ResetVertexNormals();
+            }
+
+            List<Polygon> polygons = new List<Polygon>();
+            polygons.Add(basePolygon);
+            polygons.Add(oppositePolygon);
+            polygons.AddRange(brushSides);
+
+            outputPolygons = polygons.ToArray();
+        }
+
+        private Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles)
+        {
+            return Quaternion.Euler(angles) * (point - pivot) + pivot;
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // PUBLIC API                                                                            //
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -473,6 +633,23 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.CreatePolygon;
+            // build the polygons out of the project.
+            m_LastBuiltPolygons = BuildConvexPolygons();
+            // build the brush.
+            isDirty = true;
+            Invalidate(true);
+        }
+
+        /// <summary>
+        /// Creates an extruded shape that revolves around. Also called by the 2D Shape Editor window.
+        /// </summary>
+        /// <param name="project">The project to be copied into the brush.</param>
+        public void RevolveShape(Project project)
+        {
+            // store a project copy inside of this brush.
+            this.project = project.Clone();
+            // store the extrude mode inside of this brush.
+            extrudeMode = ExtrudeMode.RevolveShape;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.
