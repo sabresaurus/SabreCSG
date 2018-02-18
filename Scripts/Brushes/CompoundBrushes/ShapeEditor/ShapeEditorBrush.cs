@@ -242,13 +242,19 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // generate a 3d cone-ish shape.
                     case ExtrudeMode.ExtrudePoint:
                         GenerateNormals(m_LastBuiltPolygons[i]);
-                        ExtrudePolygonToPoint(m_LastBuiltPolygons[i], project.extrudeDepth, new Vector2(project.globalPivot.position.x / 8.0f, -project.globalPivot.position.y / 8.0f), out outputPolygons, out rot);
+                        ExtrudePolygonToPoint(m_LastBuiltPolygons[i], project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
                         generatedBrushes[i].SetPolygons(outputPolygons);
                         break;
 
+                    // generate a 3d trapezoid-ish shape.
                     case ExtrudeMode.ExtrudeBevel:
+                        GenerateNormals(m_LastBuiltPolygons[i]);
+                        ExtrudePolygonBevel(m_LastBuiltPolygons[i], project.extrudeDepth, project.extrudeClipDepth / project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
+                        foreach (Polygon poly in outputPolygons)
+                            GenerateUvCoordinates(poly, false);
+                        generatedBrushes[i].SetPolygons(outputPolygons);
                         break;
                 }
 
@@ -351,6 +357,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         desiredBrushCount = polygons.Count;
                         break;
                     case ExtrudeMode.ExtrudeBevel:
+                        // we make a brush for every polgon.
+                        desiredBrushCount = polygons.Count;
                         break;
                 }
             }
@@ -502,14 +510,24 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Creates a brush by extruding a supplied polygon by a specified extrusion distance.
+        /// Creates a brush by extruding a supplied polygon by a specified extrusion distance towards
+        /// a point and then capping it to build a trapezoid.
         /// </summary>
         /// <param name="sourcePolygon">Source polygon, typically transformed into world space.</param>
-        /// <param name="extrusionDistance">Extrusion distance, this is the height (or depth) of the created geometry perpendicular to the source polygon.</param>
+        /// <param name="extrusionDistance">
+        /// Extrusion distance, this is the height (or depth) of the created geometry perpendicular
+        /// to the source polygon.
+        /// </param>
+        /// <param name="clip">Where to clip the new polygon (0.0f - 1.0f).</param>
+        /// <param name="offset">The offset of the point.</param>
         /// <param name="outputPolygons">Output brush polygons.</param>
         /// <param name="rotation">The rotation to be supplied to the new brush transform.</param>
-        private static void ExtrudePolygonAgainstPlane(Polygon sourcePolygon, float extrusionDistance, out Polygon[] outputPolygons, out Quaternion rotation)
+        private static void ExtrudePolygonBevel(Polygon sourcePolygon, float extrusionDistance, float clip, Vector2 offset, out Polygon[] outputPolygons, out Quaternion rotation)
         {
+            // cap the max extrusion distance.
+            float originalExtrusionDistance = extrusionDistance;
+            extrusionDistance = extrusionDistance * clip;
+
             bool flipped = false;
             if (extrusionDistance < 0)
             {
@@ -547,6 +565,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             for (int i = 0; i < vertices.Length; i++)
             {
                 vertices[i].Position += normal * extrusionDistance;
+                //vertices[i].Position.x *= Mathf.Lerp( (originalExtrusionDistance * clip);
+                //vertices[i].Position.y *= clip;
+                vertices[i].Position.x = Mathf.Lerp(vertices[i].Position.x, ((normal * originalExtrusionDistance).x * 0.5f) + offset.x, clip);
+                vertices[i].Position.y = Mathf.Lerp(vertices[i].Position.y, ((normal * originalExtrusionDistance).y * 0.5f) + offset.y, clip);
                 //				vertices[i].UV.x *= -1; // Flip UVs
             }
             oppositePolygon.SetVertices(vertices);
@@ -587,6 +609,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 Vertex vertex4 = vertex2.DeepCopy();
                 vertex4.Position += normal * extrusionDistance;
                 vertex4.UV += rotatedUVDelta;
+
+                // end in a point.
+                vertex3.Position.x = Mathf.Lerp(vertex3.Position.x, ((normal * originalExtrusionDistance).x * 0.5f) + offset.x, clip);
+                vertex3.Position.y = Mathf.Lerp(vertex3.Position.y, ((normal * originalExtrusionDistance).y * 0.5f) + offset.y, clip);
+
+                vertex4.Position.x = Mathf.Lerp(vertex4.Position.x, ((normal * originalExtrusionDistance).x * 0.5f) + offset.x, clip);
+                vertex4.Position.y = Mathf.Lerp(vertex4.Position.y, ((normal * originalExtrusionDistance).y * 0.5f) + offset.y, clip);
 
                 Vertex[] newVertices = new Vertex[] { vertex1, vertex2, vertex4, vertex3 };
 
@@ -683,6 +712,31 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.ExtrudePoint;
+            // build the polygons out of the project.
+            m_LastBuiltPolygons = BuildConvexPolygons();
+            // build the brush.
+            isDirty = true;
+            Invalidate(true);
+        }
+
+        /// <summary>
+        /// Creates an extruded shape towards a point but is then capped causing a trapezoid. Also
+        /// called by the 2D Shape Editor window.
+        /// </summary>
+        /// <param name="project">The project to be copied into the brush.</param>
+        public void ExtrudeBevel(Project project)
+        {
+            // if the depth and clip depth are identical, extrude a point instead.
+            if (project.extrudeDepth.EqualsWithEpsilon(project.extrudeClipDepth))
+            {
+                ExtrudePoint(project);
+                return;
+            }
+
+            // store a project copy inside of this brush.
+            this.project = project.Clone();
+            // store the extrude mode inside of this brush.
+            extrudeMode = ExtrudeMode.ExtrudeBevel;
             // build the polygons out of the project.
             m_LastBuiltPolygons = BuildConvexPolygons();
             // build the brush.

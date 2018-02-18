@@ -20,13 +20,15 @@ namespace Sabresaurus.SabreCSG
             CreatePolygon,
             RevolveShape,
             ExtrudeShape,
-            ExtrudePoint
+            ExtrudePoint,
+            ExtrudeBevel
         }
 
         private PopupMode popupMode;
 
         public int bezierDetailLevel_Detail = 3;
         public float extrudeDepth = 1.0f;
+        public float extrudeClipDepth = 0.5f;
         public Vector2 extrudeScale = Vector2.one;
         public int revolve360 = 8;
         public int revolveSteps = 4;
@@ -39,6 +41,7 @@ namespace Sabresaurus.SabreCSG
 
             // read the extrude settings from the project.
             extrudeDepth = project.extrudeDepth;
+            extrudeClipDepth = project.extrudeClipDepth;
             extrudeScale = project.extrudeScale;
             revolve360 = project.revolve360;
             revolveSteps = project.revolveSteps;
@@ -64,6 +67,11 @@ namespace Sabresaurus.SabreCSG
                         project.extrudeScale = extrudeScale;
                         project.extrudeDepth = extrudeDepth;
                         break;
+                    case PopupMode.ExtrudeBevel:
+                        project.extrudeScale = extrudeScale;
+                        project.extrudeDepth = extrudeDepth;
+                        project.extrudeClipDepth = extrudeClipDepth;
+                        break;
                 }
 
                 onApply(self);
@@ -86,6 +94,8 @@ namespace Sabresaurus.SabreCSG
                     return new Vector2(300, 68 + 18);
                 case PopupMode.ExtrudePoint:
                     return new Vector2(300, 68 + 18);
+                case PopupMode.ExtrudeBevel:
+                    return new Vector2(300, 86 + 18);
                 default:
                     return new Vector2(300, 150);
             }
@@ -183,6 +193,17 @@ namespace Sabresaurus.SabreCSG
 
                     extrudeDepth = EditorGUILayout.FloatField("Depth", extrudeDepth);
                     if (extrudeDepth < 0.01f) extrudeDepth = 0.01f;
+                    break;
+
+                case PopupMode.ExtrudeBevel:
+                    GUILayout.Label("Extrude Bevel", EditorStyles.boldLabel);
+                    accept = "Extrude";
+
+                    extrudeDepth = EditorGUILayout.FloatField("Depth", extrudeDepth);
+                    if (extrudeDepth < 0.01f) extrudeDepth = 0.01f;
+                    extrudeClipDepth = EditorGUILayout.FloatField("Clip Depth", extrudeClipDepth);
+                    if (extrudeClipDepth < 0.01f) extrudeClipDepth = 0.01f;
+                    if (extrudeClipDepth > extrudeDepth) extrudeClipDepth = extrudeDepth;
                     break;
             }
 
