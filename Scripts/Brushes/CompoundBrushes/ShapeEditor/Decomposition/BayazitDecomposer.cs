@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor.Decomposition
     public static class BayazitDecomposer
     {
         public static float SettingsEpsilon = 0.0001f;
-        public static int MaxPolygonVertices = 8;
+        public static int MaxPolygonVertices = 1024;
 
         private static Vector2 At(int i, Vector2[] vertices)
         {
