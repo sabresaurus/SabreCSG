@@ -1,29 +1,29 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
     /// <summary>
     /// An implementation of <see cref="IEqualityComparer{T}"/> that checks whether two <see
-    /// cref="Vector3"/> can be considered equal.
-    /// <para>Floating point inaccuracies are taken into account (see <see cref="MathHelper.EPSILON_3"/>).</para>
+    /// cref="Vertex"/> can be considered equal by their position alone.
+    /// <para>
+    /// Floating point inaccuracies are taken into account (see <see
+    /// cref="Extensions.EqualsWithEpsilon(UnityEngine.Vector3, UnityEngine.Vector3)"/>).
+    /// </para>
     /// </summary>
-    /// <seealso cref="System.Collections.Generic.IEqualityComparer{UnityEngine.Vector3}"/>
-    public class Vector3ComparerEpsilon : IEqualityComparer<Vector3>
+    /// <seealso cref="System.Collections.Generic.IEqualityComparer{Sabresaurus.SabreCSG.Vertex}"/>
+    public class VertexPositionComparerEpsilon : IEqualityComparer<Vertex>
     {
         /// <summary>
-        /// Checks whether two <see cref="Vector3"/> can be considered equal.
+        /// Checks whether two <see cref="Vertex"/> can be considered equal by their position.
         /// </summary>
-        /// <param name="a">The first <see cref="Vector3"/>.</param>
-        /// <param name="b">The second <see cref="Vector3"/>.</param>
-        /// <returns><c>true</c> if the two <see cref="Vector3"/> can be considered equal; otherwise, <c>false</c>.</returns>
-        public bool Equals(Vector3 a, Vector3 b)
+        /// <param name="a">The first <see cref="Vertex"/>.</param>
+        /// <param name="b">The second <see cref="Vertex"/>.</param>
+        /// <returns><c>true</c> if the two <see cref="Vertex"/> can be considered equal; otherwise, <c>false</c>.</returns>
+        public bool Equals(Vertex a, Vertex b)
         {
-            return Mathf.Abs(a.x - b.x) < MathHelper.EPSILON_3
-                && Mathf.Abs(a.y - b.y) < MathHelper.EPSILON_3
-                && Mathf.Abs(a.z - b.z) < MathHelper.EPSILON_3;
+            return a.Position.EqualsWithEpsilon(b.Position);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Sabresaurus.SabreCSG
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures
         /// like a hash table.
         /// </returns>
-        public int GetHashCode(Vector3 obj)
+        public int GetHashCode(Vertex obj)
         {
             // The similarity or difference between two positions can only be calculated if both are supplied
             // when Distinct is called GetHashCode is used to determine which values are in collision first

@@ -1,3 +1,7 @@
+// disable warnings for missing == and != operators
+#pragma warning disable 0660
+#pragma warning disable 0661
+
 #if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
@@ -157,6 +161,18 @@ namespace Sabresaurus.SabreCSG
                    EqualityComparer<Color32>.Default.Equals(Color, other.Color);
         }
 
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures
+        /// like a hash table.
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         public static bool operator ==(Vertex lhs, Vertex rhs)
         {
             if (ReferenceEquals(lhs, rhs))
@@ -179,3 +195,7 @@ namespace Sabresaurus.SabreCSG
 }
 
 #endif
+
+// enable warnings for missing == and != operators
+#pragma warning restore 0660
+#pragma warning restore 0661

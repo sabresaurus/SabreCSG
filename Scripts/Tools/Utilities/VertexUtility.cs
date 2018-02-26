@@ -212,7 +212,7 @@ namespace Sabresaurus.SabreCSG
 		public static void DisplacePolygons(Polygon[] polygons, float distance)
 		{
 			// Used for determining if two vertices are the same
-			VertexComparerEpsilon vertexComparer = new VertexComparerEpsilon();
+			VertexPositionComparerEpsilon vertexComparer = new VertexPositionComparerEpsilon();
 			// Used for determining if two positions or normals are the same
 			Vector3ComparerEpsilon vectorComparer = new Vector3ComparerEpsilon();
 
