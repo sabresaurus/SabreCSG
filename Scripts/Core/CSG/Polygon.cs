@@ -131,8 +131,14 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
-        /// Gets or sets a temporary value whether this polygon is excluded from the final CSG build
-        /// (this property is not serialized, see <see cref="UserExcludeFromFinal"/>).
+        /// Gets or sets a temporary value used to mark polygons that are only created during the
+        /// build process. Usually you will want to keep this set to <c>false</c>.
+        /// <para>
+        /// For example if you subtract cube B from cube A, SabreCSG will split cube A into chunks by
+        /// cube B. In order to maintain convex solid chunks additional polygons are created on those
+        /// split planes so that we can still determine if a point is inside/outside the chunk (this
+        /// property is not serialized, see <see cref="UserExcludeFromFinal"/>).
+        /// </para>
         /// </summary>
         public bool ExcludeFromFinal
         {
@@ -174,7 +180,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="vertices">The vertices (see <see cref="Vertex"/>) that make up this polygonal shape.</param>
         /// <param name="material">The Unity <see cref="UnityEngine.Material"/> applied to the surface of this polygon.</param>
-        /// <param name="isTemporary">TODOTODOTODOTODOTODOTODO If set to <c>true</c> excludes the polygon from the final CSG build.</param>
+        /// <param name="isTemporary">If set to <c>true</c> excludes the polygon from the final CSG build, it's only temporarily created during the build process to determine whether a point is inside/outside of a convex chunk (usually you set this argument to <c>false</c>, also see <paramref name="userExcludeFromFinal"/>).</param>
         /// <param name="userExcludeFromFinal">If set to <c>true</c> the user requested that this polygon be excluded from the final CSG build (i.e. not rendered, it does affect CSG operations).</param>
         /// <param name="uniqueIndex">When a polygon is split or cloned, this number is preserved inside of those new polygons so they can track where they originally came from.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="vertices"/> is null.</exception>
