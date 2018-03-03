@@ -42,6 +42,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private int gridScale = 16;
 
+        private Vector2Int mouseDragLastGridPosition = new Vector2Int();
+
         /// <summary>
         /// The currently selected objects.
         /// </summary>
@@ -249,26 +251,28 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
                     if (GetViewportRect().Contains(Event.current.mousePosition))
                     {
+                        Vector2Int mouseGridDelta = grid - mouseDragLastGridPosition;
+
                         // move the global pivot.
                         if (isGlobalPivotSelected)
                         {
-                            project.globalPivot.position = grid;
+                            project.globalPivot.position += mouseGridDelta;
                             this.Repaint();
                         }
                         // move an entire shape by its pivot.
                         foreach (Shape shape in project.shapes)
                         {
-                            if (IsObjectSelected(shape.pivot))
+                            bool isShapeSelected = IsObjectSelected(shape.pivot);
+                            if (isShapeSelected)
                             {
-                                Vector2Int delta = grid - shape.pivot.position;
-                                shape.pivot.position = grid;
+                                shape.pivot.position += mouseGridDelta;
                                 foreach (Segment segment in shape.segments)
                                 {
                                     // move segment.
-                                    segment.position += delta;
+                                    segment.position += mouseGridDelta;
                                     // move bezier pivot handles.
-                                    segment.bezierPivot1.position += delta;
-                                    segment.bezierPivot2.position += delta;
+                                    segment.bezierPivot1.position += mouseGridDelta;
+                                    segment.bezierPivot2.position += mouseGridDelta;
                                 }
                                 this.Repaint();
                             }
@@ -280,23 +284,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                                 this.Repaint();
                             }
 
+                            // we don't move bezier curves while the shape is dragged (they already moved).
+                            if (isShapeSelected) continue;
+
                             // move the bezier curves of a segment.
                             foreach (Segment segment in shape.segments)
                             {
                                 if (segment.type != SegmentType.Bezier) continue;
                                 if (IsObjectSelected(segment.bezierPivot1))
-                                    segment.bezierPivot1.position = grid;
+                                    segment.bezierPivot1.position += mouseGridDelta;
                                 if (IsObjectSelected(segment.bezierPivot2))
-                                    segment.bezierPivot2.position = grid;
+                                    segment.bezierPivot2.position += mouseGridDelta;
                                 this.Repaint();
                             }
                         }
                         // move a segment by its pivot.
                         foreach (Segment segment in selectedSegments)
                         {
-                            segment.position = grid;
+                            // we don't move segments while the shape is dragged (they already moved).
+                            if (IsObjectSelected(GetShapeOfSegment(segment).pivot)) continue;
+                            segment.position += mouseGridDelta;
                             this.Repaint();
                         }
+
+                        mouseDragLastGridPosition = grid;
                     }
                 }
 
@@ -319,9 +330,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // try finding an object under the mouse cursor.
                     Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
                     ISelectable found = GetObjectAtGridPosition(grid);
-                    if (found != null && !selectedObjects.Contains(found))
+                    // if the object was already selected, deselect it.
+                    if (found != null && selectedObjects.Contains(found))
+                        // deselect the object.
+                        selectedObjects.Remove(found);
+                    else if (found != null && !selectedObjects.Contains(found))
                         // select the object.
                         selectedObjects.Add(found);
+                    // store the grid position for relative dragging.
+                    mouseDragLastGridPosition = grid;
                     this.Repaint();
                 }
             }
@@ -404,7 +421,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     OnSegmentBezier();
                     Event.current.Use();
                 }
-                if (Event.current.keyCode == KeyCode.D)
+                if (Event.current.keyCode == KeyCode.D && Event.current.modifiers != 0)
+                {
+                    OnShapeDuplicate();
+                    Event.current.Use();
+                }
+                else if (Event.current.keyCode == KeyCode.D)
                 {
                     OnSegmentBezierDetail();
                     Event.current.Use();
@@ -641,6 +663,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 OnHome();
             }
 
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeDuplicateTexture, "Duplicate Selected Shape(s) (SHIFT + D)"), createBrushStyle))
+            {
+                OnShapeDuplicate();
+            }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeCreateTexture, "Add New Shape (A)"), createBrushStyle))
             {
                 OnShapeCreate();
@@ -698,7 +724,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GenericMenu toolsMenu = new GenericMenu();
                 toolsMenu.AddItem(new GUIContent("Background/Load Image..."), false, OnToolsBackgroundLoadImage);
                 toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
+#if UNITY_5_4_OR_NEWER
                 toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
+#else
+                toolsMenu.DropDown(new Rect((Screen.width - 50), 0, 0, 16));
+#endif
                 EditorGUIUtility.ExitGUI();
             }
 
@@ -708,11 +738,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// Rotates the segments by an amount of degrees around a pivot position.
         /// </summary>
+        /// <param name="shapes">The shapes to be rotated.</param>
         /// <param name="degrees">The degrees to rotate the segments by.</param>
         /// <param name="pivot">The pivot to rotate around.</param>
-        private void RotateSegments(float degrees, Vector2Int pivot)
+        private void RotateSegments(Shape[] shapes, float degrees, Vector2Int pivot)
         {
-            foreach (Shape shape in project.shapes)
+            foreach (Shape shape in shapes)
             {
                 foreach (Segment segment in shape.segments)
                 {
@@ -817,7 +848,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Left()
         {
-            RotateSegments(-90, project.globalPivot.position);
+            // find any selected shapes:
+            List<Shape> selectedShapes = new List<Shape>();
+            foreach (Shape shape in project.shapes)
+                if (IsObjectSelected(shape.pivot))
+                    selectedShapes.Add(shape);
+
+            // if no shapes were selected we rotate the entire project.
+            if (selectedShapes.Count == 0)
+                RotateSegments(project.shapes.ToArray(), -90, project.globalPivot.position);
+            else
+                RotateSegments(selectedShapes.ToArray(), -90, project.globalPivot.position);
         }
 
         /// <summary>
@@ -825,7 +866,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Right()
         {
-            RotateSegments(90, project.globalPivot.position);
+            // find any selected shapes:
+            List<Shape> selectedShapes = new List<Shape>();
+            foreach (Shape shape in project.shapes)
+                if (IsObjectSelected(shape.pivot))
+                    selectedShapes.Add(shape);
+
+            // if no shapes were selected we rotate the entire project.
+            if (selectedShapes.Count == 0)
+                RotateSegments(project.shapes.ToArray(), 90, project.globalPivot.position);
+            else
+                RotateSegments(selectedShapes.ToArray(), 90, project.globalPivot.position);
         }
 
         /// <summary>
@@ -921,6 +972,32 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 #else
             viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
 #endif
+        }
+
+        /// <summary>
+        /// Called when the duplicate shape button is pressed. Will duplicate all selected shapes.
+        /// </summary>
+        private void OnShapeDuplicate()
+        {
+            // duplicate all selected shapes.
+            foreach (Shape shape in project.shapes.ToArray()) // use .ToArray() to iterate a clone.
+            {
+                if (IsObjectSelected(shape.pivot))
+                {
+                    Shape duplicate = shape.Clone();
+                    project.shapes.Add(duplicate);
+                    selectedObjects.Remove(shape.pivot);
+                    selectedObjects.Add(duplicate.pivot);
+                    // offset the new shape slightly
+                    foreach (Segment segment in duplicate.segments)
+                    {
+                        segment.position += new Vector2Int(2, 2);
+                        segment.bezierPivot1.position += new Vector2Int(2, 2);
+                        segment.bezierPivot2.position += new Vector2Int(2, 2);
+                    }
+                    duplicate.CalculatePivotPosition();
+                }
+            }
         }
 
         /// <summary>
@@ -1205,7 +1282,19 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 return;
             }
 
-            EditorUtility.DisplayDialog("2D Shape Editor", "This functionality has not been implemented yet.", "But!!");
+            if (popup)
+            {
+                // let the user choose the extrude parameters.
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeBevel, project, (self) => {
+                    // extrude the shape to a point but capped to cause a trapezoid.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeBevel(project);
+                }));
+            }
+            else
+            {
+                // extrude the shape to a point but capped to cause a trapezoid.
+                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeBevel(project);
+            }
         }
 
         /// <summary>

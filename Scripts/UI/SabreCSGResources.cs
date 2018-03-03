@@ -301,6 +301,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ShapeEditorShapeDuplicateTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorShapeDuplicate.png");
+            }
+        }
+
         public static Texture2D ShapeEditorExtrudeBevelTexture
         {
             get
