@@ -199,7 +199,7 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 // find a vertex to snap at the current mouse position.
-                else if (FindVertexAtMousePosition(out vertexSnapping_VertexWorldPosition))
+                else if (FindClosestVertexAtMousePosition(out vertexSnapping_VertexWorldPosition))
                 {
                     // keep track of this vertex.
                     vertexSnapping_HasVertex = true;
@@ -226,8 +226,8 @@ namespace Sabresaurus.SabreCSG
 
 				Vector3 accumulatedDelta = newPosition - startPosition;
 
-				if(CurrentSettings.PositionSnappingEnabled)
-				{
+                if (CurrentSettings.PositionSnappingEnabled && !vertexSnapping)
+                {
 					accumulatedDelta = InverseTransformDirection(accumulatedDelta);
 
 					float snapDistance = CurrentSettings.PositionSnapDistance;
@@ -2124,7 +2124,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>Finds a vertex at the current mouse position.</summary>
         /// <param name="closestVertexWorldPosition">The closest vertex world position.</param>
         /// <returns>True if a vertex was found else false.</returns>
-        private bool FindVertexAtMousePosition(out Vector3 closestVertexWorldPosition)
+        private bool FindClosestVertexAtMousePosition(out Vector3 closestVertexWorldPosition)
         {
             // find a vertex close to the mouse cursor.
             Transform sceneViewTransform = SceneView.currentDrawingSceneView.camera.transform;
@@ -2132,7 +2132,7 @@ namespace Sabresaurus.SabreCSG
             Vector2 mousePosition = Event.current.mousePosition;
 
             bool foundAnyPoints = false;
-            //						Vertex closestVertexFound = null;
+            //                      Vertex closestVertexFound = null;
             closestVertexWorldPosition = Vector3.zero;
             float closestDistanceSquare = float.PositiveInfinity;
 
@@ -2153,10 +2153,45 @@ namespace Sabresaurus.SabreCSG
 
                         if (EditorHelper.InClickZone(mousePosition, worldPosition) && vertexDistanceSquare < closestDistanceSquare)
                         {
-                            //										closestVertexFound = vertex;
+                            //                                      closestVertexFound = vertex;
                             closestVertexWorldPosition = worldPosition;
                             foundAnyPoints = true;
                             closestDistanceSquare = vertexDistanceSquare;
+                        }
+                    }
+                }
+            }
+
+            if (foundAnyPoints == false)
+            {
+                // None matched, next try finding the closest by distance
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                closestVertexWorldPosition = Vector3.zero;
+                closestDistanceSquare = float.PositiveInfinity;
+
+                foreach (PrimitiveBrush brush in targetBrushes)
+                {
+                    Polygon[] polygons = brush.GetPolygons();
+                    for (int i = 0; i < polygons.Length; i++)
+                    {
+                        Polygon polygon = polygons[i];
+
+                        for (int j = 0; j < polygon.Vertices.Length; j++)
+                        {
+                            Vertex vertex = polygon.Vertices[j];
+
+                            Vector3 vertexWorldPosition = brush.transform.TransformPoint(vertex.Position);
+
+                            Vector3 closestPoint = MathHelper.ProjectPointOnLine(ray.origin, ray.direction, vertexWorldPosition);
+
+                            float vertexDistanceSquare = (closestPoint - vertexWorldPosition).sqrMagnitude;
+
+                            if (vertexDistanceSquare < closestDistanceSquare)
+                            {
+                                closestVertexWorldPosition = vertexWorldPosition;
+                                foundAnyPoints = true;
+                                closestDistanceSquare = vertexDistanceSquare;
+                            }
                         }
                     }
                 }
