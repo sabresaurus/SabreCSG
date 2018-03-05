@@ -137,7 +137,19 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static bool ReducedHandleThreshold
+        public static bool ShowBrushesAsWireframes
+        {
+            get
+            {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ShowBrushesAsWireframes", 0) != 0;
+            }
+            set
+            {
+                PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushesAsWireframes", value ? 1 : 0);
+            }
+        }
+
+        public static bool ReducedHandleThreshold
 		{
 			get
 			{

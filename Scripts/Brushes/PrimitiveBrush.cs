@@ -567,81 +567,77 @@ namespace Sabresaurus.SabreCSG
 				return;
 			}
 
-			// Make sure there is a mesh filter on this object
-			MeshFilter meshFilter = gameObject.AddOrGetComponent<MeshFilter>();
-			MeshRenderer meshRenderer = gameObject.AddOrGetComponent<MeshRenderer>();
+            // previous versions of sabrecsg used to use mesh colliders for ray collision, but that's no longer the case so we clean them up.
+            MeshCollider[] meshColliders = GetComponents<MeshCollider>();
+            if (meshColliders.Length > 0)
+                for (int i = 0; i < meshColliders.Length; i++)
+                    DestroyImmediate(meshColliders[i]);
 
-			// Used to use mesh colliders for ray collision, but not any more so clean them up
-			MeshCollider[] meshColliders = GetComponents<MeshCollider>();
 
-			if(meshColliders.Length > 0)
-			{
-				for (int i = 0; i < meshColliders.Length; i++) 
-				{
-					DestroyImmediate(meshColliders[i]);
-				}
-			} 
+            // Make sure there is a mesh filter on this object
+            MeshFilter meshFilter = gameObject.AddOrGetComponent<MeshFilter>();
+            MeshRenderer meshRenderer = gameObject.AddOrGetComponent<MeshRenderer>();
 
-			bool requireRegen = false;
+            bool requireRegen = false;
 
-			// If the cached ID hasn't been set or we mismatch
-			if(cachedInstanceID == 0
-				|| gameObject.GetInstanceID() != cachedInstanceID)
-			{
-				requireRegen = true;
-				cachedInstanceID = gameObject.GetInstanceID();
-			}
+            // If the cached ID hasn't been set or we mismatch
+            if (cachedInstanceID == 0
+                || gameObject.GetInstanceID() != cachedInstanceID)
+            {
+                requireRegen = true;
+                cachedInstanceID = gameObject.GetInstanceID();
+            }
 
-			Mesh renderMesh = meshFilter.sharedMesh;
+            Mesh renderMesh = meshFilter.sharedMesh;
 
-			if(requireRegen)
-			{
-				renderMesh = new Mesh();
-			}
+            if (requireRegen)
+            {
+                renderMesh = new Mesh();
+            }
 
-			if(polygons != null)
-			{
-				List<int> polygonIndices;
-				BrushFactory.GenerateMeshFromPolygons(polygons, ref renderMesh, out polygonIndices);
-			}
+            if (polygons != null)
+            {
+                List<int> polygonIndices;
+                BrushFactory.GenerateMeshFromPolygons(polygons, ref renderMesh, out polygonIndices);
+            }
 
-			if(mode == CSGMode.Subtract)
-			{
-				MeshHelper.Invert(ref renderMesh);
-			}
-			// Displace the triangles for display along the normals very slightly (this is so we can overlay built
-			// geometry with semi-transparent geometry and avoid depth fighting)
-			MeshHelper.Displace(ref renderMesh, 0.001f);
+            if (mode == CSGMode.Subtract)
+            {
+                MeshHelper.Invert(ref renderMesh);
+            }
+            // Displace the triangles for display along the normals very slightly (this is so we can overlay built
+            // geometry with semi-transparent geometry and avoid depth fighting)
+            MeshHelper.Displace(ref renderMesh, 0.001f);
 
-			meshFilter.sharedMesh = renderMesh;
-				
-			meshRenderer.receiveShadows = false;
-			meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            meshFilter.sharedMesh = renderMesh;
 
-			meshFilter.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
-			meshRenderer.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
+            meshRenderer.receiveShadows = false;
+            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            meshFilter.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
+            meshRenderer.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
 
 #if UNITY_EDITOR
-			Material material;
-			if(IsNoCSG)
-			{
-				material = SabreCSGResources.GetNoCSGMaterial();
-			}
-			else
-			{
-				if(this.mode == CSGMode.Add)
-				{
-					material = SabreCSGResources.GetAddMaterial();
-				}
-				else
-				{
-					material = SabreCSGResources.GetSubtractMaterial();
-				}
-			}
-			if(meshRenderer.sharedMaterial != material)
-			{
-				meshRenderer.sharedMaterial = material;
-			}
+            Material material;
+            if (IsNoCSG)
+            {
+                material = SabreCSGResources.GetNoCSGMaterial();
+            }
+            else
+            {
+                if (this.mode == CSGMode.Add)
+                {
+                    material = SabreCSGResources.GetAddMaterial();
+                }
+                else
+                {
+                    material = SabreCSGResources.GetSubtractMaterial();
+                }
+            }
+            if (meshRenderer.sharedMaterial != material)
+            {
+                meshRenderer.sharedMaterial = material;
+            }
 #endif
 //			isBrushConvex = GeometryHelper.IsBrushConvex(polygons);
 
@@ -674,7 +670,7 @@ namespace Sabresaurus.SabreCSG
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer != null)
             {
-                meshRenderer.enabled = isVisible;
+                meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
             }
         }
 
