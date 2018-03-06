@@ -105,20 +105,28 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < 6; i++) {
 				if (index % 2 == 1) Array.Reverse(output[i].Vertices);
 				GenerateNormals(output[i]);
-				//GenerateUvCoordinates(output[i]);
+				GenerateUvCoordinates(output[i]);
 			}
 
 			return output;
 		}
 
-		 /// <summary>
+		/// <summary>
         /// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
         /// </summary>
         /// <param name="polygon">The polygon to be updated.</param>
         private void GenerateUvCoordinates(Polygon polygon)
         {
-            foreach (Vertex vertex in polygon.Vertices)
-                vertex.UV = GeometryHelper.GetUVForPosition(polygon, vertex.Position);
+            // stolen code from the surface editor "AutoUV".
+            Vector3 planeNormal = polygon.Plane.normal;
+            Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(-planeNormal));
+            // Sets the UV at each point to the position on the plane
+            for (int i = 0; i < polygon.Vertices.Length; i++)
+            {
+                Vector3 position = polygon.Vertices[i].Position;
+                Vector2 uv = (cancellingRotation * position) * 0.5f;
+                polygon.Vertices[i].UV = uv;
+            }
         }
 
         private void GenerateNormals(Polygon polygon)
