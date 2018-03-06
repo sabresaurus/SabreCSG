@@ -131,6 +131,9 @@ namespace Sabresaurus.SabreCSG
 		protected override void Start ()
 		{
 			UpdateUtility.RunCleanup();
+            
+            // SabreCSG turns off Auto Generate, but loading a scene in editor will look too dark without it, so force refresh
+            DynamicGI.UpdateEnvironment();
 
 			base.Start ();
 
