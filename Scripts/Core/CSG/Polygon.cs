@@ -107,6 +107,21 @@ namespace Sabresaurus.SabreCSG
 	        CalculatePlane();
 	    }
 
+		public Polygon(Vector3[] vertices, Material material, bool isTemporary, bool userExcludeFromFinal, int uniqueIndex = -1)
+		{
+			this.vertices = new Vertex[vertices.Length];
+			for (int i = 0; i < vertices.Length; i++) {
+				this.vertices[i] = new Vertex(vertices[i], Vector3.zero, Vector2.zero);
+			}
+			this.material = material;
+			this.uniqueIndex = uniqueIndex;
+			this.excludeFromFinal = isTemporary;
+			this.userExcludeFromFinal = userExcludeFromFinal;
+			GenerateNormals();
+			GenerateUvCoordinates();
+	        CalculatePlane();
+		}
+
 	    public Polygon DeepCopy()
 	    {
 			return new Polygon(this.vertices.DeepCopy(), this.material, this.excludeFromFinal, this.userExcludeFromFinal, this.uniqueIndex);
@@ -401,6 +416,31 @@ namespace Sabresaurus.SabreCSG
 				CalculatePlane();
 			}
 		}
+
+		/// <summary>
+        /// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
+        /// </summary>
+        /// <param name="polygon">The polygon to be updated.</param>
+        public void GenerateUvCoordinates()
+        {
+            // stolen code from the surface editor "AutoUV".
+            Vector3 planeNormal = this.Plane.normal;
+            Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(-planeNormal));
+            // Sets the UV at each point to the position on the plane
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
+                Vector3 position = this.Vertices[i].Position;
+                Vector2 uv = (cancellingRotation * position) * 0.5f;
+                this.Vertices[i].UV = uv;
+            }
+        }
+
+		public void GenerateNormals()
+        {
+            Plane plane = new Plane(this.Vertices[1].Position, this.Vertices[2].Position, this.Vertices[3].Position);
+            foreach (Vertex vertex in this.Vertices)
+                vertex.Normal = plane.normal;
+        }
 
 	    public static bool SplitPolygon(Polygon polygon, out Polygon frontPolygon, out Polygon backPolygon, out Vertex newVertex1, out Vertex newVertex2, UnityEngine.Plane clipPlane)
 		{
