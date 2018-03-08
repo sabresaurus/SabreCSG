@@ -38,6 +38,11 @@ namespace Sabresaurus.SabreCSG
 		bool mouseIsHeld = false;
 		DateTime mouseReleaseTime = DateTime.MinValue;
 
+		// Map Import information
+		string mapImportPath;
+		float mapImportScaleFactor = 1.0f;
+		bool generateTextures = false;
+
 		// Tools
 		Tool activeTool = null;
 
@@ -1927,6 +1932,33 @@ namespace Sabresaurus.SabreCSG
 
 			// Remove the CSG Model and its brushes
 			DestroyImmediate (csgModelTransform.gameObject);	
+		}
+
+		public void LoadMap() 
+		{
+			string path = EditorUtility.OpenFilePanel("Select .MAP file", "Assets", "MAP");
+			if (!string.IsNullOrEmpty(path))
+			{
+				mapImportPath = path;
+			}
+			else
+			{
+				EditorUtility.DisplayDialog("No file selected", "You didn't,,, select a file", "sorry");
+				return;
+			}
+
+			// First clear out the existing geometry (add a warning?)
+			// while(transform.childCount > 0) {
+			// 	GameObject.DestroyImmediate(transform.GetChild(0));
+			// }
+
+			List<MapEntityData> data = QuakeMapParser.Parse(mapImportPath);
+
+			for (int i = 0; i < data.Count; i++) {
+				if (data[i].properties["classname"] == "worldspawn") {
+					Debug.Log("Found worldspawn!");
+				}
+			}
 		}
 
 		[PostProcessScene(1)]
