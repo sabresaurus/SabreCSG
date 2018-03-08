@@ -674,6 +674,44 @@ namespace Sabresaurus.SabreCSG
 			mesh.uv = uvs.ToArray();
 			mesh.triangles = triangles.ToArray();
 		}
+
+		/// <summary>
+		/// Generates a brush from clipping planes
+		/// </summary>
+		/// <returns>Polygons to be supplied to a brush.</returns>
+		public static Polygon[] GenerateBrushFromPlanes(Plane[] planes) {
+
+			Polygon[] output = new Polygon[planes.Length];
+
+			// There are a minimum of 4 planes to create a clipped shape.
+			if (planes.Length < 4) {
+				return null;
+			}
+
+			for (int i = 0; i < planes.Length; i++) {
+				List<Vector3> verts = new List<Vector3>();
+				Plane basePlane = planes[i];
+				for (int j = 0; j < planes.Length; j++) {
+					if (j != i) {
+						Vector3 linePoint;
+						Vector3 lineVec;
+						if (GeometryHelper.PlanePlaneIntersection(out linePoint, out lineVec, basePlane, planes[j])) {
+							for (int k = 0; k < planes.Length; k++) {
+								if (k != i && k != j) {
+									Vector3 intersection;
+									if (GeometryHelper.LinePlaneIntersection(out intersection, linePoint, lineVec, planes[k])) {
+										verts.Add(intersection);
+									}
+								}
+							}
+						}
+					}
+				}
+				output[i] = new Polygon(verts.ToArray(), null, false, false);
+			}
+
+			return output;
+		}
 	}
 }
 #endif
