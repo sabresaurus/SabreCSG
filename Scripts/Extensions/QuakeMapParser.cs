@@ -21,6 +21,18 @@ namespace Sabresaurus.SabreCSG {
 		public MapBrushData() {
 			planes = new List<MapPlaneData>();
 		}
+
+		Plane[] GetPlanes() {
+			Plane[] output = new Plane[planes.Count];
+			for (int i = 0; i < planes.Count; i++) {
+				output[i] = planes[i].ToPlane();
+			}
+			return output;
+		}
+
+		public Polygon[] ToBrushPolygons() {
+			return BrushFactory.GenerateBrushFromPlanes(GetPlanes());
+		}
 	}
 
 	public class MapPlaneData {
@@ -34,8 +46,8 @@ namespace Sabresaurus.SabreCSG {
 			points = new List<Vector3>();
 		}
 
-		public Polygon ToPolygon() {
-			
+		public Plane ToPlane() {
+			return new Plane(points[0], points[1], points[2]);
 		}
 	}
 
