@@ -42,6 +42,7 @@ namespace Sabresaurus.SabreCSG
 		string mapImportPath;
 		float mapImportScaleFactor = 1.0f;
 		bool generateTextures = false;
+		List<MapEntityData> parsedMapData;
 
 		// Tools
 		Tool activeTool = null;
@@ -1952,11 +1953,23 @@ namespace Sabresaurus.SabreCSG
 			// 	GameObject.DestroyImmediate(transform.GetChild(0));
 			// }
 
-			List<MapEntityData> data = QuakeMapParser.Parse(mapImportPath);
+			parsedMapData = QuakeMapParser.Parse(mapImportPath);
+		}
 
-			for (int i = 0; i < data.Count; i++) {
-				if (data[i].properties["classname"] == "worldspawn") {
-					Debug.Log("Found worldspawn!");
+		public void GenerateMap()
+		{
+			if (parsedMapData == null) {
+				EditorUtility.DisplayDialog("No parsed data", "Please parse a map file first", "ok sorry");
+				return;
+			} else {
+				for (int i = 0; i < parsedMapData.Count; i++) {
+					if (parsedMapData[i].properties["classname"] == "worldspawn") {
+						for (int b = 0; b < 1; b++) {
+							MapBrushData brush = parsedMapData[i].brushes[b];
+							GameObject newBrush = CreateCustomBrush(brush.ToBrushPolygons());
+							newBrush.GetComponent<PrimitiveBrush>().Invalidate(true);
+						}
+					}
 				}
 			}
 		}

@@ -188,6 +188,10 @@ namespace Sabresaurus.SabreCSG
 					{
 						csgModel.LoadMap();
 					}
+					if(GUILayout.Button("Generate parsed data"))
+					{
+						csgModel.GenerateMap();
+					}
 				// } 
 				// else 
 				// {

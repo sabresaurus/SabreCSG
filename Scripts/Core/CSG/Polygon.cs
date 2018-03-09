@@ -111,15 +111,15 @@ namespace Sabresaurus.SabreCSG
 		{
 			this.vertices = new Vertex[vertices.Length];
 			for (int i = 0; i < vertices.Length; i++) {
-				this.vertices[i] = new Vertex(vertices[i], Vector3.zero, Vector2.zero);
+				this.vertices[i] = new Vertex(vertices[i], Vector3.forward, Vector2.zero);
 			}
 			this.material = material;
 			this.uniqueIndex = uniqueIndex;
 			this.excludeFromFinal = isTemporary;
 			this.userExcludeFromFinal = userExcludeFromFinal;
+	        CalculatePlane();
 			GenerateNormals();
 			GenerateUvCoordinates();
-	        CalculatePlane();
 		}
 
 	    public Polygon DeepCopy()
