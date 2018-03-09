@@ -29,12 +29,6 @@ namespace Sabresaurus.SabreCSG
 		SerializedProperty lastBuildDefaultPhysicsMaterialProperty;
 		SerializedProperty lastBuildDefaultVisualMaterialProperty;
 
-		// Expandable menus
-		bool importMapMenu = false;
-		SerializedProperty mapImportPath;
-		SerializedProperty mapImportScaleFactor;
-		SerializedProperty generateTextures;
-
 		public void OnEnable()
 		{
 			// Build settings for the next build
@@ -178,31 +172,6 @@ namespace Sabresaurus.SabreCSG
 	            {
 	                csgModel.ExportOBJ(true);
 	            }
-			}
-
-			using (new NamedVerticalScope("Import"))
-			{
-				// if(!importMapMenu) 
-				// {
-					if(GUILayout.Button("Import Quake .MAP file"))
-					{
-						csgModel.LoadMap();
-					}
-					if(GUILayout.Button("Generate parsed data"))
-					{
-						csgModel.GenerateMap();
-					}
-				// } 
-				// else 
-				// {
-				// 	EditorGUILayout.BeginHorizontal();
-				// 	EditorGUILayout.PropertyField(mapImportPath);
-				// 	if(GUILayout.Button("Select File"))
-				// 	{
-				// 		csgModel.LoadMapPath();
-				// 	}
-				// 	EditorGUILayout.EndHorizontal();
-				// }
 			}
 
 			using (new NamedVerticalScope("Stats"))

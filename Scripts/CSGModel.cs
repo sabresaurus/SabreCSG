@@ -38,12 +38,6 @@ namespace Sabresaurus.SabreCSG
 		bool mouseIsHeld = false;
 		DateTime mouseReleaseTime = DateTime.MinValue;
 
-		// Map Import information
-		string mapImportPath;
-		float mapImportScaleFactor = 1.0f;
-		bool generateTextures = false;
-		List<MapEntityData> parsedMapData;
-
 		// Tools
 		Tool activeTool = null;
 
@@ -1933,45 +1927,6 @@ namespace Sabresaurus.SabreCSG
 
 			// Remove the CSG Model and its brushes
 			DestroyImmediate (csgModelTransform.gameObject);	
-		}
-
-		public void LoadMap() 
-		{
-			string path = EditorUtility.OpenFilePanel("Select .MAP file", "Assets", "MAP");
-			if (!string.IsNullOrEmpty(path))
-			{
-				mapImportPath = path;
-			}
-			else
-			{
-				EditorUtility.DisplayDialog("No file selected", "You didn't,,, select a file", "sorry");
-				return;
-			}
-
-			// First clear out the existing geometry (add a warning?)
-			// while(transform.childCount > 0) {
-			// 	GameObject.DestroyImmediate(transform.GetChild(0));
-			// }
-
-			parsedMapData = QuakeMapParser.Parse(mapImportPath);
-		}
-
-		public void GenerateMap()
-		{
-			if (parsedMapData == null) {
-				EditorUtility.DisplayDialog("No parsed data", "Please parse a map file first", "ok sorry");
-				return;
-			} else {
-				for (int i = 0; i < parsedMapData.Count; i++) {
-					if (parsedMapData[i].properties["classname"] == "worldspawn") {
-						for (int b = 0; b < 1; b++) {
-							MapBrushData brush = parsedMapData[i].brushes[b];
-							GameObject newBrush = CreateCustomBrush(brush.ToBrushPolygons());
-							newBrush.GetComponent<PrimitiveBrush>().Invalidate(true);
-						}
-					}
-				}
-			}
 		}
 
 		[PostProcessScene(1)]
