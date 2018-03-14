@@ -17,7 +17,7 @@ namespace Sabresaurus.SabreCSG
 	};
 
 	/// <summary>
-	/// A simple brush that represents a single convex shape
+	/// A simple brush that represents a single convex shape.
 	/// </summary>
     [ExecuteInEditMode]
     public class PrimitiveBrush : Brush
@@ -25,20 +25,65 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
 		Polygon[] polygons;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// The prism side count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int prismSideCount = 6;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// Gets or sets the prism side count.
+        /// </summary>
+        /// <value>The prism side count.</value>
+        public int PrismSideCount { get { return prismSideCount; } set { prismSideCount = value; } }
+
+        /// <summary>
+        /// The cylinder side count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int cylinderSideCount = 20;
 
+        /// <summary>
+        /// Gets or sets the cylinder side count.
+        /// </summary>
+        /// <value>The cylinder side count.</value>
+        public int CylinderSideCount { get { return cylinderSideCount; } set { cylinderSideCount = value; } }
+
+        /// <summary>
+        /// The cone side count.
+        /// </summary>
         [SerializeField, HideInInspector]
         int coneSideCount = 20;
 
+        /// <summary>
+        /// Gets or sets the cone side count.
+        /// </summary>
+        /// <value>The cone side count.</value>
+        public int ConeSideCount { get { return coneSideCount; } set { coneSideCount = value; } }
+
+        /// <summary>
+        /// The sphere side count.
+        /// </summary>
         [SerializeField,HideInInspector]
 		int sphereSideCount = 6;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// Gets or sets the sphere side count.
+        /// </summary>
+        /// <value>The sphere side count.</value>
+        public int SphereSideCount { get { return sphereSideCount; } set { sphereSideCount = value; } }
+
+        /// <summary>
+        /// The icon sphere iteration count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int icoSphereIterationCount = 1;
+
+        /// <summary>
+        /// Gets or sets the icon sphere iteration count.
+        /// </summary>
+        /// <value>The icon sphere iteration count.</value>
+        public int IcoSphereIterationCount { get { return icoSphereIterationCount; } set { icoSphereIterationCount = value; } }
 
         [SerializeField,HideInInspector]
 		PrimitiveBrushType brushType = PrimitiveBrushType.Cube;
