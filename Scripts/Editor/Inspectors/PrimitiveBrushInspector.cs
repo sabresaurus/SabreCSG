@@ -111,9 +111,9 @@ namespace Sabresaurus.SabreCSG
             GUI.Label(lastRect, name, labelStyle);
         }
 
-        public override void OnInspectorGUI()
+        public override void DoInspectorGUI()
         {
-			float drawableWidth = EditorGUIUtility.currentViewWidth;
+            float drawableWidth = EditorGUIUtility.currentViewWidth;
 			drawableWidth -= 42; // Take some off for scroll bars and padding
 
 			PrimitiveBrushType[] selectedTypes = BrushTargets.Select(item => ((PrimitiveBrush)item).BrushType).ToArray();
@@ -403,7 +403,7 @@ namespace Sabresaurus.SabreCSG
                 //}
             }
 
-			base.OnInspectorGUI();
+			base.DoInspectorGUI();
         }
 
         /// <summary>

@@ -30,9 +30,43 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+        /// <summary>
+        /// Implement this function to make a custom inspector.
+        /// </summary>
+        public virtual void DoInspectorGUI()
+        {
 
-		public override void OnInspectorGUI()
+        }
+
+        public sealed override void OnInspectorGUI()
 		{
+            // group editing:
+            using (new NamedVerticalScope("Group"))
+            {
+                GUILayout.BeginHorizontal();
+
+                if (BrushTarget.transform.parent && BrushTarget.transform.parent.GetComponent<BrushGroup>())
+                {
+                    if (GUILayout.Button("Select Group"))
+                    {
+                        // select the group.
+                        Selection.objects = new Object[] { BrushTarget.transform.parent.gameObject };
+                    }
+                }
+
+                if (GUILayout.Button("Create Group"))
+                {
+                    // create a group.
+                    TransformHelper.GroupSelection();
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            // custom inspector:
+            DoInspectorGUI();
+
+            // generic brush editing:
             using (new NamedVerticalScope("Order"))
             {
                 List<BrushBase> orderedTargets = BrushTargets.ToList();

@@ -59,6 +59,7 @@ namespace Sabresaurus.SabreCSG
 
 				// Create group
 				GameObject groupObject = new GameObject("Group");
+                groupObject.AddComponent<BrushGroup>();
 				Undo.RegisterCreatedObjectUndo (groupObject, "Group");
 				Undo.SetTransformParent(groupObject.transform, rootTransform, "Group");
 
@@ -82,7 +83,7 @@ namespace Sabresaurus.SabreCSG
 
 		public static void UngroupSelection()
 		{
-			if(Selection.activeTransform != null && Selection.activeGameObject.GetComponents<MonoBehaviour>().Length == 0)
+            if (Selection.activeTransform != null && Selection.activeGameObject.GetComponent<BrushGroup>())
 			{
 				Transform rootTransform = Selection.activeTransform.parent;
 				int siblingIndex = Selection.activeTransform.GetSiblingIndex();
