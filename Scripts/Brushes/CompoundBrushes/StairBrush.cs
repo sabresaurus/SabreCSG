@@ -9,31 +9,103 @@ namespace Sabresaurus.SabreCSG
 	[ExecuteInEditMode]
 	public class StairBrush : CompoundBrush
 	{
+        /// <summary>
+        /// The depth of each step.
+        /// </summary>
         [SerializeField]
         float stepDepth = 0.2f;
 
+        /// <summary>
+        /// Gets or sets the depth of each step.
+        /// </summary>
+        /// <value>The depth of each step.</value>
+        public float StepDepth { get { return stepDepth; } set { stepDepth = value; } }
+
+        /// <summary>
+        /// The height of each step.
+        /// </summary>
         [SerializeField]
 	    float stepHeight = 0.1f;
 
+        /// <summary>
+        /// Gets or sets the height of each step.
+        /// </summary>
+        /// <value>The height of each step.</value>
+        public float StepHeight { get { return stepHeight; } set { stepHeight = value; } }
+
+        /// <summary>
+        /// The step depth spacing.
+        /// </summary>
         [SerializeField]
         float stepDepthSpacing = 0f;
 
+        /// <summary>
+        /// Gets or sets the step depth spacing.
+        /// </summary>
+        /// <value>The step depth spacing.</value>
+        public float StepDepthSpacing { get { return stepDepthSpacing; } set { stepDepthSpacing = value; } }
+
+        /// <summary>
+        /// The step height spacing.
+        /// </summary>
         [SerializeField]
         float stepHeightSpacing = 0f;
 
-		[SerializeField]
+        /// <summary>
+        /// Gets or sets the step height spacing.
+        /// </summary>
+        /// <value>The step height spacing.</value>
+        public float StepHeightSpacing { get { return stepHeightSpacing; } set { stepHeightSpacing = value; } }
+
+        /// <summary>
+        /// Whether to automatically determine the best step depth.
+        /// </summary>
+        [SerializeField]
 		bool autoDepth = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to automatically determine the best step depth.
+        /// </summary>
+        /// <value><c>true</c> to automatically determine the best step depth; otherwise, <c>false</c>.</value>
+        public bool AutomaticDepth { get { return autoDepth; } set { autoDepth = value; } }
+
+        /// <summary>
+        /// Whether to automatically determine the best step height.
+        /// </summary>
         [SerializeField]
 		bool autoHeight = false;
 
-		[SerializeField]
+        /// <summary>
+        /// Gets or sets a value indicating whether to automatically determine the best step height.
+        /// </summary>
+        /// <value><c>true</c> to automatically determine the best step height; otherwise, <c>false</c>.</value>
+        public bool AutomaticHeight { get { return autoDepth; } set { autoDepth = value; } }
+
+        /// <summary>
+        /// Whether to lead from the top.
+        /// </summary>
+        [SerializeField]
 		bool leadFromTop = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to lead from the top.
+        /// </summary>
+        /// <value><c>true</c> to lead from the top; otherwise, <c>false</c>.</value>
+        public bool LeadFromTop { get { return leadFromTop; } set { leadFromTop = value; } }
+
+        /// <summary>
+        /// Whether to fill steps to the bottom to make a solid staircase.
+        /// </summary>
         [SerializeField]
         bool fillToBottom = false;
 
-        public override int BrushCount 
+        /// <summary>
+        /// Gets or sets a value indicating whether to fill steps to the bottom to make a solid staircase.
+        /// </summary>
+        /// <value><c>true</c> to fill steps to the bottom to make a solid staircase; otherwise, <c>false</c>.</value>
+        public bool FillToBottom { get { return fillToBottom; } set { fillToBottom = value; } }
+
+        public override int BrushCount
 		{
 			get 
 			{

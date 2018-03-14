@@ -18,45 +18,111 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
         float innerRadius = 1.0f;
 
+        /// <summary>
+        /// Gets or sets the radius in meters in the center of the staircase.
+        /// </summary>
+        /// <value>The radius in meters in the center of the staircase.</value>
+        public float InnerRadius { get { return innerRadius; } set { innerRadius = value; } }
+
         /// <summary>The height of each step.</summary>
         [SerializeField]
         float stepHeight = 0.0625f;
+
+        /// <summary>
+        /// Gets or sets the height of each step.
+        /// </summary>
+        /// <value>The height of each step.</value>
+        public float StepHeight { get { return stepHeight; } set { stepHeight = value; } }
 
         /// <summary>The width of each step.</summary>
         [SerializeField]
         float stepWidth = 1.0f;
 
+        /// <summary>
+        /// Gets or sets the width of each step.
+        /// </summary>
+        /// <value>The width of each step.</value>
+        public float StepWidth { get { return stepWidth; } set { stepWidth = value; } }
+
         /// <summary>The amount of curvature in degrees.</summary>
         [SerializeField]
         float angleOfCurve = 90.0f;
+
+        /// <summary>
+        /// Gets or sets the amount of curvature in degrees.
+        /// </summary>
+        /// <value>The amount of curvature in degrees.</value>
+        public float AngleOfCurve { get { return angleOfCurve; } set { angleOfCurve = value; } }
 
         /// <summary>The amount of steps on the staircase.</summary>
         [SerializeField]
         int numSteps = 4;
 
+        /// <summary>
+        /// Gets or sets the amount of steps on the staircase.
+        /// </summary>
+        /// <value>The amount of steps on the staircase.</value>
+        public int NumberOfSteps { get { return numSteps; } set { numSteps = value; } }
+
         /// <summary>An amount of height to add to the first stair step.</summary>
         [SerializeField]
         float addToFirstStep = 0.0f;
+
+        /// <summary>
+        /// Gets or sets an amount of height to add to the first stair step.
+        /// </summary>
+        /// <value>An amount of height to add to the first stair step.</value>
+        public float AddToFirstStep { get { return addToFirstStep; } set { addToFirstStep = value; } }
 
         /// <summary>Whether the stairs are mirrored counter-clockwise.</summary>
         [SerializeField]
         bool counterClockwise = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the stairs are mirrored counter-clockwise.
+        /// </summary>
+        /// <value><c>true</c> if the stairs are mirrored counter-clockwise; otherwise, <c>false</c>.</value>
+        public bool CounterClockwise { get { return counterClockwise; } set { counterClockwise = value; } }
+
         /// <summary>Whether the stairs reach down to the bottom.</summary>
         [SerializeField]
         bool fillToBottom = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the stairs reach down to the bottom.
+        /// </summary>
+        /// <value><c>true</c> if the stairs reach down to the bottom; otherwise, <c>false</c>.</value>
+        public bool FillToBottom { get { return fillToBottom; } set { fillToBottom = value; } }
 
         /// <summary>Whether to generate stairs or a curved wall.</summary>
         [SerializeField]
         bool curvedWall = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to generate stairs or a curved wall.
+        /// </summary>
+        /// <value><c>true</c> if it generates stairs; otherwise, <c>false</c> to generate a curved wall.</value>
+        public bool CurvedWall { get { return curvedWall; } set { curvedWall = value; } }
+
         /// <summary>Whether the floor is stairs or a smooth slope.</summary>
         [SerializeField]
         bool slopedFloor = false;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the floor is stairs or a smooth slope.
+        /// </summary>
+        /// <value><c>true</c> if the floor is a smooth slope; otherwise, <c>false</c> if the floor is stairs.</value>
+        public bool SlopedFloor { get { return slopedFloor; } set { slopedFloor = value; } }
+
         /// <summary>Whether the ceiling is stairs or a smooth slope.</summary>
         [SerializeField]
         bool slopedCeiling = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the ceiling is stairs or a smooth slope.
+        /// </summary>
+        /// <value><c>true</c> if the ceiling is a smooth slope; otherwise, <c>false</c> if the ceiling is stairs.</value>
+        public bool SlopedCeiling { get { return slopedCeiling; } set { slopedCeiling = value; } }
 
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
