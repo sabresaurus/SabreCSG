@@ -174,7 +174,7 @@ namespace Sabresaurus.SabreCSG
                 child.IsNoCSG = this.IsNoCSG;
                 child.IsVisible = this.IsVisible;
                 child.HasCollision = this.HasCollision;
-                child.Invalidate(true);
+                child.Invalidate(polygonsChanged);
                 csgBounds.Encapsulate(child.GetBoundsLocalTo(transform));
             }
             // apply the generated csg bounds.
@@ -185,7 +185,7 @@ namespace Sabresaurus.SabreCSG
 
         private void OnTransformChildrenChanged()
         {
-            Invalidate(true);
+            Invalidate(false);
         }
     }
 }
