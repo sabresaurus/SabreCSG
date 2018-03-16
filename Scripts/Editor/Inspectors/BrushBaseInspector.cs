@@ -45,7 +45,13 @@ namespace Sabresaurus.SabreCSG
             {
                 GUILayout.BeginHorizontal();
 
-                if (BrushTarget.transform.parent && BrushTarget.transform.parent.GetComponent<BrushGroup>())
+                // find whether we are currently inside of a group:
+                GroupBrush group = null;
+                if (BrushTarget.transform.parent)
+                    group = BrushTarget.transform.parent.GetComponent<GroupBrush>();
+
+                // we are in a group:
+                if (group != null)
                 {
                     if (GUILayout.Button("Select Group"))
                     {
@@ -61,10 +67,16 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 GUILayout.EndHorizontal();
+
+                // if requested, select the group when this child is selected.
+                if (group != null && group.AlwaysSelectGroup)
+                    Selection.objects = new Object[] { group.gameObject };
             }
+
 
             // custom inspector:
             DoInspectorGUI();
+
 
             // generic brush editing:
             using (new NamedVerticalScope("Order"))

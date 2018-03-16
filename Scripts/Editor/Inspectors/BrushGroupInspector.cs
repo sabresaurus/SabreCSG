@@ -7,14 +7,22 @@ using UnityEngine;
 namespace Sabresaurus.SabreCSG
 {
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(BrushGroup), true)]
+    [CustomEditor(typeof(GroupBrush), true)]
     public class BrushGroupInspector : Editor
     {
+        SerializedProperty alwaysSelectGroup;
+
+        private void OnEnable()
+        {
+            // Setup the SerializedProperties.
+            alwaysSelectGroup = serializedObject.FindProperty("alwaysSelectGroup");
+        }
+
         public override void OnInspectorGUI()
         {
             using (new NamedVerticalScope("Group"))
             {
-                BrushGroup group = (BrushGroup)target;
+                GroupBrush group = (GroupBrush)target;
 
                 GUILayout.BeginHorizontal();
 
@@ -35,6 +43,11 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 GUILayout.EndHorizontal();
+
+                bool oldBool;
+                alwaysSelectGroup.boolValue = GUILayout.Toggle(oldBool = alwaysSelectGroup.boolValue, "Always Select Group", EditorStyles.toolbarButton);
+                if (alwaysSelectGroup.boolValue != oldBool)
+                    serializedObject.ApplyModifiedProperties();
             }
         }
     }
