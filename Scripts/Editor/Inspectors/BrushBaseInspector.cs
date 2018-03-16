@@ -31,6 +31,11 @@ namespace Sabresaurus.SabreCSG
 		}
 
         /// <summary>
+        /// Whether to show the group editor in the inspector.
+        /// </summary>
+        protected virtual bool ShowGroupInspector { get { return true; } }
+
+        /// <summary>
         /// Implement this function to make a custom inspector.
         /// </summary>
         public virtual void DoInspectorGUI()
@@ -41,38 +46,40 @@ namespace Sabresaurus.SabreCSG
         public sealed override void OnInspectorGUI()
 		{
             // group editing:
-            using (new NamedVerticalScope("Group"))
+            if (ShowGroupInspector)
             {
-                GUILayout.BeginHorizontal();
-
-                // find whether we are currently inside of a group:
-                GroupBrush group = null;
-                if (BrushTarget.transform.parent)
-                    group = BrushTarget.transform.parent.GetComponent<GroupBrush>();
-
-                // we are in a group:
-                if (group != null)
+                using (new NamedVerticalScope("Group"))
                 {
-                    if (GUILayout.Button("Select Group"))
+                    GUILayout.BeginHorizontal();
+
+                    // find whether we are currently inside of a group:
+                    GroupBrush group = null;
+                    if (BrushTarget.transform.parent)
+                        group = BrushTarget.transform.parent.GetComponent<GroupBrush>();
+
+                    // we are in a group:
+                    if (group != null)
                     {
-                        // select the group.
-                        Selection.objects = new Object[] { BrushTarget.transform.parent.gameObject };
+                        if (GUILayout.Button("Select Group"))
+                        {
+                            // select the group.
+                            Selection.objects = new Object[] { BrushTarget.transform.parent.gameObject };
+                        }
                     }
+
+                    if (GUILayout.Button("Create Group"))
+                    {
+                        // create a group.
+                        TransformHelper.GroupSelection();
+                    }
+
+                    GUILayout.EndHorizontal();
+
+                    // if requested, select the group when this child is selected.
+                    if (group != null && group.AlwaysSelectGroup)
+                        Selection.objects = new Object[] { group.gameObject };
                 }
-
-                if (GUILayout.Button("Create Group"))
-                {
-                    // create a group.
-                    TransformHelper.GroupSelection();
-                }
-
-                GUILayout.EndHorizontal();
-
-                // if requested, select the group when this child is selected.
-                if (group != null && group.AlwaysSelectGroup)
-                    Selection.objects = new Object[] { group.gameObject };
             }
-
 
             // custom inspector:
             DoInspectorGUI();

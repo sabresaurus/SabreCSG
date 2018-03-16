@@ -8,17 +8,22 @@ namespace Sabresaurus.SabreCSG
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(GroupBrush), true)]
-    public class BrushGroupInspector : Editor
+    public class BrushGroupInspector : BrushBaseInspector
     {
         SerializedProperty alwaysSelectGroup;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             // Setup the SerializedProperties.
             alwaysSelectGroup = serializedObject.FindProperty("alwaysSelectGroup");
         }
 
-        public override void OnInspectorGUI()
+        // disable the group editor.
+        protected override bool ShowGroupInspector { get { return false; } }
+
+        public override void DoInspectorGUI()
         {
             using (new NamedVerticalScope("Group"))
             {
@@ -28,6 +33,9 @@ namespace Sabresaurus.SabreCSG
 
                 if (GUILayout.Button("Select Brushes"))
                 {
+                    // disable the always select group flag.
+                    group.AlwaysSelectGroup = false;
+
                     // select all of the child brush objects.
                     List<Object> objects = Selection.objects.ToList();
                     objects.Remove(group.gameObject);
