@@ -181,9 +181,19 @@ namespace Sabresaurus.SabreCSG
             m_LastKnownPosition = transform.localPosition;
         }
 
-        private void OnTransformChildrenChanged()
+        private void Update()
         {
-            Invalidate(false);
+            // encapsulate all of the child objects in our bounds.
+            Bounds csgBounds = new Bounds();
+
+            foreach (Transform childTransform in transform)
+            {
+                BrushBase child = childTransform.GetComponent<BrushBase>();
+                if (child == null) continue;
+                csgBounds.Encapsulate(child.GetBoundsLocalTo(transform));
+            }
+            // apply the generated csg bounds.
+            localBounds = csgBounds;
         }
     }
 }
