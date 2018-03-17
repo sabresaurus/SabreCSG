@@ -87,7 +87,15 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public virtual void Invalidate(bool polygonsChanged){}
+        /// <summary>
+        /// Gets a value indicating whether this brush supports CSG operations. Setting this to false
+        /// will hide CSG brush related options in the editor.
+        /// <para>For example a <see cref="GroupBrush"/> does not have any CSG operations.</para>
+        /// </summary>
+        /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
+        public virtual bool SupportsCsgOperations { get { return true; } }
+
+        public virtual void Invalidate(bool polygonsChanged){}
 
 		public abstract void UpdateVisibility();
 

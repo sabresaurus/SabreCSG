@@ -28,6 +28,14 @@ namespace Sabresaurus.SabreCSG
         /// <value><c>true</c> to select the group if any child is selected; otherwise, <c>false</c>.</value>
         public bool AlwaysSelectGroup { get { return alwaysSelectGroup; } set { alwaysSelectGroup = value; } }
 
+        /// <summary>
+        /// Gets a value indicating whether this brush supports CSG operations. Setting this to false
+        /// will hide CSG brush related options in the editor.
+        /// <para>For example a <see cref="GroupBrush"/> does not have any CSG operations.</para>
+        /// </summary>
+        /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
+        public override bool SupportsCsgOperations { get { return false; } }
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -170,10 +178,12 @@ namespace Sabresaurus.SabreCSG
                 BrushBase child = childTransform.GetComponent<BrushBase>();
                 if (child == null) continue;
 
-                child.Mode = this.Mode;
-                child.IsNoCSG = this.IsNoCSG;
-                child.IsVisible = this.IsVisible;
-                child.HasCollision = this.HasCollision;
+                // we do not override these properties in a group.
+                // it wouldn't make much sense and break whatever the user grouped.
+                //child.Mode = this.Mode;
+                //child.IsNoCSG = this.IsNoCSG;
+                //child.IsVisible = this.IsVisible;
+                //child.HasCollision = this.HasCollision;
                 child.Invalidate(polygonsChanged);
                 csgBounds.Encapsulate(child.GetBoundsLocalTo(transform));
             }

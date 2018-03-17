@@ -1115,7 +1115,7 @@ namespace Sabresaurus.SabreCSG
 			if(gameObject != null)
 			{
 				BrushBase brushBase = gameObject.GetComponent<BrushBase>();
-				if(brushBase != null)
+				if(brushBase != null && brushBase.SupportsCsgOperations)
 				{
 					drawRect.xMax -= 2;
 					drawRect.xMin = drawRect.xMax - 16;
