@@ -17,18 +17,6 @@ namespace Sabresaurus.SabreCSG
         protected Bounds localBounds = new Bounds(Vector3.zero, new Vector3(2, 2, 2));
 
         /// <summary>
-        /// Whether to select the group if any child is selected.
-        /// </summary>
-        [SerializeField]
-        private bool alwaysSelectGroup = true;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to select the group if any child is selected.
-        /// </summary>
-        /// <value><c>true</c> to select the group if any child is selected; otherwise, <c>false</c>.</value>
-        public bool AlwaysSelectGroup { get { return alwaysSelectGroup; } set { alwaysSelectGroup = value; } }
-
-        /// <summary>
         /// Gets a value indicating whether this brush supports CSG operations. Setting this to false
         /// will hide CSG brush related options in the editor.
         /// <para>For example a <see cref="GroupBrush"/> does not have any CSG operations.</para>

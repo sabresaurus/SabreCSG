@@ -10,16 +10,6 @@ namespace Sabresaurus.SabreCSG
     [CustomEditor(typeof(GroupBrush), true)]
     public class BrushGroupInspector : BrushBaseInspector
     {
-        SerializedProperty alwaysSelectGroup;
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-
-            // Setup the SerializedProperties.
-            alwaysSelectGroup = serializedObject.FindProperty("alwaysSelectGroup");
-        }
-
         // disable the group editor.
         protected override bool ShowGroupInspector { get { return false; } }
 
@@ -33,9 +23,6 @@ namespace Sabresaurus.SabreCSG
 
                 if (GUILayout.Button("Select Brushes"))
                 {
-                    // disable the always select group flag.
-                    group.AlwaysSelectGroup = false;
-
                     // select all of the child brush objects.
                     List<Object> objects = Selection.objects.ToList();
                     objects.Remove(group.gameObject);
@@ -51,11 +38,6 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 GUILayout.EndHorizontal();
-
-                bool oldBool;
-                alwaysSelectGroup.boolValue = GUILayout.Toggle(oldBool = alwaysSelectGroup.boolValue, "Always Select Group", EditorStyles.toolbarButton);
-                if (alwaysSelectGroup.boolValue != oldBool)
-                    serializedObject.ApplyModifiedProperties();
             }
         }
     }

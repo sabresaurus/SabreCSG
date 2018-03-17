@@ -74,10 +74,6 @@ namespace Sabresaurus.SabreCSG
                     }
 
                     GUILayout.EndHorizontal();
-
-                    // if requested, select the group when this child is selected.
-                    if (group != null && group.AlwaysSelectGroup)
-                        Selection.objects = new Object[] { group.gameObject };
                 }
             }
 
