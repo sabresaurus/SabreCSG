@@ -1115,7 +1115,7 @@ namespace Sabresaurus.SabreCSG
 			if(gameObject != null)
 			{
 				BrushBase brushBase = gameObject.GetComponent<BrushBase>();
-				if(brushBase != null && brushBase.SupportsCsgOperations)
+				if(brushBase != null)
 				{
 					drawRect.xMax -= 2;
 					drawRect.xMin = drawRect.xMax - 16;
@@ -1130,7 +1130,11 @@ namespace Sabresaurus.SabreCSG
 							iconMaterial = SabreCSGResources.GetGreyscaleUIMaterial();
 						}
 					}
-					if(brushBase.IsNoCSG)
+                    if (gameObject.GetComponent<GroupBrush>())
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
+                    }
+                    else if (brushBase.IsNoCSG)
 					{
 						Graphics.DrawTexture(drawRect, SabreCSGResources.NoCSGIconTexture, iconMaterial);
 					}
