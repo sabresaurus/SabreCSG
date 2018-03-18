@@ -38,7 +38,7 @@
 					o.color = saturate(color);
 					// compute texture coordinates
 					// transform position
-					o.pos = UnityObjectToClipPos(float4(IN.pos,1));
+					o.pos = mul(UNITY_MATRIX_MVP, float4(IN.pos,1));
 					return o;
 				}
 
