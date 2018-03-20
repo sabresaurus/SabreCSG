@@ -309,7 +309,7 @@ namespace Sabresaurus.SabreCSG
 
 			Vector3 center = transform.position;
 			Quaternion rotation = transform.rotation;
-			Vector3 scale = transform.localScale;
+			Vector3 scale = transform.lossyScale;
 
 			for (int i = 0; i < polygons.Length; i++)
 			{
@@ -888,9 +888,16 @@ namespace Sabresaurus.SabreCSG
 
 			newObject.name = this.gameObject.name;
 
-			newObject.transform.parent = this.transform.parent;
+            // copy the scale with checks for scaled parents and being of a scaled child.
+            newObject.transform.parent = null;
+            newObject.transform.localScale = this.transform.lossyScale;
+            newObject.transform.parent = this.transform.parent;
 
-			return newObject;
+            // copy the world position as compound brush children brushes have position 0,0,0.
+            // once parented they will end up at world position 0,0,0 if this step isn't done.
+            newObject.transform.position = this.transform.position;
+
+            return newObject;
 		}
 
 		public override void PrepareToBuild(List<Brush> brushes, bool forceRebuild)
