@@ -11,7 +11,7 @@ namespace Sabresaurus.SabreCSG
     public class SurfaceEditor : Tool
     {
 		bool selectHelpersVisible = false;
-		enum Mode { None, Translate, Rotate, QuickSelect };
+		enum Mode { None, Translate, Rotate, QuickSelect, FollowLastFace };
 		enum AlignDirection { Top, Bottom, Left, Right, Center };
 
 		Mode currentMode = Mode.None;
@@ -137,15 +137,15 @@ namespace Sabresaurus.SabreCSG
 		void OnMouseDown (SceneView sceneView, Event e)
 		{
 			if(e.button != 0
-				|| (SabreInput.AnyModifiersSet(e) && !(SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift)))
-				|| CameraPanInProgress
+				//|| (SabreInput.AnyModifiersSet(e) && !(SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift)) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift))
+				|| (!SabreInput.AnyModifiersSet(e) || !(SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift)))
+                || CameraPanInProgress
 				|| EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
 			{
 				return;
 			}
 
-
-			if(copyMaterialHeld) // Copy material
+            if (copyMaterialHeld) // Copy material
 			{
 				if(!EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
 				{
@@ -308,6 +308,11 @@ namespace Sabresaurus.SabreCSG
 
                         currentMode = Mode.QuickSelect;
                     }
+                    else if (e.control && e.shift)
+                    {
+                        currentMode = Mode.FollowLastFace;
+                        OnMouseDragFollowLastFace(sceneView, e);
+                    }
                     else
                     {
                         currentMode = Mode.None;
@@ -370,7 +375,11 @@ namespace Sabresaurus.SabreCSG
             {
                 OnMouseDragQuickSelect(sceneView, e);
             }
-		}
+            else if (currentMode == Mode.FollowLastFace)
+            {
+                OnMouseDragFollowLastFace(sceneView, e);
+            }
+        }
 
         void EnsureCurrentPolygonSelected()
         {
@@ -599,11 +608,35 @@ namespace Sabresaurus.SabreCSG
             e.Use();
         }
 
+        void OnMouseDragFollowLastFace(SceneView sceneView, Event e)
+        {
+            if (!EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
+            {
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                Polygon polygon = csgModel.RaycastBuiltPolygons(ray);
+
+                if (polygon != null)
+                {
+                    Polygon targetPolygon = csgModel.GetSourcePolygon(polygon.UniqueIndex);
+
+                    if (targetPolygon != null && targetPolygon != lastSelectedPolygon)
+                    {
+                        if (!matchedBrushes.ContainsKey(targetPolygon))
+                            matchedBrushes.Add(targetPolygon, csgModel.FindBrushFromPolygon(targetPolygon));
+
+                        FollowLastFace(targetPolygon);
+                    }
+                }
+            }
+
+            e.Use();
+        }
+
         void OnMouseUp (SceneView sceneView, Event e)
 		{
             // Normal selection mode
             if (e.button == 0 && !CameraPanInProgress 
-				&& (!SabreInput.AnyModifiersSet(e) || SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift))
+				&& (!SabreInput.AnyModifiersSet(e) || SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift))
 				&& !copyMaterialHeld)
 			{ 
 				currentMode = Mode.None;
@@ -688,8 +721,13 @@ namespace Sabresaurus.SabreCSG
                         // Most recent hit
                         previousHits.Insert(0, selectedPolygon);
                   
+                        // If holding control and shift, follow last face is used and we don't change anything
+                        if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control | EventModifiers.Shift))
+                        {
+
+                        }
                         // If holding control, the action counts as selection toggle (if already selected it's removed)
-                        if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
+                        else if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
                         {
                             if (selectedSourcePolygons.Contains(selectedPolygon))
                             {
@@ -700,7 +738,8 @@ namespace Sabresaurus.SabreCSG
                             {
                                 selectedSourcePolygons.Add(selectedPolygon);
                                 lastSelectedPolygon = selectedPolygon;
-                                matchedBrushes.Add(selectedPolygon, csgModel.FindBrushFromPolygon(selectedPolygon));
+                                if (!matchedBrushes.ContainsKey(selectedPolygon))
+                                    matchedBrushes.Add(selectedPolygon, csgModel.FindBrushFromPolygon(selectedPolygon));
                             }
                         }
                         // If holding shift, quick select is used and we don't change anything
@@ -712,7 +751,8 @@ namespace Sabresaurus.SabreCSG
                         {
                             selectedSourcePolygons.Add(selectedPolygon);
                             lastSelectedPolygon = selectedPolygon;
-                            matchedBrushes.Add(selectedPolygon, csgModel.FindBrushFromPolygon(selectedPolygon));
+                            if (!matchedBrushes.ContainsKey(selectedPolygon))
+                                matchedBrushes.Add(selectedPolygon, csgModel.FindBrushFromPolygon(selectedPolygon));
                         }
                     }
 
@@ -725,31 +765,13 @@ namespace Sabresaurus.SabreCSG
 
 				dragging = false;
 			}
-			else if(e.button == 0 && SabreInput.IsModifier(e, EventModifiers.Shift | EventModifiers.Control)) // Follow last face
-			{
-				if(!EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
-				{
-					Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-					Polygon polygon = csgModel.RaycastBuiltPolygons(ray);
-
-					if(polygon != null)
-					{
-						Polygon targetPolygon = csgModel.GetSourcePolygon(polygon.UniqueIndex);
-
-						if(targetPolygon != null && targetPolygon != lastSelectedPolygon)
-						{
-							matchedBrushes.Add(targetPolygon, csgModel.FindBrushFromPolygon(targetPolygon));
-
-							FollowLastFace(targetPolygon);
-						}
-					}
-				}
-			}
- 			
 		}
 
 		void FollowLastFace(Polygon sourceTargetPolygon)
 		{
+            // Must have selected a polygon.
+            if (lastSelectedPolygon == null) return;
+
 			// Use UVs on lastSelectedPolygon as a template for targetPolygon
 			Polygon[] sourceBuiltPolygons = csgModel.BuiltPolygonsByIndex(lastSelectedPolygon.UniqueIndex);
 			Polygon[] targetBuiltPolygons = csgModel.BuiltPolygonsByIndex(sourceTargetPolygon.UniqueIndex);
@@ -949,7 +971,7 @@ namespace Sabresaurus.SabreCSG
 			if(currentMode == Mode.None
 				&& !CameraPanInProgress
 				&& !EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect)
-				&& (!SabreInput.AnyModifiersSet(e) || SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift)  || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift)))
+				&& (!SabreInput.AnyModifiersSet(e) || SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift)))
 			{
 				Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
 				Polygon polygon = csgModel.RaycastBuiltPolygons(ray);
