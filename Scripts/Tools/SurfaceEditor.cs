@@ -391,7 +391,8 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 selectedSourcePolygons.Add(currentPolygon);
-                matchedBrushes.Add(currentPolygon, csgModel.FindBrushFromPolygon(currentPolygon));
+                if (!matchedBrushes.ContainsKey(currentPolygon))
+                    matchedBrushes.Add(currentPolygon, csgModel.FindBrushFromPolygon(currentPolygon));
                 lastSelectedPolygon = currentPolygon;
             }
         }
