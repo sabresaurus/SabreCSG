@@ -137,8 +137,6 @@ namespace Sabresaurus.SabreCSG
 		void OnMouseDown (SceneView sceneView, Event e)
 		{
 			if(e.button != 0
-				//|| (SabreInput.AnyModifiersSet(e) && !(SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift)) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift))
-				|| (!SabreInput.AnyModifiersSet(e) || !(SabreInput.IsModifier(e, EventModifiers.Control) || SabreInput.IsModifier(e, EventModifiers.Shift) || SabreInput.IsModifier(e, EventModifiers.Control | EventModifiers.Shift)))
                 || CameraPanInProgress
 				|| EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, ToolbarRect))
 			{
