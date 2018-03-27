@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG
 //			base.OnEnable ();
 //		}
 //
-		public override void OnInspectorGUI()
+		public override void DoInspectorGUI()
 		{
 			using (new NamedVerticalScope("Compound"))
 			{
@@ -28,7 +28,7 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 			
-			base.OnInspectorGUI();
+			base.DoInspectorGUI();
 		}
 	}
 }

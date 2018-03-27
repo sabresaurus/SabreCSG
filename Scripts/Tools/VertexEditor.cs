@@ -29,6 +29,8 @@ namespace Sabresaurus.SabreCSG
 		float weldTolerance = 0.1f;
 		float scale = 1f;
 
+        Vertex movingVertex;
+
 		void ClearSelection()
 		{
 			selectedEdges.Clear();
@@ -464,7 +466,12 @@ namespace Sabresaurus.SabreCSG
 		{
 			base.OnSceneGUI(sceneView, e); // Allow the base logic to calculate first
 
-			if(primaryTargetBrush != null && AnySelected)
+            if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
+            {
+                moveInProgress = false;
+            }
+
+            if (primaryTargetBrush != null && AnySelected)
 			{
 				if(startPositions.Count == 0)
 				{
@@ -481,7 +488,8 @@ namespace Sabresaurus.SabreCSG
 					handleDirection = primaryTargetBrush.transform.rotation;
 				}
 				
-				// Grab a source point and convert from local space to world
+				// Grab a source point and convert from local space to world.
+                // This is the emergency fall-back solution when no vertex is found.
 				Vector3 sourceWorldPosition = GetSelectedCenter();
 
 
@@ -502,9 +510,27 @@ namespace Sabresaurus.SabreCSG
 				}
 
 				EditorGUI.BeginChangeCheck();
+
+                // If not moving a vertex yet:
+                if (!moveInProgress)
+                {
+                    // Find a selected vertex close to the mouse cursor.
+                    Vector3 vpos;
+                    Brush currentBrush;
+                    if (FindClosestSelectedVertexAtMousePosition(out vpos, out movingVertex))
+                        if (selectedVertices.TryGetValue(movingVertex, out currentBrush))
+                            sourceWorldPosition = currentBrush.transform.TransformPoint(movingVertex.Position);
+                }
+                else
+                {
+                    // Move the last selected vertex.
+                    Brush currentBrush;
+                    if (selectedVertices.TryGetValue(movingVertex, out currentBrush))
+                        sourceWorldPosition = currentBrush.transform.TransformPoint(movingVertex.Position);
+                }
+
 				// Display a handle and allow the user to determine a new position in world space
 				Vector3 newWorldPosition = Handles.PositionHandle(sourceWorldPosition, handleDirection);
-
 
 				if(EditorGUI.EndChangeCheck())
 				{
@@ -564,8 +590,8 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 
-//			if(e.type == EventType.Repaint)
-			{
+            //			if(e.type == EventType.Repaint)
+            {
 				OnRepaint(sceneView, e);
 			}
 		}
@@ -1268,7 +1294,89 @@ namespace Sabresaurus.SabreCSG
 			GL.PopMatrix();
 		}
 
-		public override void Deactivated ()
+        /// <summary>Finds a selected vertex at the current mouse position.</summary>
+        /// <param name="closestVertexWorldPosition">The closest selected vertex world position.</param>
+        /// <returns>True if a vertex was found else false.</returns>
+        private bool FindClosestSelectedVertexAtMousePosition(out Vector3 closestVertexWorldPosition, out Vertex closestVertex)
+        {
+            // find a vertex close to the mouse cursor.
+            Transform sceneViewTransform = SceneView.currentDrawingSceneView.camera.transform;
+            Vector3 sceneViewPosition = sceneViewTransform.position;
+            Vector2 mousePosition = Event.current.mousePosition;
+
+            bool foundAnyPoints = false;
+            closestVertex = null;
+            closestVertexWorldPosition = Vector3.zero;
+            float closestDistanceSquare = float.PositiveInfinity;
+
+            foreach (PrimitiveBrush brush in selectedVertices.Values)
+            {
+                Polygon[] polygons = brush.GetPolygons();
+                for (int i = 0; i < polygons.Length; i++)
+                {
+                    Polygon polygon = polygons[i];
+
+                    for (int j = 0; j < polygon.Vertices.Length; j++)
+                    {
+                        Vertex vertex = polygon.Vertices[j];
+                        if (!selectedVertices.ContainsKey(vertex)) continue;
+
+                        Vector3 worldPosition = brush.transform.TransformPoint(vertex.Position);
+
+                        float vertexDistanceSquare = (sceneViewPosition - worldPosition).sqrMagnitude;
+
+                        if (EditorHelper.InClickZone(mousePosition, worldPosition) && vertexDistanceSquare < closestDistanceSquare)
+                        {
+                            closestVertex = vertex;
+                            closestVertexWorldPosition = worldPosition;
+                            foundAnyPoints = true;
+                            closestDistanceSquare = vertexDistanceSquare;
+                        }
+                    }
+                }
+            }
+
+            if (foundAnyPoints == false)
+            {
+                // None matched, next try finding the closest by distance
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                closestVertexWorldPosition = Vector3.zero;
+                closestDistanceSquare = float.PositiveInfinity;
+
+                foreach (PrimitiveBrush brush in selectedVertices.Values)
+                {
+                    Polygon[] polygons = brush.GetPolygons();
+                    for (int i = 0; i < polygons.Length; i++)
+                    {
+                        Polygon polygon = polygons[i];
+
+                        for (int j = 0; j < polygon.Vertices.Length; j++)
+                        {
+                            Vertex vertex = polygon.Vertices[j];
+                            if (!selectedVertices.ContainsKey(vertex)) continue;
+
+                            Vector3 vertexWorldPosition = brush.transform.TransformPoint(vertex.Position);
+
+                            Vector3 closestPoint = MathHelper.ProjectPointOnLine(ray.origin, ray.direction, vertexWorldPosition);
+
+                            float vertexDistanceSquare = (closestPoint - vertexWorldPosition).sqrMagnitude;
+
+                            if (vertexDistanceSquare < closestDistanceSquare)
+                            {
+                                closestVertex = vertex;
+                                closestVertexWorldPosition = vertexWorldPosition;
+                                foundAnyPoints = true;
+                                closestDistanceSquare = vertexDistanceSquare;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return foundAnyPoints;
+        }
+
+        public override void Deactivated ()
 		{
 			
 		}

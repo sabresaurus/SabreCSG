@@ -888,16 +888,16 @@ namespace Sabresaurus.SabreCSG
 
 			newObject.name = this.gameObject.name;
 
-            // copy the scale with checks for scaled parents and being of a scaled child.
-            newObject.transform.parent = null;
-            newObject.transform.localScale = this.transform.lossyScale;
-            newObject.transform.parent = this.transform.parent;
+      // copy the scale with checks for scaled parents and being of a scaled child.
+      newObject.transform.parent = null;
+      newObject.transform.localScale = this.transform.lossyScale;
+      newObject.transform.parent = this.transform.parent;
 
-            // copy the world position as compound brush children brushes have position 0,0,0.
-            // once parented they will end up at world position 0,0,0 if this step isn't done.
-            newObject.transform.position = this.transform.position;
+      // copy the world position as compound brush children brushes have position 0,0,0.
+      // once parented they will end up at world position 0,0,0 if this step isn't done.
+      newObject.transform.position = this.transform.position;
 
-            return newObject;
+			return newObject;
 		}
 
 		public override void PrepareToBuild(List<Brush> brushes, bool forceRebuild)
