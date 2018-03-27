@@ -553,6 +553,7 @@ namespace Sabresaurus.SabreCSG
 				brushObject = new GameObject("AppliedBrush");
 			}
 
+            brushObject.transform.localScale = this.transform.lossyScale;
 			brushObject.transform.parent = this.transform;
 			brushObject.transform.localPosition = localPosition;
 			if(localRotation != default(Quaternion))
@@ -606,6 +607,7 @@ namespace Sabresaurus.SabreCSG
 				brushObject = new GameObject(compoundBrushType.Name);
 			}
 
+            brushObject.transform.localScale = this.transform.lossyScale;
 			brushObject.transform.parent = this.transform;
 			brushObject.transform.localPosition = localPosition;
 			if(localRotation != default(Quaternion))
