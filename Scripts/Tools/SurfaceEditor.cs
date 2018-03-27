@@ -2135,7 +2135,11 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void ExtrudeBrushesFromSelection()
+        /// <summary>
+        /// Creates new brushes by extruding the currently selected faces. This method will then
+        /// select the new brushes.
+        /// </summary>
+        void ExtrudeBrushesFromSelection()
 		{
 			GameObject[] newObjects = new GameObject[selectedSourcePolygons.Count];
 			for (int i = 0; i < selectedSourcePolygons.Count; i++) 
@@ -2147,8 +2151,17 @@ namespace Sabresaurus.SabreCSG
 				Brush sourceBrush = matchedBrushes[selectedSourcePolygons[i]];
 				GameObject newObject = ((PrimitiveBrush)sourceBrush).Duplicate();
 
+                // if the current brush is part of a compound brush:
+                if (sourceBrush.transform.parent.GetComponent<CompoundBrush>())
+                {
+                    // we can't parent it under the compound brush as that makes no sense to the user (can't be selected individually).
+                    newObject.transform.parent = sourceBrush.transform.parent.parent;
+                    // break the relationship between the brush and the compound brush.
+                    newObject.GetComponent<PrimitiveBrush>().SetBrushController(null);
+                }
+
 				newObject.transform.rotation = sourceBrush.transform.rotation * rotation;
-				// Finally give the new brush the other set of polygons
+				// finally give the new brush the other set of polygons.
 				newObject.GetComponent<PrimitiveBrush>().SetPolygons(polygons, true);
 
 				Undo.RegisterCreatedObjectUndo(newObject, "Extrude Brush");

@@ -887,8 +887,11 @@ namespace Sabresaurus.SabreCSG
 			GameObject newObject = Instantiate(this.gameObject);
 
 			newObject.name = this.gameObject.name;
-
 			newObject.transform.parent = this.transform.parent;
+
+            // copy the world position as compound brush children brushes have position 0,0,0.
+            // once parented they will end up at world position 0,0,0 if this step isn't done.
+            newObject.transform.position = this.transform.position;
 
 			return newObject;
 		}
