@@ -989,7 +989,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 #if UNITY_5_4_OR_NEWER
             viewportScroll = new Vector2(Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint, Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint);
 #else
-            viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
+            viewportScroll = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
 #endif
         }
 
@@ -1346,7 +1346,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         private Rect GetViewportRect()
         {
+#if UNITY_5_4_OR_NEWER
             Rect viewportRect = Screen.safeArea;
+#else
+            Rect viewportRect = new Rect(0, 0, Screen.width, Screen.height);
+#endif
             viewportRect.y += 18;
             viewportRect.height -= 40;
             return viewportRect;
@@ -1475,7 +1479,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 #if UNITY_5_4_OR_NEWER
             PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
 #else
-            PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
+            PopupWindow.Show(new Rect((Screen.width / 2.0f) - (size.x / 2.0f), (Screen.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
 #endif
         }
 
