@@ -12,7 +12,7 @@ namespace Sabresaurus.SabreCSG
     [CustomEditor(typeof(ShapeEditorBrush), true)]
     public class ShapeEditorBrushInspector : CompoundBrushInspector
     {
-        public override void OnInspectorGUI()
+        public override void DoInspectorGUI()
         {
             using (new NamedVerticalScope("Shape Editor Brush"))
             {
@@ -36,7 +36,7 @@ namespace Sabresaurus.SabreCSG
                 GUILayout.EndHorizontal();
             }
 
-            base.OnInspectorGUI();
+            base.DoInspectorGUI();
         }
     }
 }

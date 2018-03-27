@@ -486,9 +486,23 @@ namespace Sabresaurus.SabreCSG
             {
                 if(sourceBrushes[i].GetType() == typeof(PrimitiveBrush))
                 {
+                    // Get any group this brush is a child of.
+                    GroupBrush group = null;
+                    if (sourceBrushes[i].transform.parent)
+                        group = sourceBrushes[i].transform.parent.GetComponent<GroupBrush>();
+
                     // Get any controller (e.g. compound brush) that is driving the selected brush
                     BrushBase controller = ((PrimitiveBrush)sourceBrushes[i]).BrushController;
-                    if (controller != null)
+
+                    if (group != null)
+                    {
+                        // Group with 'always select group' found, add it instead if it's not already in the list
+                        if (!brushBases.Contains(group))
+                        {
+                            brushBases.Add(group);
+                        }
+                    }
+                    else if (controller != null)
                     {
                         // Controller found, add it instead if it's not already in the list
                         if(!brushBases.Contains(controller))
