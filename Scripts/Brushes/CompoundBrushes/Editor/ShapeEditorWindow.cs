@@ -42,7 +42,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private int gridScale = 16;
 
+        /// <summary>
+        /// The mouse position while dragging to calculate relative positioning.
+        /// </summary>
         private Vector2Int mouseDragLastGridPosition = new Vector2Int();
+
+        /// <summary>
+        /// Whether the current drag is valid (invalid if sliding from the toolbar onto the grid).
+        /// </summary>
+        private bool isValidDrag = false;
 
         /// <summary>
         /// The currently selected objects.
@@ -248,6 +256,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // move object around with the left mouse button.
                 if (Event.current.button == 0)
                 {
+                    // can't slide from the toolbar onto the grid.
+                    if (!isValidDrag) return;
+
                     Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
                     if (GetViewportRect().Contains(Event.current.mousePosition))
                     {
@@ -321,25 +332,33 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
             if (Event.current.type == EventType.MouseDown)
             {
-                if (Event.current.button == 0 && GetViewportRect().Contains(Event.current.mousePosition))
+                if (Event.current.button == 0)
                 {
-                    // if the user is not holding CTRL or SHIFT we clear the selected objects.
-                    if ((Event.current.modifiers & EventModifiers.Control) == 0 && (Event.current.modifiers & EventModifiers.Shift) == 0)
-                        selectedObjects.Clear();
+                    isValidDrag = false;
 
-                    // try finding an object under the mouse cursor.
-                    Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
-                    ISelectable found = GetObjectAtGridPosition(grid);
-                    // if the object was already selected, deselect it.
-                    if (found != null && selectedObjects.Contains(found))
-                        // deselect the object.
-                        selectedObjects.Remove(found);
-                    else if (found != null && !selectedObjects.Contains(found))
-                        // select the object.
-                        selectedObjects.Add(found);
-                    // store the grid position for relative dragging.
-                    mouseDragLastGridPosition = grid;
-                    this.Repaint();
+                    if (GetViewportRect().Contains(Event.current.mousePosition))
+                    {
+                        // the user did not click on the toolbar so dragging is valid.
+                        isValidDrag = true;
+
+                        // if the user is not holding CTRL or SHIFT we clear the selected objects.
+                        if ((Event.current.modifiers & EventModifiers.Control) == 0 && (Event.current.modifiers & EventModifiers.Shift) == 0)
+                            selectedObjects.Clear();
+
+                        // try finding an object under the mouse cursor.
+                        Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
+                        ISelectable found = GetObjectAtGridPosition(grid);
+                        // if the object was already selected, deselect it.
+                        if (found != null && selectedObjects.Contains(found))
+                            // deselect the object.
+                            selectedObjects.Remove(found);
+                        else if (found != null && !selectedObjects.Contains(found))
+                            // select the object.
+                            selectedObjects.Add(found);
+                        // store the grid position for relative dragging.
+                        mouseDragLastGridPosition = grid;
+                        this.Repaint();
+                    }
                 }
             }
 
