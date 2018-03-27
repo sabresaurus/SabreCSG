@@ -1,0 +1,12 @@
+Content updated by Daniel Cornelius (Kerfuffles) 
+
+[3.27.2018]
+* updated all materials
+* updated all textures
+* updated default materials to use mobile diffuse shaders
+* updated naming of materials and textures to help when searching for other content in a project
+* updated default material textures to correspond to their names more accurately
+* converted all textures to targa and adjusted their alpha channels where appropriate
++ added black material
+- removed old materials
+- removed old textures
