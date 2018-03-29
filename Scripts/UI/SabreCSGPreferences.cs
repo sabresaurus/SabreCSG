@@ -83,7 +83,16 @@ namespace Sabresaurus.SabreCSG
 				SceneView.RepaintAll();
 			}
 
-			GUILayout.Space(10);
+            EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowBrushesAsWireframes = GUILayout.Toggle(CurrentSettings.ShowBrushesAsWireframes, "Show brushes as wireframes");
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
+
+            GUILayout.Space(10);
 
 			if(GUILayout.Button("Change key mappings"))
 			{

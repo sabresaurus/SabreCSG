@@ -36,6 +36,7 @@ namespace Sabresaurus.SabreCSG
 
 		bool mouseIsDragging = false;
 		bool mouseIsHeld = false;
+        bool mouseIsDoubleClick = false;
 		DateTime mouseReleaseTime = DateTime.MinValue;
 
 		// Tools
@@ -131,6 +132,9 @@ namespace Sabresaurus.SabreCSG
 		protected override void Start ()
 		{
 			UpdateUtility.RunCleanup();
+            
+            // SabreCSG turns off Auto Generate, but loading a scene in editor will look too dark without it, so force refresh
+            DynamicGI.UpdateEnvironment();
 
 			base.Start ();
 
@@ -523,10 +527,17 @@ namespace Sabresaurus.SabreCSG
 //				}
 //			}
 
+            if (e.type == EventType.MouseDown && e.clickCount == 2)
+            {
+                mouseIsDoubleClick = true;
+                OnMouseDoubleClick(sceneView, e);
+            }
 			if (e.type == EventType.MouseUp && !RadialMenu.IsActive)
 			{
 				OnMouseUp(sceneView, e);
-				SabreMouse.ResetCursor();
+                mouseIsDoubleClick = false;
+
+                SabreMouse.ResetCursor();
 			}
 			else if (e.type == EventType.KeyDown || e.type == EventType.KeyUp)
 			{
@@ -541,6 +552,36 @@ namespace Sabresaurus.SabreCSG
 			RadialMenu.OnLateSceneGUI(sceneView);
 		}
 
+        void OnMouseDoubleClick(SceneView sceneView, Event e)
+        {
+            if (mouseIsDragging
+                || (activeTool != null && activeTool.PreventBrushSelection)
+                || EditorHelper.IsMousePositionInInvalidRects(e.mousePosition))
+            {
+                SceneView.RepaintAll();
+                return;
+            }
+
+            // Left double click - select individual brush inside of a group.
+            if (e.button == 0)
+            {
+                Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+                List<PolygonRaycastHit> hits = RaycastBrushesAll(ray, true);
+                List<Brush> hitBrushes = hits.Select(hit => hit.GameObject.GetComponent<Brush>()).ToList();
+                List<GameObject> hitObjects = hitBrushes.Select(hit => hit.gameObject).ToList();
+
+                if (hitObjects.Count >= 1)
+                {
+                    if (hitObjects[0].transform.parent && hitObjects[0].transform.parent.GetComponent<GroupBrush>() != null)
+                    {
+                        Selection.activeGameObject = hitObjects[0];
+                        previousHits.Clear();
+                        lastHitSet.Clear();
+                    }
+                }
+            }
+        }
+
 		void OnMouseUp(SceneView sceneView, Event e)
 		{
 			if (mouseIsDragging 
@@ -550,6 +591,9 @@ namespace Sabresaurus.SabreCSG
                 SceneView.RepaintAll();
 				return;
 			}
+
+            // don't change the selection when double clicked.
+            if (mouseIsDoubleClick) return;
 
 			// Left click - select
 			if (e.button == 0)
@@ -1127,7 +1171,11 @@ namespace Sabresaurus.SabreCSG
 							iconMaterial = SabreCSGResources.GetGreyscaleUIMaterial();
 						}
 					}
-					if(brushBase.IsNoCSG)
+                    if (gameObject.GetComponent<GroupBrush>())
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
+                    }
+                    else if (brushBase.IsNoCSG)
 					{
 						Graphics.DrawTexture(drawRect, SabreCSGResources.NoCSGIconTexture, iconMaterial);
 					}

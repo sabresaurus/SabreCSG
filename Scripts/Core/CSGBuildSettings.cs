@@ -31,7 +31,50 @@ namespace Sabresaurus.SabreCSG
 		public float UnwrapHardAngle = 88f; // degrees, 0 to 180
 		public float UnwrapPackMargin = 0.00390625f; // Assumes a 1024 texture, pack margin = PadPixels / 1024
 
-        public ShadowCastingMode ShadowCastingMode = ShadowCastingMode.On;
+        /*
+            Fix most of the light leaking that occurs after CSG operations.
+            See https://github.com/sabresaurus/SabreCSG/issues/19#issuecomment-358567922
+
+            In Unity even a simple box placement like below will cause dynamic light to leak through
+            what may appear to be a closed corner to the player:
+
+              Dynamic
+            Light Source
+               X    
+                X   +------+
+                 X  |      |
+                  X |      |
+                   X|      |
+             +------+------+
+             |      |X
+             |      | X
+             |      |  X
+             +------+   X
+                     Light Leaks Through
+                        Causes Seam
+
+            When CSG operations hollow out brushes you may get a shape like this with the same problem:
+
+              Dynamic
+            Light Source
+                X
+                 X   +------+
+                  X  |      |
+                   X |      |
+                    X|      |
+                 +---+  +---+   <---+ NoCSG would not have caused a hole here.
+                 |    X |
+                 |     X|   <---+ This wall's normal is facing the wrong way
+                 |      |         and will not block the incoming light.
+                 +------+X
+                     Light Leaks Through
+                        Causes Seam
+
+            By setting the shadow casting mode of the mesh to be "Two Sided" the backfacing wall will
+            block the incoming light and prevent the light leak artifact from appearing.
+       */
+
+        public ShadowCastingMode ShadowCastingMode = ShadowCastingMode.TwoSided;
 
 		// What default physics material to use on collision meshes
 		public PhysicMaterial DefaultPhysicsMaterial = null;

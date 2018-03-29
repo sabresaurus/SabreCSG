@@ -17,7 +17,7 @@ namespace Sabresaurus.SabreCSG
 	};
 
 	/// <summary>
-	/// A simple brush that represents a single convex shape
+	/// A simple brush that represents a single convex shape.
 	/// </summary>
     [ExecuteInEditMode]
     public class PrimitiveBrush : Brush
@@ -25,20 +25,65 @@ namespace Sabresaurus.SabreCSG
         [SerializeField]
 		Polygon[] polygons;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// The prism side count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int prismSideCount = 6;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// Gets or sets the prism side count.
+        /// </summary>
+        /// <value>The prism side count.</value>
+        public int PrismSideCount { get { return prismSideCount; } set { prismSideCount = value; } }
+
+        /// <summary>
+        /// The cylinder side count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int cylinderSideCount = 20;
 
+        /// <summary>
+        /// Gets or sets the cylinder side count.
+        /// </summary>
+        /// <value>The cylinder side count.</value>
+        public int CylinderSideCount { get { return cylinderSideCount; } set { cylinderSideCount = value; } }
+
+        /// <summary>
+        /// The cone side count.
+        /// </summary>
         [SerializeField, HideInInspector]
         int coneSideCount = 20;
 
+        /// <summary>
+        /// Gets or sets the cone side count.
+        /// </summary>
+        /// <value>The cone side count.</value>
+        public int ConeSideCount { get { return coneSideCount; } set { coneSideCount = value; } }
+
+        /// <summary>
+        /// The sphere side count.
+        /// </summary>
         [SerializeField,HideInInspector]
 		int sphereSideCount = 6;
 
-		[SerializeField,HideInInspector]
+        /// <summary>
+        /// Gets or sets the sphere side count.
+        /// </summary>
+        /// <value>The sphere side count.</value>
+        public int SphereSideCount { get { return sphereSideCount; } set { sphereSideCount = value; } }
+
+        /// <summary>
+        /// The icon sphere iteration count.
+        /// </summary>
+        [SerializeField,HideInInspector]
 		int icoSphereIterationCount = 1;
+
+        /// <summary>
+        /// Gets or sets the icon sphere iteration count.
+        /// </summary>
+        /// <value>The icon sphere iteration count.</value>
+        public int IcoSphereIterationCount { get { return icoSphereIterationCount; } set { icoSphereIterationCount = value; } }
 
         [SerializeField,HideInInspector]
 		PrimitiveBrushType brushType = PrimitiveBrushType.Cube;
@@ -264,7 +309,7 @@ namespace Sabresaurus.SabreCSG
 
 			Vector3 center = transform.position;
 			Quaternion rotation = transform.rotation;
-			Vector3 scale = transform.localScale;
+			Vector3 scale = transform.lossyScale;
 
 			for (int i = 0; i < polygons.Length; i++)
 			{
@@ -567,81 +612,77 @@ namespace Sabresaurus.SabreCSG
 				return;
 			}
 
-			// Make sure there is a mesh filter on this object
-			MeshFilter meshFilter = gameObject.AddOrGetComponent<MeshFilter>();
-			MeshRenderer meshRenderer = gameObject.AddOrGetComponent<MeshRenderer>();
+            // previous versions of sabrecsg used to use mesh colliders for ray collision, but that's no longer the case so we clean them up.
+            MeshCollider[] meshColliders = GetComponents<MeshCollider>();
+            if (meshColliders.Length > 0)
+                for (int i = 0; i < meshColliders.Length; i++)
+                    DestroyImmediate(meshColliders[i]);
 
-			// Used to use mesh colliders for ray collision, but not any more so clean them up
-			MeshCollider[] meshColliders = GetComponents<MeshCollider>();
 
-			if(meshColliders.Length > 0)
-			{
-				for (int i = 0; i < meshColliders.Length; i++) 
-				{
-					DestroyImmediate(meshColliders[i]);
-				}
-			} 
+            // Make sure there is a mesh filter on this object
+            MeshFilter meshFilter = gameObject.AddOrGetComponent<MeshFilter>();
+            MeshRenderer meshRenderer = gameObject.AddOrGetComponent<MeshRenderer>();
 
-			bool requireRegen = false;
+            bool requireRegen = false;
 
-			// If the cached ID hasn't been set or we mismatch
-			if(cachedInstanceID == 0
-				|| gameObject.GetInstanceID() != cachedInstanceID)
-			{
-				requireRegen = true;
-				cachedInstanceID = gameObject.GetInstanceID();
-			}
+            // If the cached ID hasn't been set or we mismatch
+            if (cachedInstanceID == 0
+                || gameObject.GetInstanceID() != cachedInstanceID)
+            {
+                requireRegen = true;
+                cachedInstanceID = gameObject.GetInstanceID();
+            }
 
-			Mesh renderMesh = meshFilter.sharedMesh;
+            Mesh renderMesh = meshFilter.sharedMesh;
 
-			if(requireRegen)
-			{
-				renderMesh = new Mesh();
-			}
+            if (requireRegen)
+            {
+                renderMesh = new Mesh();
+            }
 
-			if(polygons != null)
-			{
-				List<int> polygonIndices;
-				BrushFactory.GenerateMeshFromPolygons(polygons, ref renderMesh, out polygonIndices);
-			}
+            if (polygons != null)
+            {
+                List<int> polygonIndices;
+                BrushFactory.GenerateMeshFromPolygons(polygons, ref renderMesh, out polygonIndices);
+            }
 
-			if(mode == CSGMode.Subtract)
-			{
-				MeshHelper.Invert(ref renderMesh);
-			}
-			// Displace the triangles for display along the normals very slightly (this is so we can overlay built
-			// geometry with semi-transparent geometry and avoid depth fighting)
-			MeshHelper.Displace(ref renderMesh, 0.001f);
+            if (mode == CSGMode.Subtract)
+            {
+                MeshHelper.Invert(ref renderMesh);
+            }
+            // Displace the triangles for display along the normals very slightly (this is so we can overlay built
+            // geometry with semi-transparent geometry and avoid depth fighting)
+            MeshHelper.Displace(ref renderMesh, 0.001f);
 
-			meshFilter.sharedMesh = renderMesh;
-				
-			meshRenderer.receiveShadows = false;
-			meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            meshFilter.sharedMesh = renderMesh;
 
-			meshFilter.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
-			meshRenderer.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
+            meshRenderer.receiveShadows = false;
+            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            meshFilter.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
+            meshRenderer.hideFlags = HideFlags.NotEditable;// | HideFlags.HideInInspector;
 
 #if UNITY_EDITOR
-			Material material;
-			if(IsNoCSG)
-			{
-				material = SabreCSGResources.GetNoCSGMaterial();
-			}
-			else
-			{
-				if(this.mode == CSGMode.Add)
-				{
-					material = SabreCSGResources.GetAddMaterial();
-				}
-				else
-				{
-					material = SabreCSGResources.GetSubtractMaterial();
-				}
-			}
-			if(meshRenderer.sharedMaterial != material)
-			{
-				meshRenderer.sharedMaterial = material;
-			}
+            Material material;
+            if (IsNoCSG)
+            {
+                material = SabreCSGResources.GetNoCSGMaterial();
+            }
+            else
+            {
+                if (this.mode == CSGMode.Add)
+                {
+                    material = SabreCSGResources.GetAddMaterial();
+                }
+                else
+                {
+                    material = SabreCSGResources.GetSubtractMaterial();
+                }
+            }
+            if (meshRenderer.sharedMaterial != material)
+            {
+                meshRenderer.sharedMaterial = material;
+            }
 #endif
 //			isBrushConvex = GeometryHelper.IsBrushConvex(polygons);
 
@@ -674,7 +715,7 @@ namespace Sabresaurus.SabreCSG
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer != null)
             {
-                meshRenderer.enabled = isVisible;
+                meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
             }
         }
 
@@ -847,7 +888,14 @@ namespace Sabresaurus.SabreCSG
 
 			newObject.name = this.gameObject.name;
 
-			newObject.transform.parent = this.transform.parent;
+            // copy the scale with checks for scaled parents and being of a scaled child.
+            newObject.transform.parent = null;
+            newObject.transform.localScale = this.transform.lossyScale;
+            newObject.transform.parent = this.transform.parent;
+
+            // copy the world position as compound brush children brushes have position 0,0,0.
+            // once parented they will end up at world position 0,0,0 if this step isn't done.
+            newObject.transform.position = this.transform.position;
 
 			return newObject;
 		}

@@ -202,6 +202,36 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Polygon"/> class.
+        /// </summary>
+        /// <param name="vertices">The vertex positions of a <see cref="Vertex"/> that make up this polygonal shape. Normals and UVs will be zero (see <see cref="ResetVertexNormals"/> and <see cref="GenerateUvCoordinates"/> to generate them automatically).</param>
+        /// <param name="material">The Unity <see cref="UnityEngine.Material"/> applied to the surface of this polygon.</param>
+        /// <param name="isTemporary">If set to <c>true</c> excludes the polygon from the final CSG build, it's only temporarily created during the build process to determine whether a point is inside/outside of a convex chunk (usually you set this argument to <c>false</c>, also see <paramref name="userExcludeFromFinal"/>).</param>
+        /// <param name="userExcludeFromFinal">If set to <c>true</c> the user requested that this polygon be excluded from the final CSG build (i.e. not rendered, it does affect CSG operations).</param>
+        /// <param name="uniqueIndex">When a polygon is split or cloned, this number is preserved inside of those new polygons so they can track where they originally came from.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="vertices"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">A polygon must have at least 3 vertices.</exception>
+		public Polygon(Vector3[] vertices, Material material, bool isTemporary, bool userExcludeFromFinal, int uniqueIndex = -1)
+		{
+            if (vertices == null) throw new ArgumentNullException("vertices");
+            if (vertices.Length < 3) throw new ArgumentOutOfRangeException("A polygon must have at least 3 vertices.");
+            // consideration: check array for null elements?
+
+            // create vertices from the vector3 array.
+            this.vertices = new Vertex[vertices.Length];
+			for (int i = 0; i < vertices.Length; i++)
+				this.vertices[i] = new Vertex(vertices[i], Vector3.zero, Vector2.zero);
+
+			this.material = material;
+			this.uniqueIndex = uniqueIndex;
+			this.excludeFromFinal = isTemporary;
+			this.userExcludeFromFinal = userExcludeFromFinal;
+
+            // calculate the cached plane.
+            CalculatePlane();
+		}
+
+        /// <summary>
         /// Creates a deep copy of the <see cref="Polygon"/>. Returns a new instance of a <see
         /// cref="Polygon"/> with the same value as this instance.
         /// </summary>
@@ -452,6 +482,21 @@ namespace Sabresaurus.SabreCSG
             return true;
         }
 
+        /// <summary>
+        /// Generates the UV coordinates for this polygon automatically. This works similarly to the
+        /// "AutoUV" button in the surface editor. This method may throw warnings in the console if
+        /// the normal of the polygon is zero.
+        /// <para>You may have to call <see cref="CalculatePlane"/> first if you modified the polygon.</para>
+        /// </summary>
+        public void GenerateUvCoordinates()
+        {
+            // stolen code from the surface editor "AutoUV".
+            Quaternion cancellingRotation = Quaternion.Inverse(Quaternion.LookRotation(-Plane.normal));
+            // sets the uv at each point to the position on the plane.
+            for (int i = 0; i < vertices.Length; i++)
+                vertices[i].UV = (cancellingRotation * vertices[i].Position) * 0.5f;
+        }
+
         #region Static Methods
 
         public enum PolygonPlaneRelation { InFront, Behind, Spanning, Coplanar };
@@ -498,10 +543,10 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public static bool SplitPolygon(Polygon polygon, out Polygon frontPolygon, out Polygon backPolygon, out Vertex newVertex1, out Vertex newVertex2, UnityEngine.Plane clipPlane)
-        {
-            newVertex1 = null;
-            newVertex2 = null;
+	    public static bool SplitPolygon(Polygon polygon, out Polygon frontPolygon, out Polygon backPolygon, out Vertex newVertex1, out Vertex newVertex2, UnityEngine.Plane clipPlane)
+		{
+			newVertex1 = null;
+			newVertex2 = null;
 
             List<Vertex> frontVertices = new List<Vertex>();
             List<Vertex> backVertices = new List<Vertex>();
@@ -746,7 +791,52 @@ namespace Sabresaurus.SabreCSG
             return false;
         }
 
-#endregion Static Methods
+        #endregion Static Methods
+
+        #region Obsolete Methods
+
+        // Loops through the vertices and removes any that share a position with any others so that
+        // only uniquely positioned vertices remain
+        [Obsolete("Please use the new TryRemoveExtraneousVertices method as it prevents generating a polygon with less than 3 vertices.", false)]
+        public void RemoveExtraneousVertices()
+        {
+            List<Vertex> newVertices = new List<Vertex>();
+            newVertices.Add(vertices[0]);
+
+            for (int i = 1; i < vertices.Length; i++)
+            {
+                bool alreadyContained = false;
+
+                for (int j = 0; j < newVertices.Count; j++)
+                {
+                    if (vertices[i].Position.EqualsWithEpsilonLower(newVertices[j].Position))
+                    {
+                        alreadyContained = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyContained)
+                {
+                    newVertices.Add(vertices[i]);
+                }
+            }
+
+            vertices = newVertices.ToArray();
+            if (vertices.Length > 2)
+            {
+                CalculatePlane();
+            }
+        }
+
+        [Obsolete("Please assign the Vertices property instead of calling this method.", false)]
+        public void SetVertices(Vertex[] vertices)
+        {
+            this.vertices = vertices;
+            CalculatePlane();
+        }
+
+        #endregion Obsolete Methods
     }
 }
 

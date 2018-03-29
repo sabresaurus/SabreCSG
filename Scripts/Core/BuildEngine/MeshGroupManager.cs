@@ -33,7 +33,7 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < colliders.Length; i++) 
 			{
 #if UNITY_EDITOR
-                if(filters[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(filters[i].sharedMesh))
+                if(colliders[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(colliders[i].sharedMesh))
 #endif                
 				GameObject.DestroyImmediate(colliders[i].sharedMesh);
 			}
