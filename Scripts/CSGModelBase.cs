@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG
 //	[ExecuteInEditMode]
 	public class CSGModelBase : MonoBehaviour
 	{
-		public const string VERSION_STRING = "1.5.1";
+		public const string VERSION_STRING = "1.6.1";
 		protected const string DEFAULT_FALLBACK_MATERIAL_PATH = "Materials/Default_Map";
 
 		// Limit to how many vertices a Unity mesh can hold, before it must be split into a second mesh (just under 2^16)
@@ -505,9 +505,23 @@ namespace Sabresaurus.SabreCSG
             {
                 if(sourceBrushes[i].GetType() == typeof(PrimitiveBrush))
                 {
+                    // Get any group this brush is a child of.
+                    GroupBrush group = null;
+                    if (sourceBrushes[i].transform.parent)
+                        group = sourceBrushes[i].transform.parent.GetComponent<GroupBrush>();
+
                     // Get any controller (e.g. compound brush) that is driving the selected brush
                     BrushBase controller = ((PrimitiveBrush)sourceBrushes[i]).BrushController;
-                    if (controller != null)
+
+                    if (group != null)
+                    {
+                        // Group with 'always select group' found, add it instead if it's not already in the list
+                        if (!brushBases.Contains(group))
+                        {
+                            brushBases.Add(group);
+                        }
+                    }
+                    else if (controller != null)
                     {
                         // Controller found, add it instead if it's not already in the list
                         if(!brushBases.Contains(controller))
@@ -558,6 +572,7 @@ namespace Sabresaurus.SabreCSG
 				brushObject = new GameObject("AppliedBrush");
 			}
 
+            brushObject.transform.localScale = this.transform.lossyScale;
 			brushObject.transform.parent = this.transform;
 			brushObject.transform.localPosition = localPosition;
 			if(localRotation != default(Quaternion))
@@ -611,6 +626,7 @@ namespace Sabresaurus.SabreCSG
 				brushObject = new GameObject(compoundBrushType.Name);
 			}
 
+            brushObject.transform.localScale = this.transform.lossyScale;
 			brushObject.transform.parent = this.transform;
 			brushObject.transform.localPosition = localPosition;
 			if(localRotation != default(Quaternion))

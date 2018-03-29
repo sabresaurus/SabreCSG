@@ -53,6 +53,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public float extrudeDepth = 1.0f;
 
         /// <summary>
+        /// The extrude clip depth used on the most recent extrude.
+        /// </summary>
+        [SerializeField]
+        public float extrudeClipDepth = 0.5f;
+
+        /// <summary>
         /// The scale modifier values used on the most recent extrude.
         /// </summary>
         [SerializeField]

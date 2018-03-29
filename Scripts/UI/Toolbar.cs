@@ -415,6 +415,10 @@ namespace Sabresaurus.SabreCSG
 					menu.AddItem (new GUIContent (compoundBrushTypes[i].Name), false, CreateCompoundBrush, compoundBrushTypes[i]);
 				}
 
+                menu.AddSeparator("");
+                
+                menu.AddItem(new GUIContent("Add More?"), false, () => { EditorUtility.DisplayDialog("SabreCSG - About Compound Brushes", "Any custom compound brushes in your project are automatically detected and added to this list. Simply inherit from 'Sabresaurus.SabreCSG.CompoundBrush'.", "Okay"); });
+
 				menu.DropDown(new Rect(60,createBrushStyle.fixedHeight, 100, createBrushStyle.fixedHeight));
 			}
 
@@ -436,7 +440,7 @@ namespace Sabresaurus.SabreCSG
 						brushes.Add(brush);
 					}
 				}
-                if (primaryBrush != null)
+                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
                 {
 					CSGMode brushMode = (CSGMode)EditorGUILayout.EnumPopup(primaryBrush.Mode, EditorStyles.toolbarPopup, GUILayout.Width(80));
 					if(brushMode != primaryBrush.Mode)

@@ -197,6 +197,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D GroupIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Group.png");
+            }
+        }
+
         public static Texture2D DialogOverlayTexture 
 		{
 			get 
@@ -314,6 +322,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ShapeEditorShapeCreate.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorShapeDuplicateTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorShapeDuplicate.png");
             }
         }
 

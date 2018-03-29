@@ -39,6 +39,16 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 center += segment.position;
             pivot.position = new Vector2Int(center.x / segments.Count, center.y / segments.Count);
         }
+
+        /// <summary>
+        /// Clones this shape and returns the copy.
+        /// </summary>
+        /// <returns>A copy of the shape.</returns>
+        public Shape Clone()
+        {
+            // create a copy of the given shape using JSON.
+            return JsonUtility.FromJson<Shape>(JsonUtility.ToJson(this));
+        }
     }
 }
 #endif

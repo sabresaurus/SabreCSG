@@ -218,8 +218,13 @@ namespace Sabresaurus.SabreCSG
 						// If the Type inherits from CompoundBrush and is not abstract
 						if(!types[i].IsAbstract && types[i].IsSubclassOf(typeof(CompoundBrush)))
 						{
-							// Valid compound brush type found!
-							matchedTypes.Add(types[i]);
+                            // List of exceptions that already have an icon in the toolbar
+                            if (types[i] == typeof(StairBrush)) continue;
+                            if (types[i] == typeof(CurvedStairBrush)) continue;
+                            if (types[i] == typeof(ShapeEditor.ShapeEditorBrush)) continue;
+
+                            // Valid compound brush type found!
+                            matchedTypes.Add(types[i]);
 						}
 					}
 				}
