@@ -1,4 +1,9 @@
 Content updated by Daniel Cornelius (Kerfuffles) 
+Wood textures provided by Textures.com (formerly CGTextures.com)
+
+[3.28.2018]
+* fixed wrong project version - was using the wrong version of unity and had .meta issues with older versions.
+* added credit for wood textures to the top of update.txt
 
 [3.27.2018]
 * updated all materials
