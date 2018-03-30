@@ -58,8 +58,8 @@ namespace Sabresaurus.SabreCSG
 				}
 
 				// Create group
-				GameObject groupObject = new GameObject("Group");
-                groupObject.AddComponent<GroupBrush>();
+				GameObject groupObject = new GameObject("");
+                GroupBrush groupBrush = groupObject.AddComponent<GroupBrush>();
 				Undo.RegisterCreatedObjectUndo (groupObject, "Group");
 				Undo.SetTransformParent(groupObject.transform, rootTransform, "Group");
 
@@ -74,6 +74,9 @@ namespace Sabresaurus.SabreCSG
 				{
 					Undo.SetTransformParent(selectedTransforms[i], groupObject.transform, "Group");
 				}
+
+                // Ensure it gets a correct name in the hierarchy.
+                groupBrush.UpdateGeneratedHierarchyName();
 
 				Selection.activeGameObject = groupObject;
 				//						EditorApplication.RepaintHierarchyWindow();

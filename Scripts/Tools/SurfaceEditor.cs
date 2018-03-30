@@ -2184,6 +2184,9 @@ namespace Sabresaurus.SabreCSG
 				newObject.transform.rotation = sourceBrush.transform.rotation * rotation;
 				// finally give the new brush the other set of polygons.
 				newObject.GetComponent<PrimitiveBrush>().SetPolygons(polygons, true);
+                // give the brush an appropriate auto-generated name.
+                newObject.name = "";
+                newObject.GetComponent<PrimitiveBrush>().UpdateGeneratedHierarchyName();
 
 				Undo.RegisterCreatedObjectUndo(newObject, "Extrude Brush");
 
