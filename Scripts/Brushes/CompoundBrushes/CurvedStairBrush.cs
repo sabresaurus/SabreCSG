@@ -129,8 +129,21 @@ namespace Sabresaurus.SabreCSG
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
         private Vector3 m_LastKnownPosition;
 
-        void Awake()
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
         {
+            get
+            {
+                return "Curved Stairs Brush";
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
             // get the last known extents and position (especially after scene changes).
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
@@ -151,7 +164,7 @@ namespace Sabresaurus.SabreCSG
 
 		public override void Invalidate (bool polygonsChanged)
 		{
-			base.Invalidate(polygonsChanged);
+            base.Invalidate(polygonsChanged);
 
             ////////////////////////////////////////////////////////////////////
             // a little hack to detect the user manually resizing the bounds. //
@@ -167,7 +180,7 @@ namespace Sabresaurus.SabreCSG
                 {                                                             //
                     numSteps += 1;                                            //
                     m_LastKnownExtents = localBounds.extents;                 //
-                    Invalidate(true); // recusion! <3                         //
+                    Invalidate(true); // recursion! <3                        //
                     return;                                                   //
                 }                                                             //
                 // user is trying to scale down.                              //
@@ -176,7 +189,7 @@ namespace Sabresaurus.SabreCSG
                     numSteps -= 1;                                            //
                     if (numSteps < 1) numSteps = 1;                           //
                     m_LastKnownExtents = localBounds.extents;                 //
-                    Invalidate(true); // recusion! <3                         //
+                    Invalidate(true); // recursion! <3                        //
                     return;                                                   //
                 }                                                             //
             }                                                                 //
@@ -524,6 +537,8 @@ namespace Sabresaurus.SabreCSG
             localBounds = csgBounds;
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
+            // update the generated name in the hierarchy.
+            UpdateGeneratedHierarchyName();
         }
 
         /// <summary>

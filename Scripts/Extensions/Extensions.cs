@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using UnityEngine;
 
@@ -412,6 +413,20 @@ namespace Sabresaurus.SabreCSG
                 && point.x < bounds1.max.x + EPSILON_LOWER_2
                 && point.y < bounds1.max.y + EPSILON_LOWER_2
                 && point.z < bounds1.max.z + EPSILON_LOWER_2);
+        }
+
+        /// <summary>
+        /// Creates a beautiful string that matches the numbers shown in the resize tool.
+        /// Used in the hierarchy.
+        /// </summary>
+        /// <param name="bounds">The bounds 'this' reference.</param>
+        /// <returns>The beautiful string.</returns>
+        internal static string ToGeneratedHierarchyString(this Bounds bounds)
+        {
+            string x = MathHelper.RoundFloat(bounds.size.x, 0.0001f).ToString(CultureInfo.InvariantCulture);
+            string y = MathHelper.RoundFloat(bounds.size.y, 0.0001f).ToString(CultureInfo.InvariantCulture);
+            string z = MathHelper.RoundFloat(bounds.size.z, 0.0001f).ToString(CultureInfo.InvariantCulture);
+            return x + " x " + y + " x " + z;
         }
     }
 }

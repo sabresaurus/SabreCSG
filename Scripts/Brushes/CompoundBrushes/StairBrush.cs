@@ -105,6 +105,18 @@ namespace Sabresaurus.SabreCSG
         /// <value><c>true</c> to fill steps to the bottom to make a solid staircase; otherwise, <c>false</c>.</value>
         public bool FillToBottom { get { return fillToBottom; } set { fillToBottom = value; } }
 
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "Linear Stairs Brush";
+            }
+        }
+
         public override int BrushCount
 		{
 			get 

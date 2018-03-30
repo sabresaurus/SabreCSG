@@ -136,7 +136,37 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public void SetBrushController(BrushBase brushController)
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                switch (brushType)
+                {
+                    case PrimitiveBrushType.Cube:
+                        return "Cube Brush";
+                    case PrimitiveBrushType.Sphere:
+                        return "Sphere Brush";
+                    case PrimitiveBrushType.Cylinder:
+                        return "Cylinder Brush";
+                    case PrimitiveBrushType.Prism:
+                        return "Prism Brush";
+                    case PrimitiveBrushType.Custom:
+                        return "Custom Brush";
+                    case PrimitiveBrushType.IcoSphere:
+                        return "Icosphere Brush";
+                    case PrimitiveBrushType.Cone:
+                        return "Cone Brush";
+                    default:
+                        return base.BeautifulBrushName;
+                }
+            }
+        }
+
+        public void SetBrushController(BrushBase brushController)
 		{
 			this.brushController = brushController;
 		}
@@ -586,8 +616,10 @@ namespace Sabresaurus.SabreCSG
 			UpdateTracking();
 		}
 
-		void Update()
-		{
+        protected override void Update()
+        {
+            base.Update();
+
 			if(!tracked)
 			{
 				UpdateTracking();
@@ -727,7 +759,7 @@ namespace Sabresaurus.SabreCSG
 
         public override Bounds GetBounds()
         {
-			if (polygons.Length > 0)
+			if (polygons != null && polygons.Length > 0)
 			{
 				Bounds bounds = new Bounds(polygons[0].Vertices[0].Position, Vector3.zero);
 				
