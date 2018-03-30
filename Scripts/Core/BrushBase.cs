@@ -167,14 +167,8 @@ namespace Sabresaurus.SabreCSG
                 previousHierarchyName = transform.name;
         }
 
-        protected virtual void Update()
-        {
-            // if the brush name is equal to the auto-generated one,
-            // we store the name so we can check for manual user changes.
-            if (previousHierarchyName == "" && GeneratedHierarchyName == transform.name)
-                previousHierarchyName = transform.name;
-        }
-	}
+        protected virtual void Update() { }
+    }
 }
 
 #endif
