@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
+using System.Linq;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -217,9 +218,20 @@ namespace Sabresaurus.SabreCSG
         {
             List<Polygon> polygons = new List<Polygon>();
             // iterate through all child brushes:
-            foreach (Brush brush in GetComponentsInChildren<Brush>())
+            foreach (BrushBase brush in GetComponentsInChildren<BrushBase>().Where(c => c.transform != transform))
             {
-                polygons.AddRange(GenerateTransformedPolygons(brush.transform, brush.GetPolygons()));
+                Polygon[] polys;
+
+                // try getting the polygons depending on the brush type.
+                if (brush is PrimitiveBrush)
+                    polys = ((PrimitiveBrush)brush).GetPolygons();
+                else if (brush is CompoundBrush)
+                    polys = ((CompoundBrush)brush).GetPolygons();
+                else if (brush is GroupBrush)
+                    polys = ((GroupBrush)brush).GetPolygons();
+                else continue;
+
+                polygons.AddRange(GenerateTransformedPolygons(brush.transform, polys));
             }
             return polygons.ToArray();
         }
