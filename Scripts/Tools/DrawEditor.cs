@@ -430,6 +430,10 @@ namespace Sabresaurus.SabreCSG
 
         private void OnMouseDrag(SceneView sceneView, Event e)
         {
+            // if the user stopped holding shift we cancel the automatic height.
+            if (!e.shift)
+                startedSubtract = false;
+
             UpdateCSGMode(e);
             Vector3? hitPoint = GetHitPoint(e.mousePosition);
 
@@ -513,6 +517,10 @@ namespace Sabresaurus.SabreCSG
 
         private void OnMouseMove(SceneView sceneView, Event e)
         {
+            // if the user stopped holding shift we cancel the automatic height.
+            if (!e.shift)
+                startedSubtract = false;
+
             UpdateCSGMode(e);
 
             if (selectingHeight)
@@ -556,6 +564,11 @@ namespace Sabresaurus.SabreCSG
                 ignoreNextMouseUp = false;
                 return;
             }
+
+            // if the user stopped holding shift we cancel the automatic height.
+            if (!e.shift)
+                startedSubtract = false;
+
             UpdateCSGMode(e);
 
             if (selectingHeight)
