@@ -21,6 +21,18 @@ namespace Sabresaurus.SabreCSG
         /// <value>The size of the trim.</value>
         public float TrimSize { get { return trimSize; } set { trimSize = value; } }
 
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "Trim Brush";
+            }
+        }
+
         public override int BrushCount
 		{
 			get 

@@ -42,7 +42,19 @@ namespace Sabresaurus.SabreCSG
 			return parentCsgModel;
 		}
 
-		protected virtual void Start()
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return GetType().Name;
+            }
+        }
+
+        protected virtual void Start()
 		{
 			generatedBrushes = new List<PrimitiveBrush>(GetComponentsInChildren<PrimitiveBrush>());
 			for (int i = 0; i < generatedBrushes.Count; i++) 
@@ -53,6 +65,8 @@ namespace Sabresaurus.SabreCSG
 
 		public override void Invalidate (bool polygonsChanged)
 		{
+            base.Invalidate(polygonsChanged);
+
 			generatedBrushes.RemoveAll(item => item == null);
 			if(generatedBrushes.Count > BrushCount)
 			{

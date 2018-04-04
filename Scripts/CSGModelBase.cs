@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG
 //	[ExecuteInEditMode]
 	public class CSGModelBase : MonoBehaviour
 	{
-		public const string VERSION_STRING = "1.6.1";
+		public const string VERSION_STRING = "1.6.2";
 		protected const string DEFAULT_FALLBACK_MATERIAL_PATH = "Materials/Default_Map";
 
 		// Limit to how many vertices a Unity mesh can hold, before it must be split into a second mesh (just under 2^16)
@@ -550,7 +550,7 @@ namespace Sabresaurus.SabreCSG
 			}
 			else
 			{
-				brushObject = new GameObject("AppliedBrush");
+				brushObject = new GameObject("");
 			}
 
             brushObject.transform.localScale = this.transform.lossyScale;
@@ -581,7 +581,7 @@ namespace Sabresaurus.SabreCSG
 				SurfaceUtility.SetAllPolygonsMaterials(primitiveBrush, material);
 			}
 
-			return brushObject;
+            return brushObject;
 		}
 
 		public GameObject CreateCompoundBrush<T>(Vector3 localPosition, Vector3 localSize = default(Vector3), Quaternion localRotation = default(Quaternion), Material material = null, CSGMode csgMode = CSGMode.Add, string brushName = null) where T : CompoundBrush
@@ -604,7 +604,7 @@ namespace Sabresaurus.SabreCSG
 			}
 			else
 			{
-				brushObject = new GameObject(compoundBrushType.Name);
+				brushObject = new GameObject("");
 			}
 
             brushObject.transform.localScale = this.transform.lossyScale;
@@ -628,7 +628,7 @@ namespace Sabresaurus.SabreCSG
 //				SurfaceUtility.SetAllPolygonsMaterials(compoundBrush, material);
 			}
 
-			return brushObject;
+            return brushObject;
 		}
 
 		/// <summary>
@@ -638,7 +638,7 @@ namespace Sabresaurus.SabreCSG
 		/// <param name="polygons">Polygons.</param>
 		public GameObject CreateCustomBrush(Polygon[] polygons)
 		{
-			GameObject brushObject = new GameObject("AppliedBrush");
+			GameObject brushObject = new GameObject("");
 			brushObject.transform.parent = this.transform;
 			PrimitiveBrush primitiveBrush = brushObject.AddComponent<PrimitiveBrush>();
 			primitiveBrush.SetPolygons(polygons, true);

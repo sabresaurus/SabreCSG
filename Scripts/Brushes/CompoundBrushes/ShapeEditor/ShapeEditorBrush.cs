@@ -69,6 +69,18 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         [SerializeField]
         bool isDirty = true;
 
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "2D Shape Editor Brush";
+            }
+        }
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
@@ -80,8 +92,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private List<Polygon> m_LastBuiltPolygons;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             // get the last known extents and position (especially after scene changes).
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
@@ -267,6 +280,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             localBounds = csgBounds;
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
+            // update the generated name in the hierarchy.
+            UpdateGeneratedHierarchyName();
         }
 
         /// <summary>

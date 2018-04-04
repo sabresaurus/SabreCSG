@@ -24,13 +24,22 @@ namespace Sabresaurus.SabreCSG
         /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
         public override bool SupportsCsgOperations { get { return false; } }
 
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "Group";
+            }
+        }
+
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
         private Vector3 m_LastKnownPosition;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             // get the last known extents and position (especially after scene changes).
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
@@ -179,13 +188,15 @@ namespace Sabresaurus.SabreCSG
             localBounds = csgBounds;
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
+            // update name in hierarchy.
+            base.Invalidate(polygonsChanged);
         }
 
-        private void Update()
+        protected override void Update()
         {
+            base.Update();
             // encapsulate all of the child objects in our bounds.
             Bounds csgBounds = new Bounds();
-
             foreach (Transform childTransform in transform)
             {
                 BrushBase child = childTransform.GetComponent<BrushBase>();
@@ -194,6 +205,8 @@ namespace Sabresaurus.SabreCSG
             }
             // apply the generated csg bounds.
             localBounds = csgBounds;
+            // update the generated name in the hierarchy.
+            UpdateGeneratedHierarchyName();
         }
     }
 }
