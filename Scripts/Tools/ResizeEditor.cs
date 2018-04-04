@@ -2136,9 +2136,19 @@ namespace Sabresaurus.SabreCSG
             closestVertexWorldPosition = Vector3.zero;
             float closestDistanceSquare = float.PositiveInfinity;
 
-            foreach (PrimitiveBrush brush in targetBrushes)
+            foreach (BrushBase brush in targetBrushBases)
             {
-                Polygon[] polygons = brush.GetPolygons();
+                Polygon[] polygons;
+
+                // try getting the polygons depending on the brush type.
+                if (brush is PrimitiveBrush)
+                    polygons = ((PrimitiveBrush)brush).GetPolygons();
+                else if (brush is CompoundBrush)
+                    polygons = ((CompoundBrush)brush).GetPolygons();
+                else if (brush is GroupBrush)
+                    polygons = ((GroupBrush)brush).GetPolygons();
+                else continue;
+
                 for (int i = 0; i < polygons.Length; i++)
                 {
                     Polygon polygon = polygons[i];
@@ -2169,9 +2179,19 @@ namespace Sabresaurus.SabreCSG
                 closestVertexWorldPosition = Vector3.zero;
                 closestDistanceSquare = float.PositiveInfinity;
 
-                foreach (PrimitiveBrush brush in targetBrushes)
+                foreach (BrushBase brush in targetBrushBases)
                 {
-                    Polygon[] polygons = brush.GetPolygons();
+                    Polygon[] polygons;
+
+                    // try getting the polygons depending on the brush type.
+                    if (brush is PrimitiveBrush)
+                        polygons = ((PrimitiveBrush)brush).GetPolygons();
+                    else if (brush is CompoundBrush)
+                        polygons = ((CompoundBrush)brush).GetPolygons();
+                    else if (brush is GroupBrush)
+                        polygons = ((GroupBrush)brush).GetPolygons();
+                    else continue;
+
                     for (int i = 0; i < polygons.Length; i++)
                     {
                         Polygon polygon = polygons[i];
