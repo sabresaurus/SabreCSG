@@ -743,8 +743,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GenericMenu toolsMenu = new GenericMenu();
                 toolsMenu.AddItem(new GUIContent("Background/Load Image..."), false, OnToolsBackgroundLoadImage);
                 toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
-                toolsMenu.AddItem(new GUIContent("Pivot/Set Position..."), false, OnToolsPivotSetPosition);
-                toolsMenu.AddItem(new GUIContent("Pivot/Reset Position"), false, OnToolsPivotResetPosition);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Set Position..."), false, OnToolsPivotSetPosition);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Reset Position"), false, OnToolsPivotResetPosition);
 #if UNITY_5_4_OR_NEWER
                 toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
 #else
