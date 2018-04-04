@@ -743,6 +743,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GenericMenu toolsMenu = new GenericMenu();
                 toolsMenu.AddItem(new GUIContent("Background/Load Image..."), false, OnToolsBackgroundLoadImage);
                 toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Set Position..."), false, OnToolsPivotSetPosition);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Reset Position"), false, OnToolsPivotResetPosition);
 #if UNITY_5_4_OR_NEWER
                 toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
 #else
@@ -1344,6 +1346,29 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             backgroundImage = null;
         }
 
+        /// <summary>
+        /// Called when the tools 'menu/pivot/set position' item is pressed.
+        /// </summary>
+        private void OnToolsPivotSetPosition()
+        {
+            // let the user choose the global pivot position.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) => {
+                // set the new global pivot position.
+                project.globalPivot.position = self.GlobalPivotPosition_Position;
+
+                // show the changes.
+                Repaint();
+            }));
+        }
+
+        /// <summary>
+        /// Called when the tools 'menu/pivot/reset position' item is pressed.
+        /// </summary>
+        private void OnToolsPivotResetPosition()
+        {
+            project.globalPivot.position = Vector2Int.zero;
+        }
+
         private Rect GetViewportRect()
         {
 #if UNITY_2017_2_OR_NEWER
@@ -1476,11 +1501,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void ShowCenteredPopupWindowContent(PopupWindowContent popup)
         {
             Vector2 size = popup.GetWindowSize();
+            try
+            {
 #if UNITY_2017_2_OR_NEWER
-            PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
+                PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
 #else
-            PopupWindow.Show(new Rect((Screen.width / 2.0f) - (size.x / 2.0f), (Screen.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
+                PopupWindow.Show(new Rect((Screen.width / 2.0f) - (size.x / 2.0f), (Screen.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
 #endif
+            }
+            catch (ExitGUIException) { }
         }
 
         /// <summary>
