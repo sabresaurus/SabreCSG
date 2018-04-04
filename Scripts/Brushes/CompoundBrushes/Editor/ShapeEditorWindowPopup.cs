@@ -17,11 +17,12 @@ namespace Sabresaurus.SabreCSG
         public enum PopupMode
         {
             BezierDetailLevel,
+            GlobalPivotPosition,
             CreatePolygon,
             RevolveShape,
             ExtrudeShape,
             ExtrudePoint,
-            ExtrudeBevel
+            ExtrudeBevel,
         }
 
         private PopupMode popupMode;
@@ -32,6 +33,7 @@ namespace Sabresaurus.SabreCSG
         public Vector2 extrudeScale = Vector2.one;
         public int revolve360 = 8;
         public int revolveSteps = 4;
+        public Vector2Int GlobalPivotPosition_Position;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -45,6 +47,7 @@ namespace Sabresaurus.SabreCSG
             extrudeScale = project.extrudeScale;
             revolve360 = project.revolve360;
             revolveSteps = project.revolveSteps;
+            GlobalPivotPosition_Position = project.globalPivot.position;
 
             this.onApply = (self) => {
 
@@ -86,6 +89,8 @@ namespace Sabresaurus.SabreCSG
             {
                 case PopupMode.BezierDetailLevel:
                     return new Vector2(205, 140);
+                case PopupMode.GlobalPivotPosition:
+                    return new Vector2(300, 50 + 18);
                 case PopupMode.CreatePolygon:
                     return new Vector2(300, 50 + 18);
                 case PopupMode.RevolveShape:
@@ -159,6 +164,22 @@ namespace Sabresaurus.SabreCSG
                     bezierDetailLevel_Detail = EditorGUILayout.IntField("Detail", bezierDetailLevel_Detail);
                     if (bezierDetailLevel_Detail < 1) bezierDetailLevel_Detail = 1;
                     if (bezierDetailLevel_Detail > 999) bezierDetailLevel_Detail = 999;
+                    break;
+
+                case PopupMode.GlobalPivotPosition:
+                    GUILayout.Label("Global Pivot Position", EditorStyles.boldLabel);
+                    hasScale = false;
+                    accept = "Set Position";
+
+#if !UNITY_2017_2_OR_NEWER
+                    EditorGUIUtility.wideMode = true;
+                    GlobalPivotPosition_Position = Vector2Int.FloorToInt(EditorGUILayout.Vector2Field("Position", GlobalPivotPosition_Position));
+                    EditorGUIUtility.wideMode = false;
+#else
+                    EditorGUIUtility.wideMode = true;
+                    GlobalPivotPosition_Position = EditorGUILayout.Vector2IntField("Position", GlobalPivotPosition_Position);
+                    EditorGUIUtility.wideMode = false;
+#endif
                     break;
 
                 case PopupMode.CreatePolygon:
