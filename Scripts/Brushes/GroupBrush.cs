@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
+using System.Linq;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -207,6 +208,61 @@ namespace Sabresaurus.SabreCSG
             localBounds = csgBounds;
             // update the generated name in the hierarchy.
             UpdateGeneratedHierarchyName();
+        }
+
+        /// <summary>
+        /// Gets all of the polygons from all brushes in this group brush.
+        /// </summary>
+        /// <returns>All of the polygons from all brushes in this group brush.</returns>
+        public Polygon[] GetPolygons()
+        {
+            List<Polygon> polygons = new List<Polygon>();
+            // iterate through all child brushes:
+            foreach (BrushBase brush in GetComponentsInChildren<BrushBase>().Where(c => c.transform != transform))
+            {
+                Polygon[] polys;
+
+                // try getting the polygons depending on the brush type.
+                if (brush is PrimitiveBrush)
+                    polys = ((PrimitiveBrush)brush).GetPolygons();
+                else if (brush is CompoundBrush)
+                    polys = ((CompoundBrush)brush).GetPolygons();
+                else if (brush is GroupBrush)
+                    polys = ((GroupBrush)brush).GetPolygons();
+                else continue;
+
+                polygons.AddRange(GenerateTransformedPolygons(brush.transform, polys));
+            }
+            return polygons.ToArray();
+        }
+
+        /// <summary>
+        /// Generates transformed polygons to match the group brush position.
+        /// </summary>
+        /// <param name="t">The transform of a child brush.</param>
+        /// <param name="polygons">The polygons of a child brush.</param>
+        /// <returns>The transformed polygons.</returns>
+        private Polygon[] GenerateTransformedPolygons(Transform t, Polygon[] polygons)
+        {
+            Polygon[] polygonsCopy = polygons.DeepCopy<Polygon>();
+
+            Vector3 center = t.localPosition;
+            Quaternion rotation = t.localRotation;
+            Vector3 scale = t.lossyScale;
+
+            for (int i = 0; i < polygonsCopy.Length; i++)
+            {
+                for (int j = 0; j < polygonsCopy[i].Vertices.Length; j++)
+                {
+                    polygonsCopy[i].Vertices[j].Position = rotation * polygonsCopy[i].Vertices[j].Position.Multiply(scale) + center;
+                    polygonsCopy[i].Vertices[j].Normal = rotation * polygonsCopy[i].Vertices[j].Normal;
+                }
+
+                // Just updated a load of vertex positions, so make sure the cached plane is updated
+                polygonsCopy[i].CalculatePlane();
+            }
+
+            return polygonsCopy;
         }
     }
 }

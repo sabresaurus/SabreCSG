@@ -1268,6 +1268,9 @@ namespace Sabresaurus.SabreCSG
 			if(!EditorHelper.HasDelegate(Selection.selectionChanged, (Action)OnSelectionChanged))
 			{
 				Selection.selectionChanged += OnSelectionChanged;
+                // When we come out of play mode we lose this event handler and are no longer in edit mode.
+                // We call OnSelectionChanged() manually to make sure we go back into edit mode, if a brush is still selected.
+                OnSelectionChanged();
 			}
 #endif
 
