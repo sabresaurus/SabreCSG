@@ -25,6 +25,10 @@ namespace Sabresaurus.SabreCSG
         /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
         public override bool SupportsCsgOperations { get { return false; } }
 
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
         public override string BeautifulBrushName
         {
             get
@@ -159,10 +163,9 @@ namespace Sabresaurus.SabreCSG
         {
             ////////////////////////////////////////////////////////////////////
             // a little hack to detect the user manually resizing the bounds. //
-            // we use this to automatically add steps for barnaby.            //
             // it's probably good to build a more 'official' way to detect    //
             // user scaling events in compound brushes sometime.              //
-            if (m_LastKnownExtents != localBounds.extents)                    //
+            if (m_LastKnownExtents != localBounds.extents && m_LastKnownPosition != Vector3.zero)
             {                                                                 //
                 // undo any position movement.                                //
                 transform.localPosition = m_LastKnownPosition;                //
