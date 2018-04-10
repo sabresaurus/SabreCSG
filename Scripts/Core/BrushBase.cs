@@ -122,7 +122,11 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void UpdateGeneratedHierarchyName()
         {
-            if (transform.name == previousHierarchyName || transform.name == "" || previousHierarchyName == "")
+            // this may happen after the brush is duplicated.
+            if (previousHierarchyName == "" && GeneratedHierarchyName == transform.name)
+                previousHierarchyName = transform.name;
+
+            if (transform.name == previousHierarchyName || transform.name == "")
                 transform.name = previousHierarchyName = GeneratedHierarchyName;
         }
 
