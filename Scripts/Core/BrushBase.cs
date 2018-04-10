@@ -122,7 +122,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void UpdateGeneratedHierarchyName()
         {
-            if (transform.name == previousHierarchyName || transform.name == "")
+            if (transform.name == previousHierarchyName || transform.name == "" || previousHierarchyName == "")
                 transform.name = previousHierarchyName = GeneratedHierarchyName;
         }
 
