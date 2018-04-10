@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Reflection;
+using System.Linq;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -24,6 +25,10 @@ namespace Sabresaurus.SabreCSG
         /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
         public override bool SupportsCsgOperations { get { return false; } }
 
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
         public override string BeautifulBrushName
         {
             get
@@ -158,10 +163,9 @@ namespace Sabresaurus.SabreCSG
         {
             ////////////////////////////////////////////////////////////////////
             // a little hack to detect the user manually resizing the bounds. //
-            // we use this to automatically add steps for barnaby.            //
             // it's probably good to build a more 'official' way to detect    //
             // user scaling events in compound brushes sometime.              //
-            if (m_LastKnownExtents != localBounds.extents)                    //
+            if (m_LastKnownExtents != localBounds.extents && m_LastKnownPosition != Vector3.zero)
             {                                                                 //
                 // undo any position movement.                                //
                 transform.localPosition = m_LastKnownPosition;                //
@@ -207,6 +211,61 @@ namespace Sabresaurus.SabreCSG
             localBounds = csgBounds;
             // update the generated name in the hierarchy.
             UpdateGeneratedHierarchyName();
+        }
+
+        /// <summary>
+        /// Gets all of the polygons from all brushes in this group brush.
+        /// </summary>
+        /// <returns>All of the polygons from all brushes in this group brush.</returns>
+        public Polygon[] GetPolygons()
+        {
+            List<Polygon> polygons = new List<Polygon>();
+            // iterate through all child brushes:
+            foreach (BrushBase brush in GetComponentsInChildren<BrushBase>().Where(c => c.transform != transform))
+            {
+                Polygon[] polys;
+
+                // try getting the polygons depending on the brush type.
+                if (brush is PrimitiveBrush)
+                    polys = ((PrimitiveBrush)brush).GetPolygons();
+                else if (brush is CompoundBrush)
+                    polys = ((CompoundBrush)brush).GetPolygons();
+                else if (brush is GroupBrush)
+                    polys = ((GroupBrush)brush).GetPolygons();
+                else continue;
+
+                polygons.AddRange(GenerateTransformedPolygons(brush.transform, polys));
+            }
+            return polygons.ToArray();
+        }
+
+        /// <summary>
+        /// Generates transformed polygons to match the group brush position.
+        /// </summary>
+        /// <param name="t">The transform of a child brush.</param>
+        /// <param name="polygons">The polygons of a child brush.</param>
+        /// <returns>The transformed polygons.</returns>
+        private Polygon[] GenerateTransformedPolygons(Transform t, Polygon[] polygons)
+        {
+            Polygon[] polygonsCopy = polygons.DeepCopy<Polygon>();
+
+            Vector3 center = t.localPosition;
+            Quaternion rotation = t.localRotation;
+            Vector3 scale = t.lossyScale;
+
+            for (int i = 0; i < polygonsCopy.Length; i++)
+            {
+                for (int j = 0; j < polygonsCopy[i].Vertices.Length; j++)
+                {
+                    polygonsCopy[i].Vertices[j].Position = rotation * polygonsCopy[i].Vertices[j].Position.Multiply(scale) + center;
+                    polygonsCopy[i].Vertices[j].Normal = rotation * polygonsCopy[i].Vertices[j].Normal;
+                }
+
+                // Just updated a load of vertex positions, so make sure the cached plane is updated
+                polygonsCopy[i].CalculatePlane();
+            }
+
+            return polygonsCopy;
         }
     }
 }

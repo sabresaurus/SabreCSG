@@ -285,6 +285,18 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
+        /// Called when undo or redo is performed in the editor.
+        /// </summary>
+        public override void OnUndoRedoPerformed()
+        {
+            // reset our cached polygon data.
+            isDirty = true;
+            m_LastBuiltPolygons = null;
+            // the base method will invalidate this compound brush.
+            base.OnUndoRedoPerformed();
+        }
+
+        /// <summary>
         /// Gets the next segment.
         /// </summary>
         /// <param name="segment">The segment to find the next segment for.</param>
@@ -683,6 +695,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to be copied into the brush.</param>
         public void CreatePolygon(Project project)
         {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Create Polygon");
+#endif
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
@@ -700,6 +715,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to be copied into the brush.</param>
         public void RevolveShape(Project project)
         {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Revolve Shape");
+#endif
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
@@ -717,6 +735,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to be copied into the brush.</param>
         public void ExtrudeShape(Project project)
         {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Extrude Shape");
+#endif
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
@@ -734,6 +755,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to be copied into the brush.</param>
         public void ExtrudePoint(Project project)
         {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Extrude Point");
+#endif
             // store a project copy inside of this brush.
             this.project = project.Clone();
             // store the extrude mode inside of this brush.
@@ -752,6 +776,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to be copied into the brush.</param>
         public void ExtrudeBevel(Project project)
         {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Extrude Bevel");
+#endif
             // if the depth and clip depth are identical, extrude a point instead.
             if (project.extrudeDepth.EqualsWithEpsilon(project.extrudeClipDepth))
             {
