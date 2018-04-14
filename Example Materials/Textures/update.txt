@@ -1,0 +1,17 @@
+Content updated by Daniel Cornelius (Kerfuffles) 
+Wood textures provided by Textures.com (formerly CGTextures.com)
+
+[3.28.2018]
+* fixed wrong project version - was using the wrong version of unity and had .meta issues with older versions.
+* added credit for wood textures to the top of update.txt
+
+[3.27.2018]
+* updated all materials
+* updated all textures
+* updated default materials to use mobile diffuse shaders
+* updated naming of materials and textures to help when searching for other content in a project
+* updated default material textures to correspond to their names more accurately
+* converted all textures to targa and adjusted their alpha channels where appropriate
++ added black material
+- removed old materials
+- removed old textures
