@@ -298,9 +298,47 @@ namespace Sabresaurus.SabreCSG
 			{
 				vertices[i].Color = newColor;
 			}
-		}
+        }
 
+        /// <summary>
+        /// Maps all 3D vertices (x, y, z) of the polygon to 2D (x, z). Useful for 2D polygon algorithms.
+        /// <para>Returns the matrix used for the 3D to 2D operation for use with <see cref="MapTo3D"/>.</para>
+        /// <para>You may have to call <see cref="CalculatePlane"/> first if you modified the polygon.</para>
+        /// </summary>
+        /// <remarks>
+        /// Special thanks to jwatte from http://xboxforums.create.msdn.com/forums/t/16529.aspx for
+        /// the algorithm.
+        /// </remarks>
+        /// <returns>The matrix used for the 3D to 2D operation so it can be used in <see cref="MapTo3D"/>.</returns>
+        public Matrix4x4 MapTo2D()
+        {
+            // calculate a 3d to 2d matrix.
+            Vector3 right, backward;
+            if (Math.Abs(Plane.normal.x) > Math.Abs(Plane.normal.z))
+                right = Vector3.Cross(Plane.normal, new Vector3(0, 0, 1));
+            else
+                right = Vector3.Cross(Plane.normal, new Vector3(1, 0, 0));
+            right = Vector3.Normalize(right);
+            backward = Vector3.Cross(right, Plane.normal);
+            Matrix4x4 m = new Matrix4x4(new Vector4(right.x, Plane.normal.x, backward.x, 0), new Vector4(right.y, Plane.normal.y, backward.y, 0), new Vector4(right.z, Plane.normal.z, backward.z, 0), new Vector4(0, 0, 0, 1));
+            // multiply all vertices by the matrix.
+            for (int p = 0; p < vertices.Length; p++)
+                vertices[p].Position = m * vertices[p].Position;
+            return m;
+        }
 
+        /// <summary>
+        /// Maps all 2D vertices (x, z) of the polygon to 3D (x, y, z). Requires matrix from <see cref="MapTo2D"/>.
+        /// </summary>
+        /// <param name="matrix">The matrix from the <see cref="MapTo2D"/> operation.</param>
+        public void MapTo3D(Matrix4x4 matrix)
+        {
+            // inverse the 3d to 2d matrix.
+            Matrix4x4 m = matrix.inverse;
+            // multiply all vertices by the matrix.
+            for (int p = 0; p < vertices.Length; p++)
+                vertices[p].Position = m * vertices[p].Position;
+        }
 
 		public class Vector3ComparerEpsilon : IEqualityComparer<Vector3>
 		{
