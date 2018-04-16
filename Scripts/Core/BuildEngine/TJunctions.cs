@@ -161,39 +161,39 @@ namespace Sabresaurus.SabreCSG
                 //tjunctions.Add(new TJunction { Vertex = vertex, DisconnectedEdge = edge });
 
                 // I found the T-Junctions, fix em!
-                foreach (TJunction tjunction in steiners)
-                {
-                    // split the edge that the vertex is on top of (but not connected to).
-                    int index = 0;
-                    if (SplitPolygonAtEdge(tjunction.Polygon, tjunction.DisconnectedEdge, tjunction.Vertex, out index))
-                    {
-                        List<Vertex> oldTriangle = tjunction.Polygon.Vertices.ToList();
-                        Vertex[] newTriangle = new Vertex[3];
-                        if (index + 2 < tjunction.Polygon.Vertices.Length)
-                        {
-                            newTriangle[0] = tjunction.Polygon.Vertices[index + 0];
-                            newTriangle[1] = tjunction.Polygon.Vertices[index + 1];
-                            newTriangle[2] = tjunction.Polygon.Vertices[index + 2];
+                //foreach (TJunction tjunction in steiners)
+                //{
+                //    // split the edge that the vertex is on top of (but not connected to).
+                //    int index = 0;
+                //    if (SplitPolygonAtEdge(tjunction.Polygon, tjunction.DisconnectedEdge, tjunction.Vertex, out index))
+                //    {
+                //        List<Vertex> oldTriangle = tjunction.Polygon.Vertices.ToList();
+                //        Vertex[] newTriangle = new Vertex[3];
+                //        if (index + 2 < tjunction.Polygon.Vertices.Length)
+                //        {
+                //            newTriangle[0] = tjunction.Polygon.Vertices[index + 0];
+                //            newTriangle[1] = tjunction.Polygon.Vertices[index + 1];
+                //            newTriangle[2] = tjunction.Polygon.Vertices[index + 2];
 
-                            oldTriangle.Remove(tjunction.Polygon.Vertices[index + 1]);
-                        }
-                        else if (index - 2 >= 0)
-                        {
-                            newTriangle[2] = tjunction.Polygon.Vertices[index - 0];
-                            newTriangle[1] = tjunction.Polygon.Vertices[index - 1];
-                            newTriangle[0] = tjunction.Polygon.Vertices[index - 2];
+                //            oldTriangle.Remove(tjunction.Polygon.Vertices[index + 1]);
+                //        }
+                //        else if (index - 2 >= 0)
+                //        {
+                //            newTriangle[2] = tjunction.Polygon.Vertices[index - 0];
+                //            newTriangle[1] = tjunction.Polygon.Vertices[index - 1];
+                //            newTriangle[0] = tjunction.Polygon.Vertices[index - 2];
 
-                            oldTriangle.Remove(tjunction.Polygon.Vertices[index - 1]);
-                        }
-                        tjunction.Polygon.Vertices = oldTriangle.ToArray();
+                //            oldTriangle.Remove(tjunction.Polygon.Vertices[index - 1]);
+                //        }
+                //        tjunction.Polygon.Vertices = oldTriangle.ToArray();
 
-                        allGroupedPolygons[0].Add(new Polygon(newTriangle, tjunction.Polygon.Material, tjunction.Polygon.ExcludeFromFinal, tjunction.Polygon.UserExcludeFromFinal));
-                    }
-                    totalTJunctions++;
+                //        allGroupedPolygons[0].Add(new Polygon(newTriangle, tjunction.Polygon.Material, tjunction.Polygon.ExcludeFromFinal, tjunction.Polygon.UserExcludeFromFinal));
+                //    }
+                //    totalTJunctions++;
 
-                    //globalVertices.Remove(tjunction.DisconnectedEdge.Vertex1.Position);
-                    //globalVertices.Remove(tjunction.DisconnectedEdge.Vertex2.Position);
-                }
+                //    //globalVertices.Remove(tjunction.DisconnectedEdge.Vertex1.Position);
+                //    //globalVertices.Remove(tjunction.DisconnectedEdge.Vertex2.Position);
+                //}
 
                 done = steiners.Count == 0;
 
@@ -215,9 +215,8 @@ namespace Sabresaurus.SabreCSG
         /// <returns><c>true</c>, if the edge was matched in the polygon and a vertex was added, <c>false</c> otherwise.</returns>
         /// <param name="polygon">Source polygon to add a vertex to.</param>
         /// <param name="edge">Edge to match and at a vertex to</param>
-        public static bool SplitPolygonAtEdge(Polygon polygon, Edge edge, Vector3 futurePosition, out int index)
+        public static bool SplitPolygonAtEdge(Polygon polygon, Edge edge, Vector3 futurePosition)
         {
-            index = 0;
             List<Vertex> vertices = new List<Vertex>(polygon.Vertices);
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
@@ -236,7 +235,6 @@ namespace Sabresaurus.SabreCSG
                     float interpolant = newlength / originalLength;
 
                     vertices.Insert(i + 1, Vertex.Lerp(begin, end, interpolant));
-                    index = i + 1;
                     break;
                 }
             }
