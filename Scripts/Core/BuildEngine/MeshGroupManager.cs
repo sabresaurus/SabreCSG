@@ -348,8 +348,6 @@ namespace Sabresaurus.SabreCSG
 
         internal static void TriangulateNewPolygons(bool individualVertices, bool fixTJunctions, Dictionary<int, List<Polygon>> groupedPolygons, PolygonEntry[] polygonIndex)
         {
-            fixTJunctions = true;
-
             if (fixTJunctions)
             {
                 // create a global list of all vertices.
@@ -457,163 +455,169 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 //Debug.Log("(SabreCSG) FixTJunctions: Fixed " + totalTJunctions + " T-Junctions in " + (giveup - 1) + " iteration(s).");
-            }
 
-            List<Vector3> lPositions = new List<Vector3>();
-            List<Vector3> lNormals = new List<Vector3>();
-            List<Vector2> lUvs = new List<Vector2>();
-            List<Color> lColors = new List<Color>();
-            List<int> lTriangesToAppend = new List<int>();
+                List<Vector3> lPositions = new List<Vector3>();
+                List<Vector3> lNormals = new List<Vector3>();
+                List<Vector2> lUvs = new List<Vector2>();
+                List<Color> lColors = new List<Color>();
+                List<int> lTriangesToAppend = new List<int>();
 
-            int j = 0;
-            // triangulate polygons.
-            for (int i = 0; i < polygons.Count; i++)
-            {
-                // map polygon to 2d space.
-                Polygon polygon = polygons[i];
-                //float y = polygon.Vertices[0].Position.y;
-                Matrix4x4 matrix = polygon.MapTo2D();
-
-                // convert vertices to vectors and triangulate.
-                List<Vector2> vertices = polygon.Vertices.Select(v => new Vector2(v.Position.x, v.Position.z)).ToList();
-                List<List<Vector2>> triangles = ShapeEditor.Decomposition.FlipcodeDecomposer.ConvexPartition(vertices, false);
-
-                // convert 2d triangles to something SabreCSG expects.
-                foreach (List<Vector2> triangle in triangles)
+                int j = 0;
+                // triangulate polygons.
+                for (int i = 0; i < polygons.Count; i++)
                 {
-                    foreach (Vector2 vertex2d in triangle.ToArray().Reverse())
+                    // map polygon to 2d space.
+                    Polygon polygon = polygons[i];
+                    //float y = polygon.Vertices[0].Position.y;
+                    Matrix4x4 matrix = polygon.MapTo2D();
+
+                    // convert vertices to vectors and triangulate.
+                    List<Vector2> vertices = polygon.Vertices.Select(v => new Vector2(v.Position.x, v.Position.z)).ToList();
+                    List<List<Vector2>> triangles = ShapeEditor.Decomposition.FlipcodeDecomposer.ConvexPartition(vertices, false);
+                    float y = polygon.Vertices[0].Position.y;
+                    polygon.MapTo3D(matrix);
+
+                    // convert 2d triangles to something SabreCSG expects.
+                    foreach (List<Vector2> triangle in triangles)
                     {
-                        // map vertex to 3d space.
-                        Vector3 position = matrix.inverse * new Vector3(vertex2d.x, polygon.Vertices[0].Position.y, vertex2d.y);
-                        lPositions.Add(position);
+                        foreach (Vector2 vertex2d in triangle.ToArray().Reverse())
+                        {
+                            // map vertex to 3d space.
+                            Vector3 position = matrix.inverse * new Vector3(vertex2d.x, y, vertex2d.y);
+                            lPositions.Add(position);
 
-                        lNormals.Add(polygon.Vertices[0].Normal);
-                        lUvs.Add(polygon.Vertices[0].UV);
-                        lColors.Add(polygon.Vertices[0].Color);
+                            lNormals.Add(polygon.Vertices[0].Normal);
+                            lUvs.Add(GeometryHelper.GetUVForPosition(polygon, position));
+                            lColors.Add(polygon.Vertices[0].Color);
 
-                        lTriangesToAppend.Add(j);
-                        j++;
+                            lTriangesToAppend.Add(j);
+                            j++;
+                        }
+                    }
+                    //int totalTriangleCount = triangles.Count;
+                    //int totalVertexCount = triangles.Count * 3;
+
+                    // map polygon to 3d space.
+                    //polygon.MapTo3D(matrix);
+                }
+
+                positions = lPositions.ToArray();
+                normals = lNormals.ToArray();
+                uv = lUvs.ToArray();
+                colors = lColors.ToArray();
+                triangesToAppend = lTriangesToAppend.ToArray();
+            }
+            else
+            {
+                // retro triangulator that is fast and dirty.
+
+                if (individualVertices)
+                {
+                    int totalTriangleCount = 0;
+                    for (int i = 0; i < polygons.Count; i++)
+                    {
+                        totalTriangleCount += polygons[i].Vertices.Length - 2;
+                    }
+                    int totalVertexCount = totalTriangleCount * 3;
+
+                    positions = new Vector3[totalVertexCount];
+                    normals = new Vector3[totalVertexCount];
+                    uv = new Vector2[totalVertexCount];
+                    colors = new Color[totalVertexCount];
+
+                    triangesToAppend = new int[totalTriangleCount * 3];
+
+                    int triangleOffset = 0;
+                    int vertexOffset = 0;
+
+                    // Calculate triangulation
+                    for (int i = 0; i < polygons.Count; i++)
+                    {
+                        Polygon polygon = polygons[i];
+                        int triangleCount = polygons[i].Vertices.Length - 2;
+
+                        for (int j = 0; j < triangleCount; j++)
+                        {
+                            int sourceIndex = 0;
+
+                            positions[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Position;
+                            normals[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Normal;
+                            uv[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].UV;
+                            colors[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Color;
+
+                            sourceIndex = j + 1;
+
+                            positions[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Position;
+                            normals[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Normal;
+                            uv[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].UV;
+                            colors[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Color;
+
+                            sourceIndex = j + 2;
+
+                            positions[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Position;
+                            normals[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Normal;
+                            uv[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].UV;
+                            colors[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Color;
+                        }
+
+                        for (int j = 0; j < triangleCount; j++)
+                        {
+                            triangesToAppend[triangleOffset + 0] = triangleOffset + 0;
+                            triangesToAppend[triangleOffset + 1] = triangleOffset + 1;
+                            triangesToAppend[triangleOffset + 2] = triangleOffset + 2;
+
+                            triangleOffset += 3;
+                        }
+
+                        vertexOffset += triangleCount * 3;
                     }
                 }
-                //int totalTriangleCount = triangles.Count;
-                //int totalVertexCount = triangles.Count * 3;
+                else
+                {
+                    int totalVertexCount = 0;
+                    for (int i = 0; i < polygons.Count; i++)
+                    {
+                        totalVertexCount += polygons[i].Vertices.Length;
+                    }
 
-                // map polygon to 3d space.
-                //polygon.MapTo3D(matrix);
+                    int totalTriangleCount = totalVertexCount - 2 * polygons.Count;
+
+                    positions = new Vector3[totalVertexCount];
+                    normals = new Vector3[totalVertexCount];
+                    uv = new Vector2[totalVertexCount];
+                    colors = new Color[totalVertexCount];
+
+                    triangesToAppend = new int[totalTriangleCount * 3];
+
+                    int triangleOffset = 0;
+                    int vertexOffset = 0;
+
+                    // Calculate triangulation
+                    for (int i = 0; i < polygons.Count; i++)
+                    {
+                        Polygon polygon = polygons[i];
+                        int vertexCount = polygon.Vertices.Length;
+
+                        for (int j = 0; j < vertexCount; j++)
+                        {
+                            positions[vertexOffset + j] = polygon.Vertices[j].Position;
+                            normals[vertexOffset + j] = polygon.Vertices[j].Normal;
+                            uv[vertexOffset + j] = polygon.Vertices[j].UV;
+                            colors[vertexOffset + j] = polygon.Vertices[j].Color;
+                        }
+
+                        for (int j = 2; j < vertexCount; j++)
+                        {
+                            triangesToAppend[triangleOffset + 0] = vertexOffset + (0);
+                            triangesToAppend[triangleOffset + 1] = vertexOffset + (j - 1);
+                            triangesToAppend[triangleOffset + 2] = vertexOffset + (j);
+                            triangleOffset += 3;
+                        }
+
+                        vertexOffset += vertexCount;
+                    }
+                }
             }
-
-            positions = lPositions.ToArray();
-            normals = lNormals.ToArray();
-            uv = lUvs.ToArray();
-            colors = lColors.ToArray();
-            triangesToAppend = lTriangesToAppend.ToArray();
-
-            //if (individualVertices)
-            //{
-            //int totalTriangleCount = 0;
-            //for (int i = 0; i < polygons.Count; i++)
-            //{
-            //    totalTriangleCount += polygons[i].Vertices.Length - 2;
-            //}
-            //int totalVertexCount = totalTriangleCount * 3;
-
-            //positions = new Vector3[totalVertexCount];
-            //normals = new Vector3[totalVertexCount];
-            //uv = new Vector2[totalVertexCount];
-            //colors = new Color[totalVertexCount];
-
-            //triangesToAppend = new int[totalTriangleCount * 3];
-
-            //int triangleOffset = 0;
-            //int vertexOffset = 0;
-
-            //// Calculate triangulation
-            //for (int i = 0; i < polygons.Count; i++)
-            //{
-            //    Polygon polygon = polygons[i];
-            //    int triangleCount = polygons[i].Vertices.Length - 2;
-
-            //    for (int j = 0; j < triangleCount; j++)
-            //    {
-            //        int sourceIndex = 0;
-
-            //        positions[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Position;
-            //        normals[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Normal;
-            //        uv[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].UV;
-            //        colors[vertexOffset + j * 3] = polygon.Vertices[sourceIndex].Color;
-
-            //        sourceIndex = j + 1;
-
-            //        positions[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Position;
-            //        normals[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Normal;
-            //        uv[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].UV;
-            //        colors[vertexOffset + j * 3 + 1] = polygon.Vertices[sourceIndex].Color;
-
-            //        sourceIndex = j + 2;
-
-            //        positions[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Position;
-            //        normals[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Normal;
-            //        uv[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].UV;
-            //        colors[vertexOffset + j * 3 + 2] = polygon.Vertices[sourceIndex].Color;
-            //    }
-
-            //    for (int j = 0; j < triangleCount; j++)
-            //    {
-            //        triangesToAppend[triangleOffset + 0] = triangleOffset + 0;
-            //        triangesToAppend[triangleOffset + 1] = triangleOffset + 1;
-            //        triangesToAppend[triangleOffset + 2] = triangleOffset + 2;
-
-            //        triangleOffset += 3;
-            //    }
-
-            //    vertexOffset += triangleCount * 3;
-            //}
-            //}
-            //else
-            //{
-            //    int totalVertexCount = 0;
-            //    for (int i = 0; i < polygons.Count; i++)
-            //    {
-            //        totalVertexCount += polygons[i].Vertices.Length;
-            //    }
-
-            //    int totalTriangleCount = totalVertexCount - 2 * polygons.Count;
-
-            //    positions = new Vector3[totalVertexCount];
-            //    normals = new Vector3[totalVertexCount];
-            //    uv = new Vector2[totalVertexCount];
-            //    colors = new Color[totalVertexCount];
-
-            //    triangesToAppend = new int[totalTriangleCount * 3];
-
-            //    int triangleOffset = 0;
-            //    int vertexOffset = 0;
-
-            //    // Calculate triangulation
-            //    for (int i = 0; i < polygons.Count; i++)
-            //    {
-            //        Polygon polygon = polygons[i];
-            //        int vertexCount = polygon.Vertices.Length;
-
-            //        for (int j = 0; j < vertexCount; j++)
-            //        {
-            //            positions[vertexOffset + j] = polygon.Vertices[j].Position;
-            //            normals[vertexOffset + j] = polygon.Vertices[j].Normal;
-            //            uv[vertexOffset + j] = polygon.Vertices[j].UV;
-            //            colors[vertexOffset + j] = polygon.Vertices[j].Color;
-            //        }
-
-            //        for (int j = 2; j < vertexCount; j++)
-            //        {
-            //            triangesToAppend[triangleOffset + 0] = vertexOffset + (0);
-            //            triangesToAppend[triangleOffset + 1] = vertexOffset + (j - 1);
-            //            triangesToAppend[triangleOffset + 2] = vertexOffset + (j);
-            //            triangleOffset += 3;
-            //        }
-
-            //        vertexOffset += vertexCount;
-            //    }
-            //}
         }
     }
 }
