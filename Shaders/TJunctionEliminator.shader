@@ -55,11 +55,12 @@
 				float4 s12 = tex2D(_CameraDepthTexture, float2(xoff       , yoff + ymin));
 				float4 s21 = tex2D(_CameraDepthTexture, float2(xoff + xmin, yoff       ));
 
-				float surrounding = (s01.r + s10.r + s12.r + s21.r) / 4.0f;
+				float surmin = min(s01.r, min(s10.r, min(s12.r, s21.r)));
+				float surmax = max(s01.r, max(s10.r, max(s12.r, s21.r)));
 
-				if (surrounding - s11.r > 0.00001f)
-					return 1;
-				return 0;
+				if (s11.r <= surmax + 0.00001f && s11.r >= surmin - 0.00001f)
+					return 0;
+				return 1;
 			}
 
 			float4 sampleSurroundingPixels(float2 uv : TEXCOORD) : COLOR
