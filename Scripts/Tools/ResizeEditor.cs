@@ -2086,10 +2086,20 @@ namespace Sabresaurus.SabreCSG
 			List<Transform> rootTransforms = TransformHelper.GetRootSelectionOnly(targetBrushTransforms);
 			Undo.RecordObjects(rootTransforms.ToArray(), "Move brush(es)");
 
-			for (int i = 0; i < rootTransforms.Count; i++) 
+            bool didAnyPositionChange = false;
+
+			for (int i = 0; i < rootTransforms.Count; i++)
 			{
-				targetBrushTransforms[i].position += worldDelta;
+                if (worldDelta != Vector3.zero)
+                {
+				    targetBrushTransforms[i].position += worldDelta;
+                    didAnyPositionChange = true;
+                }
 			}
+
+            // the user translated brushes but the grid snapping caused no movement in the scene.
+            // we return here to prevent rebuilding a bunch of brushes.
+            if (!didAnyPositionChange) return;
 
 			for (int brushIndex = 0; brushIndex < targetBrushBases.Length; brushIndex++) 
 			{
