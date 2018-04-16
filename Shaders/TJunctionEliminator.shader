@@ -2,7 +2,10 @@
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" {}
+		_MSAA ("MSAA", Int) = 0
+		_ScreenDetectionAggressiveness ("ScreenDetectionAggressiveness", float) = 0.03
+		_DebugMode ("DebugMode", Int) = 0
+		_MainTex ("Texture", 2D) = "white" { }
 	}
 	SubShader
 	{
@@ -17,8 +20,12 @@
 			
 			#include "UnityCG.cginc"
 
+			sampler2D _MainTex;
 			sampler2D _CameraDepthTexture;
 			float4 _CameraDepthTexture_TexelSize;
+			int _MSAA;
+			float _ScreenDetectionAggressiveness;
+			int _DebugMode;
 
 			struct appdata
 			{
@@ -39,10 +46,13 @@
 				o.uv = v.uv;
 				return o;
 			}
-			
-			sampler2D _MainTex;
 
-			int isShimmeringPixel(float2 uv : TEXCOORD) : COLOR
+			float intensity(float3 color)
+			{
+				return (color.r + color.g + color.b) / 3.0f;
+			}
+
+			int isShimmeringDepthPixel(float2 uv : TEXCOORD) : COLOR
 			{
 				float xmin = _CameraDepthTexture_TexelSize.x;
 				float ymin = _CameraDepthTexture_TexelSize.y;
@@ -59,6 +69,27 @@
 				float surmax = max(s01.r, max(s10.r, max(s12.r, s21.r)));
 
 				if (s11.r <= surmax + 0.00001f && s11.r >= surmin - 0.00001f)
+					return 0;
+				return 1;
+			}
+
+			int isShimmeringScreenPixel(float2 uv : TEXCOORD) : COLOR
+			{
+				float xmin = _CameraDepthTexture_TexelSize.x;
+				float ymin = _CameraDepthTexture_TexelSize.y;
+				float xoff = uv.x / 1.0f;
+				float yoff = uv.y / 1.0f;
+	
+				float4 s01 = tex2D(_MainTex, float2(xoff - xmin, yoff       ));
+				float4 s10 = tex2D(_MainTex, float2(xoff       , yoff - ymin));
+				float4 s11 = tex2D(_MainTex, float2(xoff       , yoff       ));
+				float4 s12 = tex2D(_MainTex, float2(xoff       , yoff + ymin));
+				float4 s21 = tex2D(_MainTex, float2(xoff + xmin, yoff       ));
+
+				float surmin = min(intensity(s01.rgb), min(intensity(s10.rgb), min(intensity(s12.rgb), intensity(s21.rgb))));
+				float surmax = max(intensity(s01.rgb), max(intensity(s10.rgb), max(intensity(s12.rgb), intensity(s21.rgb))));
+
+				if (intensity(s11.rgb) < surmax + _ScreenDetectionAggressiveness && intensity(s11.rgb) > surmin - _ScreenDetectionAggressiveness /*&& intensity(s11.rgb) < 0.999f*/)
 					return 0;
 				return 1;
 			}
@@ -85,42 +116,36 @@
 
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv);
+				fixed4 col = fixed4(0.0, 0.0, 0.0, 1.0);
 
-				if (isShimmeringPixel(i.uv))
+				// We can check the depth buffer for pixel holes and blur them.
+				if (_MSAA == 0)
 				{
-					col = sampleSurroundingPixels(i.uv);
-					//col.r = 0.0f;
-					//col.g = 1.0f;
-					//col.b = 0.0f;
+					if (isShimmeringDepthPixel(i.uv))
+					{
+						if (_DebugMode == 0)
+							col = sampleSurroundingPixels(i.uv);
+						else
+							col.g = 1.0f;
+					} else col = tex2D(_MainTex, i.uv);
 				}
+
+				// MSAA causes white outlines that do not exist in the depth buffer.
+				// We detect awkward screen pixels that stand out and blur them instead.
+				else
+				{
+					if (isShimmeringScreenPixel(i.uv))
+					{
+						if (_DebugMode == 0)
+							col = sampleSurroundingPixels(i.uv);
+						else
+							col.g = 1.0f;
+					} else col = tex2D(_MainTex, i.uv);
+				}
+
 				return col;
 			}
 
-			//float4 sampleArea(float2 uv : TEXCOORD) : COLOR
-			//{
-			//	float xmin = _CameraDepthTexture_TexelSize.x;
-			//	float ymin = _CameraDepthTexture_TexelSize.y;
-			//	float xoff = uv.x / 1.0f;
-			//	float yoff = uv.y / 1.0f;
-			//
-			//	float4 s00 = tex2D(_CameraDepthTexture, float2(xoff - xmin, yoff - ymin));
-			//	float4 s01 = tex2D(_CameraDepthTexture, float2(xoff - xmin, yoff       ));
-			//	float4 s02 = tex2D(_CameraDepthTexture, float2(xoff - xmin, yoff + ymin));
-			//	float4 s10 = tex2D(_CameraDepthTexture, float2(xoff       , yoff - ymin));
-			//	float4 s11 = tex2D(_CameraDepthTexture, float2(xoff       , yoff       ));
-			//	float4 s12 = tex2D(_CameraDepthTexture, float2(xoff       , yoff + ymin));
-			//	float4 s20 = tex2D(_CameraDepthTexture, float2(xoff + xmin, yoff - ymin));
-			//	float4 s21 = tex2D(_CameraDepthTexture, float2(xoff + xmin, yoff       ));
-			//	float4 s22 = tex2D(_CameraDepthTexture, float2(xoff + xmin, yoff + ymin));
-			//
-			//	return float4(
-			//		(s00.r + s01.r + s02.r + s10.r + s11.r + s12.r + s20.r + s21.r + s22.r) / 9.0f,
-			//		(s00.g + s01.g + s02.g + s10.g + s11.g + s12.g + s20.g + s21.g + s22.g) / 9.0f,
-			//		(s00.b + s01.b + s02.b + s10.b + s11.b + s12.b + s20.b + s21.b + s22.b) / 9.0f,
-			//		1.0f
-			//	);
-			//}
 			ENDCG
 		}
 	}
