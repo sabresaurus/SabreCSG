@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,12 +90,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public int revolveRadius = 1;
 
         /// <summary>
-        /// The revolve direction (true is right, false is left).
-        /// </summary>
-        [SerializeField]
-        public bool revolveDirection = true;
-
-        /// <summary>
         /// Clones this project and returns the copy.
         /// </summary>
         /// <returns>A copy of the project.</returns>
@@ -105,4 +100,5 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
     }
 }
+
 #endif

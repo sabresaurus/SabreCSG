@@ -1204,18 +1204,24 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // store generated parameters.
                     if (extremeRight)
                     {
-                        project.revolveDirection = true;
                         project.revolveRadius = project.globalPivot.position.x - minX;
                         project.revolveDistance = minX;
+                        // extrude the shape revolved.
+                        Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
                     }
                     else
                     {
-                        project.revolveDirection = false;
-                        project.revolveRadius = maxX - project.globalPivot.position.x;
-                        project.revolveDistance = maxX + (minX - maxX);
+                        // flip project horizontally.
+                        OnFlipHorizontally();
+
+                        project.revolveRadius = project.globalPivot.position.x - minX;
+                        project.revolveDistance = minX;
+                        // extrude the shape revolved.
+                        Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
+
+                        // flip project horizontally.
+                        OnFlipHorizontally();
                     }
-                    // extrude the shape revolved.
-                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
                 }));
             }
             else
@@ -1223,18 +1229,24 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // store generated parameters.
                 if (extremeRight)
                 {
-                    project.revolveDirection = true;
                     project.revolveRadius = project.globalPivot.position.x - minX;
                     project.revolveDistance = minX;
+                    // extrude the shape revolved.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
                 }
                 else
                 {
-                    project.revolveDirection = false;
-                    project.revolveRadius = maxX - project.globalPivot.position.x;
-                    project.revolveDistance = maxX + (minX - maxX);
+                    // flip project horizontally.
+                    OnFlipHorizontally();
+
+                    project.revolveRadius = project.globalPivot.position.x - minX;
+                    project.revolveDistance = minX;
+                    // extrude the shape revolved.
+                    Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
+
+                    // flip project horizontally.
+                    OnFlipHorizontally();
                 }
-                // extrude the shape revolved.
-                Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
             }
         }
 
