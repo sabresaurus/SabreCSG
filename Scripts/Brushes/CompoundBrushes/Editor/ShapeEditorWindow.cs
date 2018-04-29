@@ -189,7 +189,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (segment != null)
                     return segment.bezierPivot2;
             }
-            // the segments have the medium-low priority.
+            // the segments have medium-low priority.
             foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.position == position);
@@ -227,19 +227,18 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot1.position)).Select(s => (ISelectable)s.bezierPivot1));
                 results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot2.position)).Select(s => (ISelectable)s.bezierPivot2));
             }
-            // the segments have the medium-low priority.
+            // the segments have medium-low priority.
             foreach (Shape shape in project.shapes)
             {
                 results.AddRange(shape.segments.Where(s => rect.Contains(s.position)).Select(s => (ISelectable)s));
             }
-
             // add all of the previously selected objects.
             foreach (ISelectable obj in marqueeSelectedObjectsBackup)
             {
                 if (!results.Contains(obj))
                     results.Add(obj);
             }
-
+            // select the objects in the editor.
             selectedObjects = results;
         }
 
@@ -421,7 +420,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         // store the grid position for relative dragging.
                         mouseDragStartGridPosition = grid;
                         mouseDragLastGridPosition = grid;
-                        // if nothing was selected or the user is holding CTRL and nothing was selected then we start a(nother) marquee selection.
+                        // if nothing was selected or the user is holding CTRL but SHIFT is not held in either case then we start a(nother) marquee selection.
                         if ((selectedObjects.Count == 0 || (Event.current.modifiers & EventModifiers.Control) != 0) && (Event.current.modifiers & EventModifiers.Shift) == 0)
                         {
                             // store a copy of the current selection and start the marquee select.
