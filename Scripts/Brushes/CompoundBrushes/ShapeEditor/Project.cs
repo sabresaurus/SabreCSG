@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,4 +106,5 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
     }
 }
+
 #endif

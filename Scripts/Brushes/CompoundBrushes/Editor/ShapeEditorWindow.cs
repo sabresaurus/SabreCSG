@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -509,7 +510,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             //    Event.current.Use();
             //}
 
-
             if (Event.current.type == EventType.Repaint)
             {
                 if (!initialized)
@@ -799,8 +799,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
         }
 
-
-
         /// <summary>
         /// Called when the new button is pressed. Will reset the shape.
         /// </summary>
@@ -955,9 +953,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             switch (gridScale)
             {
-                case 2 : gridScale = 4 ; break;
-                case 4 : gridScale = 8 ; break;
-                case 8 : gridScale = 16; break;
+                case 2: gridScale = 4; break;
+                case 4: gridScale = 8; break;
+                case 8: gridScale = 16; break;
                 case 16: gridScale = 32; break;
                 case 32: gridScale = 64; break;
                 case 64: gridScale = 64; break;
@@ -972,10 +970,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             switch (gridScale)
             {
-                case 2 : gridScale = 2 ; break;
-                case 4 : gridScale = 2 ; break;
-                case 8 : gridScale = 4 ; break;
-                case 16: gridScale = 8 ; break;
+                case 2: gridScale = 2; break;
+                case 4: gridScale = 2; break;
+                case 8: gridScale = 4; break;
+                case 16: gridScale = 8; break;
                 case 32: gridScale = 16; break;
                 case 64: gridScale = 32; break;
                 default: gridScale = 16; break;
@@ -1133,7 +1131,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnSegmentBezierDetail()
         {
             // let the user choose the amount of bezier curve detail.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) =>
+            {
                 foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
@@ -1165,7 +1164,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the creation parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) =>
+                {
                     // create the polygon.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
                 }));
@@ -1199,20 +1199,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.RevolveShape, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.RevolveShape, project, (self) =>
+                {
                     // store generated parameters.
-                    if (extremeRight)
-                    {
-                        project.revolveDirection = true;
-                        project.revolveRadius = project.globalPivot.position.x - minX;
-                        project.revolveDistance = minX;
-                    }
-                    else
-                    {
-                        project.revolveDirection = false;
-                        project.revolveRadius = maxX - project.globalPivot.position.x;
-                        project.revolveDistance = maxX;
-                    }
+                    project.revolveRadius = project.globalPivot.position.x - minX;
+                    project.revolveDistance = minX;
+                    project.revolveDirection = extremeRight;
+
                     // extrude the shape revolved.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
                 }));
@@ -1220,18 +1213,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             else
             {
                 // store generated parameters.
-                if (extremeRight)
-                {
-                    project.revolveDirection = true;
-                    project.revolveRadius = project.globalPivot.position.x - minX;
-                    project.revolveDistance = minX;
-                }
-                else
-                {
-                    project.revolveDirection = false;
-                    project.revolveRadius = maxX - project.globalPivot.position.x;
-                    project.revolveDistance = maxX;
-                }
+                project.revolveRadius = project.globalPivot.position.x - minX;
+                project.revolveDistance = minX;
+                project.revolveDirection = extremeRight;
+
                 // extrude the shape revolved.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
             }
@@ -1252,7 +1237,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) =>
+                {
                     // extrude the shape.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project);
                 }));
@@ -1279,7 +1265,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) =>
+                {
                     // extrude the shape to a point.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project);
                 }));
@@ -1306,7 +1293,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeBevel, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeBevel, project, (self) =>
+                {
                     // extrude the shape to a point but capped to cause a trapezoid.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeBevel(project);
                 }));
@@ -1352,7 +1340,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnToolsPivotSetPosition()
         {
             // let the user choose the global pivot position.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) =>
+            {
                 // set the new global pivot position.
                 project.globalPivot.position = self.GlobalPivotPosition_Position;
 
@@ -1380,7 +1369,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             viewportRect.height -= 40;
             return viewportRect;
         }
-        
+
         private void GlDrawLine(float thickness, float x1, float y1, float x2, float y2)
         {
             var point1 = new Vector2(x1, y1);
