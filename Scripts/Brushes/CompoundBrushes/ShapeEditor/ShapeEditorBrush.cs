@@ -672,6 +672,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             return Quaternion.Euler(angles) * (point - pivot) + pivot;
         }
 
+        /// <summary>
+        /// Flips a project horizontally. This code was stolen from the ShapeEditorWindow.
+        /// </summary>
+        private void FlipProjectHorizontally()
+        {
+            // store this flip inside of the project.
+            project.flipHorizontally = !project.flipHorizontally;
+
+            foreach (Shape shape in project.shapes)
+            {
+                foreach (Segment segment in shape.segments)
+                {
+                    // flip segment.
+                    segment.position = new Vector2Int(-segment.position.x + (project.globalPivot.position.x * 2), segment.position.y);
+                    // flip bezier pivot handles.
+                    segment.bezierPivot1.position = new Vector2Int(-segment.bezierPivot1.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot1.position.y);
+                    segment.bezierPivot2.position = new Vector2Int(-segment.bezierPivot2.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot2.position.y);
+                }
+
+                // recalculate the pivot position of the shape.
+                shape.CalculatePivotPosition();
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // PUBLIC API                                                                            //
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -711,6 +735,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             // store a project copy inside of this brush.
             this.project = project.Clone();
+            // flip project horizontally if revolving left.
+            if (!this.project.revolveDirection) FlipProjectHorizontally();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.RevolveShape;
             // build the polygons out of the project.
@@ -718,6 +744,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // build the brush.
             isDirty = true;
             Invalidate(true);
+            // un-flip project horizontally if revolving left.
+            if (!this.project.revolveDirection) FlipProjectHorizontally();
         }
 
         /// <summary>
