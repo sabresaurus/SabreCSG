@@ -2078,12 +2078,18 @@ namespace Sabresaurus.SabreCSG
         {
             Dictionary<Polygon, Brush> newSelection = new Dictionary<Polygon, Brush>();
 
+            // Set the selection to all the possible selectable polygons
+            List<Polygon> allPolygons = csgModel.GetAllSourcePolygons();
+
             foreach (Polygon selectedPolygon in selectedSourcePolygons)
             {
                 Brush brush = csgModel.FindBrushFromPolygon(selectedPolygon);
                 if (newSelection.ContainsValue(brush)) continue;
                 foreach (Polygon brushPolygon in brush.GetPolygons())
+                {
+                    if (!allPolygons.Contains(brushPolygon)) continue;
                     newSelection.Add(brushPolygon, brush);
+                }
             }
 
             ResetSelection();
