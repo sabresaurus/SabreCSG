@@ -49,6 +49,21 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private Vector2Int mouseDragLastGridPosition = new Vector2Int();
 
         /// <summary>
+        /// The mouse drag starting position used for marquee selections.
+        /// </summary>
+        private Vector2Int mouseDragStartGridPosition = new Vector2Int();
+
+        /// <summary>
+        /// Whether the current drag is a marquee selection box.
+        /// </summary>
+        private bool isMarqueeSelect = false;
+
+        /// <summary>
+        /// The selected objects before the marquee selection started.
+        /// </summary>
+        private List<ISelectable> marqueeSelectedObjectsBackup = new List<ISelectable>();
+
+        /// <summary>
         /// Whether the current drag is valid (invalid if sliding from the toolbar onto the grid).
         /// </summary>
         private bool isValidDrag = false;
@@ -154,11 +169,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Gets the segment at grid position.
+        /// Gets the object at the specified grid position.
         /// </summary>
         /// <param name="x">The x-coordinate on the grid.</param>
         /// <param name="y">The y-coordinate on the grid.</param>
-        /// <returns>The segment if found else null.</returns>
+        /// <returns>The object if found else null.</returns>
         private ISelectable GetObjectAtGridPosition(Vector2Int position)
         {
             // the global pivot point has the highest selection priority.
@@ -174,7 +189,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (segment != null)
                     return segment.bezierPivot2;
             }
-            // the segments have the medium-low priority.
+            // the segments have medium-low priority.
             foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.position == position);
@@ -189,6 +204,42 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
             // nothing was found.
             return null;
+        }
+
+        /// <summary>
+        /// Selects most objects within a marquee rectangle with multi-marquee selection support.
+        /// </summary>
+        /// <param name="startPosition">The start grid position of the marquee selection.</param>
+        /// <param name="stopPosition">The stop grid position of the marquee selection.</param>
+        private void MarqueeSelectObjectsInRectangle(Vector2Int startPosition, Vector2Int stopPosition)
+        {
+            // calculate a rectangle that always uses positive numbers.
+            int x = stopPosition.x - startPosition.x < 0 ? stopPosition.x : startPosition.x;
+            int y = stopPosition.y - startPosition.y < 0 ? stopPosition.y : startPosition.y;
+            int w = stopPosition.x - startPosition.x < 0 ? startPosition.x - stopPosition.x : stopPosition.x - startPosition.x;
+            int h = stopPosition.y - startPosition.y < 0 ? startPosition.y - stopPosition.y : stopPosition.y - startPosition.y;
+            Rect rect = new Rect(x, y, w, h);
+
+            List<ISelectable> results = new List<ISelectable>();
+            // the bezier segment pivots have medium-high priority.
+            foreach (Shape shape in project.shapes)
+            {
+                results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot1.position)).Select(s => (ISelectable)s.bezierPivot1));
+                results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot2.position)).Select(s => (ISelectable)s.bezierPivot2));
+            }
+            // the segments have medium-low priority.
+            foreach (Shape shape in project.shapes)
+            {
+                results.AddRange(shape.segments.Where(s => rect.Contains(s.position)).Select(s => (ISelectable)s));
+            }
+            // add all of the previously selected objects.
+            foreach (ISelectable obj in marqueeSelectedObjectsBackup)
+            {
+                if (!results.Contains(obj))
+                    results.Add(obj);
+            }
+            // select the objects in the editor.
+            selectedObjects = results;
         }
 
         /// <summary>
@@ -263,6 +314,16 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
                     if (GetViewportRect().Contains(Event.current.mousePosition))
                     {
+                        // if we are drawing a marquee selection:
+                        if (isMarqueeSelect)
+                        {
+                            // select the objects in the current marquee selection.
+                            mouseDragLastGridPosition = grid;
+                            MarqueeSelectObjectsInRectangle(mouseDragStartGridPosition, mouseDragLastGridPosition);
+                            this.Repaint();
+                            return; // stop here so we don't move anything.
+                        }
+
                         Vector2Int mouseGridDelta = grid - mouseDragLastGridPosition;
 
                         // move the global pivot.
@@ -357,7 +418,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             // select the object.
                             selectedObjects.Add(found);
                         // store the grid position for relative dragging.
+                        mouseDragStartGridPosition = grid;
                         mouseDragLastGridPosition = grid;
+                        // if nothing was selected or the user is holding CTRL but SHIFT is not held in either case then we start a(nother) marquee selection.
+                        if ((selectedObjects.Count == 0 || (Event.current.modifiers & EventModifiers.Control) != 0) && (Event.current.modifiers & EventModifiers.Shift) == 0)
+                        {
+                            // store a copy of the current selection and start the marquee select.
+                            marqueeSelectedObjectsBackup = selectedObjects.ToList();
+                            isMarqueeSelect = true;
+                        }
+                        this.Repaint();
+                    }
+                }
+            }
+
+            // have to check the raw type in case the mouse is released outside of this window.
+            if (Event.current.type == EventType.MouseUp || Event.current.rawType == EventType.MouseUp)
+            {
+                // if the left mouse button is released:
+                if (Event.current.button == 0)
+                {
+                    // stop the marquee select.
+                    if (isMarqueeSelect)
+                    {
+                        isMarqueeSelect = false;
                         this.Repaint();
                     }
                 }
@@ -632,6 +716,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // draw the global pivot point.
                 Vector2 pivotScreenPosition = GridPointToScreen(project.globalPivot.position);
                 Handles.DrawSolidRectangleWithOutline(new Rect(pivotScreenPosition.x - 4.0f, pivotScreenPosition.y - 4.0f, 8.0f, 8.0f), Color.white, isGlobalPivotSelected ? Color.red : Color.green);
+
+                // draw the current marquee selection.
+                if (isMarqueeSelect)
+                {
+                    Vector2 marqueeStart = GridPointToScreen(mouseDragStartGridPosition);
+                    Vector2 marqueeStop = GridPointToScreen(mouseDragLastGridPosition);
+                    Handles.DrawSolidRectangleWithOutline(new Rect(marqueeStart.x, marqueeStart.y, marqueeStop.x - marqueeStart.x, marqueeStop.y - marqueeStart.y), new Color(0.2f, 0.3f, 0.8f, 0.3f), new Color(0.1f, 0.2f, 0.7f, 0.3f));
+                }
             }
 
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
