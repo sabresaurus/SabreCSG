@@ -197,8 +197,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
                         break;
 
-                    // generate 3d cube-ish shapes that revolve around the pivot.
+                    // generate 3d cube-ish shapes that revolve around the pivot and spirals up or down.
                     case ExtrudeMode.RevolveShape:
+                        float spiralHeight = ((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * (i / m_LastBuiltPolygons.Count) / ((project.revolve360 / project.revolveSteps) * (project.revolve360 / 8.0f));
+                        //float slope = ((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * ((i + 1) / m_LastBuiltPolygons.Count);
                         int labpIndex = i % m_LastBuiltPolygons.Count;
 
                         Polygon poly2 = m_LastBuiltPolygons[labpIndex].DeepCopy();
@@ -207,17 +209,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         foreach (Vertex v in poly2.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            //v.Position = stairs: new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            //v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
                         }
+                        GenerateNormals(poly2);
+
                         Polygon nextPoly = m_LastBuiltPolygons[labpIndex].DeepCopy();
                         nextPoly.Flip();
                         foreach (Vertex v in nextPoly.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                            // stair mode: v.Position = new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
                         }
-                        GenerateNormals(poly2);
                         List<Polygon> polygons = new List<Polygon>() { poly2 };
+                        polygons.Add(nextPoly);
                         List<Vertex> backPolyVertices = new List<Vertex>();
                         Edge[] myEdges = poly2.GetEdges();
                         Edge[] nextEdges = nextPoly.GetEdges();
