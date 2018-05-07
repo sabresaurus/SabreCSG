@@ -204,7 +204,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     // generate 3d cube-ish shapes that revolve around the pivot and spirals up or down.
                     case ExtrudeMode.RevolveShape:
                         float spiralHeight = ((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * (i / m_LastBuiltPolygons.Count) / ((project.revolve360 / project.revolveSteps) * (project.revolve360 / 8.0f));
-                        float spiralStep = ((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * (8 / m_LastBuiltPolygons.Count) / ((project.revolve360 / project.revolveSteps) * (project.revolve360 / 8.0f));
+                        float spiralStep = ((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * 1 / ((project.revolve360 / project.revolveSteps) * (project.revolve360 / 8.0f));
                         int labpIndex = i % m_LastBuiltPolygons.Count;
 
                         Polygon poly2 = m_LastBuiltPolygons[labpIndex].DeepCopy();
