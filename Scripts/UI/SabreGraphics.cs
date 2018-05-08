@@ -156,7 +156,7 @@ namespace Sabresaurus.SabreCSG
             Vector3 gright = Vector3.right * 8.0f;
             Vector3 gforward = Vector3.forward * 8.0f;
 
-            Color transparent = new Color(color.r, color.g, color.b, 0.0f);
+            Color transparent = new Color(color.r, color.g, color.b, 0.35f);
 
             if (transform != null)
             {
