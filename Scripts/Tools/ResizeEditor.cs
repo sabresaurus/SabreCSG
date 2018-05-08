@@ -1205,15 +1205,14 @@ namespace Sabresaurus.SabreCSG
 
                 // Selection
                 GL.Begin(GL.LINES);
-                GL.Color(Color.white);
 
                 if (Tools.pivotRotation == PivotRotation.Global)
                 {
-                    SabreGraphics.DrawBoxWithGuideLines(bounds);
+                    SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds);
                 }
                 else
                 {
-                    SabreGraphics.DrawBoxWithGuideLines(bounds, primaryTargetBrushTransform);
+                    SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds, primaryTargetBrushTransform);
                 }
 
                 GL.End();
