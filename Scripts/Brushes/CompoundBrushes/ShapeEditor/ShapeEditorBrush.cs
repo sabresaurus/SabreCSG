@@ -141,6 +141,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             ////////////////////////////////////////////////////////////////////
             Bounds csgBounds = new Bounds();
 
+            // force nocsg when creating a flat polygon sheet as sabrecsg doesn't support it.
+            if (extrudeMode == ExtrudeMode.CreatePolygon)
+                this.IsNoCSG = true;
+
+            // force nocsg when revolving with a sloped spiral as there are non-planar polygons.
+            if (extrudeMode == ExtrudeMode.RevolveShape && project.revolveSpiralSloped && project.globalPivot.position.y != 0)
+                this.IsNoCSG = true;
+
             // nothing to do except copy csg information to our child brushes.
             if (!isDirty)
             {
@@ -170,10 +178,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // iterate through the brushes we received:
             int brushCount = BrushCount;
 
-            // force nocsg when creating a flat polygon sheet as sabrecsg doesn't support it.
-            if (extrudeMode == ExtrudeMode.CreatePolygon)
-                this.IsNoCSG = true;
-
             for (int i = 0; i < brushCount; i++)
             {
                 // copy our csg information to our child brushes.
@@ -197,8 +201,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
                         break;
 
-                    // generate 3d cube-ish shapes that revolve around the pivot.
+                    // generate 3d cube-ish shapes that revolve around the pivot and spirals up or down.
                     case ExtrudeMode.RevolveShape:
+                        float spiralHeight = ((((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * (i / m_LastBuiltPolygons.Count)) / project.revolve360) * (project.revolve360 / project.revolveSteps);
+                        float spiralStep = ((((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f)) / project.revolve360) * (project.revolve360 / project.revolveSteps);
                         int labpIndex = i % m_LastBuiltPolygons.Count;
 
                         Polygon poly2 = m_LastBuiltPolygons[labpIndex].DeepCopy();
@@ -207,16 +213,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         foreach (Vertex v in poly2.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
                         }
+                        GenerateNormals(poly2);
+
                         Polygon nextPoly = m_LastBuiltPolygons[labpIndex].DeepCopy();
                         nextPoly.Flip();
                         foreach (Vertex v in nextPoly.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight - (project.revolveSpiralSloped ? spiralStep : 0), 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
                         }
-                        GenerateNormals(poly2);
                         List<Polygon> polygons = new List<Polygon>() { poly2 };
                         List<Vertex> backPolyVertices = new List<Vertex>();
                         Edge[] myEdges = poly2.GetEdges();
