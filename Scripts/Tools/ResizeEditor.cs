@@ -1208,7 +1208,7 @@ namespace Sabresaurus.SabreCSG
 
                 if (Tools.pivotRotation == PivotRotation.Global)
                 {
-                    if (CurrentSettings.ShowBrushBoundsGuideWires)
+                    if (CurrentSettings.ShowBrushBoundsGuideLines)
                     {
                         SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds);
                     }
@@ -1220,7 +1220,7 @@ namespace Sabresaurus.SabreCSG
                 }
                 else
                 {
-                    if (CurrentSettings.ShowBrushBoundsGuideWires)
+                    if (CurrentSettings.ShowBrushBoundsGuideLines)
                     {
                         SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds, primaryTargetBrushTransform);
                     }

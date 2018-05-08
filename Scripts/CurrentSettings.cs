@@ -150,15 +150,15 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public static bool ShowBrushBoundsGuideWires
+        public static bool ShowBrushBoundsGuideLines
         {
             get
             {
-                return PlayerPrefs.GetInt(KEY_PREFIX + "ShowBrushBoundsGuideWires", 0) != 0;
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ShowBrushBoundsGuideLines", 0) != 0;
             }
             set
             {
-                PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushBoundsGuideWires", value ? 1 : 0);
+                PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushBoundsGuideLines", value ? 1 : 0);
             }
         }
 

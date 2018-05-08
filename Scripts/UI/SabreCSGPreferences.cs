@@ -86,7 +86,7 @@ namespace Sabresaurus.SabreCSG
             }
 
             EditorGUI.BeginChangeCheck();
-            CurrentSettings.ShowBrushBoundsGuideWires = GUILayout.Toggle(CurrentSettings.ShowBrushBoundsGuideWires, "Show brush bounds guide wires");
+            CurrentSettings.ShowBrushBoundsGuideLines = GUILayout.Toggle(CurrentSettings.ShowBrushBoundsGuideLines, "Show brush bounds guide lines");
             if (EditorGUI.EndChangeCheck())
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
