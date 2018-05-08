@@ -1196,11 +1196,11 @@ namespace Sabresaurus.SabreCSG
                 SabreGraphics.DrawMarquee(marqueeStart, marqueeEnd);
             }
 
-            if (primaryTargetBrushBase != null && widgetMode == WidgetMode.Bounds)
+            if (primaryTargetBrushBase != null)
             {
                 Bounds bounds = GetBounds();
 
-                // Selected brush green outline
+                // Selected brush white outline
                 SabreCSGResources.GetSelectedBrushMaterial().SetPass(0);
 
                 // Selection
@@ -1217,21 +1217,24 @@ namespace Sabresaurus.SabreCSG
 
                 GL.End();
 
-                if (currentMode == ActiveMode.Rotate && selectedResizeHandlePair.HasValue)
+                if (widgetMode == WidgetMode.Bounds)
                 {
-                    SabreCSGResources.GetSelectedBrushMaterial().SetPass(0);
+                    if (currentMode == ActiveMode.Rotate && selectedResizeHandlePair.HasValue)
+                    {
+                        SabreCSGResources.GetSelectedBrushMaterial().SetPass(0);
 
-                    Vector3 extents = bounds.extents;
+                        Vector3 extents = bounds.extents;
 
-                    // If rotation axis is (0,1,0) or (0,1,0), this produces (1,0,1)
-                    Vector3 mask = Vector3.one - MathHelper.VectorAbs(GetRotationAxis());
+                        // If rotation axis is (0,1,0) or (0,1,0), this produces (1,0,1)
+                        Vector3 mask = Vector3.one - MathHelper.VectorAbs(GetRotationAxis());
 
-                    // Discount any extents in the rotation axis and find the magnitude
-                    float largestExtent = extents.Multiply(mask).magnitude;// bounds.GetLargestExtent();
-                    Vector3 worldCenter = TransformPoint(bounds.center);
-                    SabreGraphics.DrawRotationCircle(worldCenter, GetRotationAxisTransformed(), largestExtent, initialRotationDirection);
+                        // Discount any extents in the rotation axis and find the magnitude
+                        float largestExtent = extents.Multiply(mask).magnitude;// bounds.GetLargestExtent();
+                        Vector3 worldCenter = TransformPoint(bounds.center);
+                        SabreGraphics.DrawRotationCircle(worldCenter, GetRotationAxisTransformed(), largestExtent, initialRotationDirection);
+                    }
+                    DrawResizeHandles(sceneView, e);
                 }
-                DrawResizeHandles(sceneView, e);
             }
 
             GUIStyle style = new GUIStyle(EditorStyles.toolbar);
