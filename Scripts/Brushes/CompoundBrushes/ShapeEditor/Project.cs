@@ -96,6 +96,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public bool revolveDirection = true;
 
         /// <summary>
+        /// Whether the spiral is like stairs or a smooth slope.
+        /// </summary>
+        [SerializeField]
+        public bool revolveSpiralSloped = false;
+
+        /// <summary>
         /// Clones this project and returns the copy.
         /// </summary>
         /// <returns>A copy of the project.</returns>
