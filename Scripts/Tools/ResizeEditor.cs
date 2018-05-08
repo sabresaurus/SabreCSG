@@ -1208,11 +1208,27 @@ namespace Sabresaurus.SabreCSG
 
                 if (Tools.pivotRotation == PivotRotation.Global)
                 {
-                    SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds);
+                    if (CurrentSettings.ShowBrushBoundsGuideWires)
+                    {
+                        SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds);
+                    }
+                    else
+                    {
+                        GL.Color(Color.white);
+                        SabreGraphics.DrawBox(bounds);
+                    }
                 }
                 else
                 {
-                    SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds, primaryTargetBrushTransform);
+                    if (CurrentSettings.ShowBrushBoundsGuideWires)
+                    {
+                        SabreGraphics.DrawBoxWithGuideLines(Color.white, bounds, primaryTargetBrushTransform);
+                    }
+                    else
+                    {
+                        GL.Color(Color.white);
+                        SabreGraphics.DrawBox(bounds, primaryTargetBrushTransform);
+                    }
                 }
 
                 GL.End();
