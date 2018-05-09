@@ -156,7 +156,9 @@ namespace Sabresaurus.SabreCSG
             Vector3 gright = Vector3.right * 8.0f;
             Vector3 gforward = Vector3.forward * 8.0f;
 
-            Color transparent = new Color(color.r, color.g, color.b, 0.35f);
+            Color transparentr = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+            Color transparentg = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+            Color transparentb = new Color(0.0f, 0.0f, 1.0f, 0.35f);
 
             if (transform != null)
             {
@@ -184,14 +186,14 @@ namespace Sabresaurus.SabreCSG
             GL.Vertex(center + right + forward - up);
 
             // Guide Lines
-            GL.Color(color); GL.Vertex(center - right - forward + up); GL.Color(transparent); GL.Vertex(center - right - forward + up + gup);
-            GL.Color(color); GL.Vertex(center - right - forward - up); GL.Color(transparent); GL.Vertex(center - right - forward - up - gup);
-            GL.Color(color); GL.Vertex(center - right + forward + up); GL.Color(transparent); GL.Vertex(center - right + forward + up + gup);
-            GL.Color(color); GL.Vertex(center - right + forward - up); GL.Color(transparent); GL.Vertex(center - right + forward - up - gup);
-            GL.Color(color); GL.Vertex(center + right - forward + up); GL.Color(transparent); GL.Vertex(center + right - forward + up + gup);
-            GL.Color(color); GL.Vertex(center + right - forward - up); GL.Color(transparent); GL.Vertex(center + right - forward - up - gup);
-            GL.Color(color); GL.Vertex(center + right + forward + up); GL.Color(transparent); GL.Vertex(center + right + forward + up + gup);
-            GL.Color(color); GL.Vertex(center + right + forward - up); GL.Color(transparent); GL.Vertex(center + right + forward - up - gup);
+            GL.Color(Color.green); GL.Vertex(center - right - forward + up); GL.Color(transparentg); GL.Vertex(center - right - forward + up + gup);
+            GL.Color(Color.green); GL.Vertex(center - right - forward - up); GL.Color(transparentg); GL.Vertex(center - right - forward - up - gup);
+            GL.Color(Color.green); GL.Vertex(center - right + forward + up); GL.Color(transparentg); GL.Vertex(center - right + forward + up + gup);
+            GL.Color(Color.green); GL.Vertex(center - right + forward - up); GL.Color(transparentg); GL.Vertex(center - right + forward - up - gup);
+            GL.Color(Color.green); GL.Vertex(center + right - forward + up); GL.Color(transparentg); GL.Vertex(center + right - forward + up + gup);
+            GL.Color(Color.green); GL.Vertex(center + right - forward - up); GL.Color(transparentg); GL.Vertex(center + right - forward - up - gup);
+            GL.Color(Color.green); GL.Vertex(center + right + forward + up); GL.Color(transparentg); GL.Vertex(center + right + forward + up + gup);
+            GL.Color(Color.green); GL.Vertex(center + right + forward - up); GL.Color(transparentg); GL.Vertex(center + right + forward - up - gup);
 
             // Horizontal - forward/back
             GL.Color(color);
@@ -205,14 +207,14 @@ namespace Sabresaurus.SabreCSG
             GL.Vertex(center + right - forward + up);
 
             // Guide Lines
-            GL.Color(color); GL.Vertex(center - right + forward - up); GL.Color(transparent); GL.Vertex(center - right + forward - up + gforward);
-            GL.Color(color); GL.Vertex(center - right - forward - up); GL.Color(transparent); GL.Vertex(center - right - forward - up - gforward);
-            GL.Color(color); GL.Vertex(center + right + forward - up); GL.Color(transparent); GL.Vertex(center + right + forward - up + gforward);
-            GL.Color(color); GL.Vertex(center + right - forward - up); GL.Color(transparent); GL.Vertex(center + right - forward - up - gforward);
-            GL.Color(color); GL.Vertex(center - right + forward + up); GL.Color(transparent); GL.Vertex(center - right + forward + up + gforward);
-            GL.Color(color); GL.Vertex(center - right - forward + up); GL.Color(transparent); GL.Vertex(center - right - forward + up - gforward);
-            GL.Color(color); GL.Vertex(center + right + forward + up); GL.Color(transparent); GL.Vertex(center + right + forward + up + gforward);
-            GL.Color(color); GL.Vertex(center + right - forward + up); GL.Color(transparent); GL.Vertex(center + right - forward + up - gforward);
+            GL.Color(Color.blue); GL.Vertex(center - right + forward - up); GL.Color(transparentb); GL.Vertex(center - right + forward - up + gforward);
+            GL.Color(Color.blue); GL.Vertex(center - right - forward - up); GL.Color(transparentb); GL.Vertex(center - right - forward - up - gforward);
+            GL.Color(Color.blue); GL.Vertex(center + right + forward - up); GL.Color(transparentb); GL.Vertex(center + right + forward - up + gforward);
+            GL.Color(Color.blue); GL.Vertex(center + right - forward - up); GL.Color(transparentb); GL.Vertex(center + right - forward - up - gforward);
+            GL.Color(Color.blue); GL.Vertex(center - right + forward + up); GL.Color(transparentb); GL.Vertex(center - right + forward + up + gforward);
+            GL.Color(Color.blue); GL.Vertex(center - right - forward + up); GL.Color(transparentb); GL.Vertex(center - right - forward + up - gforward);
+            GL.Color(Color.blue); GL.Vertex(center + right + forward + up); GL.Color(transparentb); GL.Vertex(center + right + forward + up + gforward);
+            GL.Color(Color.blue); GL.Vertex(center + right - forward + up); GL.Color(transparentb); GL.Vertex(center + right - forward + up - gforward);
 
             // Horizontal - right/left
             GL.Color(color);
@@ -226,14 +228,14 @@ namespace Sabresaurus.SabreCSG
             GL.Vertex(center - right + forward + up);
 
             // Guide Lines
-            GL.Color(color); GL.Vertex(center + right - forward - up); GL.Color(transparent); GL.Vertex(center + right - forward - up + gright);
-            GL.Color(color); GL.Vertex(center - right - forward - up); GL.Color(transparent); GL.Vertex(center - right - forward - up - gright);
-            GL.Color(color); GL.Vertex(center + right + forward - up); GL.Color(transparent); GL.Vertex(center + right + forward - up + gright);
-            GL.Color(color); GL.Vertex(center - right + forward - up); GL.Color(transparent); GL.Vertex(center - right + forward - up - gright);
-            GL.Color(color); GL.Vertex(center + right - forward + up); GL.Color(transparent); GL.Vertex(center + right - forward + up + gright);
-            GL.Color(color); GL.Vertex(center - right - forward + up); GL.Color(transparent); GL.Vertex(center - right - forward + up - gright);
-            GL.Color(color); GL.Vertex(center + right + forward + up); GL.Color(transparent); GL.Vertex(center + right + forward + up + gright);
-            GL.Color(color); GL.Vertex(center - right + forward + up); GL.Color(transparent); GL.Vertex(center - right + forward + up - gright);
+            GL.Color(Color.red); GL.Vertex(center + right - forward - up); GL.Color(transparentr); GL.Vertex(center + right - forward - up + gright);
+            GL.Color(Color.red); GL.Vertex(center - right - forward - up); GL.Color(transparentr); GL.Vertex(center - right - forward - up - gright);
+            GL.Color(Color.red); GL.Vertex(center + right + forward - up); GL.Color(transparentr); GL.Vertex(center + right + forward - up + gright);
+            GL.Color(Color.red); GL.Vertex(center - right + forward - up); GL.Color(transparentr); GL.Vertex(center - right + forward - up - gright);
+            GL.Color(Color.red); GL.Vertex(center + right - forward + up); GL.Color(transparentr); GL.Vertex(center + right - forward + up + gright);
+            GL.Color(Color.red); GL.Vertex(center - right - forward + up); GL.Color(transparentr); GL.Vertex(center - right - forward + up - gright);
+            GL.Color(Color.red); GL.Vertex(center + right + forward + up); GL.Color(transparentr); GL.Vertex(center + right + forward + up + gright);
+            GL.Color(Color.red); GL.Vertex(center - right + forward + up); GL.Color(transparentr); GL.Vertex(center - right + forward + up - gright);
         }
 
         public static void DrawPlane(UnityEngine.Plane plane, Vector3 center, Color colorFront, Color colorBack, float size)
