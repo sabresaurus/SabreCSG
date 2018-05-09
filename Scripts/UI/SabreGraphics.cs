@@ -143,7 +143,7 @@ namespace Sabresaurus.SabreCSG
             GL.Vertex(center - right + forward + up);
         }
 
-        public static void DrawBoxWithGuideLines(Color color, Bounds bounds, Transform transform = null)
+        public static void DrawBoxGuideLines(Bounds bounds, float length, Transform transform = null)
         {
             Vector3 center = bounds.center;
 
@@ -152,9 +152,9 @@ namespace Sabresaurus.SabreCSG
             Vector3 right = Vector3.right * bounds.extents.x;
             Vector3 forward = Vector3.forward * bounds.extents.z;
 
-            Vector3 gup = Vector3.up * 8.0f;
-            Vector3 gright = Vector3.right * 8.0f;
-            Vector3 gforward = Vector3.forward * 8.0f;
+            Vector3 gup = Vector3.up * length;
+            Vector3 gright = Vector3.right * length;
+            Vector3 gforward = Vector3.forward * length;
 
             Color transparentr = new Color(1.0f, 0.0f, 0.0f, 0.35f);
             Color transparentg = new Color(0.0f, 1.0f, 0.0f, 0.35f);
@@ -169,23 +169,12 @@ namespace Sabresaurus.SabreCSG
                 right = transform.TransformVector(Vector3.right) * bounds.extents.x;
                 forward = transform.TransformVector(Vector3.forward) * bounds.extents.z;
 
-                gup = transform.TransformVector(Vector3.up) * 8.0f;
-                gright = transform.TransformVector(Vector3.right) * 8.0f;
-                gforward = transform.TransformVector(Vector3.forward) * 8.0f;
+                gup = transform.TransformVector(Vector3.up) * length;
+                gright = transform.TransformVector(Vector3.right) * length;
+                gforward = transform.TransformVector(Vector3.forward) * length;
             }
 
-            // Verticals
-            GL.Color(color);
-            GL.Vertex(center - right - forward + up);
-            GL.Vertex(center - right - forward - up);
-            GL.Vertex(center - right + forward + up);
-            GL.Vertex(center - right + forward - up);
-            GL.Vertex(center + right - forward + up);
-            GL.Vertex(center + right - forward - up);
-            GL.Vertex(center + right + forward + up);
-            GL.Vertex(center + right + forward - up);
-
-            // Guide Lines
+            // Vertical Guide Lines
             GL.Color(Color.green); GL.Vertex(center - right - forward + up); GL.Color(transparentg); GL.Vertex(center - right - forward + up + gup);
             GL.Color(Color.green); GL.Vertex(center - right - forward - up); GL.Color(transparentg); GL.Vertex(center - right - forward - up - gup);
             GL.Color(Color.green); GL.Vertex(center - right + forward + up); GL.Color(transparentg); GL.Vertex(center - right + forward + up + gup);
@@ -195,18 +184,7 @@ namespace Sabresaurus.SabreCSG
             GL.Color(Color.green); GL.Vertex(center + right + forward + up); GL.Color(transparentg); GL.Vertex(center + right + forward + up + gup);
             GL.Color(Color.green); GL.Vertex(center + right + forward - up); GL.Color(transparentg); GL.Vertex(center + right + forward - up - gup);
 
-            // Horizontal - forward/back
-            GL.Color(color);
-            GL.Vertex(center - right + forward - up);
-            GL.Vertex(center - right - forward - up);
-            GL.Vertex(center + right + forward - up);
-            GL.Vertex(center + right - forward - up);
-            GL.Vertex(center - right + forward + up);
-            GL.Vertex(center - right - forward + up);
-            GL.Vertex(center + right + forward + up);
-            GL.Vertex(center + right - forward + up);
-
-            // Guide Lines
+            // Horizontal Guide Lines - forward/back
             GL.Color(Color.blue); GL.Vertex(center - right + forward - up); GL.Color(transparentb); GL.Vertex(center - right + forward - up + gforward);
             GL.Color(Color.blue); GL.Vertex(center - right - forward - up); GL.Color(transparentb); GL.Vertex(center - right - forward - up - gforward);
             GL.Color(Color.blue); GL.Vertex(center + right + forward - up); GL.Color(transparentb); GL.Vertex(center + right + forward - up + gforward);
@@ -216,18 +194,7 @@ namespace Sabresaurus.SabreCSG
             GL.Color(Color.blue); GL.Vertex(center + right + forward + up); GL.Color(transparentb); GL.Vertex(center + right + forward + up + gforward);
             GL.Color(Color.blue); GL.Vertex(center + right - forward + up); GL.Color(transparentb); GL.Vertex(center + right - forward + up - gforward);
 
-            // Horizontal - right/left
-            GL.Color(color);
-            GL.Vertex(center + right - forward - up);
-            GL.Vertex(center - right - forward - up);
-            GL.Vertex(center + right + forward - up);
-            GL.Vertex(center - right + forward - up);
-            GL.Vertex(center + right - forward + up);
-            GL.Vertex(center - right - forward + up);
-            GL.Vertex(center + right + forward + up);
-            GL.Vertex(center - right + forward + up);
-
-            // Guide Lines
+            // Horizontal Guide Lines - right/left
             GL.Color(Color.red); GL.Vertex(center + right - forward - up); GL.Color(transparentr); GL.Vertex(center + right - forward - up + gright);
             GL.Color(Color.red); GL.Vertex(center - right - forward - up); GL.Color(transparentr); GL.Vertex(center - right - forward - up - gright);
             GL.Color(Color.red); GL.Vertex(center + right + forward - up); GL.Color(transparentr); GL.Vertex(center + right + forward - up + gright);
