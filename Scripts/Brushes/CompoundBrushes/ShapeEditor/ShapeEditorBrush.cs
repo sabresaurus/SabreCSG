@@ -318,19 +318,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // we invalidate every brush after hidden surface removal.
             }
 
-            // assign the concave polygons to the brush.
-            if (!project.convexBrushes)
-            {
-                generatedBrushes[0].SetPolygons(concavePolygons.ToArray());
-                csgBounds.Encapsulate(generatedBrushes[0].GetBounds());
-            }
-
             // we exclude hidden faces automatically.
             // this step will automatically optimize NoCSG output the same way additive brushes would have.
             // it also excludes a couple faces that CSG doesn't exclude due to floating point precision errors.
             // the latter is especially noticable with complex revolved shapes.
 
-            // can only use hidden surface removal on convex brushes.
+            // hidden surface removal for convex brushes.
             if (project.convexBrushes)
             {
                 // compare each brush to another brush:
@@ -370,6 +363,43 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     generatedBrushes[i].Invalidate(true);
                     csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
                 }
+            }
+
+            // hidden surface removal for a concave brush.
+            else
+            {
+                List<Polygon> concavePolygonsCopy = concavePolygons.ToList();
+
+                // compare each polygon and find duplicates:
+                foreach (Polygon pa in concavePolygonsCopy)
+                {
+                    foreach (Polygon pb in concavePolygonsCopy)
+                    {
+                        // can't be the same polygon.
+                        if (pa == pb) continue;
+
+                        // check they both have this polygon:
+                        bool identical = true;
+                        foreach (Vertex va in pa.Vertices)
+                        {
+                            if (!pb.Vertices.Any(vb => vb.Position == va.Position))
+                            {
+                                identical = false;
+                                break;
+                            }
+                        }
+                        // identical polygons on both brushes means it can be excluded:
+                        if (identical)
+                        {
+                            concavePolygons.Remove(pa);
+                            concavePolygons.Remove(pb);
+                        }
+                    }
+                }
+
+                // invalidate the brush.
+                generatedBrushes[0].SetPolygons(concavePolygons.ToArray());
+                csgBounds.Encapsulate(generatedBrushes[0].GetBounds());
             }
 
             // apply the generated csg bounds.
