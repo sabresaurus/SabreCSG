@@ -674,17 +674,16 @@ namespace Sabresaurus.SabreCSG
 
             if (polygons != null)
             {
-                List<int> polygonIndices;
-                BrushFactory.GenerateMeshFromPolygons(polygons, ref renderMesh, out polygonIndices);
+                // generate a mesh preview for the transparent brushes.
+                // we also displace the triangles along the normals slightly so we can overlay built geometry
+                // with semi-transparent geometry and avoid depth fighting.
+                BrushFactory.GenerateMeshFromPolygonsFast(polygons, ref renderMesh, 0.001f);
             }
 
             if (mode == CSGMode.Subtract)
             {
                 MeshHelper.Invert(ref renderMesh);
             }
-            // Displace the triangles for display along the normals very slightly (this is so we can overlay built
-            // geometry with semi-transparent geometry and avoid depth fighting)
-            MeshHelper.Displace(ref renderMesh, 0.001f);
 
             meshFilter.sharedMesh = renderMesh;
 
