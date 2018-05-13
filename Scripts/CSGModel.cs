@@ -376,8 +376,7 @@ namespace Sabresaurus.SabreCSG
 					SabreCSGResources.GetExcludedMaterial().SetPass(0);
 
 					Mesh mesh = new Mesh();
-					List<int> indices = new List<int>();
-					BrushFactory.GenerateMeshFromPolygons(excluded.ToArray(), ref mesh, out indices);
+					BrushFactory.GenerateMeshFromPolygonsFast(excluded.ToArray(), ref mesh, 0.0f);
 
 					Graphics.DrawMeshNow(mesh, Vector3.zero, Quaternion.identity);
 
