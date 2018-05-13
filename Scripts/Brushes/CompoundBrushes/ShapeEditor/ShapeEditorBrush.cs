@@ -110,6 +110,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             get
             {
+                // if the user desires a single concave brush we return 1.
+                if (!project.convexBrushes)
+                    return 1;
+
                 // we already know the amount of brushes we need.
                 if (!isDirty)
                     return desiredBrushCount;
@@ -149,10 +153,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (extrudeMode == ExtrudeMode.RevolveShape && project.revolveSpiralSloped && project.globalPivot.position.y != 0)
                 this.IsNoCSG = true;
 
+            // force nocsg when using concave brushes as sabrecsg doesn't support it.
+            if (!project.convexBrushes)
+                this.IsNoCSG = true;
+
             // nothing to do except copy csg information to our child brushes.
             if (!isDirty)
             {
-                for (int i = 0; i < BrushCount; i++)
+                for (int i = 0; i < (project.convexBrushes ? desiredBrushCount : 1); i++)
                 {
                     generatedBrushes[i].Mode = this.Mode;
                     generatedBrushes[i].IsNoCSG = this.IsNoCSG;
@@ -175,16 +183,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (m_LastBuiltPolygons == null)
                 m_LastBuiltPolygons = BuildConvexPolygons();
 
-            // iterate through the brushes we received:
-            int brushCount = BrushCount;
+            // prepare a list of polygons for concave brushes.
+            List<Polygon> concavePolygons = null;
+            if (!project.convexBrushes)
+                concavePolygons = new List<Polygon>();
 
+            // iterate through the brushes we received:
+            int brushCount = desiredBrushCount;
+
+            // iterate through the brushes we received:
             for (int i = 0; i < brushCount; i++)
             {
                 // copy our csg information to our child brushes.
-                generatedBrushes[i].Mode = this.Mode;
-                generatedBrushes[i].IsNoCSG = this.IsNoCSG;
-                generatedBrushes[i].IsVisible = this.IsVisible;
-                generatedBrushes[i].HasCollision = this.HasCollision;
+                generatedBrushes[project.convexBrushes ? i : 0].Mode = this.Mode;
+                generatedBrushes[project.convexBrushes ? i : 0].IsNoCSG = this.IsNoCSG;
+                generatedBrushes[project.convexBrushes ? i : 0].IsVisible = this.IsVisible;
+                generatedBrushes[project.convexBrushes ? i : 0].HasCollision = this.HasCollision;
 
                 // local variables.
                 Quaternion rot;
@@ -198,7 +212,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         GenerateUvCoordinates(m_LastBuiltPolygons[i], false);
                         Polygon poly1 = m_LastBuiltPolygons[i].DeepCopy();
                         poly1.Flip();
-                        generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
+
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
+                        else
+                            concavePolygons.Add(poly1);
                         break;
 
                     // generate 3d cube-ish shapes that revolve around the pivot and spirals up or down.
@@ -254,7 +272,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         GenerateUvCoordinates(backPoly, false);
                         polygons.Add(backPoly);
 
-                        generatedBrushes[i].SetPolygons(polygons.ToArray());
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(polygons.ToArray());
+                        else
+                            concavePolygons.AddRange(polygons);
                         break;
 
                     // generate a 3d cube-ish shape.
@@ -263,7 +284,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], project.extrudeDepth, out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
 
                     // generate a 3d cone-ish shape.
@@ -272,7 +296,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         ExtrudePolygonToPoint(m_LastBuiltPolygons[i], project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
 
                     // generate a 3d trapezoid-ish shape.
@@ -281,7 +308,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         ExtrudePolygonBevel(m_LastBuiltPolygons[i], project.extrudeDepth, project.extrudeClipDepth / project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
                 }
 
@@ -293,42 +323,83 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // it also excludes a couple faces that CSG doesn't exclude due to floating point precision errors.
             // the latter is especially noticable with complex revolved shapes.
 
-            // compare each brush to another brush:
-            for (int i = 0; i < brushCount; i++)
+            // hidden surface removal for convex brushes.
+            if (project.convexBrushes)
             {
-                for (int j = 0; j < brushCount; j++)
+                // compare each brush to another brush:
+                for (int i = 0; i < brushCount; i++)
                 {
-                    // can't check for hidden faces on the same brush.
-                    if (i == j) continue;
-
-                    // compare each polygon on brush i to each polygon on brush j:
-                    foreach (Polygon pa in generatedBrushes[i].GetPolygons())
+                    for (int j = 0; j < brushCount; j++)
                     {
-                        foreach (Polygon pb in generatedBrushes[j].GetPolygons())
+                        // can't check for hidden faces on the same brush.
+                        if (i == j) continue;
+
+                        // compare each polygon on brush i to each polygon on brush j:
+                        foreach (Polygon pa in generatedBrushes[i].GetPolygons())
                         {
-                            // check they both have this polygon:
-                            bool identical = true;
-                            foreach (Vertex va in pa.Vertices)
+                            foreach (Polygon pb in generatedBrushes[j].GetPolygons())
                             {
-                                if (!pb.Vertices.Any(vb => vb.Position == va.Position))
+                                // check they both have this polygon:
+                                bool identical = true;
+                                foreach (Vertex va in pa.Vertices)
                                 {
-                                    identical = false;
-                                    break;
+                                    if (!pb.Vertices.Any(vb => vb.Position == va.Position))
+                                    {
+                                        identical = false;
+                                        break;
+                                    }
+                                }
+                                // identical polygons on both brushes means it can be excluded:
+                                if (identical)
+                                {
+                                    pa.UserExcludeFromFinal = true;
+                                    pb.UserExcludeFromFinal = true;
                                 }
                             }
-                            // identical polygons on both brushes means it can be excluded:
-                            if (identical)
+                        }
+                    }
+
+                    // invalidate every brush.
+                    generatedBrushes[i].Invalidate(true);
+                    csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
+                }
+            }
+
+            // hidden surface removal for a concave brush.
+            else
+            {
+                List<Polygon> concavePolygonsCopy = concavePolygons.ToList();
+
+                // compare each polygon and find duplicates:
+                foreach (Polygon pa in concavePolygonsCopy)
+                {
+                    foreach (Polygon pb in concavePolygonsCopy)
+                    {
+                        // can't be the same polygon.
+                        if (pa == pb) continue;
+
+                        // check they both have this polygon:
+                        bool identical = true;
+                        foreach (Vertex va in pa.Vertices)
+                        {
+                            if (!pb.Vertices.Any(vb => vb.Position == va.Position))
                             {
-                                pa.UserExcludeFromFinal = true;
-                                pb.UserExcludeFromFinal = true;
+                                identical = false;
+                                break;
                             }
+                        }
+                        // identical polygons on both brushes means it can be excluded:
+                        if (identical)
+                        {
+                            concavePolygons.Remove(pa);
+                            concavePolygons.Remove(pb);
                         }
                     }
                 }
 
-                // invalidate every brush.
-                generatedBrushes[i].Invalidate(true);
-                csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
+                // invalidate the brush.
+                generatedBrushes[0].SetPolygons(concavePolygons.ToArray());
+                csgBounds.Encapsulate(generatedBrushes[0].GetBounds());
             }
 
             // apply the generated csg bounds.

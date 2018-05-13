@@ -674,6 +674,71 @@ namespace Sabresaurus.SabreCSG
 			mesh.uv = uvs.ToArray();
 			mesh.triangles = triangles.ToArray();
 		}
-	}
+
+        /// <summary>
+        /// Generates a mesh from the supplied polygons. particularly useful for visualising a
+        /// brush's polygons on a MeshFilter. This method can optionally displace the vertices along
+        /// the normal slightly. This is a faster method than <see
+        /// cref="GenerateMeshFromPolygons(Polygon[], ref Mesh, out List{int})"/> as it doesn't
+        /// generate optimized indices.
+        /// </summary>
+        /// <param name="polygons">The polygons to be triangulated.</param>
+        /// <param name="mesh">
+        /// Mesh to be written to. If the existing mesh is null it will be set to a new one,
+        /// otherwise the existing mesh is cleared.
+        /// </param>
+        /// <param name="displacement">The amount of vertex displacement.</param>
+        public static void GenerateMeshFromPolygonsFast(Polygon[] polygons, ref Mesh mesh, float displacement)
+        {
+            if (mesh == null)
+            {
+                mesh = new Mesh();
+            }
+            mesh.Clear();
+
+            int vertexIndex = 0;
+            int vertexCount = 0;
+            for (int i = 0; i < polygons.Length; i++)
+                vertexCount += polygons[i].Vertices.Length * 3;
+
+            Vector3[] vertices = new Vector3[vertexCount];
+            Vector3[] normals = new Vector3[vertexCount];
+            Vector2[] uvs = new Vector2[vertexCount];
+            int[] triangles = new int[vertexCount];
+            int tri = 0;
+
+            // Iterate through every polygon and triangulate
+            int offset = 0;
+            for (int i = 0; i < polygons.Length; i++)
+            {
+                Polygon polygon = polygons[i];
+                offset += polygon.Vertices.Length;
+
+                for (int j = 0; j < polygon.Vertices.Length; j++)
+                {
+                    Vertex v = polygon.Vertices[j];
+                    vertices[vertexIndex] = v.Position + v.Normal * displacement;
+                    normals[vertexIndex] = v.Normal;
+                    uvs[vertexIndex] = v.UV;
+                    vertexIndex++;
+                }
+
+                // Triangulate the n-sided polygon and allow vertex reuse by using indexed geometry
+                for (int j = 2; j < polygon.Vertices.Length; j++)
+                {
+                    int start = offset - polygon.Vertices.Length;
+                    triangles[tri] = start; tri++;
+                    triangles[tri] = start + j - 1; tri++;
+                    triangles[tri] = start + j; tri++;
+                }
+            }
+
+            // Set the mesh buffers
+            mesh.vertices = vertices;
+            mesh.normals = normals;
+            mesh.uv = uvs;
+            mesh.triangles = triangles;
+        }
+    }
 }
 #endif
