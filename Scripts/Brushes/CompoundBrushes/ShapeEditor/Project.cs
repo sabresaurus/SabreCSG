@@ -102,6 +102,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public bool revolveSpiralSloped = false;
 
         /// <summary>
+        /// Whether the shape uses Convex Decomposition or Concave Shapes.
+        /// </summary>
+        [SerializeField]
+        public bool convexBrushes = true;
+
+        /// <summary>
         /// Clones this project and returns the copy.
         /// </summary>
         /// <returns>A copy of the project.</returns>
