@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Sabresaurus.SabreCSG.Import.UnrealGold
+namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 {
     /// <summary>
     /// Importer for Unreal Gold Text (*.t3d) format. Unreal Editor -&gt; File -&gt; Export.

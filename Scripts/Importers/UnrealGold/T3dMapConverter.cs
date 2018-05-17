@@ -1,10 +1,11 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Sabresaurus.SabreCSG.Import.UnrealGold
+namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 {
     /// <summary>
     /// Converts an Unreal Editor 1 Map to SabreCSG Brushes.
@@ -18,12 +19,17 @@ namespace Sabresaurus.SabreCSG.Import.UnrealGold
         /// <param name="map">The map to be imported.</param>
         public static void Import(CSGModel model, T3dMap map)
         {
+            List<T3dActor> brushes = map.Brushes;
+
             // iterate through all brush actors.
-            foreach (T3dActor tactor in map.Brushes)
+            for (int k = 0; k < brushes.Count; k++)
             {
                 // get the underlying brush data.
+                T3dActor tactor = brushes[k];
                 T3dBrush tbrush = tactor.Brush;
-
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Converting Unreal Brushes To SabreCSG Brushes (" + (k + 1) + " / " + brushes.Count + ")...", k / (float)brushes.Count);
+#endif
                 // iterate through the brush polygons.
                 Polygon[] polygons = new Polygon[tbrush.Polygons.Count];
                 for (int i = 0; i < tbrush.Polygons.Count; i++)
@@ -33,18 +39,26 @@ namespace Sabresaurus.SabreCSG.Import.UnrealGold
                     // find the material in the unity project automatically.
                     Material material = null;
 #if UNITY_EDITOR
-                    string texture = tpolygon.Texture;
-                    if (tpolygon.Texture.Contains('.'))
-                        texture = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
-                    string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
+                    // first try finding the fully qualified texture name like 'PlayrShp.Ceiling.Hullwk'.
+                    string texture = "";
+                    string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + tpolygon.Texture).FirstOrDefault();
+                    if (guid == null)
+                    {
+                        // if it couldn't be found try a simplified name which UnrealEd typically exports like 'Hullwk'.
+                        texture = tpolygon.Texture;
+                        if (tpolygon.Texture.Contains('.'))
+                            texture = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
+                        guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
+                    }
+                    // if a material could be found using either option:
                     if (guid != null)
                     {
+                        // load the material.
                         string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
                         material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
                     }
-                    else { Debug.Log("Tried to find material '" + tpolygon.Texture + "' as '" + texture + "' but it couldn't be found in the project."); }
+                    else { Debug.Log("Tried to find material '" + tpolygon.Texture + "' and also as '" + texture + "' but it couldn't be found in the project."); }
 #endif
-
                     Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                     for (int j = 0; j < tpolygon.Vertices.Count; j++)
                     {
@@ -58,15 +72,21 @@ namespace Sabresaurus.SabreCSG.Import.UnrealGold
                 transform.position = ToVector3(tactor.Location) / 64.0f;
                 //Vector3 axis;
                 //float angle;
-                //Quaternion.Euler((tactor.Rotation.Roll / 65535f) * 360.0f, (tactor.Rotation.Yaw / 65535f) * 360.0f, (tactor.Rotation.Pitch / 65535f) * 360.0f).ToAngleAxis(out angle, out axis);
+                //ConvertRightHandedToLeftHandedQuaternion(T3dRotatorToQuaternion(tactor.Rotation)).ToAngleAxis(out angle, out axis);
                 //transform.RotateAround(transform.TransformPoint(ToVector3(tactor.PrePivot) / 64.0f), axis, angle);
-                transform.rotation = Quaternion.Euler((tactor.Rotation.Roll / 65535f) * 360.0f, (tactor.Rotation.Yaw / 65535f) * 360.0f, (tactor.Rotation.Pitch / 65535f) * 360.0f);
+                //transform.rotation = ConvertRightHandedToLeftHandedQuaternion(Quaternion.Euler((tactor.Rotation.Pitch / 32768f) * 180.0f, (tactor.Rotation.Roll / 32768f) * 180.0f, (tactor.Rotation.Yaw / 32768f) * 180.0f));
+                //transform.rotation = ConvertRightHandedToLeftHandedQuaternion(T3dRotatorToQuaternion(tactor.Rotation));//Quaternion.Euler((tactor.Rotation.Roll / 64.0f), (tactor.Rotation.Yaw / 64.0f), (tactor.Rotation.Pitch / 64.0f));
+                transform.rotation = T3dRotatorToQuaternion(tactor.Rotation);
 
                 PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
                 object value;
                 if (tactor.Properties.TryGetValue("CsgOper", out value))
                     brush.Mode = (string)value == "CSG_Add" ? CSGMode.Add : CSGMode.Subtract;
             }
+
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.ClearProgressBar();
+#endif
         }
 
         /// <summary>
@@ -94,6 +114,33 @@ namespace Sabresaurus.SabreCSG.Import.UnrealGold
                 return new Vector2(uu * (1.0f / 256f), 1.0f - (vv * (1.0f / 256f)));
             else
                 return new Vector2((uu + polygon.PanU) * (1.0f / material.mainTexture.width), 1.0f - ((vv + polygon.PanV) * (1.0f / material.mainTexture.height)));
+        }
+
+        private static Quaternion T3dRotatorToQuaternion(T3dRotator rotator)
+        {
+            // 227 variant:
+            float cosp = Mathf.Cos(rotator.Pitch * 0.0000479369f);
+            float cosy = Mathf.Cos(rotator.Yaw * 0.0000479369f);
+            float cosr = Mathf.Cos(rotator.Roll * 0.0000479369f);
+            float sinp = Mathf.Sin(rotator.Pitch * 0.0000479369f);
+            float siny = Mathf.Sin(rotator.Yaw * 0.0000479369f);
+            float sinr = Mathf.Sin(rotator.Roll * 0.0000479369f);
+
+            Quaternion quaternion;
+            quaternion.w = cosp * cosy * cosr + sinp * siny * sinr;
+            quaternion.z = sinp * cosy * cosr + cosp * siny * sinr;
+            quaternion.y = cosp * siny * cosr - sinp * cosy * sinr;
+            quaternion.x = cosp * cosy * sinr - sinp * siny * cosr;
+
+            float L = Mathf.Sqrt(Mathf.Pow(quaternion.w, 2) + Mathf.Pow(quaternion.x, 2) + Mathf.Pow(quaternion.y, 2) + Mathf.Pow(quaternion.z, 2));
+            quaternion.w /= L;
+            quaternion.x /= L;
+            quaternion.y /= L;
+            quaternion.z /= L;
+
+            quaternion.z = -quaternion.z;
+
+            return quaternion;
         }
     }
 }

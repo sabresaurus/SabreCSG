@@ -184,13 +184,15 @@ namespace Sabresaurus.SabreCSG
                         string path = EditorUtility.OpenFilePanel("Import Unreal Gold Map", "", "t3d");
                         if (path.Length != 0)
                         {
-                            var importer = new Import.UnrealGold.T3dImporter();
+                            EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Parsing Unreal Text File (*.t3d)...", 0.0f);
+                            var importer = new Importers.UnrealGold.T3dImporter();
                             var map = importer.Import(path);
-                            Import.UnrealGold.T3dMapToSabreCSG.Import(csgModel, map);
+                            Importers.UnrealGold.T3dMapToSabreCSG.Import(csgModel, map);
                         }
                     }
                     catch (Exception ex)
                     {
+                        EditorUtility.ClearProgressBar();
                         EditorUtility.DisplayDialog("Unreal Gold Map Import", "An exception occured while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }

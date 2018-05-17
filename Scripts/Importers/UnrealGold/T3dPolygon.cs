@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sabresaurus.SabreCSG.Import.UnrealGold
+namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 {
     /// <summary>
     /// Represents an Unreal Editor 1 polygon.

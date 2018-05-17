@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sabresaurus.SabreCSG.Import.UnrealGold
+namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 {
     /// <summary>
     /// Represents an Unreal Editor 1 map.
