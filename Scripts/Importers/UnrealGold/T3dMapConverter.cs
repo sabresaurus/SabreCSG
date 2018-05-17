@@ -80,8 +80,12 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 
                 PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
                 object value;
+                // detect the brush mode (additive, subtractive).
                 if (tactor.Properties.TryGetValue("CsgOper", out value))
                     brush.Mode = (string)value == "CSG_Add" ? CSGMode.Add : CSGMode.Subtract;
+                // detect single polygons.
+                if (polygons.Length == 1)
+                    brush.IsNoCSG = true;
             }
 
 #if UNITY_EDITOR
