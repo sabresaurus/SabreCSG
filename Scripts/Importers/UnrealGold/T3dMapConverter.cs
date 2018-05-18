@@ -21,6 +21,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         public static void Import(CSGModel model, T3dMap map, int scale = 64)
         {
             List<T3dActor> brushes = map.Brushes;
+            Brush[] sabreBrushes = new Brush[brushes.Count];
 
             // iterate through all brush actors.
             for (int k = 0; k < brushes.Count; k++)
@@ -63,6 +64,8 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                 transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / (float)scale), axis, angle);
 
                 PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
+                sabreBrushes[k] = brush;
+
                 object value;
                 // detect the brush mode (additive, subtractive).
                 if (tactor.Properties.TryGetValue("CsgOper", out value))
@@ -82,6 +85,18 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                 if (polygons.Length == 1)
                     brush.IsNoCSG = true;
             }
+
+            // add all new brushes to a group.
+            string title = "Unreal Gold Map";
+            if (map.Title != "")
+                title += " '" + map.Title + "'";
+            if (map.Author != "")
+                title += " (" + map.Author + ")";
+
+            GroupBrush groupBrush = new GameObject(title).AddComponent<GroupBrush>();
+            groupBrush.transform.SetParent(model.transform);
+            for (int i = 0; i < sabreBrushes.Length; i++)
+                sabreBrushes[i].transform.SetParent(groupBrush.transform);
 
 #if UNITY_EDITOR
             UnityEditor.EditorUtility.ClearProgressBar();
