@@ -17,7 +17,8 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         /// </summary>
         /// <param name="model">The model to import into.</param>
         /// <param name="map">The map to be imported.</param>
-        public static void Import(CSGModel model, T3dMap map)
+        /// <param name="scale">The scale modifier.</param>
+        public static void Import(CSGModel model, T3dMap map, int scale = 64)
         {
             List<T3dActor> brushes = map.Brushes;
 
@@ -42,7 +43,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                     Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                     for (int j = 0; j < tpolygon.Vertices.Count; j++)
                     {
-                        vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / 64.0f, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                        vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
                     }
 
                     // detect the polygon flags.
@@ -55,11 +56,11 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 
                 // position and rotate the brushes.
                 Transform transform = model.CreateCustomBrush(polygons).transform;
-                transform.position = (ToVector3(tactor.Location) / 64.0f) - (ToVector3(tactor.PrePivot) / 64.0f);
+                transform.position = (ToVector3(tactor.Location) / (float)scale) - (ToVector3(tactor.PrePivot) / (float)scale);
                 Vector3 axis;
                 float angle;
                 T3dRotatorToQuaternion(tactor.Rotation).ToAngleAxis(out angle, out axis);
-                transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / 64.0f), axis, angle);
+                transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / (float)scale), axis, angle);
 
                 PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
                 object value;

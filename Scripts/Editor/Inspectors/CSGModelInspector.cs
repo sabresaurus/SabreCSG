@@ -10,8 +10,8 @@ namespace Sabresaurus.SabreCSG
     public class CSGModelInspector : Editor
     {
         // Build settings for the next build
-        private SerializedProperty generateCollisionMeshesProperty;
 
+        private SerializedProperty generateCollisionMeshesProperty;
         private SerializedProperty generateTangentsProperty;
         private SerializedProperty optimizeGeometryProperty;
         private SerializedProperty saveMeshesAsAssetsProperty;
@@ -28,9 +28,13 @@ namespace Sabresaurus.SabreCSG
         private SerializedProperty defaultVisualMaterialProperty;
 
         // Build settings from the last build
-        private SerializedProperty lastBuildDefaultPhysicsMaterialProperty;
 
+        private SerializedProperty lastBuildDefaultPhysicsMaterialProperty;
         private SerializedProperty lastBuildDefaultVisualMaterialProperty;
+
+        // Temporary importer settings.
+
+        private static int importerUnrealGoldScale = 64;
 
         public void OnEnable()
         {
@@ -177,6 +181,9 @@ namespace Sabresaurus.SabreCSG
 
             using (new NamedVerticalScope("Import"))
             {
+                importerUnrealGoldScale = EditorGUILayout.IntField("Scale", importerUnrealGoldScale);
+                if (importerUnrealGoldScale < 1) importerUnrealGoldScale = 1;
+
                 if (GUILayout.Button("Import Unreal Gold Map (*.t3d)"))
                 {
                     try
@@ -187,7 +194,7 @@ namespace Sabresaurus.SabreCSG
                             EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Parsing Unreal Text File (*.t3d)...", 0.0f);
                             var importer = new Importers.UnrealGold.T3dImporter();
                             var map = importer.Import(path);
-                            Importers.UnrealGold.T3dMapToSabreCSG.Import(csgModel, map);
+                            Importers.UnrealGold.T3dMapToSabreCSG.Import(csgModel, map, importerUnrealGoldScale);
                         }
                     }
                     catch (Exception ex)
