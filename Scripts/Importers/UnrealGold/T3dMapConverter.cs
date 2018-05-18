@@ -37,28 +37,8 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                     T3dPolygon tpolygon = tbrush.Polygons[i];
 
                     // find the material in the unity project automatically.
-                    Material material = null;
-#if UNITY_EDITOR
-                    // first try finding the fully qualified texture name like 'PlayrShp.Ceiling.Hullwk'.
-                    string texture = "";
-                    string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + tpolygon.Texture).FirstOrDefault();
-                    if (guid == null)
-                    {
-                        // if it couldn't be found try a simplified name which UnrealEd typically exports like 'Hullwk'.
-                        texture = tpolygon.Texture;
-                        if (tpolygon.Texture.Contains('.'))
-                            texture = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
-                        guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
-                    }
-                    // if a material could be found using either option:
-                    if (guid != null)
-                    {
-                        // load the material.
-                        string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                        material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-                    }
-                    else { Debug.Log("Tried to find material '" + tpolygon.Texture + "' and also as '" + texture + "' but it couldn't be found in the project."); }
-#endif
+                    Material material = FindMaterial(tpolygon.Texture);
+
                     Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                     for (int j = 0; j < tpolygon.Vertices.Count; j++)
                     {
@@ -68,15 +48,13 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                     polygons[i] = new Polygon(vertices, material, false, false);
                 }
 
+                // position and rotate the brushes.
                 Transform transform = model.CreateCustomBrush(polygons).transform;
-                transform.position = ToVector3(tactor.Location) / 64.0f;
-                //Vector3 axis;
-                //float angle;
-                //ConvertRightHandedToLeftHandedQuaternion(T3dRotatorToQuaternion(tactor.Rotation)).ToAngleAxis(out angle, out axis);
-                //transform.RotateAround(transform.TransformPoint(ToVector3(tactor.PrePivot) / 64.0f), axis, angle);
-                //transform.rotation = ConvertRightHandedToLeftHandedQuaternion(Quaternion.Euler((tactor.Rotation.Pitch / 32768f) * 180.0f, (tactor.Rotation.Roll / 32768f) * 180.0f, (tactor.Rotation.Yaw / 32768f) * 180.0f));
-                //transform.rotation = ConvertRightHandedToLeftHandedQuaternion(T3dRotatorToQuaternion(tactor.Rotation));//Quaternion.Euler((tactor.Rotation.Roll / 64.0f), (tactor.Rotation.Yaw / 64.0f), (tactor.Rotation.Pitch / 64.0f));
-                transform.rotation = T3dRotatorToQuaternion(tactor.Rotation);
+                transform.position = (ToVector3(tactor.Location) / 64.0f) - (ToVector3(tactor.PrePivot) / 64.0f);
+                Vector3 axis;
+                float angle;
+                T3dRotatorToQuaternion(tactor.Rotation).ToAngleAxis(out angle, out axis);
+                transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / 64.0f), axis, angle);
 
                 PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
                 object value;
@@ -145,6 +123,37 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
             quaternion.z = -quaternion.z;
 
             return quaternion;
+        }
+
+        /// <summary>
+        /// Attempts to find a material in the project by name.
+        /// </summary>
+        /// <param name="name">The material name to search for.</param>
+        /// <returns>The material if found or null.</returns>
+        private static Material FindMaterial(string name)
+        {
+#if UNITY_EDITOR
+            // first try finding the fully qualified texture name like 'PlayrShp.Ceiling.Hullwk'.
+            string texture = "";
+            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
+            if (guid == null)
+            {
+                // if it couldn't be found try a simplified name which UnrealEd typically exports like 'Hullwk'.
+                texture = name;
+                if (name.Contains('.'))
+                    texture = name.Substring(name.LastIndexOf('.') + 1);
+                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
+            }
+            // if a material could be found using either option:
+            if (guid != null)
+            {
+                // load the material.
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
+            }
+            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
+#endif
+            return null;
         }
     }
 }
