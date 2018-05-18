@@ -61,6 +61,17 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                 // detect the brush mode (additive, subtractive).
                 if (tactor.Properties.TryGetValue("CsgOper", out value))
                     brush.Mode = (string)value == "CSG_Add" ? CSGMode.Add : CSGMode.Subtract;
+                // detect special brush flags.
+                if (tactor.Properties.TryGetValue("PolyFlags", out value))
+                {
+                    T3dPolyFlags flags = (T3dPolyFlags)value;
+                    if ((flags & T3dPolyFlags.Invisible) > 0)
+                        brush.IsVisible = false;
+                    if ((flags & T3dPolyFlags.NonSolid) > 0)
+                        brush.HasCollision = false;
+                    if ((flags & T3dPolyFlags.SemiSolid) > 0)
+                        brush.IsNoCSG = true;
+                }
                 // detect single polygons.
                 if (polygons.Length == 1)
                     brush.IsNoCSG = true;
