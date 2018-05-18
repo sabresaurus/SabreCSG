@@ -97,6 +97,8 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                                         polygon.Item = properties["Item"];
                                     if (properties.ContainsKey("Texture"))
                                         polygon.Texture = properties["Texture"];
+                                    if (properties.ContainsKey("Flags"))
+                                        polygon.Flags = (T3dPolygonFlags)Int32.Parse(properties["Flags"]);
                                 }
                             }
                             // we are currently parsing a brush polygon:

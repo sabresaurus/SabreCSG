@@ -23,6 +23,12 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         public string Texture { get; set; }
 
         /// <summary>
+        /// Gets or sets the polygon flags.
+        /// </summary>
+        /// <value>The polygon flags.</value>
+        public T3dPolygonFlags Flags { get; set; }
+
+        /// <summary>
         /// Gets or sets the origin.
         /// </summary>
         /// <value>The origin.</value>

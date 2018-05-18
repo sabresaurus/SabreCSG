@@ -5,10 +5,10 @@ using System;
 namespace Sabresaurus.SabreCSG.Importers.UnrealGold
 {
     /// <summary>
-    /// Represents an Unreal Editor 1 Brush's Polygon Flags.
+    /// Represents Unreal Editor 1's Brush Flags.
     /// </summary>
     [Flags]
-    public enum T3dPolyFlags
+    public enum T3dBrushFlags
     {
         /// <summary>
         /// Whether the brush is invisible.

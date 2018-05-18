@@ -45,7 +45,12 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / 64.0f, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
                     }
 
-                    polygons[i] = new Polygon(vertices, material, false, false);
+                    // detect the polygon flags.
+                    bool userExcludeFromFinal = false;
+                    if ((tpolygon.Flags & T3dPolygonFlags.Invisible) > 0)
+                        userExcludeFromFinal = true;
+
+                    polygons[i] = new Polygon(vertices, material, false, userExcludeFromFinal);
                 }
 
                 // position and rotate the brushes.
@@ -64,12 +69,12 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                 // detect special brush flags.
                 if (tactor.Properties.TryGetValue("PolyFlags", out value))
                 {
-                    T3dPolyFlags flags = (T3dPolyFlags)value;
-                    if ((flags & T3dPolyFlags.Invisible) > 0)
+                    T3dBrushFlags flags = (T3dBrushFlags)value;
+                    if ((flags & T3dBrushFlags.Invisible) > 0)
                         brush.IsVisible = false;
-                    if ((flags & T3dPolyFlags.NonSolid) > 0)
+                    if ((flags & T3dBrushFlags.NonSolid) > 0)
                         brush.HasCollision = false;
-                    if ((flags & T3dPolyFlags.SemiSolid) > 0)
+                    if ((flags & T3dBrushFlags.SemiSolid) > 0)
                         brush.IsNoCSG = true;
                 }
                 // detect single polygons.
