@@ -35,6 +35,7 @@ namespace Sabresaurus.SabreCSG
         // Temporary importer settings.
 
         private static int importerValveMapFormatScale = 32;
+        private static int importerUnrealGoldScale = 64;
 
         public void OnEnable()
         {
@@ -181,6 +182,29 @@ namespace Sabresaurus.SabreCSG
 
             using (new NamedVerticalScope("Import"))
             {
+                importerUnrealGoldScale = EditorGUILayout.IntField("Scale", importerUnrealGoldScale);
+                if (importerUnrealGoldScale < 1) importerUnrealGoldScale = 1;
+
+                if (GUILayout.Button("Import Unreal Gold Map (*.t3d)"))
+                {
+                    try
+                    {
+                        string path = EditorUtility.OpenFilePanel("Import Unreal Gold Map", "", "t3d");
+                        if (path.Length != 0)
+                        {
+                            EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Parsing Unreal Text File (*.t3d)...", 0.0f);
+                            var importer = new Importers.UnrealGold.T3dImporter();
+                            var map = importer.Import(path);
+                            Importers.UnrealGold.T3dMapConverter.Import(csgModel, map, importerUnrealGoldScale);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        EditorUtility.ClearProgressBar();
+                        EditorUtility.DisplayDialog("Unreal Gold Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
+                    }
+                }
+				
                 importerValveMapFormatScale = EditorGUILayout.IntField("Scale", importerValveMapFormatScale);
                 if (importerValveMapFormatScale < 1) importerValveMapFormatScale = 1;
 
@@ -200,7 +224,7 @@ namespace Sabresaurus.SabreCSG
                     catch (Exception ex)
                     {
                         EditorUtility.ClearProgressBar();
-                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occured while importing the map:\r\n" + ex.Message, "Ohno!");
+                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }
             }
