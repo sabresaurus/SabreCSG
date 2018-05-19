@@ -182,9 +182,12 @@ namespace Sabresaurus.SabreCSG
 
             using (new NamedVerticalScope("Import"))
             {
+                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterUnrealGoldTexture, "Unreal Gold Importer", "Henry de Jongh");
+
                 importerUnrealGoldScale = EditorGUILayout.IntField("Scale", importerUnrealGoldScale);
                 if (importerUnrealGoldScale < 1) importerUnrealGoldScale = 1;
 
+                EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Import Unreal Gold Map (*.t3d)"))
                 {
                     try
@@ -204,10 +207,23 @@ namespace Sabresaurus.SabreCSG
                         EditorUtility.DisplayDialog("Unreal Gold Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }
+                if (GUILayout.Button("?", GUILayout.Width(16)))
+                {
+                    EditorUtility.DisplayDialog("Unreal Gold Importer", "This importer was created using Unreal Gold 227 (http://oldunreal.com/).\n\nImportant Notes:\n* It will try to find the materials in your project automatically. First it looks for the full name like 'PlayrShp.Ceiling.Hullwk' then the last word 'Hullwk'. The latter option could cause some false positives, try creating a material with the full name if this happens.\n* This importer requires you to place a massive additive cube around your whole level as Unreal Editor uses the subtractive workflow.\n\nKnown Issues:\n* Concave brushes may cause corruptions.", "Okay");
+                }
+                EditorGUILayout.EndHorizontal();
+                GuiLayoutEndImporterSection();
+
+                //
+                EditorGUILayout.Space();
+                //
+
+                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterImporterValveMapFormat2006Texture, "Source Engine 2006 Importer", "Henry de Jongh");
 
                 importerValveMapFormatScale = EditorGUILayout.IntField("Scale", importerValveMapFormatScale);
                 if (importerValveMapFormatScale < 1) importerValveMapFormatScale = 1;
 
+                EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Import Source Engine Map (*.vmf)"))
                 {
                     try
@@ -227,6 +243,14 @@ namespace Sabresaurus.SabreCSG
                         EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }
+
+                if (GUILayout.Button("?", GUILayout.Width(16)))
+                {
+                    EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer is an incomplete proof of concept! While it has internal data structures with UV and texture details none of it is currently used by SabreCSG.\n\nKnown Issues:\n* NODRAW solid sides are not excluded.\n* No imported UV data is applied on the brushes.\n* There is no automatic material search.", "Okay");
+                }
+                EditorGUILayout.EndHorizontal();
+
+                GuiLayoutEndImporterSection();
             }
 
             using (new NamedVerticalScope("Stats"))
@@ -335,6 +359,40 @@ namespace Sabresaurus.SabreCSG
                 // Update the last build's default material because we don't need to build again
                 lastBuildDefaultPhysicsMaterialProperty.objectReferenceValue = newMaterial;
             }
+        }
+
+        private void GuiLayoutBeginImporterSection(Texture2D icon, string title, string author)
+        {
+            GUIStyle style = new GUIStyle();
+            style.normal.background = SabreCSGResources.ImporterBackgroundTexture;
+
+            EditorGUILayout.BeginVertical(style);
+            EditorGUILayout.BeginHorizontal();
+
+            GUILayout.Label(icon);
+
+            EditorGUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(title, SabreGUILayout.GetTitleStyle());
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Author: " + author);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void GuiLayoutEndImporterSection()
+        {
+            EditorGUILayout.EndVertical();
         }
     }
 }
