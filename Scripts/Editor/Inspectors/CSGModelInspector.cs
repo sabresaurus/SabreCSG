@@ -204,7 +204,7 @@ namespace Sabresaurus.SabreCSG
                         EditorUtility.DisplayDialog("Unreal Gold Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }
-				
+
                 importerValveMapFormatScale = EditorGUILayout.IntField("Scale", importerValveMapFormatScale);
                 if (importerValveMapFormatScale < 1) importerValveMapFormatScale = 1;
 
