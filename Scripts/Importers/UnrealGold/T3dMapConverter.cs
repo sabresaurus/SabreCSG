@@ -20,87 +20,100 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         /// <param name="scale">The scale modifier.</param>
         public static void Import(CSGModel model, T3dMap map, int scale = 64)
         {
-            List<T3dActor> brushes = map.Brushes;
-            Brush[] sabreBrushes = new Brush[brushes.Count];
-
-            // iterate through all brush actors.
-            for (int k = 0; k < brushes.Count; k++)
+            try
             {
-                // get the underlying brush data.
-                T3dActor tactor = brushes[k];
-                T3dBrush tbrush = tactor.Brush;
-#if UNITY_EDITOR
-                UnityEditor.EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Converting Unreal Brushes To SabreCSG Brushes (" + (k + 1) + " / " + brushes.Count + ")...", k / (float)brushes.Count);
-#endif
-                // iterate through the brush polygons.
-                Polygon[] polygons = new Polygon[tbrush.Polygons.Count];
-                for (int i = 0; i < tbrush.Polygons.Count; i++)
+                model.BeginUpdate();
+
+                List<T3dActor> brushes = map.Brushes;
+                Brush[] sabreBrushes = new Brush[brushes.Count];
+
+                // iterate through all brush actors.
+                for (int k = 0; k < brushes.Count; k++)
                 {
-                    T3dPolygon tpolygon = tbrush.Polygons[i];
-
-                    // find the material in the unity project automatically.
-                    Material material = FindMaterial(tpolygon.Texture);
-
-                    Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
-                    for (int j = 0; j < tpolygon.Vertices.Count; j++)
+                    // get the underlying brush data.
+                    T3dActor tactor = brushes[k];
+                    T3dBrush tbrush = tactor.Brush;
+#if UNITY_EDITOR
+                    UnityEditor.EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Converting Unreal Brushes To SabreCSG Brushes (" + (k + 1) + " / " + brushes.Count + ")...", k / (float)brushes.Count);
+#endif
+                    // iterate through the brush polygons.
+                    Polygon[] polygons = new Polygon[tbrush.Polygons.Count];
+                    for (int i = 0; i < tbrush.Polygons.Count; i++)
                     {
-                        vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                        T3dPolygon tpolygon = tbrush.Polygons[i];
+
+                        // find the material in the unity project automatically.
+                        Material material = FindMaterial(tpolygon.Texture);
+
+                        Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
+                        for (int j = 0; j < tpolygon.Vertices.Count; j++)
+                        {
+                            vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                        }
+
+                        // detect the polygon flags.
+                        bool userExcludeFromFinal = false;
+                        if ((tpolygon.Flags & T3dPolygonFlags.Invisible) > 0)
+                            userExcludeFromFinal = true;
+
+                        polygons[i] = new Polygon(vertices, material, false, userExcludeFromFinal);
                     }
 
-                    // detect the polygon flags.
-                    bool userExcludeFromFinal = false;
-                    if ((tpolygon.Flags & T3dPolygonFlags.Invisible) > 0)
-                        userExcludeFromFinal = true;
+                    // position and rotate the brushes.
+                    Transform transform = model.CreateCustomBrush(polygons).transform;
+                    transform.position = (ToVector3(tactor.Location) / (float)scale) - (ToVector3(tactor.PrePivot) / (float)scale);
+                    Vector3 axis;
+                    float angle;
+                    T3dRotatorToQuaternion(tactor.Rotation).ToAngleAxis(out angle, out axis);
+                    transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / (float)scale), axis, angle);
 
-                    polygons[i] = new Polygon(vertices, material, false, userExcludeFromFinal);
-                }
+                    PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
+                    sabreBrushes[k] = brush;
 
-                // position and rotate the brushes.
-                Transform transform = model.CreateCustomBrush(polygons).transform;
-                transform.position = (ToVector3(tactor.Location) / (float)scale) - (ToVector3(tactor.PrePivot) / (float)scale);
-                Vector3 axis;
-                float angle;
-                T3dRotatorToQuaternion(tactor.Rotation).ToAngleAxis(out angle, out axis);
-                transform.RotateAround(transform.position + (ToVector3(tactor.PrePivot) / (float)scale), axis, angle);
-
-                PrimitiveBrush brush = transform.GetComponent<PrimitiveBrush>();
-                sabreBrushes[k] = brush;
-
-                object value;
-                // detect the brush mode (additive, subtractive).
-                if (tactor.Properties.TryGetValue("CsgOper", out value))
-                    brush.Mode = (string)value == "CSG_Add" ? CSGMode.Add : CSGMode.Subtract;
-                // detect special brush flags.
-                if (tactor.Properties.TryGetValue("PolyFlags", out value))
-                {
-                    T3dBrushFlags flags = (T3dBrushFlags)value;
-                    if ((flags & T3dBrushFlags.Invisible) > 0)
-                        brush.IsVisible = false;
-                    if ((flags & T3dBrushFlags.NonSolid) > 0)
-                        brush.HasCollision = false;
-                    if ((flags & T3dBrushFlags.SemiSolid) > 0)
+                    object value;
+                    // detect the brush mode (additive, subtractive).
+                    if (tactor.Properties.TryGetValue("CsgOper", out value))
+                        brush.Mode = (string)value == "CSG_Add" ? CSGMode.Add : CSGMode.Subtract;
+                    // detect special brush flags.
+                    if (tactor.Properties.TryGetValue("PolyFlags", out value))
+                    {
+                        T3dBrushFlags flags = (T3dBrushFlags)value;
+                        if ((flags & T3dBrushFlags.Invisible) > 0)
+                            brush.IsVisible = false;
+                        if ((flags & T3dBrushFlags.NonSolid) > 0)
+                            brush.HasCollision = false;
+                        if ((flags & T3dBrushFlags.SemiSolid) > 0)
+                            brush.IsNoCSG = true;
+                    }
+                    // detect single polygons.
+                    if (polygons.Length == 1)
                         brush.IsNoCSG = true;
                 }
-                // detect single polygons.
-                if (polygons.Length == 1)
-                    brush.IsNoCSG = true;
-            }
 
-            // add all new brushes to a group.
-            string title = "Unreal Gold Map";
-            if (map.Title != "")
-                title += " '" + map.Title + "'";
-            if (map.Author != "")
-                title += " (" + map.Author + ")";
+                // add all new brushes to a group.
+                string title = "Unreal Gold Map";
+                if (map.Title != "")
+                    title += " '" + map.Title + "'";
+                if (map.Author != "")
+                    title += " (" + map.Author + ")";
 
-            GroupBrush groupBrush = new GameObject(title).AddComponent<GroupBrush>();
-            groupBrush.transform.SetParent(model.transform);
-            for (int i = 0; i < sabreBrushes.Length; i++)
-                sabreBrushes[i].transform.SetParent(groupBrush.transform);
+                GroupBrush groupBrush = new GameObject(title).AddComponent<GroupBrush>();
+                groupBrush.transform.SetParent(model.transform);
+                for (int i = 0; i < sabreBrushes.Length; i++)
+                    sabreBrushes[i].transform.SetParent(groupBrush.transform);
 
 #if UNITY_EDITOR
-            UnityEditor.EditorUtility.ClearProgressBar();
+                UnityEditor.EditorUtility.ClearProgressBar();
 #endif
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                model.EndUpdate();
+            }
         }
 
         /// <summary>
