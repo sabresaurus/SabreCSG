@@ -481,6 +481,30 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ImporterUnrealGoldTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ImporterUnrealGold.png");
+            }
+        }
+
+        public static Texture2D ImporterImporterValveMapFormat2006Texture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ImporterValveMapFormat2006.png");
+            }
+        }
+
+        public static Texture2D ImporterBackgroundTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ImporterBackground.png");
+            }
+        }
+
         public static Material GetExcludedMaterial()
         {
             if (excludedMaterial == null)

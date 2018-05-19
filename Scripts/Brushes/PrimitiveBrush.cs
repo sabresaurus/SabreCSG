@@ -642,6 +642,9 @@ namespace Sabresaurus.SabreCSG
             // allows us to make sure the CSG Model knows about it
             if (parentCSGModel != null)
             {
+                // don't track brushes while a large scene update is going on.
+                if (parentCsgModel.IsUpdating) return;
+
                 bool newBrush = parentCSGModel.TrackBrush(this);
 
                 if (newBrush)
