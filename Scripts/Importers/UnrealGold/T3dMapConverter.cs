@@ -10,7 +10,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
     /// <summary>
     /// Converts an Unreal Editor 1 Map to SabreCSG Brushes.
     /// </summary>
-    public static class T3dMapToSabreCSG
+    public static class T3dMapConverter
     {
         /// <summary>
         /// Imports the specified map into the SabreCSG model.

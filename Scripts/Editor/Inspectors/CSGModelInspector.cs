@@ -194,7 +194,7 @@ namespace Sabresaurus.SabreCSG
                             EditorUtility.DisplayProgressBar("SabreCSG: Importing Unreal Gold Map", "Parsing Unreal Text File (*.t3d)...", 0.0f);
                             var importer = new Importers.UnrealGold.T3dImporter();
                             var map = importer.Import(path);
-                            Importers.UnrealGold.T3dMapToSabreCSG.Import(csgModel, map, importerUnrealGoldScale);
+                            Importers.UnrealGold.T3dMapConverter.Import(csgModel, map, importerUnrealGoldScale);
                         }
                     }
                     catch (Exception ex)
