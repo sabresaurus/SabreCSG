@@ -44,7 +44,7 @@ namespace Sabresaurus.SabreCSG
             fillToBottom = serializedObject.FindProperty ("fillToBottom");
         }
 
-		public override void OnInspectorGUI()
+		public override void DoInspectorGUI()
 		{
             Rect rect = GUILayoutUtility.GetRect(new GUIContent(), GUI.skin.box, GUILayout.ExpandWidth(true), GUILayout.Height(130));
 
@@ -105,7 +105,7 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.Space();
 			}
 
-			base.OnInspectorGUI();
+			base.DoInspectorGUI();
 		}
 
         private void DrawStairPreview(Rect rect)

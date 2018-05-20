@@ -9,11 +9,31 @@ namespace Sabresaurus.SabreCSG
 	[ExecuteInEditMode]
 	public class TrimBrush : CompoundBrush
 	{
-
-		[SerializeField]
+        /// <summary>
+        /// The size of the trim.
+        /// </summary>
+        [SerializeField]
 		float trimSize = 0.25f;
 
-		public override int BrushCount 
+        /// <summary>
+        /// Gets or sets the size of the trim.
+        /// </summary>
+        /// <value>The size of the trim.</value>
+        public float TrimSize { get { return trimSize; } set { trimSize = value; } }
+
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "Trim Brush";
+            }
+        }
+
+        public override int BrushCount
 		{
 			get 
 			{

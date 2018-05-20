@@ -40,7 +40,7 @@ namespace Sabresaurus.SabreCSG
             slopedCeiling = serializedObject.FindProperty("slopedCeiling");
         }
 
-        public override void OnInspectorGUI()
+        public override void DoInspectorGUI()
         {
             bool oldBool;
 
@@ -143,7 +143,7 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
-            base.OnInspectorGUI();
+            base.DoInspectorGUI();
         }
 
         void ApplyAndInvalidate()

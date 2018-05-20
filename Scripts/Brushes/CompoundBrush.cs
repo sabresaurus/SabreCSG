@@ -42,7 +42,19 @@ namespace Sabresaurus.SabreCSG
 			return parentCsgModel;
 		}
 
-		protected virtual void Start()
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return GetType().Name;
+            }
+        }
+
+        protected virtual void Start()
 		{
 			generatedBrushes = new List<PrimitiveBrush>(GetComponentsInChildren<PrimitiveBrush>());
 			for (int i = 0; i < generatedBrushes.Count; i++) 
@@ -53,6 +65,8 @@ namespace Sabresaurus.SabreCSG
 
 		public override void Invalidate (bool polygonsChanged)
 		{
+            base.Invalidate(polygonsChanged);
+
 			generatedBrushes.RemoveAll(item => item == null);
 			if(generatedBrushes.Count > BrushCount)
 			{
@@ -180,6 +194,49 @@ namespace Sabresaurus.SabreCSG
             return bounds;
         }
 
+        /// <summary>
+        /// Gets all of the polygons from all brushes in this compound brush.
+        /// </summary>
+        /// <returns>All of the polygons from all brushes in this compound brush.</returns>
+        public Polygon[] GetPolygons()
+        {
+            List<Polygon> polygons = new List<Polygon>();
+            // iterate through all child brushes:
+            foreach (Brush brush in GetComponentsInChildren<Brush>())
+            {
+                polygons.AddRange(GenerateTransformedPolygons(brush.transform, brush.GetPolygons()));
+            }
+            return polygons.ToArray();
+        }
+
+        /// <summary>
+        /// Generates transformed polygons to match the compound brush position.
+        /// </summary>
+        /// <param name="t">The transform of a child brush.</param>
+        /// <param name="polygons">The polygons of a child brush.</param>
+        /// <returns>The transformed polygons.</returns>
+        private Polygon[] GenerateTransformedPolygons(Transform t, Polygon[] polygons)
+        {
+            Polygon[] polygonsCopy = polygons.DeepCopy<Polygon>();
+
+            Vector3 center = t.localPosition;
+            Quaternion rotation = t.localRotation;
+            Vector3 scale = t.lossyScale;
+
+            for (int i = 0; i < polygonsCopy.Length; i++)
+            {
+                for (int j = 0; j < polygonsCopy[i].Vertices.Length; j++)
+                {
+                    polygonsCopy[i].Vertices[j].Position = rotation * polygonsCopy[i].Vertices[j].Position.Multiply(scale) + center;
+                    polygonsCopy[i].Vertices[j].Normal = rotation * polygonsCopy[i].Vertices[j].Normal;
+                }
+
+                // Just updated a load of vertex positions, so make sure the cached plane is updated
+                polygonsCopy[i].CalculatePlane();
+            }
+
+            return polygonsCopy;
+        }
 
         public virtual PrimitiveBrush CreateBrush()
 		{

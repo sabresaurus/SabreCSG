@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,12 @@ namespace Sabresaurus.SabreCSG
         public enum PopupMode
         {
             BezierDetailLevel,
+            GlobalPivotPosition,
             CreatePolygon,
             RevolveShape,
             ExtrudeShape,
             ExtrudePoint,
-            ExtrudeBevel
+            ExtrudeBevel,
         }
 
         private PopupMode popupMode;
@@ -32,6 +34,9 @@ namespace Sabresaurus.SabreCSG
         public Vector2 extrudeScale = Vector2.one;
         public int revolve360 = 8;
         public int revolveSteps = 4;
+        public bool revolveSpiralSloped = false;
+        public Vector2Int GlobalPivotPosition_Position;
+        public bool convexBrushes = true;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -45,30 +50,43 @@ namespace Sabresaurus.SabreCSG
             extrudeScale = project.extrudeScale;
             revolve360 = project.revolve360;
             revolveSteps = project.revolveSteps;
+            revolveSpiralSloped = project.revolveSpiralSloped;
+            convexBrushes = project.convexBrushes;
+            GlobalPivotPosition_Position = project.globalPivot.position;
 
-            this.onApply = (self) => {
-
+            this.onApply = (self) =>
+            {
                 // store the extrude settings in the project.
                 switch (popupMode)
                 {
                     case PopupMode.CreatePolygon:
                         project.extrudeScale = extrudeScale;
+                        project.convexBrushes = convexBrushes;
                         break;
+
                     case PopupMode.RevolveShape:
                         project.extrudeScale = extrudeScale;
+                        project.convexBrushes = convexBrushes;
                         project.revolve360 = revolve360;
                         project.revolveSteps = revolveSteps;
+                        project.revolveSpiralSloped = revolveSpiralSloped;
                         break;
+
                     case PopupMode.ExtrudeShape:
                         project.extrudeScale = extrudeScale;
+                        project.convexBrushes = convexBrushes;
                         project.extrudeDepth = extrudeDepth;
                         break;
+
                     case PopupMode.ExtrudePoint:
                         project.extrudeScale = extrudeScale;
+                        project.convexBrushes = convexBrushes;
                         project.extrudeDepth = extrudeDepth;
                         break;
+
                     case PopupMode.ExtrudeBevel:
                         project.extrudeScale = extrudeScale;
+                        project.convexBrushes = convexBrushes;
                         project.extrudeDepth = extrudeDepth;
                         project.extrudeClipDepth = extrudeClipDepth;
                         break;
@@ -82,20 +100,30 @@ namespace Sabresaurus.SabreCSG
 
         public override Vector2 GetWindowSize()
         {
+            // + 18 for every element
             switch (popupMode)
             {
                 case PopupMode.BezierDetailLevel:
                     return new Vector2(205, 140);
+
+                case PopupMode.GlobalPivotPosition:
+                    return new Vector2(300, 68);
+
                 case PopupMode.CreatePolygon:
-                    return new Vector2(300, 50 + 18);
+                    return new Vector2(300, 50 + 36);
+
                 case PopupMode.RevolveShape:
-                    return new Vector2(300, 86 + 18);
+                    return new Vector2(300, 104 + 36);
+
                 case PopupMode.ExtrudeShape:
-                    return new Vector2(300, 68 + 18);
+                    return new Vector2(300, 68 + 36);
+
                 case PopupMode.ExtrudePoint:
-                    return new Vector2(300, 68 + 18);
+                    return new Vector2(300, 68 + 36);
+
                 case PopupMode.ExtrudeBevel:
-                    return new Vector2(300, 86 + 18);
+                    return new Vector2(300, 86 + 36);
+
                 default:
                     return new Vector2(300, 150);
             }
@@ -104,12 +132,14 @@ namespace Sabresaurus.SabreCSG
         public override void OnGUI(Rect rect)
         {
             bool hasScale = true;
+            bool hasConvexBrushes = true;
             string accept = "";
             switch (popupMode)
             {
                 case PopupMode.BezierDetailLevel:
                     GUILayout.Label("Bezier Detail Level", EditorStyles.boldLabel);
                     hasScale = false;
+                    hasConvexBrushes = false;
                     accept = "Apply";
 
                     GUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -161,6 +191,23 @@ namespace Sabresaurus.SabreCSG
                     if (bezierDetailLevel_Detail > 999) bezierDetailLevel_Detail = 999;
                     break;
 
+                case PopupMode.GlobalPivotPosition:
+                    GUILayout.Label("Global Pivot Position", EditorStyles.boldLabel);
+                    hasScale = false;
+                    hasConvexBrushes = false;
+                    accept = "Set Position";
+
+#if !UNITY_2017_2_OR_NEWER
+                    EditorGUIUtility.wideMode = true;
+                    GlobalPivotPosition_Position = Vector2Int.FloorToInt(EditorGUILayout.Vector2Field("Position", GlobalPivotPosition_Position));
+                    EditorGUIUtility.wideMode = false;
+#else
+                    EditorGUIUtility.wideMode = true;
+                    GlobalPivotPosition_Position = EditorGUILayout.Vector2IntField("Position", GlobalPivotPosition_Position);
+                    EditorGUIUtility.wideMode = false;
+#endif
+                    break;
+
                 case PopupMode.CreatePolygon:
                     GUILayout.Label("Create Polygon", EditorStyles.boldLabel);
                     accept = "Create";
@@ -174,6 +221,8 @@ namespace Sabresaurus.SabreCSG
                     if (revolve360 < 3) revolve360 = 3;
                     revolveSteps = EditorGUILayout.IntField("Steps", revolveSteps);
                     if (revolveSteps < 1) revolveSteps = 1;
+
+                    revolveSpiralSloped = EditorGUILayout.Toggle("Sloped Spiral", revolveSpiralSloped);
 
                     // steps can't be more than 360.
                     if (revolveSteps > revolve360) revolveSteps = revolve360;
@@ -205,6 +254,11 @@ namespace Sabresaurus.SabreCSG
                     if (extrudeClipDepth < 0.01f) extrudeClipDepth = 0.01f;
                     if (extrudeClipDepth > extrudeDepth) extrudeClipDepth = extrudeDepth;
                     break;
+            }
+
+            if (hasConvexBrushes)
+            {
+                convexBrushes = EditorGUILayout.Toggle("Convex Brushes", convexBrushes);
             }
 
             if (hasScale)

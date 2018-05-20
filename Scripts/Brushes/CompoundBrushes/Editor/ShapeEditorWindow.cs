@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,7 +43,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private int gridScale = 16;
 
+        /// <summary>
+        /// The mouse position while dragging to calculate relative positioning.
+        /// </summary>
         private Vector2Int mouseDragLastGridPosition = new Vector2Int();
+
+        /// <summary>
+        /// The mouse drag starting position used for marquee selections.
+        /// </summary>
+        private Vector2Int mouseDragStartGridPosition = new Vector2Int();
+
+        /// <summary>
+        /// Whether the current drag is a marquee selection box.
+        /// </summary>
+        private bool isMarqueeSelect = false;
+
+        /// <summary>
+        /// The selected objects before the marquee selection started.
+        /// </summary>
+        private List<ISelectable> marqueeSelectedObjectsBackup = new List<ISelectable>();
+
+        /// <summary>
+        /// Whether the current drag is valid (invalid if sliding from the toolbar onto the grid).
+        /// </summary>
+        private bool isValidDrag = false;
 
         /// <summary>
         /// The currently selected objects.
@@ -145,11 +169,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Gets the segment at grid position.
+        /// Gets the object at the specified grid position.
         /// </summary>
         /// <param name="x">The x-coordinate on the grid.</param>
         /// <param name="y">The y-coordinate on the grid.</param>
-        /// <returns>The segment if found else null.</returns>
+        /// <returns>The object if found else null.</returns>
         private ISelectable GetObjectAtGridPosition(Vector2Int position)
         {
             // the global pivot point has the highest selection priority.
@@ -165,7 +189,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (segment != null)
                     return segment.bezierPivot2;
             }
-            // the segments have the medium-low priority.
+            // the segments have medium-low priority.
             foreach (Shape shape in project.shapes)
             {
                 Segment segment = shape.segments.FirstOrDefault((s) => s.position == position);
@@ -180,6 +204,42 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
             // nothing was found.
             return null;
+        }
+
+        /// <summary>
+        /// Selects most objects within a marquee rectangle with multi-marquee selection support.
+        /// </summary>
+        /// <param name="startPosition">The start grid position of the marquee selection.</param>
+        /// <param name="stopPosition">The stop grid position of the marquee selection.</param>
+        private void MarqueeSelectObjectsInRectangle(Vector2Int startPosition, Vector2Int stopPosition)
+        {
+            // calculate a rectangle that always uses positive numbers.
+            int x = stopPosition.x - startPosition.x < 0 ? stopPosition.x : startPosition.x;
+            int y = stopPosition.y - startPosition.y < 0 ? stopPosition.y : startPosition.y;
+            int w = stopPosition.x - startPosition.x < 0 ? startPosition.x - stopPosition.x : stopPosition.x - startPosition.x;
+            int h = stopPosition.y - startPosition.y < 0 ? startPosition.y - stopPosition.y : stopPosition.y - startPosition.y;
+            Rect rect = new Rect(x, y, w, h);
+
+            List<ISelectable> results = new List<ISelectable>();
+            // the bezier segment pivots have medium-high priority.
+            foreach (Shape shape in project.shapes)
+            {
+                results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot1.position)).Select(s => (ISelectable)s.bezierPivot1));
+                results.AddRange(shape.segments.Where(s => s.type == SegmentType.Bezier && rect.Contains(s.bezierPivot2.position)).Select(s => (ISelectable)s.bezierPivot2));
+            }
+            // the segments have medium-low priority.
+            foreach (Shape shape in project.shapes)
+            {
+                results.AddRange(shape.segments.Where(s => rect.Contains(s.position)).Select(s => (ISelectable)s));
+            }
+            // add all of the previously selected objects.
+            foreach (ISelectable obj in marqueeSelectedObjectsBackup)
+            {
+                if (!results.Contains(obj))
+                    results.Add(obj);
+            }
+            // select the objects in the editor.
+            selectedObjects = results;
         }
 
         /// <summary>
@@ -248,9 +308,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // move object around with the left mouse button.
                 if (Event.current.button == 0)
                 {
+                    // can't slide from the toolbar onto the grid.
+                    if (!isValidDrag) return;
+
                     Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
                     if (GetViewportRect().Contains(Event.current.mousePosition))
                     {
+                        // if we are drawing a marquee selection:
+                        if (isMarqueeSelect)
+                        {
+                            // select the objects in the current marquee selection.
+                            mouseDragLastGridPosition = grid;
+                            MarqueeSelectObjectsInRectangle(mouseDragStartGridPosition, mouseDragLastGridPosition);
+                            this.Repaint();
+                            return; // stop here so we don't move anything.
+                        }
+
                         Vector2Int mouseGridDelta = grid - mouseDragLastGridPosition;
 
                         // move the global pivot.
@@ -321,25 +394,56 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
             if (Event.current.type == EventType.MouseDown)
             {
-                if (Event.current.button == 0 && GetViewportRect().Contains(Event.current.mousePosition))
+                if (Event.current.button == 0)
                 {
-                    // if the user is not holding CTRL or SHIFT we clear the selected objects.
-                    if ((Event.current.modifiers & EventModifiers.Control) == 0 && (Event.current.modifiers & EventModifiers.Shift) == 0)
-                        selectedObjects.Clear();
+                    isValidDrag = false;
 
-                    // try finding an object under the mouse cursor.
-                    Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
-                    ISelectable found = GetObjectAtGridPosition(grid);
-                    // if the object was already selected, deselect it.
-                    if (found != null && selectedObjects.Contains(found))
-                        // deselect the object.
-                        selectedObjects.Remove(found);
-                    else if (found != null && !selectedObjects.Contains(found))
-                        // select the object.
-                        selectedObjects.Add(found);
-                    // store the grid position for relative dragging.
-                    mouseDragLastGridPosition = grid;
-                    this.Repaint();
+                    if (GetViewportRect().Contains(Event.current.mousePosition))
+                    {
+                        // the user did not click on the toolbar so dragging is valid.
+                        isValidDrag = true;
+
+                        // if the user is not holding CTRL or SHIFT we clear the selected objects.
+                        if ((Event.current.modifiers & EventModifiers.Control) == 0 && (Event.current.modifiers & EventModifiers.Shift) == 0)
+                            selectedObjects.Clear();
+
+                        // try finding an object under the mouse cursor.
+                        Vector2Int grid = ScreenPointToGrid(new Vector3(Event.current.mousePosition.x, Event.current.mousePosition.y));
+                        ISelectable found = GetObjectAtGridPosition(grid);
+                        // if the object was already selected, deselect it.
+                        if (found != null && selectedObjects.Contains(found))
+                            // deselect the object.
+                            selectedObjects.Remove(found);
+                        else if (found != null && !selectedObjects.Contains(found))
+                            // select the object.
+                            selectedObjects.Add(found);
+                        // store the grid position for relative dragging.
+                        mouseDragStartGridPosition = grid;
+                        mouseDragLastGridPosition = grid;
+                        // if nothing was selected or the user is holding CTRL but SHIFT is not held in either case then we start a(nother) marquee selection.
+                        if ((selectedObjects.Count == 0 || (Event.current.modifiers & EventModifiers.Control) != 0) && (Event.current.modifiers & EventModifiers.Shift) == 0)
+                        {
+                            // store a copy of the current selection and start the marquee select.
+                            marqueeSelectedObjectsBackup = selectedObjects.ToList();
+                            isMarqueeSelect = true;
+                        }
+                        this.Repaint();
+                    }
+                }
+            }
+
+            // have to check the raw type in case the mouse is released outside of this window.
+            if (Event.current.type == EventType.MouseUp || Event.current.rawType == EventType.MouseUp)
+            {
+                // if the left mouse button is released:
+                if (Event.current.button == 0)
+                {
+                    // stop the marquee select.
+                    if (isMarqueeSelect)
+                    {
+                        isMarqueeSelect = false;
+                        this.Repaint();
+                    }
                 }
             }
 
@@ -490,7 +594,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             //    Event.current.Use();
             //}
 
-
             if (Event.current.type == EventType.Repaint)
             {
                 if (!initialized)
@@ -613,6 +716,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // draw the global pivot point.
                 Vector2 pivotScreenPosition = GridPointToScreen(project.globalPivot.position);
                 Handles.DrawSolidRectangleWithOutline(new Rect(pivotScreenPosition.x - 4.0f, pivotScreenPosition.y - 4.0f, 8.0f, 8.0f), Color.white, isGlobalPivotSelected ? Color.red : Color.green);
+
+                // draw the current marquee selection.
+                if (isMarqueeSelect)
+                {
+                    Vector2 marqueeStart = GridPointToScreen(mouseDragStartGridPosition);
+                    Vector2 marqueeStop = GridPointToScreen(mouseDragLastGridPosition);
+                    Handles.DrawSolidRectangleWithOutline(new Rect(marqueeStart.x, marqueeStart.y, marqueeStop.x - marqueeStart.x, marqueeStop.y - marqueeStart.y), new Color(0.2f, 0.3f, 0.8f, 0.3f), new Color(0.1f, 0.2f, 0.7f, 0.3f));
+                }
             }
 
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
@@ -724,6 +835,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GenericMenu toolsMenu = new GenericMenu();
                 toolsMenu.AddItem(new GUIContent("Background/Load Image..."), false, OnToolsBackgroundLoadImage);
                 toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Set Position..."), false, OnToolsPivotSetPosition);
+                toolsMenu.AddItem(new GUIContent("Global Pivot/Reset Position"), false, OnToolsPivotResetPosition);
 #if UNITY_5_4_OR_NEWER
                 toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
 #else
@@ -777,8 +890,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 shape.CalculatePivotPosition();
             }
         }
-
-
 
         /// <summary>
         /// Called when the new button is pressed. Will reset the shape.
@@ -934,9 +1045,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             switch (gridScale)
             {
-                case 2 : gridScale = 4 ; break;
-                case 4 : gridScale = 8 ; break;
-                case 8 : gridScale = 16; break;
+                case 2: gridScale = 4; break;
+                case 4: gridScale = 8; break;
+                case 8: gridScale = 16; break;
                 case 16: gridScale = 32; break;
                 case 32: gridScale = 64; break;
                 case 64: gridScale = 64; break;
@@ -951,10 +1062,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             switch (gridScale)
             {
-                case 2 : gridScale = 2 ; break;
-                case 4 : gridScale = 2 ; break;
-                case 8 : gridScale = 4 ; break;
-                case 16: gridScale = 8 ; break;
+                case 2: gridScale = 2; break;
+                case 4: gridScale = 2; break;
+                case 8: gridScale = 4; break;
+                case 16: gridScale = 8; break;
                 case 32: gridScale = 16; break;
                 case 64: gridScale = 32; break;
                 default: gridScale = 16; break;
@@ -967,10 +1078,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnHome()
         {
             // scroll to the center of the screen.
-#if UNITY_5_4_OR_NEWER
+#if UNITY_2017_2_OR_NEWER
             viewportScroll = new Vector2(Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint, Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint);
 #else
-            viewportScroll = new Vector2(Screen.safeArea.width / 2.0f, Screen.safeArea.height / 2.0f);
+            viewportScroll = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
 #endif
         }
 
@@ -1112,7 +1223,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnSegmentBezierDetail()
         {
             // let the user choose the amount of bezier curve detail.
-            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) => {
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) =>
+            {
                 foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
@@ -1144,7 +1256,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the creation parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.CreatePolygon, project, (self) =>
+                {
                     // create the polygon.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().CreatePolygon(project);
                 }));
@@ -1178,20 +1291,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.RevolveShape, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.RevolveShape, project, (self) =>
+                {
                     // store generated parameters.
-                    if (extremeRight)
-                    {
-                        project.revolveDirection = true;
-                        project.revolveRadius = project.globalPivot.position.x - minX;
-                        project.revolveDistance = minX;
-                    }
-                    else
-                    {
-                        project.revolveDirection = false;
-                        project.revolveRadius = maxX - project.globalPivot.position.x;
-                        project.revolveDistance = maxX;
-                    }
+                    project.revolveRadius = project.globalPivot.position.x - minX;
+                    project.revolveDistance = minX;
+                    project.revolveDirection = extremeRight;
+
                     // extrude the shape revolved.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
                 }));
@@ -1199,18 +1305,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             else
             {
                 // store generated parameters.
-                if (extremeRight)
-                {
-                    project.revolveDirection = true;
-                    project.revolveRadius = project.globalPivot.position.x - minX;
-                    project.revolveDistance = minX;
-                }
-                else
-                {
-                    project.revolveDirection = false;
-                    project.revolveRadius = maxX - project.globalPivot.position.x;
-                    project.revolveDistance = maxX;
-                }
+                project.revolveRadius = project.globalPivot.position.x - minX;
+                project.revolveDistance = minX;
+                project.revolveDirection = extremeRight;
+
                 // extrude the shape revolved.
                 Selection.activeGameObject.GetComponent<ShapeEditorBrush>().RevolveShape(project);
             }
@@ -1231,7 +1329,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeShape, project, (self) =>
+                {
                     // extrude the shape.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeShape(project);
                 }));
@@ -1258,7 +1357,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudePoint, project, (self) =>
+                {
                     // extrude the shape to a point.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudePoint(project);
                 }));
@@ -1285,7 +1385,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (popup)
             {
                 // let the user choose the extrude parameters.
-                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeBevel, project, (self) => {
+                ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.ExtrudeBevel, project, (self) =>
+                {
                     // extrude the shape to a point but capped to cause a trapezoid.
                     Selection.activeGameObject.GetComponent<ShapeEditorBrush>().ExtrudeBevel(project);
                 }));
@@ -1325,14 +1426,42 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             backgroundImage = null;
         }
 
+        /// <summary>
+        /// Called when the tools 'menu/pivot/set position' item is pressed.
+        /// </summary>
+        private void OnToolsPivotSetPosition()
+        {
+            // let the user choose the global pivot position.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) =>
+            {
+                // set the new global pivot position.
+                project.globalPivot.position = self.GlobalPivotPosition_Position;
+
+                // show the changes.
+                Repaint();
+            }));
+        }
+
+        /// <summary>
+        /// Called when the tools 'menu/pivot/reset position' item is pressed.
+        /// </summary>
+        private void OnToolsPivotResetPosition()
+        {
+            project.globalPivot.position = Vector2Int.zero;
+        }
+
         private Rect GetViewportRect()
         {
+#if UNITY_2017_2_OR_NEWER
             Rect viewportRect = Screen.safeArea;
+#else
+            Rect viewportRect = new Rect(0, 0, Screen.width, Screen.height);
+#endif
             viewportRect.y += 18;
             viewportRect.height -= 40;
             return viewportRect;
         }
-        
+
         private void GlDrawLine(float thickness, float x1, float y1, float x2, float y2)
         {
             var point1 = new Vector2(x1, y1);
@@ -1453,11 +1582,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void ShowCenteredPopupWindowContent(PopupWindowContent popup)
         {
             Vector2 size = popup.GetWindowSize();
-#if UNITY_5_4_OR_NEWER
-            PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
+            try
+            {
+#if UNITY_2017_2_OR_NEWER
+                PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f / EditorGUIUtility.pixelsPerPoint) - (size.y / 2.0f), 0, 0), popup);
 #else
-            PopupWindow.Show(new Rect((Screen.safeArea.width / 2.0f) - (size.x / 2.0f), (Screen.safeArea.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
+                PopupWindow.Show(new Rect((Screen.width / 2.0f) - (size.x / 2.0f), (Screen.height / 2.0f) - (size.y / 2.0f), 0, 0), popup);
 #endif
+            }
+            catch (ExitGUIException) { }
         }
 
         /// <summary>

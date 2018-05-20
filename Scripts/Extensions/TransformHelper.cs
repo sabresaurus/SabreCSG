@@ -58,7 +58,8 @@ namespace Sabresaurus.SabreCSG
 				}
 
 				// Create group
-				GameObject groupObject = new GameObject("Group");
+				GameObject groupObject = new GameObject("");
+                GroupBrush groupBrush = groupObject.AddComponent<GroupBrush>();
 				Undo.RegisterCreatedObjectUndo (groupObject, "Group");
 				Undo.SetTransformParent(groupObject.transform, rootTransform, "Group");
 
@@ -74,6 +75,9 @@ namespace Sabresaurus.SabreCSG
 					Undo.SetTransformParent(selectedTransforms[i], groupObject.transform, "Group");
 				}
 
+                // Ensure it gets a correct name in the hierarchy.
+                groupBrush.UpdateGeneratedHierarchyName();
+
 				Selection.activeGameObject = groupObject;
 				//						EditorApplication.RepaintHierarchyWindow();
 				//						SceneView.RepaintAll();
@@ -82,7 +86,7 @@ namespace Sabresaurus.SabreCSG
 
 		public static void UngroupSelection()
 		{
-			if(Selection.activeTransform != null && Selection.activeGameObject.GetComponents<MonoBehaviour>().Length == 0)
+            if (Selection.activeTransform != null && Selection.activeGameObject.GetComponent<GroupBrush>())
 			{
 				Transform rootTransform = Selection.activeTransform.parent;
 				int siblingIndex = Selection.activeTransform.GetSiblingIndex();

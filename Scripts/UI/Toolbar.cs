@@ -430,7 +430,7 @@ namespace Sabresaurus.SabreCSG
 						brushes.Add(brush);
 					}
 				}
-                if (primaryBrush != null)
+                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
                 {
 					CSGMode brushMode = (CSGMode)EditorGUILayout.EnumPopup(primaryBrush.Mode, EditorStyles.toolbarPopup, GUILayout.Width(80));
 					if(brushMode != primaryBrush.Mode)

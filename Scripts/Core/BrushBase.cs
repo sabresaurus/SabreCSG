@@ -10,6 +10,7 @@ using UnityEngine.Serialization;
 namespace Sabresaurus.SabreCSG
 {
 	public enum CSGMode { Add, Subtract };
+    [ExecuteInEditMode]
 	public abstract class BrushBase : MonoBehaviour
 	{
 		[SerializeField]
@@ -26,7 +27,9 @@ namespace Sabresaurus.SabreCSG
 
 		protected bool destroyed = false;
 
-		public CSGMode Mode
+        protected string previousHierarchyName = "";
+
+        public CSGMode Mode
 		{
 			get
 			{
@@ -87,7 +90,60 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public virtual void Invalidate(bool polygonsChanged){}
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public virtual string BeautifulBrushName
+        {
+            get
+            {
+                return "AppliedBrush";
+            }
+        }
+
+        /// <summary>
+        /// Gets an auto-generated name for use in the hierarchy.
+        /// </summary>
+        /// <value>An auto-generated name for use in the hierarchy.</value>
+        public string GeneratedHierarchyName
+        {
+            get
+            {
+                return BeautifulBrushName + " (" + GetBounds().ToGeneratedHierarchyString() + ")";
+            }
+        }
+
+        /// <summary>
+        /// Updates the auto-generated name of the brush in the hierarchy. This must be called when
+        /// the bounds of a brush change without a call to <see cref="Invalidate"/>. The name of the
+        /// brush is not updated when the user changed it to something else manually. The only
+        /// exception to that is when the user resets the name to an empty string.
+        /// </summary>
+        public void UpdateGeneratedHierarchyName()
+        {
+            // this may happen after the brush is duplicated.
+            if (previousHierarchyName == "" && GeneratedHierarchyName == transform.name)
+                previousHierarchyName = transform.name;
+
+            if (transform.name == previousHierarchyName || transform.name == "")
+                transform.name = previousHierarchyName = GeneratedHierarchyName;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this brush supports CSG operations. Setting this to false
+        /// will hide CSG brush related options in the editor.
+        /// <para>For example a <see cref="GroupBrush"/> does not have any CSG operations.</para>
+        /// </summary>
+        /// <value><c>true</c> if this brush supports CSG operations; otherwise, <c>false</c>.</value>
+        public virtual bool SupportsCsgOperations { get { return true; } }
+
+        public virtual void Invalidate(bool polygonsChanged)
+        {
+            // when a modification to a brush occured we update the auto-generated name.
+            if (polygonsChanged)
+                UpdateGeneratedHierarchyName();
+        }
 
 		public abstract void UpdateVisibility();
 
@@ -102,12 +158,21 @@ namespace Sabresaurus.SabreCSG
         // Fired by the CSG Model on each brush it knows about when Unity triggers Undo.undoRedoPerformed
         public abstract void OnUndoRedoPerformed ();
 
-
 		protected virtual void OnDestroy()
 		{
 			destroyed = true;
-		}			
-	}
+		}
+
+        protected virtual void Awake()
+        {
+            // if the brush name is equal to the auto-generated one,
+            // we store the name so we can check for manual user changes.
+            if (previousHierarchyName == "" && GeneratedHierarchyName == transform.name)
+                previousHierarchyName = transform.name;
+        }
+
+        protected virtual void Update() { }
+    }
 }
 
 #endif

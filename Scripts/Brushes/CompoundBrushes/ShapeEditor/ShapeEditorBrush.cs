@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
+
 using Sabresaurus.SabreCSG.ShapeEditor.Decomposition;
 using System;
 using System.Collections;
@@ -28,18 +29,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             /// Creates a flat polygon in NoCSG mode.
             /// </summary>
             CreatePolygon,
+
             /// <summary>
             /// Revolves the shapes.
             /// </summary>
             RevolveShape,
+
             /// <summary>
             /// Extrudes the shapes.
             /// </summary>
             ExtrudeShape,
+
             /// <summary>
             /// Extrudes the shapes to a point.
             /// </summary>
             ExtrudePoint,
+
             /// <summary>
             /// Extrudes the shapes bevelled.
             /// </summary>
@@ -48,29 +53,42 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         /// <summary>The 2D Shape Editor Project (latest project used to build this brush).</summary>
         [SerializeField]
-        Project project = JsonUtility.FromJson<Project>("{\"version\":1,\"shapes\":[{\"segments\":[{\"_position\":{\"x\":-18,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-14,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-14,\"y\":-13},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-20,\"y\":-13},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-10,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-6,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-6,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-3,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":6,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":11,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":14,\"y\":-12},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":14,\"y\":-2},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":5,\"y\":-15},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-3,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":6,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":-1},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":3},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":5,\"y\":6},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":12,\"y\":6},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-10,\"y\":8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-18,\"y\":0},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3}],\"pivot\":{\"_position\":{\"x\":0,\"y\":-8}}}],\"globalPivot\":{\"_position\":{\"x\":0,\"y\":0}},\"flipHorizontally\":false,\"flipVertically\":false,\"extrudeDepth\":1.0,\"extrudeClipDepth\":0.5,\"extrudeScale\":{\"x\":1.0,\"y\":1.0},\"revolve360\":8,\"revolveSteps\":4,\"revolveDistance\":1,\"revolveRadius\":1,\"revolveDirection\":true}");
+        private Project project = JsonUtility.FromJson<Project>("{\"version\":1,\"shapes\":[{\"segments\":[{\"_position\":{\"x\":-18,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-14,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-14,\"y\":-13},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-20,\"y\":-13},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-10,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-6,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-6,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-3,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":6,\"y\":-19},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":11,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":14,\"y\":-12},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":14,\"y\":-2},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":5,\"y\":-15},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":-16},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-3,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":9,\"y\":-11},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":6,\"y\":-8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":-1},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-2,\"y\":3},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":5,\"y\":6},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":12,\"y\":6},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":10,\"y\":8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-10,\"y\":8},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3},{\"_position\":{\"x\":-18,\"y\":0},\"type\":0,\"bezierPivot1\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierPivot2\":{\"_position\":{\"x\":-2,\"y\":-6}},\"bezierDetail\":3}],\"pivot\":{\"_position\":{\"x\":0,\"y\":-8}}}],\"globalPivot\":{\"_position\":{\"x\":0,\"y\":0}},\"flipHorizontally\":false,\"flipVertically\":false,\"extrudeDepth\":1.0,\"extrudeClipDepth\":0.5,\"extrudeScale\":{\"x\":1.0,\"y\":1.0},\"revolve360\":8,\"revolveSteps\":4,\"revolveDistance\":1,\"revolveRadius\":1,\"revolveDirection\":true}");
 
         /// <summary>
         /// The extrude mode (latest operation used to build this brush).
         /// </summary>
         [SerializeField]
-        ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
+        private ExtrudeMode extrudeMode = ExtrudeMode.ExtrudeShape;
 
         /// <summary>
         /// The last built polygons determine the <see cref="BrushCount"/> needed to build the
         /// compound brush.
         /// </summary>
         [SerializeField]
-        int desiredBrushCount;
+        private int desiredBrushCount;
 
         /// <summary>
         /// Whether the geometry has been changed through one of the extrude methods.
         /// </summary>
         [SerializeField]
-        bool isDirty = true;
+        private bool isDirty = true;
+
+        /// <summary>
+        /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
+        /// </summary>
+        /// <value>The beautiful name of the brush.</value>
+        public override string BeautifulBrushName
+        {
+            get
+            {
+                return "2D Shape Editor Brush";
+            }
+        }
 
         /// <summary>The last known extents of the compound brush to detect user resizing the bounds.</summary>
         private Vector3 m_LastKnownExtents;
+
         /// <summary>The last known position of the compound brush to prevent movement on resizing the bounds.</summary>
         private Vector3 m_LastKnownPosition;
 
@@ -80,8 +98,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private List<Polygon> m_LastBuiltPolygons;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             // get the last known extents and position (especially after scene changes).
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
@@ -91,6 +110,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             get
             {
+                // if the user desires a single concave brush we return 1.
+                if (!project.convexBrushes)
+                    return 1;
+
                 // we already know the amount of brushes we need.
                 if (!isDirty)
                     return desiredBrushCount;
@@ -122,10 +145,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             ////////////////////////////////////////////////////////////////////
             Bounds csgBounds = new Bounds();
 
+            // force nocsg when creating a flat polygon sheet as sabrecsg doesn't support it.
+            if (extrudeMode == ExtrudeMode.CreatePolygon)
+                this.IsNoCSG = true;
+
+            // force nocsg when revolving with a sloped spiral as there are non-planar polygons.
+            if (extrudeMode == ExtrudeMode.RevolveShape && project.revolveSpiralSloped && project.globalPivot.position.y != 0)
+                this.IsNoCSG = true;
+
+            // force nocsg when using concave brushes as sabrecsg doesn't support it.
+            if (!project.convexBrushes)
+                this.IsNoCSG = true;
+
             // nothing to do except copy csg information to our child brushes.
             if (!isDirty)
             {
-                for (int i = 0; i < BrushCount; i++)
+                for (int i = 0; i < (project.convexBrushes ? desiredBrushCount : 1); i++)
                 {
                     generatedBrushes[i].Mode = this.Mode;
                     generatedBrushes[i].IsNoCSG = this.IsNoCSG;
@@ -148,20 +183,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (m_LastBuiltPolygons == null)
                 m_LastBuiltPolygons = BuildConvexPolygons();
 
+            // prepare a list of polygons for concave brushes.
+            List<Polygon> concavePolygons = null;
+            if (!project.convexBrushes)
+                concavePolygons = new List<Polygon>();
+
             // iterate through the brushes we received:
-            int brushCount = BrushCount;
+            int brushCount = desiredBrushCount;
 
-            // force nocsg when creating a flat polygon sheet as sabrecsg doesn't support it.
-            if (extrudeMode == ExtrudeMode.CreatePolygon)
-                this.IsNoCSG = true;
-
+            // iterate through the brushes we received:
             for (int i = 0; i < brushCount; i++)
             {
                 // copy our csg information to our child brushes.
-                generatedBrushes[i].Mode = this.Mode;
-                generatedBrushes[i].IsNoCSG = this.IsNoCSG;
-                generatedBrushes[i].IsVisible = this.IsVisible;
-                generatedBrushes[i].HasCollision = this.HasCollision;
+                generatedBrushes[project.convexBrushes ? i : 0].Mode = this.Mode;
+                generatedBrushes[project.convexBrushes ? i : 0].IsNoCSG = this.IsNoCSG;
+                generatedBrushes[project.convexBrushes ? i : 0].IsVisible = this.IsVisible;
+                generatedBrushes[project.convexBrushes ? i : 0].HasCollision = this.HasCollision;
 
                 // local variables.
                 Quaternion rot;
@@ -175,11 +212,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         GenerateUvCoordinates(m_LastBuiltPolygons[i], false);
                         Polygon poly1 = m_LastBuiltPolygons[i].DeepCopy();
                         poly1.Flip();
-                        generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
+
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(new Polygon[] { poly1 });
+                        else
+                            concavePolygons.Add(poly1);
                         break;
 
-                    // generate 3d cube-ish shapes that revolve around the pivot.
+                    // generate 3d cube-ish shapes that revolve around the pivot and spirals up or down.
                     case ExtrudeMode.RevolveShape:
+                        float spiralHeight = ((((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f) * (i / m_LastBuiltPolygons.Count)) / project.revolve360) * (project.revolve360 / project.revolveSteps);
+                        float spiralStep = ((((project.globalPivot.position.y * project.extrudeScale.y) / 8.0f)) / project.revolve360) * (project.revolve360 / project.revolveSteps);
                         int labpIndex = i % m_LastBuiltPolygons.Count;
 
                         Polygon poly2 = m_LastBuiltPolygons[labpIndex].DeepCopy();
@@ -188,16 +231,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         foreach (Vertex v in poly2.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight, 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, ((i / m_LastBuiltPolygons.Count) * step), 0.0f));
                         }
+                        GenerateNormals(poly2);
+
                         Polygon nextPoly = m_LastBuiltPolygons[labpIndex].DeepCopy();
                         nextPoly.Flip();
                         foreach (Vertex v in nextPoly.Vertices)
                         {
                             float step = 360.0f / project.revolve360;
-                            v.Position = RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (project.revolveDirection ? 0 : 180) + (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
+                            v.Position = new Vector3(0, -spiralHeight - (project.revolveSpiralSloped ? spiralStep : 0), 0) + RotatePointAroundPivot(v.Position, new Vector3(((project.revolveDistance / 8.0f) * project.extrudeScale.x) + ((project.revolveRadius * project.extrudeScale.x) / 8.0f), 0.0f, 0.0f), new Vector3(0.0f, (((i / m_LastBuiltPolygons.Count) * step) + step), 0.0f));
                         }
-                        GenerateNormals(poly2);
                         List<Polygon> polygons = new List<Polygon>() { poly2 };
                         List<Vertex> backPolyVertices = new List<Vertex>();
                         Edge[] myEdges = poly2.GetEdges();
@@ -228,7 +272,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         GenerateUvCoordinates(backPoly, false);
                         polygons.Add(backPoly);
 
-                        generatedBrushes[i].SetPolygons(polygons.ToArray());
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(polygons.ToArray());
+                        else
+                            concavePolygons.AddRange(polygons);
                         break;
 
                     // generate a 3d cube-ish shape.
@@ -237,7 +284,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         SurfaceUtility.ExtrudePolygon(m_LastBuiltPolygons[i], project.extrudeDepth, out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
 
                     // generate a 3d cone-ish shape.
@@ -246,7 +296,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         ExtrudePolygonToPoint(m_LastBuiltPolygons[i], project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
 
                     // generate a 3d trapezoid-ish shape.
@@ -255,18 +308,106 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         ExtrudePolygonBevel(m_LastBuiltPolygons[i], project.extrudeDepth, project.extrudeClipDepth / project.extrudeDepth, new Vector2((project.globalPivot.position.x * project.extrudeScale.x) / 8.0f, -(project.globalPivot.position.y * project.extrudeScale.y) / 8.0f), out outputPolygons, out rot);
                         foreach (Polygon poly in outputPolygons)
                             GenerateUvCoordinates(poly, false);
-                        generatedBrushes[i].SetPolygons(outputPolygons);
+                        if (project.convexBrushes)
+                            generatedBrushes[i].SetPolygons(outputPolygons);
+                        else
+                            concavePolygons.AddRange(outputPolygons);
                         break;
                 }
 
-                generatedBrushes[i].Invalidate(true);
-                csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
+                // we invalidate every brush after hidden surface removal.
+            }
+
+            // we exclude hidden faces automatically.
+            // this step will automatically optimize NoCSG output the same way additive brushes would have.
+            // it also excludes a couple faces that CSG doesn't exclude due to floating point precision errors.
+            // the latter is especially noticable with complex revolved shapes.
+
+            // hidden surface removal for convex brushes.
+            if (project.convexBrushes)
+            {
+                // compare each brush to another brush:
+                for (int i = 0; i < brushCount; i++)
+                {
+                    for (int j = 0; j < brushCount; j++)
+                    {
+                        // can't check for hidden faces on the same brush.
+                        if (i == j) continue;
+
+                        // compare each polygon on brush i to each polygon on brush j:
+                        foreach (Polygon pa in generatedBrushes[i].GetPolygons())
+                        {
+                            foreach (Polygon pb in generatedBrushes[j].GetPolygons())
+                            {
+                                // check they both have this polygon:
+                                bool identical = true;
+                                foreach (Vertex va in pa.Vertices)
+                                {
+                                    if (!pb.Vertices.Any(vb => vb.Position == va.Position))
+                                    {
+                                        identical = false;
+                                        break;
+                                    }
+                                }
+                                // identical polygons on both brushes means it can be excluded:
+                                if (identical)
+                                {
+                                    pa.UserExcludeFromFinal = true;
+                                    pb.UserExcludeFromFinal = true;
+                                }
+                            }
+                        }
+                    }
+
+                    // invalidate every brush.
+                    generatedBrushes[i].Invalidate(true);
+                    csgBounds.Encapsulate(generatedBrushes[i].GetBounds());
+                }
+            }
+
+            // hidden surface removal for a concave brush.
+            else
+            {
+                List<Polygon> concavePolygonsCopy = concavePolygons.ToList();
+
+                // compare each polygon and find duplicates:
+                foreach (Polygon pa in concavePolygonsCopy)
+                {
+                    foreach (Polygon pb in concavePolygonsCopy)
+                    {
+                        // can't be the same polygon.
+                        if (pa == pb) continue;
+
+                        // check they both have this polygon:
+                        bool identical = true;
+                        foreach (Vertex va in pa.Vertices)
+                        {
+                            if (!pb.Vertices.Any(vb => vb.Position == va.Position))
+                            {
+                                identical = false;
+                                break;
+                            }
+                        }
+                        // identical polygons on both brushes means it can be excluded:
+                        if (identical)
+                        {
+                            concavePolygons.Remove(pa);
+                            concavePolygons.Remove(pb);
+                        }
+                    }
+                }
+
+                // invalidate the brush.
+                generatedBrushes[0].SetPolygons(concavePolygons.ToArray());
+                csgBounds.Encapsulate(generatedBrushes[0].GetBounds());
             }
 
             // apply the generated csg bounds.
             localBounds = csgBounds;
             m_LastKnownExtents = localBounds.extents;
             m_LastKnownPosition = transform.localPosition;
+            // update the generated name in the hierarchy.
+            UpdateGeneratedHierarchyName();
         }
 
         /// <summary>
@@ -284,7 +425,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         /// <summary>
         /// Builds convex polygons out of the currently loaded 2D Shape Editor project.
-        /// Note: Currently simply triangulates everything instead.
         /// </summary>
         /// <returns>A list of convex polygons.</returns>
         private List<Polygon> BuildConvexPolygons()
@@ -341,18 +481,22 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         // we make a brush for every polgon.
                         desiredBrushCount = polygons.Count;
                         break;
-                        // we need another brush for every revolve step.
+
                     case ExtrudeMode.RevolveShape:
+                        // we need another brush for every revolve step.
                         desiredBrushCount = polygons.Count * project.revolveSteps;
                         break;
+
                     case ExtrudeMode.ExtrudeShape:
                         // we make a brush for every polgon.
                         desiredBrushCount = polygons.Count;
                         break;
+
                     case ExtrudeMode.ExtrudePoint:
                         // we make a brush for every polgon.
                         desiredBrushCount = polygons.Count;
                         break;
+
                     case ExtrudeMode.ExtrudeBevel:
                         // we make a brush for every polgon.
                         desiredBrushCount = polygons.Count;
@@ -648,6 +792,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             return Quaternion.Euler(angles) * (point - pivot) + pivot;
         }
 
+        /// <summary>
+        /// Flips a project horizontally. This code was stolen from the ShapeEditorWindow.
+        /// </summary>
+        private void FlipProjectHorizontally()
+        {
+            // store this flip inside of the project.
+            project.flipHorizontally = !project.flipHorizontally;
+
+            foreach (Shape shape in project.shapes)
+            {
+                foreach (Segment segment in shape.segments)
+                {
+                    // flip segment.
+                    segment.position = new Vector2Int(-segment.position.x + (project.globalPivot.position.x * 2), segment.position.y);
+                    // flip bezier pivot handles.
+                    segment.bezierPivot1.position = new Vector2Int(-segment.bezierPivot1.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot1.position.y);
+                    segment.bezierPivot2.position = new Vector2Int(-segment.bezierPivot2.position.x + (project.globalPivot.position.x * 2), segment.bezierPivot2.position.y);
+                }
+
+                // recalculate the pivot position of the shape.
+                shape.CalculatePivotPosition();
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // PUBLIC API                                                                            //
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -687,6 +855,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             // store a project copy inside of this brush.
             this.project = project.Clone();
+            // flip project horizontally if revolving left.
+            if (!this.project.revolveDirection) FlipProjectHorizontally();
             // store the extrude mode inside of this brush.
             extrudeMode = ExtrudeMode.RevolveShape;
             // build the polygons out of the project.
@@ -694,6 +864,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // build the brush.
             isDirty = true;
             Invalidate(true);
+            // un-flip project horizontally if revolving left.
+            if (!this.project.revolveDirection) FlipProjectHorizontally();
         }
 
         /// <summary>

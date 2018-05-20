@@ -20,7 +20,7 @@ namespace Sabresaurus.SabreCSG
 			trimSizeProp = serializedObject.FindProperty ("trimSize");
         }
 
-		public override void OnInspectorGUI()
+		public override void DoInspectorGUI()
 		{
 			using (new NamedVerticalScope("TrimBrush"))
 			{
@@ -34,7 +34,7 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.Space();
 			}
 
-			base.OnInspectorGUI();
+			base.DoInspectorGUI();
 		}
 
 		void ApplyAndInvalidate()
