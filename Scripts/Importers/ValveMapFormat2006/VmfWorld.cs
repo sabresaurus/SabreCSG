@@ -35,6 +35,11 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// The solids in the world.
         /// </summary>
         public List<VmfSolid> Solids = new List<VmfSolid>();
+
+        /// <summary>
+        /// The entities in the world.
+        /// </summary>
+        public List<VmfEntity> Entities = new List<VmfEntity>();
     }
 }
 

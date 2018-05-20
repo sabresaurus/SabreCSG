@@ -40,6 +40,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                 object value;
                 VmfSolid solid = null;
                 VmfSolidSide solidSide = null;
+                VmfEntity entity = null;
                 while (!reader.EndOfStream)
                 {
                     line = reader.ReadLine().Trim();
@@ -99,7 +100,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                         }
                     }
 
-                    // parse solid.
+                    // parse world solid.
                     if (closures[0] == "world" && closures[1] == "solid" && closures[2] == null)
                     {
                         // create a new solid and add it to the world.
@@ -119,7 +120,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                         }
                     }
 
-                    // parse solid side.
+                    // parse world solid side.
                     if (closures[0] == "world" && closures[1] == "solid" && closures[2] == "side" && closures[3] == null)
                     {
                         // create a new solid side and add it to the solid.
@@ -137,7 +138,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 case "id": solidSide.Id = (int)value; break;
                                 case "plane": solidSide.Plane = (VmfPlane)value; break;
                                 case "material": solidSide.Material = (string)value; break;
-                                case "rotation": solidSide.Rotation = (int)value; break;
+                                //case "rotation": solidSide.Rotation = (float)value; break;
                                 case "uaxis": solidSide.UAxis = (VmfAxis)value; break;
                                 case "vaxis": solidSide.VAxis = (VmfAxis)value; break;
                                 case "lightmapscale": solidSide.LightmapScale = (int)value; break;
@@ -150,6 +151,74 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                     if (closures[0] == "world" && closures[1] == "solid" && closures[2] == "side" && closures[3] == "dispinfo")
                     {
                         solidSide.HasDisplacement = true;
+                    }
+
+                    // parse entity.
+                    if (closures[0] == "entity" && closures[1] == null)
+                    {
+                        // create a new entity and add it to the world.
+                        if (justEnteredClosure)
+                        {
+                            entity = new VmfEntity();
+                            world.Entities.Add(entity);
+                        }
+
+                        // parse entity properties.
+                        if (TryParsekeyValue(line, out key, out value))
+                        {
+                            switch (key)
+                            {
+                                case "id": entity.Id = (int)value; break;
+                                case "classname": entity.ClassName = (string)value; break;
+                            }
+                        }
+                    }
+
+                    // parse entity solid.
+                    if (closures[0] == "entity" && closures[1] == "solid" && closures[2] == null)
+                    {
+                        // create a new solid and add it to the entity.
+                        if (justEnteredClosure)
+                        {
+                            solid = new VmfSolid();
+                            entity.Solids.Add(solid);
+                        }
+
+                        // parse solid properties.
+                        if (TryParsekeyValue(line, out key, out value))
+                        {
+                            switch (key)
+                            {
+                                case "id": solid.Id = (int)value; break;
+                            }
+                        }
+                    }
+
+                    // parse entity solid side.
+                    if (closures[0] == "entity" && closures[1] == "solid" && closures[2] == "side" && closures[3] == null)
+                    {
+                        // create a new solid side and add it to the solid.
+                        if (justEnteredClosure)
+                        {
+                            solidSide = new VmfSolidSide();
+                            solid.Sides.Add(solidSide);
+                        }
+
+                        // parse solid side properties.
+                        if (TryParsekeyValue(line, out key, out value))
+                        {
+                            switch (key)
+                            {
+                                case "id": solidSide.Id = (int)value; break;
+                                case "plane": solidSide.Plane = (VmfPlane)value; break;
+                                case "material": solidSide.Material = (string)value; break;
+                                //case "rotation": solidSide.Rotation = (float)value; break;
+                                case "uaxis": solidSide.UAxis = (VmfAxis)value; break;
+                                case "vaxis": solidSide.VAxis = (VmfAxis)value; break;
+                                case "lightmapscale": solidSide.LightmapScale = (int)value; break;
+                                case "smoothing_groups": solidSide.SmoothingGroups = (int)value; break;
+                            }
+                        }
                     }
 
                     previousLine = line;
@@ -177,8 +246,10 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
 
             key = line.Substring(1, idx - 1);
             string rawvalue = line.Substring(idx + 3, line.Length - idx - 4);
+            if (rawvalue.Length == 0) return false;
 
             int vi;
+            float vf;
             // detect plane definition.
             if (rawvalue[0] == '(')
             {
@@ -194,6 +265,12 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             {
                 string[] values = rawvalue.Replace("[", "").Replace("]", "").Split(' ');
                 value = new VmfAxis(new VmfVector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2])), float.Parse(values[3]), float.Parse(values[4]));
+                return true;
+            }
+            // detect floating point value.
+            else if (rawvalue.Contains('.') && float.TryParse(rawvalue, out vf))
+            {
+                value = vf;
                 return true;
             }
             // detect integer value.
