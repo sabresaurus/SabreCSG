@@ -240,13 +240,13 @@ namespace Sabresaurus.SabreCSG
                     catch (Exception ex)
                     {
                         EditorUtility.ClearProgressBar();
-                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
+                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message + ex.StackTrace, "Ohno!");
                     }
                 }
 
                 if (GUILayout.Button("?", GUILayout.Width(16)))
                 {
-                    EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer is an incomplete proof of concept! While it has internal data structures with UV and texture details none of it is currently used by SabreCSG.\n\nKnown Issues:\n* NODRAW solid sides are not excluded.\n* No imported UV data is applied on the brushes.\n* There is no automatic material search.", "Okay");
+                    EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer was created using Source SDK maps and Hammer 4.1.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. First it looks for the full name with forward slashes '/' replaced by periods '.' like 'BRICK.BRICKFLOOR001A' then the last word 'BRICKFLOOR001A'. The latter option could cause some false positives, try creating a material with the full name if this happens.\n\nKnown Issues:\n* Some UVs' panning appears to be completely off but I have been unable to replicate it. If anyone knows why it happens please do contact me!", "Okay");
                 }
                 EditorGUILayout.EndHorizontal();
 
