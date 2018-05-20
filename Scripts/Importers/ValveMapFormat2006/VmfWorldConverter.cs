@@ -24,7 +24,11 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             {
                 model.BeginUpdate();
 
-                // iterate through all solids.
+                // group all the brushes together.
+                GroupBrush groupBrush = new GameObject("Source Engine Map").AddComponent<GroupBrush>();
+                groupBrush.transform.SetParent(model.transform);
+
+                // iterate through all world solids.
                 for (int i = 0; i < world.Solids.Count; i++)
                 {
 #if UNITY_EDITOR
@@ -33,29 +37,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                     VmfSolid solid = world.Solids[i];
 
                     // don't add triggers to the scene.
-                    if (solid.Sides.Count > 0 && (
-                        solid.Sides[0].Material == "TOOLS/TOOLSTRIGGER" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSBLOCK_LOS" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSBLOCKBULLETS" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSBLOCKBULLETS2" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSBLOCKSBULLETSFORCEFIELD" || // did the wiki have a typo or is BLOCKS truly plural?
-                        solid.Sides[0].Material == "TOOLS/TOOLSBLOCKLIGHT" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSCLIMBVERSUS" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSHINT" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSINVISIBLE" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSINVISIBLENONSOLID" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSINVISIBLELADDER" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSINVISMETAL" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSNODRAWROOF" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSNODRAWWOOD" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSNODRAWPORTALABLE" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSSKIP" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSFOG" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSSKYBOX" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLS2DSKYBOX" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSSKYFOG" ||
-                        solid.Sides[0].Material == "TOOLS/TOOLSFOGVOLUME"
-                        ))
+                    if (solid.Sides.Count > 0 && IsSpecialMaterial(solid.Sides[0].Material))
                         continue;
 
                     // build a very large cube brush.
@@ -76,14 +58,10 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                         foreach (var polygon in polygons)
                         {
                             // detect excluded polygons.
-                            if (side.Material == "TOOLS/TOOLSNODRAW")
+                            if (IsExcludedMaterial(side.Material))
                                 polygon.UserExcludeFromFinal = true;
                             // detect collision-only brushes.
-                            if (side.Material == "TOOLS/TOOLSCLIP" ||
-                                side.Material == "TOOLS/TOOLSNPCCLIP" ||
-                                side.Material == "TOOLS/TOOLSPLAYERCLIP" ||
-                                side.Material == "TOOLS/TOOLSGRENDADECLIP" ||
-                                side.Material == "TOOLS/TOOLSSTAIRS")
+                            if (IsInvisibleMaterial(side.Material))
                                 pr.IsVisible = false;
                             // try finding the material in the project.
                             polygon.Material = FindMaterial(side.Material);
@@ -97,6 +75,97 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                             }
                             CalculateTextureCoordinates(polygon, w, h, side.UAxis, side.VAxis, scale);
                         }
+                    }
+
+                    // add the brush to the group.
+                    pr.transform.SetParent(groupBrush.transform);
+                }
+
+                // iterate through all entities.
+                for (int e = 0; e < world.Entities.Count; e++)
+                {
+#if UNITY_EDITOR
+                    UnityEditor.EditorUtility.DisplayProgressBar("SabreCSG: Importing Source Engine Map", "Converting Hammer Entities To SabreCSG Brushes (" + (e + 1) + " / " + world.Entities.Count + ")...", e / (float)world.Entities.Count);
+#endif
+                    VmfEntity entity = world.Entities[e];
+
+                    // skip entities that sabrecsg can't handle.
+                    switch (entity.ClassName)
+                    {
+                        case "func_areaportal":
+                        case "func_areaportalwindow":
+                        case "func_capturezone":
+                        case "func_changeclass":
+                        case "func_combine_ball_spawner":
+                        case "func_dustcloud":
+                        case "func_dustmotes":
+                        case "func_nobuild":
+                        case "func_nogrenades":
+                        case "func_occluder":
+                        case "func_precipitation":
+                        case "func_proprespawnzone":
+                        case "func_regenerate":
+                        case "func_respawnroom":
+                        case "func_smokevolume":
+                        case "func_viscluster":
+                            continue;
+                    }
+
+                    // iterate through all entity solids.
+                    for (int i = 0; i < entity.Solids.Count; i++)
+                    {
+                        VmfSolid solid = entity.Solids[i];
+
+                        // don't add triggers to the scene.
+                        if (solid.Sides.Count > 0 && IsSpecialMaterial(solid.Sides[0].Material))
+                            continue;
+
+                        // build a very large cube brush.
+                        var go = model.CreateBrush(PrimitiveBrushType.Cube, Vector3.zero);
+                        var pr = go.GetComponent<PrimitiveBrush>();
+                        BrushUtility.Resize(pr, new Vector3(8192, 8192, 8192));
+
+                        // clip all the sides out of the brush.
+                        for (int j = solid.Sides.Count; j-- > 0;)
+                        {
+                            VmfSolidSide side = solid.Sides[j];
+                            Plane clip = new Plane(pr.transform.InverseTransformPoint(new Vector3(side.Plane.P1.X, side.Plane.P1.Z, side.Plane.P1.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P2.X, side.Plane.P2.Z, side.Plane.P2.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P3.X, side.Plane.P3.Z, side.Plane.P3.Y) / scale));
+                            ClipUtility.ApplyClipPlane(pr, clip, false);
+
+                            // find the polygons associated with the clipping plane.
+                            // the normal is unique and can never occur twice as that wouldn't allow the solid to be convex.
+                            var polygons = pr.GetPolygons().Where(p => p.Plane.normal == clip.normal);
+                            foreach (var polygon in polygons)
+                            {
+                                // detect excluded polygons.
+                                if (IsExcludedMaterial(side.Material))
+                                    polygon.UserExcludeFromFinal = true;
+                                // detect collision-only brushes.
+                                if (IsInvisibleMaterial(side.Material))
+                                    pr.IsVisible = false;
+                                // try finding the material in the project.
+                                polygon.Material = FindMaterial(side.Material);
+                                // calculate the texture coordinates.
+                                int w = 256;
+                                int h = 256;
+                                if (polygon.Material != null && polygon.Material.mainTexture != null)
+                                {
+                                    w = polygon.Material.mainTexture.width;
+                                    h = polygon.Material.mainTexture.height;
+                                }
+                                CalculateTextureCoordinates(polygon, w, h, side.UAxis, side.VAxis, scale);
+                            }
+                        }
+
+                        // detail brushes that do not affect the CSG world.
+                        if (entity.ClassName == "func_detail")
+                            pr.IsNoCSG = true;
+                        // collision only brushes.
+                        if (entity.ClassName == "func_vehicleclip")
+                            pr.IsVisible = false;
+
+                        // add the brush to the group.
+                        pr.transform.SetParent(groupBrush.transform);
                     }
                 }
 
@@ -136,6 +205,76 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                 polygon.Vertices[i].UV.x = U;
                 polygon.Vertices[i].UV.y = 1.0f - V;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the specified name is an excluded material.
+        /// </summary>
+        /// <param name="name">The name of the material.</param>
+        /// <returns><c>true</c> if the specified name is an excluded material; otherwise, <c>false</c>.</returns>
+        private static bool IsExcludedMaterial(string name)
+        {
+            switch (name)
+            {
+                case "TOOLS/TOOLSNODRAW":
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the specified name is an invisible material.
+        /// </summary>
+        /// <param name="name">The name of the material.</param>
+        /// <returns><c>true</c> if the specified name is an invisible material; otherwise, <c>false</c>.</returns>
+        private static bool IsInvisibleMaterial(string name)
+        {
+            switch (name)
+            {
+                case "TOOLS/TOOLSCLIP":
+                case "TOOLS/TOOLSNPCCLIP":
+                case "TOOLS/TOOLSPLAYERCLIP":
+                case "TOOLS/TOOLSGRENDADECLIP":
+                case "TOOLS/TOOLSSTAIRS":
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the specified name is a special material, these brush will not be
+        /// imported into SabreCSG.
+        /// </summary>
+        /// <param name="name">The name of the material.</param>
+        /// <returns><c>true</c> if the specified name is a special material; otherwise, <c>false</c>.</returns>
+        private static bool IsSpecialMaterial(string name)
+        {
+            switch (name)
+            {
+                case "TOOLS/TOOLSTRIGGER":
+                case "TOOLS/TOOLSBLOCK_LOS":
+                case "TOOLS/TOOLSBLOCKBULLETS":
+                case "TOOLS/TOOLSBLOCKBULLETS2":
+                case "TOOLS/TOOLSBLOCKSBULLETSFORCEFIELD": // did the wiki have a typo or is BLOCKS truly plural?
+                case "TOOLS/TOOLSBLOCKLIGHT":
+                case "TOOLS/TOOLSCLIMBVERSUS":
+                case "TOOLS/TOOLSHINT":
+                case "TOOLS/TOOLSINVISIBLE":
+                case "TOOLS/TOOLSINVISIBLENONSOLID":
+                case "TOOLS/TOOLSINVISIBLELADDER":
+                case "TOOLS/TOOLSINVISMETAL":
+                case "TOOLS/TOOLSNODRAWROOF":
+                case "TOOLS/TOOLSNODRAWWOOD":
+                case "TOOLS/TOOLSNODRAWPORTALABLE":
+                case "TOOLS/TOOLSSKIP":
+                case "TOOLS/TOOLSFOG":
+                case "TOOLS/TOOLSSKYBOX":
+                case "TOOLS/TOOLS2DSKYBOX":
+                case "TOOLS/TOOLSSKYFOG":
+                case "TOOLS/TOOLSFOGVOLUME":
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
