@@ -1,25 +1,26 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
+using System.Collections.Generic;
 
 namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
 {
     /// <summary>
-    /// Represents a Hammer Solid Side.
+    /// Represents a Hammer Entity.
     /// </summary>
-    public class VmfSolidSide
+    public class VmfEntity
     {
         public int Id = -1;
-        public VmfPlane Plane;
-        public string Material;
-        public float Rotation;
-        public VmfAxis UAxis;
-        public VmfAxis VAxis;
-        public int LightmapScale;
-        public int SmoothingGroups;
 
-        // HACK:
-        public bool HasDisplacement = false;
+        /// <summary>
+        /// The class name of the entity.
+        /// </summary>
+        public string ClassName;
+
+        /// <summary>
+        /// The solids in the entity if available.
+        /// </summary>
+        public List<VmfSolid> Solids = new List<VmfSolid>();
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents this instance.
@@ -27,7 +28,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// <returns>A <see cref="System.String"/> that represents this instance.</returns>
         public override string ToString()
         {
-            return "VMF Solid Side " + Id + " '" + Material + "' " + " " + Plane;
+            return "VmfEntity " + ClassName + " " + Id + " (" + Solids.Count + " Solids)";
         }
     }
 }
