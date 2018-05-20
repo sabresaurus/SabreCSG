@@ -85,6 +85,8 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 side.Material == "TOOLS/TOOLSGRENDADECLIP" ||
                                 side.Material == "TOOLS/TOOLSSTAIRS")
                                 pr.IsVisible = false;
+                            // try finding the material in the project.
+                            polygon.Material = FindMaterial(side.Material);
                         }
                     }
                 }
@@ -101,6 +103,38 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             {
                 model.EndUpdate();
             }
+        }
+
+        /// <summary>
+        /// Attempts to find a material in the project by name.
+        /// </summary>
+        /// <param name="name">The material name to search for.</param>
+        /// <returns>The material if found or null.</returns>
+        private static Material FindMaterial(string name)
+        {
+#if UNITY_EDITOR
+            // first try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
+            name = name.Replace("/", ".");
+            string texture = "";
+            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
+            if (guid == null)
+            {
+                // if it couldn't be found try a simplified name like 'BRICKWALL052D'.
+                texture = name;
+                if (name.Contains('.'))
+                    texture = name.Substring(name.LastIndexOf('.') + 1);
+                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
+            }
+            // if a material could be found using either option:
+            if (guid != null)
+            {
+                // load the material.
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
+            }
+            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
+#endif
+            return null;
         }
     }
 }
