@@ -87,6 +87,15 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 pr.IsVisible = false;
                             // try finding the material in the project.
                             polygon.Material = FindMaterial(side.Material);
+                            // calculate the texture coordinates.
+                            int w = 256;
+                            int h = 256;
+                            if (polygon.Material != null && polygon.Material.mainTexture != null)
+                            {
+                                w = polygon.Material.mainTexture.width;
+                                h = polygon.Material.mainTexture.height;
+                            }
+                            CalculateTextureCoordinates(polygon, w, h, side.UAxis, side.VAxis, scale);
                         }
                     }
                 }
@@ -102,6 +111,30 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             finally
             {
                 model.EndUpdate();
+            }
+        }
+
+        // shoutouts to Stefan Hajnoczi for your map importer giving me a clue on how to do this.
+        private static void CalculateTextureCoordinates(Polygon polygon, int textureWidth, int textureHeight, VmfAxis UAxis, VmfAxis VAxis, int scale)
+        {
+            // calculate texture coordinates.
+            for (int i = 0; i < polygon.Vertices.Length; i++)
+            {
+                float U, V;
+
+                Plane uplane = new Plane(new Vector3(UAxis.Vector.X, UAxis.Vector.Z, UAxis.Vector.Y), UAxis.Translation);
+                Plane vplane = new Plane(new Vector3(VAxis.Vector.X, VAxis.Vector.Z, VAxis.Vector.Y), VAxis.Translation);
+
+                U = Vector3.Dot(uplane.normal, polygon.Vertices[i].Position);
+                U = (U / textureWidth) / (UAxis.Scale / scale);
+                U = U + (UAxis.Translation / textureWidth);
+
+                V = Vector3.Dot(vplane.normal, polygon.Vertices[i].Position);
+                V = (V / textureHeight) / (VAxis.Scale / scale);
+                V = V + (VAxis.Translation / textureHeight);
+
+                polygon.Vertices[i].UV.x = U;
+                polygon.Vertices[i].UV.y = 1.0f - V;
             }
         }
 
