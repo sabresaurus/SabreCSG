@@ -34,7 +34,6 @@ namespace Sabresaurus.SabreCSG
 
         // Temporary importer settings.
 
-        private static int importerValveMapFormatScale = 32;
         private static int importerUnrealGoldScale = 64;
 
         public void OnEnable()
@@ -220,9 +219,6 @@ namespace Sabresaurus.SabreCSG
 
                 GuiLayoutBeginImporterSection(SabreCSGResources.ImporterImporterValveMapFormat2006Texture, "Source Engine 2006 Importer", "Henry de Jongh");
 
-                importerValveMapFormatScale = EditorGUILayout.IntField("Scale", importerValveMapFormatScale);
-                if (importerValveMapFormatScale < 1) importerValveMapFormatScale = 1;
-
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Import Source Engine Map (*.vmf)"))
                 {
@@ -234,19 +230,19 @@ namespace Sabresaurus.SabreCSG
                             EditorUtility.DisplayProgressBar("SabreCSG: Importing Source Engine Map", "Parsing Valve Map Format File (*.vmf)...", 0.0f);
                             var importer = new Importers.ValveMapFormat2006.VmfImporter();
                             var map = importer.Import(path);
-                            Importers.ValveMapFormat2006.VmfWorldConverter.Import(csgModel, map, importerValveMapFormatScale);
+                            Importers.ValveMapFormat2006.VmfWorldConverter.Import(csgModel, map);
                         }
                     }
                     catch (Exception ex)
                     {
                         EditorUtility.ClearProgressBar();
-                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message + ex.StackTrace, "Ohno!");
+                        EditorUtility.DisplayDialog("Source Engine Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
                     }
                 }
 
                 if (GUILayout.Button("?", GUILayout.Width(16)))
                 {
-                    EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer was created using Source SDK maps and Hammer 4.1.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. First it looks for the full name with forward slashes '/' replaced by periods '.' like 'BRICK.BRICKFLOOR001A' then the last word 'BRICKFLOOR001A'. The latter option could cause some false positives, try creating a material with the full name if this happens.\n\nKnown Issues:\n* Some UVs' panning appears to be completely off but I have been unable to replicate it. If anyone knows why it happens please do contact me!", "Okay");
+                    EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer was created using Source SDK maps and Hammer 4.1.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. First it looks for the full name with forward slashes '/' replaced by periods '.' like 'BRICK.BRICKFLOOR001A' then the last word 'BRICKFLOOR001A'. The latter option could cause some false positives, try creating a material with the full name if this happens.", "Okay");
                 }
                 EditorGUILayout.EndHorizontal();
 
