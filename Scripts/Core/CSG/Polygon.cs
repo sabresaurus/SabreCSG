@@ -160,6 +160,7 @@ namespace Sabresaurus.SabreCSG
         {
             if (vertices.Length < 3)
             {
+                cachedPlane = new Plane();
                 return;
             }
             cachedPlane = new Plane(vertices[0].Position, vertices[1].Position, vertices[2].Position);
