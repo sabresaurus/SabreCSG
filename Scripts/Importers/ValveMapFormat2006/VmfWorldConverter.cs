@@ -12,7 +12,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
     /// </summary>
     public static class VmfWorldConverter
     {
-        private const float inchesInMeters = 0.0254f;
+        private const float inchesInMeters = 0.03125f; // 1/32
 
         /// <summary>
         /// Imports the specified world into the SabreCSG model.
