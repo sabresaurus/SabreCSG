@@ -621,12 +621,26 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // draw the grid using the special grid shader:
                 bool docked = isDocked;
-                gridMaterial.SetFloat("_OffsetX", (GetViewportRect().x + (docked ? 2 : 0)) / EditorGUIUtility.pixelsPerPoint); // why is this neccesary, what's moving?
-                gridMaterial.SetFloat("_OffsetY", (GetViewportRect().y + (docked ? 0 : 3)) / EditorGUIUtility.pixelsPerPoint); // why is this neccesary, what's moving?
-                gridMaterial.SetFloat("_ScrollX", viewportScroll.x / EditorGUIUtility.pixelsPerPoint);
-                gridMaterial.SetFloat("_ScrollY", viewportScroll.y / EditorGUIUtility.pixelsPerPoint);
+                gridMaterial.SetFloat("_OffsetX", GetViewportRect().x + (docked ? 2 : 0)); // why is this neccesary, what's moving?
+#if UNITY_UV_STARTS_AT_TOP
+                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 0 : 3)); // why is this neccesary, what's moving?
+#else
+                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 3 : 0)); // why is this neccesary, what's moving?
+#endif
+                gridMaterial.SetFloat("_ScrollX", viewportScroll.x);
+                gridMaterial.SetFloat("_ScrollY", viewportScroll.y);
                 gridMaterial.SetFloat("_Zoom", gridScale);
+                gridMaterial.SetFloat("_Height", GetViewportRect().height);
                 gridMaterial.SetTexture("_Background", backgroundImage);
+#if UNITY_UV_STARTS_AT_TOP
+                gridMaterial.SetInt("_IsOpenGL", 0);
+                lineMaterial.SetInt("_IsOpenGL", 0);
+                lineMaterial.SetFloat("_CutoffY", 35.0f);
+#else
+                gridMaterial.SetInt("_IsOpenGL", 1);
+                lineMaterial.SetInt("_IsOpenGL", 1);
+                lineMaterial.SetFloat("_CutoffY", GetViewportRect().height);
+#endif
                 gridMaterial.SetPass(0);
 
                 GL.Begin(GL.QUADS);

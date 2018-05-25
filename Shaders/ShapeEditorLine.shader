@@ -1,5 +1,11 @@
 ﻿Shader "SabreCSG/ShapeEditorLine"
 {
+	Properties
+	{
+		_CutoffY ("Cutoff Y", Float) = 0.0
+		_IsOpenGL ("Is OpenGL", Int) = 0
+	}
+
 	SubShader
 	{
 		Pass
@@ -29,6 +35,9 @@
 					float4 pos : SV_POSITION;
 				};
 
+				int _IsOpenGL;
+				float _CutoffY;
+
 				// vertex shader
 				v2f vert(appdata IN)
 				{
@@ -47,8 +56,10 @@
 				{
 					fixed4 col;
 					col = IN.color;
-					if (IN.pos.y < 35)
-					discard;
+					if (IN.pos.y < _CutoffY && _IsOpenGL == 0)
+						discard;
+					else if (IN.pos.y > _CutoffY && _IsOpenGL == 1)
+						discard;
 					return col;
 				}
 			ENDCG

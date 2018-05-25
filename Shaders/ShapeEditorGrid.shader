@@ -8,6 +8,8 @@
 		_ScrollY ("Scroll Y", Float) = 0.0
 		_Zoom ("Zoom", Float) = 16.0
 		_Background ("Background", 2D) = "white" { }
+		_IsOpenGL ("Is OpenGL", Int) = 0
+		_Height ("Height", Float) = 0
 	}
 
 	SubShader
@@ -52,6 +54,8 @@
 				float _Zoom;
 				float4 _Background_TexelSize;
 				sampler2D _Background;
+				int _IsOpenGL;
+				float _Height;
 
 				// fragment shader
 				fixed4 frag(v2f IN) : SV_Target
@@ -59,7 +63,12 @@
 					// calculate grid offset and scrolling.
 					float4 pos = IN.pos;
 					pos.x -= _OffsetX + _ScrollX;
-					pos.y -= _OffsetY + _ScrollY;
+
+					// special handling for opengl on mac computers.
+					if (_IsOpenGL)
+						pos.y -= _OffsetY - _ScrollY + _Height;
+					else
+						pos.y -= _OffsetY + _ScrollY;
 
 					// the 1x1 grid line light gray color.
 					fixed4 col;
@@ -96,8 +105,8 @@
 					fixed2 size = fixed2(_Background_TexelSize.z * (_Zoom / 16), _Background_TexelSize.w * (_Zoom / 16));
 					fixed2 offset = fixed2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
 					if (offset.x > 0 && offset.y > 0 && offset.x < size.x && offset.y < size.y)
-						col = tex2D(_Background, fixed2(offset.x / size.x, offset.y / -size.y)).rgba;
-						
+						col = tex2D(_Background, fixed2(offset.x / size.x, offset.y / -size.y * (_IsOpenGL ? -1.0f : 1.0f))).rgba;
+
 					return col;
 				}
 			ENDCG
