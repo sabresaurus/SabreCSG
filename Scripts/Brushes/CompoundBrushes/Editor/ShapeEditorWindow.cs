@@ -622,7 +622,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // draw the grid using the special grid shader:
                 bool docked = isDocked;
                 gridMaterial.SetFloat("_OffsetX", GetViewportRect().x + (docked ? 2 : 0)); // why is this neccesary, what's moving?
-#if UNITY_UV_STARTS_AT_TOP
+#if UNITY_EDITOR_WIN
                 gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 0 : 3)); // why is this neccesary, what's moving?
 #else
                 gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 3 : 0)); // why is this neccesary, what's moving?
@@ -632,7 +632,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 gridMaterial.SetFloat("_Zoom", gridScale);
                 gridMaterial.SetFloat("_Height", GetViewportRect().height);
                 gridMaterial.SetTexture("_Background", backgroundImage);
-#if UNITY_UV_STARTS_AT_TOP
+#if UNITY_EDITOR_WIN
                 gridMaterial.SetInt("_IsOpenGL", 0);
                 lineMaterial.SetInt("_IsOpenGL", 0);
                 lineMaterial.SetFloat("_CutoffY", 35.0f);
