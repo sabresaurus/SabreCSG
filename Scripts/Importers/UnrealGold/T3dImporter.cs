@@ -307,12 +307,16 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                 if (rawvalue[1] == 'S' && rawvalue[2] != 'h')
                 {
                     // (Scale=(X=0.173205,Y=0.150000,Z=0.125000),SheerAxis=SHEER_ZX)
-                    string x = rawvalue.Replace("(Scale=", "x=").Replace(",SheerAxis=SHEER_ZX)", "");
+                    string x = rawvalue.Replace("(Scale=", "X=").Replace(",SheerAxis=SHEER_ZX)", "");
                     string k;
                     object v;
                     if (TryParseProperty(x, out k, out v))
                     {
-                        value = v; // vector.
+                        T3dVector3 vec = (T3dVector3)v;
+                        vec.X = vec.X == 0.0f ? 1.0f : vec.X;
+                        vec.Y = vec.Y == 0.0f ? 1.0f : vec.Y;
+                        vec.Z = vec.Z == 0.0f ? 1.0f : vec.Z;
+                        value = vec; // vector.
                         return true;
                     }
                 }
