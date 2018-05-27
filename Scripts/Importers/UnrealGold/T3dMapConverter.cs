@@ -48,7 +48,15 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                         for (int j = 0; j < tpolygon.Vertices.Count; j++)
                         {
-                            vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]).Multiply(ToVector3Raw(tactor.MainScale)).Multiply(ToVector3Raw(tactor.PostScale)) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                            // main-scale
+                            // scale around pivot point.
+                            Vector3 vertexPosition = ToVector3(tpolygon.Vertices[j]);
+                            Vector3 pivot = ToVector3(tactor.PrePivot);
+                            Vector3 difference = vertexPosition - pivot;
+                            vertexPosition = difference.Multiply(ToVector3Raw(tactor.MainScale)) + pivot;
+
+                            // post-scale
+                            vertices[j] = new Vertex(vertexPosition.Multiply(ToVector3Raw(tactor.PostScale)) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
                         }
 
                         // detect the polygon flags.
@@ -59,7 +67,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         polygons[i] = new Polygon(vertices, material, false, userExcludeFromFinal);
                     }
 
-                    // position and rotate the brushes.
+                    // position and rotate the brushes around their pivot point.
                     Transform transform = model.CreateCustomBrush(polygons).transform;
                     transform.position = (ToVector3(tactor.Location) / (float)scale) - (ToVector3(tactor.PrePivot) / (float)scale);
                     Vector3 axis;
