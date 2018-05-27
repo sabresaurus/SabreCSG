@@ -48,7 +48,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                         for (int j = 0; j < tpolygon.Vertices.Count; j++)
                         {
-                            vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                            vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]).Multiply(ToVector3Raw(tactor.MainScale)).Multiply(ToVector3Raw(tactor.PostScale)) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
                         }
 
                         // detect the polygon flags.
@@ -124,6 +124,16 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         private static Vector3 ToVector3(T3dVector3 vector3)
         {
             return new Vector3(-vector3.X, vector3.Z, vector3.Y);
+        }
+
+        /// <summary>
+        /// Converts <see cref="T3dVector3"/> to <see cref="Vector3"/>.
+        /// </summary>
+        /// <param name="vector3">The <see cref="T3dVector3"/> to be converted.</param>
+        /// <returns>The <see cref="Vector3"/>.</returns>
+        private static Vector3 ToVector3Raw(T3dVector3 vector3)
+        {
+            return new Vector3(vector3.X, vector3.Z, vector3.Y);
         }
 
         private static float DotProduct(float ax, float ay, float az, float bx, float by, float bz)
