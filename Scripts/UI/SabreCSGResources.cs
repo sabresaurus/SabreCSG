@@ -632,6 +632,11 @@ namespace Sabresaurus.SabreCSG
             return (Material)LoadObject("Materials/Subtract.mat");
         }
 
+        public static Material GetCollisionMaterial()
+        {
+            return (Material)LoadObject("Materials/Collision.mat");
+        }
+
         public static Material GetPlaneMaterial()
         {
             if (planeMaterial == null)
