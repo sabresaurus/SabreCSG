@@ -416,7 +416,7 @@ namespace Sabresaurus.SabreCSG
                         {
                             if (!brushes[brushIndex].IsVisible)
                             {
-                                outlineColor = new Color(1.0f, 0.6f, 0.6f);
+                                outlineColor = new Color(0.6f, 1.0f, 0.6f);
                             }
                             else if (brushes[brushIndex].IsNoCSG)
                             {
@@ -438,7 +438,7 @@ namespace Sabresaurus.SabreCSG
                         {
                             if (!brushes[brushIndex].IsVisible)
                             {
-                                outlineColor = new Color(1.0f, 0.3f, 0.3f);
+                                outlineColor = new Color(0.0f, 1.0f, 0.0f);
                             }
                             else if (brushes[brushIndex].IsNoCSG)
                             {
