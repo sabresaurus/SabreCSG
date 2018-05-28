@@ -1189,6 +1189,10 @@ namespace Sabresaurus.SabreCSG
                     {
                         Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
                     }
+                    else if (!brushBase.IsVisible)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.CollisionIconTexture, iconMaterial);
+                    }
                     else if (brushBase.IsNoCSG)
                     {
                         Graphics.DrawTexture(drawRect, SabreCSGResources.NoCSGIconTexture, iconMaterial);

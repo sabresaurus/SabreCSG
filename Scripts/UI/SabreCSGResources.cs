@@ -191,6 +191,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D CollisionIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Collision.png");
+            }
+        }
+
         public static Texture2D DialogOverlayTexture
         {
             get
