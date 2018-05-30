@@ -70,6 +70,8 @@ namespace Sabresaurus.SabreCSG
         {
 			EditorWindow window = EditorWindow.GetWindow<PaletteWindow>("Palette");//false, "Palette", true);
 
+			window.minSize = new Vector2( 120, 120 );
+
             window.Show();
         }
 
