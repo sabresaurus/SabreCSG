@@ -1,13 +1,11 @@
 #if UNITY_EDITOR || RUNTIME_CSG
 
-using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using System;
-using System.Reflection;
-using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -191,6 +189,7 @@ namespace Sabresaurus.SabreCSG
             MeshRenderer meshRenderer = newGameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = material;
             meshRenderer.shadowCastingMode = buildSettings.ShadowCastingMode;
+            meshRenderer.reflectionProbeUsage = buildSettings.ReflectionProbeUsage;
             //			newGameObject.transform.parent = meshGroupHolder;
             newGameObject.transform.SetParent(meshGroupHolder, false);
 

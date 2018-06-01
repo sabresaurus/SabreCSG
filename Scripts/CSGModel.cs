@@ -1998,6 +1998,8 @@ namespace Sabresaurus.SabreCSG
             Transform meshGroup = csgModelTransform.Find("MeshGroup");
             if (meshGroup != null)
             {
+                // If the CSG Model is disabled we also disable the mesh group.
+                meshGroup.gameObject.SetActive(csgModelTransform.gameObject.activeSelf);
                 // Reanchor the meshes to the parent of the CSG Model
                 meshGroup.SetParent(csgModelTransform.parent, true);
             }
