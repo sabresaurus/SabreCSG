@@ -24,6 +24,9 @@ namespace Sabresaurus.SabreCSG
 
         private SerializedProperty shadowCastingModeProperty;
 
+		private SerializedProperty useModelReflectionProbesProperty;
+		private SerializedProperty reflectionProbeUsageProperty;
+
         private SerializedProperty defaultPhysicsMaterialProperty;
         private SerializedProperty defaultVisualMaterialProperty;
 
@@ -51,6 +54,9 @@ namespace Sabresaurus.SabreCSG
             unwrapPackMarginProperty = serializedObject.FindProperty("buildSettings.UnwrapPackMargin");
 
             shadowCastingModeProperty = serializedObject.FindProperty("buildSettings.ShadowCastingMode");
+
+			useModelReflectionProbesProperty = serializedObject.FindProperty( "buildSettings.UseModelReflectionProbes" );
+			reflectionProbeUsageProperty = serializedObject.FindProperty( "buildSettings.ReflectionProbeUsage" );
 
             defaultPhysicsMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultPhysicsMaterial");
             defaultVisualMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultVisualMaterial");
@@ -91,7 +97,8 @@ namespace Sabresaurus.SabreCSG
                 EditorGUIUtility.labelWidth = 0;
                 GUI.enabled = true;
 
-                EditorGUILayout.PropertyField(shadowCastingModeProperty, new GUIContent("Shadow Casting Mode"));
+
+				EditorGUILayout.PropertyField(shadowCastingModeProperty, new GUIContent("Shadow Casting Mode"));
 
                 // Experimental build settings to enable features that are not yet completely stable
                 GUILayout.Label("Experimental", EditorStyles.boldLabel);
@@ -100,7 +107,18 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.PropertyField(optimizeGeometryProperty, new GUIContent("Optimize Geometry"));
                 EditorGUILayout.PropertyField(saveMeshesAsAssetsProperty, new GUIContent("Save Meshes As Assets"));
                 EditorGUI.indentLevel = 0;
-            }
+
+				GUILayout.Label( "Common Fixes", EditorStyles.boldLabel );
+				EditorGUI.indentLevel = 1;
+
+				EditorGUILayout.PropertyField( useModelReflectionProbesProperty, new GUIContent( "Default Reflection Probe Settings", "Use the default reflection probe usage settings (Blend Probes)?" ) );
+
+				GUI.enabled = !useModelReflectionProbesProperty.boolValue;
+				EditorGUILayout.PropertyField( reflectionProbeUsageProperty, new GUIContent( "Reflection Probes" ) );
+				GUI.enabled = true;
+
+				EditorGUI.indentLevel = 0;
+			}
 
             using (new NamedVerticalScope("Default Material"))
             {

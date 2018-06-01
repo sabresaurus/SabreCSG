@@ -76,6 +76,9 @@ namespace Sabresaurus.SabreCSG
 
         public ShadowCastingMode ShadowCastingMode = ShadowCastingMode.TwoSided;
 
+		public bool UseModelReflectionProbes = true; 
+		public ReflectionProbeUsage ReflectionProbeUsage = ReflectionProbeUsage.BlendProbes;
+
 		// What default physics material to use on collision meshes
 		public PhysicMaterial DefaultPhysicsMaterial = null;
 
@@ -147,7 +150,12 @@ namespace Sabresaurus.SabreCSG
             if(settings1.ShadowCastingMode != settings2.ShadowCastingMode)
             {
                 return true;
-            }
+			}
+
+			if( settings1.UseModelReflectionProbes != settings2.UseModelReflectionProbes )
+			{
+				return true;
+			}
 
 			// Don't compare IsBuilt
 

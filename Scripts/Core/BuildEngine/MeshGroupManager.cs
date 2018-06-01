@@ -6,6 +6,7 @@ using System;
 using System.Reflection;
 using UnityEngine.SceneManagement;
 using System.IO;
+using UnityEngine.Rendering;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -186,12 +187,24 @@ namespace Sabresaurus.SabreCSG
 				OnFinalizeVisualMesh(newGameObject, mesh);
 			}
 
-
 			newGameObject.AddComponent<MeshFilter>().sharedMesh = mesh;
-            MeshRenderer meshRenderer = newGameObject.AddComponent<MeshRenderer>();
+           MeshRenderer meshRenderer = newGameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = material;
-            meshRenderer.shadowCastingMode = buildSettings.ShadowCastingMode;
-//			newGameObject.transform.parent = meshGroupHolder;
+			meshRenderer.shadowCastingMode = buildSettings.ShadowCastingMode;
+			//newGameObject.transform.parent = meshGroupHolder;
+			
+			// we only want to use custom reflection probe settings for the visual model if we ask for them,
+			// otherwise we will just use the settings already assigned.
+			if( !buildSettings.UseModelReflectionProbes )
+			{
+				meshRenderer.reflectionProbeUsage = buildSettings.ReflectionProbeUsage;
+			}
+			else
+			{
+				// use unity default
+				meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.BlendProbes;
+			}
+
 			newGameObject.transform.SetParent(meshGroupHolder, false);
 
 #if UNITY_EDITOR
