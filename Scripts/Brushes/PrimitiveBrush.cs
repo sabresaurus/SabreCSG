@@ -711,7 +711,11 @@ namespace Sabresaurus.SabreCSG
 
 #if UNITY_EDITOR
             Material material;
-            if (IsNoCSG)
+            if (!IsVisible)
+            {
+                material = SabreCSGResources.GetCollisionMaterial();
+            }
+            else if (IsNoCSG)
             {
                 material = SabreCSGResources.GetNoCSGMaterial();
             }

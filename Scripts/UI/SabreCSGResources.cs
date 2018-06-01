@@ -191,6 +191,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D CollisionIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Collision.png");
+            }
+        }
+
         public static Texture2D DialogOverlayTexture
         {
             get
@@ -630,6 +638,11 @@ namespace Sabresaurus.SabreCSG
         public static Material GetSubtractMaterial()
         {
             return (Material)LoadObject("Materials/Subtract.mat");
+        }
+
+        public static Material GetCollisionMaterial()
+        {
+            return (Material)LoadObject("Materials/Collision.mat");
         }
 
         public static Material GetPlaneMaterial()
