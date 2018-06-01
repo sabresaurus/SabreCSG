@@ -24,6 +24,8 @@ namespace Sabresaurus.SabreCSG
 
         private SerializedProperty shadowCastingModeProperty;
 
+        private SerializedProperty reflectionProbeUsageProperty;
+
         private SerializedProperty defaultPhysicsMaterialProperty;
         private SerializedProperty defaultVisualMaterialProperty;
 
@@ -51,6 +53,8 @@ namespace Sabresaurus.SabreCSG
             unwrapPackMarginProperty = serializedObject.FindProperty("buildSettings.UnwrapPackMargin");
 
             shadowCastingModeProperty = serializedObject.FindProperty("buildSettings.ShadowCastingMode");
+
+            reflectionProbeUsageProperty = serializedObject.FindProperty("buildSettings.ReflectionProbeUsage");
 
             defaultPhysicsMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultPhysicsMaterial");
             defaultVisualMaterialProperty = serializedObject.FindProperty("buildSettings.DefaultVisualMaterial");
@@ -92,6 +96,7 @@ namespace Sabresaurus.SabreCSG
                 GUI.enabled = true;
 
                 EditorGUILayout.PropertyField(shadowCastingModeProperty, new GUIContent("Shadow Casting Mode"));
+                EditorGUILayout.PropertyField(reflectionProbeUsageProperty, new GUIContent("Reflection Probes"));
 
                 // Experimental build settings to enable features that are not yet completely stable
                 GUILayout.Label("Experimental", EditorStyles.boldLabel);
