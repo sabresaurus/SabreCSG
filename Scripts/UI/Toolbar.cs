@@ -219,7 +219,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			// Make sure we're actually being asked to create a compound brush
 			if(compoundBrushType != null 
-				&& compoundBrushType == typeof(Type) 
+				&& (Type)compoundBrushType == typeof(Type) 
 				&& !typeof(CompoundBrush).IsAssignableFrom((Type)compoundBrushType))
 			{
 				throw new ArgumentException("Specified type must be derived from CompoundBrush");
