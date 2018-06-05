@@ -20,11 +20,14 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// <param name="model">The model to import into.</param>
         /// <param name="world">The world to be imported.</param>
         /// <param name="scale">The scale modifier.</param>
-        public static void Import(CSGModel model, VmfWorld world)
+        public static void Import(CSGModelBase model, VmfWorld world)
         {
             try
             {
                 model.BeginUpdate();
+
+                // create a material searcher to associate materials automatically.
+                MaterialSearcher materialSearcher = new MaterialSearcher();
 
                 // group all the brushes together.
                 GroupBrush groupBrush = new GameObject("Source Engine Map").AddComponent<GroupBrush>();
@@ -65,8 +68,26 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                             // detect collision-only brushes.
                             if (IsInvisibleMaterial(side.Material))
                                 pr.IsVisible = false;
-                            // try finding the material in the project.
-                            polygon.Material = FindMaterial(side.Material);
+                            // find the material in the unity project automatically.
+                            Material material;
+                            // try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
+                            string materialName = side.Material.Replace("/", ".");
+                            if (materialName.Contains('.'))
+                            {
+                                // try finding both 'BRICK.BRICKWALL052D' and 'BRICKWALL052D'.
+                                string tiny = materialName.Substring(materialName.LastIndexOf('.') + 1);
+                                material = materialSearcher.FindMaterial(new string[] { materialName, tiny });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + materialName + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                            }
+                            else
+                            {
+                                // only try finding 'BRICKWALL052D'.
+                                material = materialSearcher.FindMaterial(new string[] { materialName });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + materialName + "' but it couldn't be found in the project.");
+                            }
+                            polygon.Material = material;
                             // calculate the texture coordinates.
                             int w = 256;
                             int h = 256;
@@ -145,8 +166,26 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 // detect collision-only brushes.
                                 if (IsInvisibleMaterial(side.Material))
                                     pr.IsVisible = false;
-                                // try finding the material in the project.
-                                polygon.Material = FindMaterial(side.Material);
+                                // find the material in the unity project automatically.
+                                Material material;
+                                // try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
+                                string materialName = side.Material.Replace("/", ".");
+                                if (materialName.Contains('.'))
+                                {
+                                    // try finding both 'BRICK.BRICKWALL052D' and 'BRICKWALL052D'.
+                                    string tiny = materialName.Substring(materialName.LastIndexOf('.') + 1);
+                                    material = materialSearcher.FindMaterial(new string[] { materialName, tiny });
+                                    if (material == null)
+                                        Debug.Log("SabreCSG: Tried to find material '" + materialName + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                                }
+                                else
+                                {
+                                    // only try finding 'BRICKWALL052D'.
+                                    material = materialSearcher.FindMaterial(new string[] { materialName });
+                                    if (material == null)
+                                        Debug.Log("SabreCSG: Tried to find material '" + materialName + "' but it couldn't be found in the project.");
+                                }
+                                polygon.Material = material;
                                 // calculate the texture coordinates.
                                 int w = 256;
                                 int h = 256;
@@ -282,38 +321,6 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                     return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Attempts to find a material in the project by name.
-        /// </summary>
-        /// <param name="name">The material name to search for.</param>
-        /// <returns>The material if found or null.</returns>
-        private static Material FindMaterial(string name)
-        {
-#if UNITY_EDITOR
-            // first try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
-            name = name.Replace("/", ".");
-            string texture = "";
-            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
-            if (guid == null)
-            {
-                // if it couldn't be found try a simplified name like 'BRICKWALL052D'.
-                texture = name;
-                if (name.Contains('.'))
-                    texture = name.Substring(name.LastIndexOf('.') + 1);
-                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
-            }
-            // if a material could be found using either option:
-            if (guid != null)
-            {
-                // load the material.
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-            }
-            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
-#endif
-            return null;
         }
     }
 }

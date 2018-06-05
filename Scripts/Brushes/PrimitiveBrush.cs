@@ -806,7 +806,11 @@ namespace Sabresaurus.SabreCSG
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer != null)
             {
+#if UNITY_EDITOR
                 meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
+#else
+                meshRenderer.enabled = isVisible;
+#endif
             }
         }
 
