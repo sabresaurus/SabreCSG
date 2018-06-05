@@ -197,6 +197,9 @@ namespace Sabresaurus.SabreCSG
                     case PrimitiveBrushType.Cone:
                         return "Cone Brush";
 
+                    case PrimitiveBrushType.Capsule:
+                        return "Capsule Brush";
+
                     default:
                         return base.BeautifulBrushName;
                 }
