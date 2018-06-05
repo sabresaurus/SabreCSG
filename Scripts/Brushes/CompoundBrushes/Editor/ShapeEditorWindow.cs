@@ -510,6 +510,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     OnSegmentInsert();
                     Event.current.Use();
                 }
+                if (Event.current.keyCode == KeyCode.E)
+                {
+                    OnSegmentExtrude();
+                    Event.current.Use();
+                }
                 if (Event.current.keyCode == KeyCode.Delete)
                 {
                     OnDelete();
@@ -786,6 +791,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentInsertTexture, "Split Segment(s) (I)"), createBrushStyle))
             {
                 OnSegmentInsert();
+            }
+            if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentExtrudeTexture, "Extrude Segment(s) (E)"), createBrushStyle))
+            {
+                OnSegmentExtrude();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorDeleteTexture, "Delete Segment(s) or Shape(s) (DEL)"), createBrushStyle))
             {
@@ -1137,6 +1146,30 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // recalculate the pivot position of the shape.
                 parent.CalculatePivotPosition();
+            }
+        }
+
+        /// <summary>
+        /// Called when the extrude segment button is pressed. Will extrude all selected segments.
+        /// </summary>
+        private void OnSegmentExtrude()
+        {
+            foreach (Segment segment in selectedSegments.ToArray()) // use .ToArray() to iterate a clone.
+            {
+                Segment next = GetNextSegment(segment);
+                // calculate extrude direction.
+                Vector2Int pos1 = next.position - segment.position;
+                Vector2 dir = new Vector2(pos1.y, -pos1.x).normalized * 2.0f;
+                // insert new segments at an extruded distance.
+                Shape parent = GetShapeOfSegment(segment);
+                Segment select;
+                parent.segments.Insert(parent.segments.IndexOf(next), select = new Segment(segment.position.x + Mathf.RoundToInt(dir.x), segment.position.y + Mathf.RoundToInt(dir.y)));
+                parent.segments.Insert(parent.segments.IndexOf(next), new Segment(next.position.x + Mathf.RoundToInt(dir.x), next.position.y + Mathf.RoundToInt(dir.y)));
+                // recalculate the pivot position of the shape.
+                parent.CalculatePivotPosition();
+                // update the selection so we have the extruded segment selected, this improves the workflow experience.
+                selectedObjects.Remove(segment);
+                selectedObjects.Add(select);
             }
         }
 
