@@ -18,11 +18,14 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         /// <param name="model">The model to import into.</param>
         /// <param name="map">The map to be imported.</param>
         /// <param name="scale">The scale modifier.</param>
-        public static void Import(CSGModel model, T3dMap map, int scale = 64)
+        public static void Import(CSGModelBase model, T3dMap map, int scale = 64)
         {
             try
             {
                 model.BeginUpdate();
+
+                // create a material searcher to associate materials automatically.
+                MaterialSearcher materialSearcher = new MaterialSearcher();
 
                 List<T3dActor> brushes = map.Brushes;
                 Brush[] sabreBrushes = new Brush[brushes.Count];
@@ -43,7 +46,22 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         T3dPolygon tpolygon = tbrush.Polygons[i];
 
                         // find the material in the unity project automatically.
-                        Material material = FindMaterial(tpolygon.Texture);
+                        Material material;
+                        if (tpolygon.Texture.Contains('.'))
+                        {
+                            // try finding both 'PlayrShp.Ceiling.Hullwk' and 'Hullwk'.
+                            string tiny = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
+                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture, tiny });
+                            if (material == null)
+                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                        }
+                        else
+                        {
+                            // only try finding 'Hullwk'.
+                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture });
+                            if (material == null)
+                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' but it couldn't be found in the project.");
+                        }
 
                         Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                         for (int j = 0; j < tpolygon.Vertices.Count; j++)
@@ -186,37 +204,6 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
             quaternion.z = -quaternion.z;
 
             return quaternion;
-        }
-
-        /// <summary>
-        /// Attempts to find a material in the project by name.
-        /// </summary>
-        /// <param name="name">The material name to search for.</param>
-        /// <returns>The material if found or null.</returns>
-        private static Material FindMaterial(string name)
-        {
-#if UNITY_EDITOR
-            // first try finding the fully qualified texture name like 'PlayrShp.Ceiling.Hullwk'.
-            string texture = "";
-            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
-            if (guid == null)
-            {
-                // if it couldn't be found try a simplified name which UnrealEd typically exports like 'Hullwk'.
-                texture = name;
-                if (name.Contains('.'))
-                    texture = name.Substring(name.LastIndexOf('.') + 1);
-                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
-            }
-            // if a material could be found using either option:
-            if (guid != null)
-            {
-                // load the material.
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-            }
-            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
-#endif
-            return null;
         }
     }
 }
