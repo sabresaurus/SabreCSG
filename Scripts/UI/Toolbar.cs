@@ -217,6 +217,7 @@ namespace Sabresaurus.SabreCSG
 
 		static void CreateCompoundBrush(object compoundBrushType)
 		{
+#if NET_4_6
 			// Make sure we're actually being asked to create a compound brush
 			if(compoundBrushType != null 
 				&& (Type)compoundBrushType == typeof(Type) 
@@ -224,6 +225,15 @@ namespace Sabresaurus.SabreCSG
 			{
 				throw new ArgumentException("Specified type must be derived from CompoundBrush");
 			}
+#else
+			if(compoundBrushType != null 
+				&& compoundBrushType == typeof(Type) 
+				&& !typeof(CompoundBrush).IsAssignableFrom((Type)compoundBrushType))
+			{
+				throw new ArgumentException("Specified type must be derived from CompoundBrush");
+			}
+
+#endif
 
 			Vector3 position = GetPositionForNewBrush();
 			GameObject newBrushObject = csgModel.CreateCompoundBrush((Type) compoundBrushType, position);
