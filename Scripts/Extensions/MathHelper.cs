@@ -312,7 +312,7 @@ namespace Sabresaurus.SabreCSG
         public static bool PlaneEqualsLooserWithFlip(Plane plane1, Plane plane2)
         {
             if (
-                Mathf.Abs(plane1.distance - plane2.distance) <= 0.02f
+                Mathf.Abs(plane1.distance - plane2.distance) <= 0.08f
                 && Mathf.Abs(plane1.normal.x - plane2.normal.x) < 0.006f
                 && Mathf.Abs(plane1.normal.y - plane2.normal.y) < 0.006f
                 && Mathf.Abs(plane1.normal.z - plane2.normal.z) < 0.006f)
@@ -320,7 +320,7 @@ namespace Sabresaurus.SabreCSG
                 return true;
             }
             else if (
-                Mathf.Abs(-plane1.distance - plane2.distance) <= 0.02f
+                Mathf.Abs(-plane1.distance - plane2.distance) <= 0.08f
                 && Mathf.Abs(-plane1.normal.x - plane2.normal.x) < 0.006f
                 && Mathf.Abs(-plane1.normal.y - plane2.normal.y) < 0.006f
                 && Mathf.Abs(-plane1.normal.z - plane2.normal.z) < 0.006f)
