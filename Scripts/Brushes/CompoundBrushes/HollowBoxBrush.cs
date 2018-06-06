@@ -22,6 +22,18 @@
 			}
 		}
 
+		public float BrushSize
+		{
+			get
+			{
+				return brushSize;
+			}
+			set
+			{
+				brushSize = value;
+			}
+		}
+
 		/// <summary>
 		/// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
 		/// </summary>
@@ -50,6 +62,12 @@
 		/// </summary>
 		[SerializeField]
 		private float wallThickness = 0.25f;
+		
+		/// <summary>
+		/// The size of the brush bounds, set by inspector [set] button.
+		/// </summary>
+		[SerializeField]
+		private float brushSize = 2.0f;
 
 		public override void UpdateVisibility()
 		{
@@ -71,6 +89,8 @@
 				localBounds.size.y > wallThickness * 2.0f &&
 				localBounds.size.z > wallThickness * 2.0f )
 			{
+				localBounds.size = Vector3.one * brushSize;
+
 				Vector3 baseSize = localBounds.size;
 
 				generatedBrushes[0].Mode = CSGMode.Add;
