@@ -93,6 +93,8 @@ namespace Sabresaurus.SabreCSG
                 return ButtonSphereTexture;
             else if (brushType == PrimitiveBrushType.Cone)
                 return ButtonConeTexture;
+            else if (brushType == PrimitiveBrushType.Capsule)
+                return ButtonCapsuleTexture;
             else
                 return ButtonCubeTexture;
         }
@@ -268,6 +270,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
+            }
+        }
+
+        public static Texture2D ButtonCapsuleTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCapsule.png");
             }
         }
 

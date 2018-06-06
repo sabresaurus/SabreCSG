@@ -6,90 +6,95 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
-	[CanEditMultipleObjects]
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(PrimitiveBrush))]
-	public class PrimitiveBrushInspector : BrushBaseInspector
+    public class PrimitiveBrushInspector : BrushBaseInspector
     {
-		string scaleString = "1";
-		string resizeString = "1";
+        private string scaleString = "1";
+        private string resizeString = "1";
 
-		Mesh sourceMesh = null;
+        private Mesh sourceMesh = null;
 
-		SerializedProperty prismSideCountProp;
-		SerializedProperty cylinderSideCountProp;
-		SerializedProperty sphereSideCountProp;
-		SerializedProperty icoSphereIterationCountProp;
-        SerializedProperty coneSideCountProp;
+        private SerializedProperty prismSideCountProp;
+        private SerializedProperty cylinderSideCountProp;
+        private SerializedProperty sphereSideCountProp;
+        private SerializedProperty icoSphereIterationCountProp;
+        private SerializedProperty coneSideCountProp;
+        private SerializedProperty capsuleSideCountProp;
+        private SerializedProperty capsuleHeightProp;
 
-        float shellDistance = 0;
+        private float shellDistance = 0;
 
-		protected override void OnEnable ()
-		{
-			base.OnEnable ();
-			// Setup the SerializedProperties.
-			prismSideCountProp = serializedObject.FindProperty ("prismSideCount");
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            // Setup the SerializedProperties.
+            prismSideCountProp = serializedObject.FindProperty("prismSideCount");
 
-			cylinderSideCountProp = serializedObject.FindProperty ("cylinderSideCount");
+            cylinderSideCountProp = serializedObject.FindProperty("cylinderSideCount");
 
-			sphereSideCountProp = serializedObject.FindProperty ("sphereSideCount");
+            sphereSideCountProp = serializedObject.FindProperty("sphereSideCount");
 
-			coneSideCountProp = serializedObject.FindProperty ("coneSideCount");
+            coneSideCountProp = serializedObject.FindProperty("coneSideCount");
 
-            icoSphereIterationCountProp = serializedObject.FindProperty ("icoSphereIterationCount");
+            capsuleSideCountProp = serializedObject.FindProperty("capsuleSideCount");
+            capsuleHeightProp = serializedObject.FindProperty("capsuleHeight");
+
+            icoSphereIterationCountProp = serializedObject.FindProperty("icoSphereIterationCount");
         }
 
-		private void ChangeBrushesToType(PrimitiveBrushType newType)
-		{
-			Undo.RecordObjects(targets, "Change Brush Type");
-			PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
-			foreach (PrimitiveBrush brush in brushes) 
-			{
-				Bounds localBounds = brush.GetBounds();
-				brush.BrushType = newType;
-				brush.ResetPolygons();
+        private void ChangeBrushesToType(PrimitiveBrushType newType)
+        {
+            Undo.RecordObjects(targets, "Change Brush Type");
+            PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
+            foreach (PrimitiveBrush brush in brushes)
+            {
+                Bounds localBounds = brush.GetBounds();
+                brush.BrushType = newType;
+                brush.ResetPolygons();
 
-				if(localBounds.size != new Vector3(2, 2, 2))
-				{
-					BrushUtility.Resize(brush, localBounds.size);
-				}
-				else
-				{
-					brush.Invalidate(true);
-				}
-			}
-		}
+                if (localBounds.size != new Vector3(2, 2, 2))
+                {
+                    BrushUtility.Resize(brush, localBounds.size);
+                }
+                else
+                {
+                    brush.Invalidate(true);
+                }
+            }
+        }
 
-		private void ResetPolygonsKeepScale()
-		{
-			PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
-			foreach (PrimitiveBrush brush in brushes) 
-			{
-				Bounds localBounds = brush.GetBounds();
-				brush.ResetPolygons();
+        private void ResetPolygonsKeepScale()
+        {
+            PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
+            foreach (PrimitiveBrush brush in brushes)
+            {
+                Bounds localBounds = brush.GetBounds();
+                brush.ResetPolygons();
 
-				if(localBounds.size != new Vector3(2, 2, 2))
-				{
-					BrushUtility.Resize(brush, localBounds.size);
-				}
-				else
-				{
-					brush.Invalidate(true);
-				}
-			}
-		}
+                if (localBounds.size != new Vector3(2, 2, 2))
+                {
+                    BrushUtility.Resize(brush, localBounds.size);
+                }
+                else
+                {
+                    brush.Invalidate(true);
+                }
+            }
+        }
 
-		private void ResetBounds()
-		{
-			// Reset the bounds to a 2,2,2 cube
-			Undo.RecordObjects(targets, "Reset Bounds");
-			PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
-			foreach (PrimitiveBrush brush in brushes) 
-			{
-				BrushUtility.Resize(brush, new Vector3(2, 2, 2));
-			}
-		}
+        private void ResetBounds()
+        {
+            // Reset the bounds to a 2,2,2 cube
+            Undo.RecordObjects(targets, "Reset Bounds");
+            PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
+            foreach (PrimitiveBrush brush in brushes)
+            {
+                BrushUtility.Resize(brush, new Vector3(2, 2, 2));
+            }
+        }
 
-        void DrawBrushButton(PrimitiveBrushType brushType, PrimitiveBrushType? activeType, GUIStyle brushButtonStyle, GUIStyle labelStyle, int width, int height, bool shortMode)
+        private void DrawBrushButton(PrimitiveBrushType brushType, PrimitiveBrushType? activeType, GUIStyle brushButtonStyle, GUIStyle labelStyle, int width, int height, bool shortMode)
         {
             GUI.enabled = !activeType.HasValue || activeType.Value != brushType;
             if (GUILayout.Button(new GUIContent(" ", SabreCSGResources.GetButtonTexture(brushType)), brushButtonStyle, GUILayout.Width(width), GUILayout.Height(height)))
@@ -108,17 +113,22 @@ namespace Sabresaurus.SabreCSG
                 name = "Cyl";
             }
 
+            if (shortMode && brushType == PrimitiveBrushType.Capsule)
+            {
+                name = "Cap";
+            }
+
             GUI.Label(lastRect, name, labelStyle);
         }
 
         public override void DoInspectorGUI()
         {
             float drawableWidth = EditorGUIUtility.currentViewWidth;
-			drawableWidth -= 42; // Take some off for scroll bars and padding
+            drawableWidth -= 42; // Take some off for scroll bars and padding
 
-			PrimitiveBrushType[] selectedTypes = BrushTargets.Select(item => ((PrimitiveBrush)item).BrushType).ToArray();
+            PrimitiveBrushType[] selectedTypes = BrushTargets.Select(item => ((PrimitiveBrush)item).BrushType).ToArray();
 
-			PrimitiveBrushType? activeType = (selectedTypes.Length == 1) ? (PrimitiveBrushType?)selectedTypes[0] : null;
+            PrimitiveBrushType? activeType = (selectedTypes.Length == 1) ? (PrimitiveBrushType?)selectedTypes[0] : null;
 
             using (new NamedVerticalScope("Type"))
             {
@@ -144,11 +154,12 @@ namespace Sabresaurus.SabreCSG
                 DrawBrushButton(PrimitiveBrushType.Cylinder, activeType, brushButtonStyle, labelStyle, stretchButtonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.Sphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
                 DrawBrushButton(PrimitiveBrushType.IcoSphere, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
-				
+
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
 
                 DrawBrushButton(PrimitiveBrushType.Cone, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
+                DrawBrushButton(PrimitiveBrushType.Capsule, activeType, brushButtonStyle, labelStyle, buttonWidth, buttonHeight, shortMode);
 
                 GUI.enabled = true; // Reset GUI enabled so that the next items aren't disabled
                 GUILayout.EndHorizontal();
@@ -188,6 +199,13 @@ namespace Sabresaurus.SabreCSG
                     else if (activeType.Value == PrimitiveBrushType.Cone)
                     {
                         EditorGUILayout.PropertyField(coneSideCountProp, new GUIContent("Sides"));
+                    }
+                    else if (activeType.Value == PrimitiveBrushType.Capsule)
+                    {
+                        EditorGUILayout.BeginVertical();
+                        EditorGUILayout.PropertyField(capsuleHeightProp, new GUIContent("Height"));
+                        EditorGUILayout.PropertyField(capsuleSideCountProp, new GUIContent("Sides"));
+                        EditorGUILayout.EndVertical();
                     }
                     if (EditorGUI.EndChangeCheck())
                     {
@@ -273,42 +291,41 @@ namespace Sabresaurus.SabreCSG
                 GUILayout.EndHorizontal();
             }
 
-			using (new NamedVerticalScope("Rotation"))
-			{
+            using (new NamedVerticalScope("Rotation"))
+            {
+                GUILayout.Label("Align up direction", EditorStyles.boldLabel);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("X"))
+                {
+                    AlignUpToAxis(new Vector3(1, 0, 0), false);
+                }
+                if (GUILayout.Button("Y"))
+                {
+                    AlignUpToAxis(new Vector3(0, 1, 0), false);
+                }
+                if (GUILayout.Button("Z"))
+                {
+                    AlignUpToAxis(new Vector3(0, 0, 1), false);
+                }
+                GUILayout.EndHorizontal();
 
-				GUILayout.Label("Align up direction", EditorStyles.boldLabel);
-				GUILayout.BeginHorizontal();
-				if(GUILayout.Button("X"))
-				{
-					AlignUpToAxis(new Vector3(1, 0, 0), false);
-				}
-				if(GUILayout.Button("Y"))
-				{
-					AlignUpToAxis(new Vector3(0, 1, 0), false);
-				}
-				if(GUILayout.Button("Z"))
-				{
-					AlignUpToAxis(new Vector3(0, 0, 1), false);
-				}
-				GUILayout.EndHorizontal();
+                GUILayout.Label("Align up direction (keep positions)", EditorStyles.boldLabel);
 
-				GUILayout.Label("Align up direction (keep positions)", EditorStyles.boldLabel);
-
-				GUILayout.BeginHorizontal();
-				if(GUILayout.Button("X"))
-				{
-					AlignUpToAxis(new Vector3(1, 0, 0), true);
-				}
-				if(GUILayout.Button("Y"))
-				{
-					AlignUpToAxis(new Vector3(0, 1, 0), true);
-				}
-				if(GUILayout.Button("Z"))
-				{
-					AlignUpToAxis(new Vector3(0, 0, 1), true);
-				}
-				GUILayout.EndHorizontal();
-			}
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("X"))
+                {
+                    AlignUpToAxis(new Vector3(1, 0, 0), true);
+                }
+                if (GUILayout.Button("Y"))
+                {
+                    AlignUpToAxis(new Vector3(0, 1, 0), true);
+                }
+                if (GUILayout.Button("Z"))
+                {
+                    AlignUpToAxis(new Vector3(0, 0, 1), true);
+                }
+                GUILayout.EndHorizontal();
+            }
 
             using (new NamedVerticalScope("Misc"))
             {
@@ -389,7 +406,6 @@ namespace Sabresaurus.SabreCSG
                     BrushUtility.SplitIntersecting(brushes);
                 }
 
-
                 //			BrushOrder brushOrder = BrushTarget.GetBrushOrder();
                 //			string positionString = string.Join(",", brushOrder.Position.Select(item => item.ToString()).ToArray());
                 //            GUILayout.Label(positionString, EditorStyles.boldLabel);
@@ -403,7 +419,7 @@ namespace Sabresaurus.SabreCSG
                 //}
             }
 
-			base.DoInspectorGUI();
+            base.DoInspectorGUI();
         }
 
         /// <summary>
@@ -411,17 +427,17 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="newUpAxis">Axis to match transform.up to</param>
         /// <param name="counterAlignment">If specified, when the brush is rotated the vertices will be counter rotated so they remain in their old positions and orientations</param>
-		void AlignUpToAxis(Vector3 newUpAxis, bool counterAlignment)
-		{
-			PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
-			foreach (PrimitiveBrush brush in brushes)
-			{
+		private void AlignUpToAxis(Vector3 newUpAxis, bool counterAlignment)
+        {
+            PrimitiveBrush[] brushes = BrushTargets.Cast<PrimitiveBrush>().ToArray();
+            foreach (PrimitiveBrush brush in brushes)
+            {
                 Vector3 perpendicularDirection = Vector3.up;
-                if(Mathf.Abs(Vector3.Dot(perpendicularDirection, newUpAxis)) > 0.9f)
+                if (Mathf.Abs(Vector3.Dot(perpendicularDirection, newUpAxis)) > 0.9f)
                 {
                     perpendicularDirection = Vector3.back;
                 }
-                
+
                 // Calculate the new rotation for the brush so that it's new transform.up is at the axis. Note the parameter order
                 Quaternion rotation = Quaternion.LookRotation(-perpendicularDirection, newUpAxis);
                 Quaternion inverseRotation = Quaternion.Inverse(rotation * Quaternion.Inverse(brush.transform.localRotation));
@@ -433,28 +449,28 @@ namespace Sabresaurus.SabreCSG
 
                 // If they want to realign the brush but keep original world positions
                 if (counterAlignment)
-				{
-					Polygon[] polygons = brush.GetPolygons();
+                {
+                    Polygon[] polygons = brush.GetPolygons();
 
-					for (int polygonIndex = 0; polygonIndex < polygons.Length; polygonIndex++) 
-					{
-						Vertex[] vertices = polygons[polygonIndex].Vertices;
+                    for (int polygonIndex = 0; polygonIndex < polygons.Length; polygonIndex++)
+                    {
+                        Vertex[] vertices = polygons[polygonIndex].Vertices;
 
-						// Rotate positions and vertices so they remain in their original place
-						for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++) 
-						{
-							vertices[vertexIndex].Position = inverseRotation * vertices[vertexIndex].Position;
-							vertices[vertexIndex].Normal = inverseRotation * vertices[vertexIndex].Normal;
-						}
-					}
+                        // Rotate positions and vertices so they remain in their original place
+                        for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
+                        {
+                            vertices[vertexIndex].Position = inverseRotation * vertices[vertexIndex].Position;
+                            vertices[vertexIndex].Normal = inverseRotation * vertices[vertexIndex].Normal;
+                        }
+                    }
 
-					// Polygon vertices have changed, so recalculate the planes
-					for (int polygonIndex = 0; polygonIndex < polygons.Length; polygonIndex++) 
-					{
-						polygons[polygonIndex].CalculatePlane();
-					}
-				}
-			}
-		}
+                    // Polygon vertices have changed, so recalculate the planes
+                    for (int polygonIndex = 0; polygonIndex < polygons.Length; polygonIndex++)
+                    {
+                        polygons[polygonIndex].CalculatePlane();
+                    }
+                }
+            }
+        }
     }
 }

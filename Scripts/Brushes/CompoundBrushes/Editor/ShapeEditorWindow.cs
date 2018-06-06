@@ -1156,9 +1156,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         {
             foreach (Segment segment in selectedSegments.ToArray()) // use .ToArray() to iterate a clone.
             {
+                bool inverted = project.flipHorizontally ^ project.flipVertically;
                 Segment next = GetNextSegment(segment);
                 // calculate extrude direction.
-                Vector2Int pos1 = next.position - segment.position;
+                Vector2Int pos1 = (inverted ? segment.position - next.position : next.position - segment.position);
                 Vector2 dir = new Vector2(pos1.y, -pos1.x).normalized * 2.0f;
                 // insert new segments at an extruded distance.
                 Shape parent = GetShapeOfSegment(segment);
