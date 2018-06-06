@@ -16,6 +16,7 @@ namespace Sabresaurus.SabreCSG
         Custom,
         IcoSphere,
         Cone,
+        Capsule
     };
 
     /// <summary>
@@ -62,6 +63,30 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <value>The cone side count.</value>
         public int ConeSideCount { get { return coneSideCount; } set { coneSideCount = value; } }
+
+        /// <summary>
+        /// The capsule side count.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private int capsuleSideCount = 12;
+
+        /// <summary>
+        /// Gets or sets the capsule side count.
+        /// </summary>
+        /// <value>The capsule side count.</value>
+        public int CapsuleSideCount { get { return capsuleSideCount; } set { capsuleSideCount = value; } }
+
+        /// <summary>
+        /// The capsule height.
+        /// </summary>
+        [SerializeField, HideInInspector]
+        private float capsuleHeight = 2.0f;
+
+        /// <summary>
+        /// Gets or sets the capsule height.
+        /// </summary>
+        /// <value>The capsule height.</value>
+        public float CapsuleHeight { get { return capsuleHeight; } set { capsuleHeight = value; } }
 
         /// <summary>
         /// The sphere side count.
@@ -171,6 +196,9 @@ namespace Sabresaurus.SabreCSG
 
                     case PrimitiveBrushType.Cone:
                         return "Cone Brush";
+
+                    case PrimitiveBrushType.Capsule:
+                        return "Capsule Brush";
 
                     default:
                         return base.BeautifulBrushName;
@@ -302,6 +330,18 @@ namespace Sabresaurus.SabreCSG
                     coneSideCount = 3;
                 }
                 polygons = BrushFactory.GenerateCone(coneSideCount);
+            }
+            else if (brushType == PrimitiveBrushType.Capsule)
+            {
+                if (capsuleHeight < 0.001f)
+                {
+                    capsuleHeight = 0.001f;
+                }
+                if (capsuleSideCount < 3)
+                {
+                    capsuleSideCount = 3;
+                }
+                polygons = BrushFactory.GenerateCapsule(capsuleHeight, 0.5f, capsuleSideCount);
             }
             else if (brushType == Sabresaurus.SabreCSG.PrimitiveBrushType.Custom)
             {
@@ -766,7 +806,11 @@ namespace Sabresaurus.SabreCSG
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer != null)
             {
+#if UNITY_EDITOR
                 meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
+#else
+                meshRenderer.enabled = isVisible;
+#endif
             }
         }
 
