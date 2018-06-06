@@ -1,6 +1,7 @@
 ﻿namespace Sabresaurus.SabreCSG
 {
 	using UnityEditor;
+	using UnityEngine;
 
 	[CanEditMultipleObjects]
 	[CustomEditor( typeof( HollowBoxBrush ), true )]
@@ -9,7 +10,7 @@
 		private SerializedProperty wallThicknessProp;
 		private SerializedProperty brushSizeProp;
 
-		private float bSize;
+		private Vector3 bSize;
 
 		public override void DoInspectorGUI()
 		{
@@ -20,11 +21,11 @@
 
 				EditorGUILayout.BeginHorizontal();
 
-				bSize = EditorGUILayout.FloatField("Brush Size", bSize );
+				bSize = EditorGUILayout.Vector3Field( "Brush Size", bSize );
 
 				if( SabreGUILayout.Button( "Set" ) )
 				{
-					brushSizeProp.floatValue = bSize;
+					brushSizeProp.vector3Value = bSize;
 				}
 
 				EditorGUILayout.EndHorizontal();
@@ -49,7 +50,7 @@
 			brushSizeProp = serializedObject.FindProperty( "brushSize" );
 
 			// Get the size of the brush for the inspector field value.
-			bSize = brushSizeProp.floatValue;
+			bSize = brushSizeProp.vector3Value;
 		}
 
 		private void ApplyAndInvalidate()

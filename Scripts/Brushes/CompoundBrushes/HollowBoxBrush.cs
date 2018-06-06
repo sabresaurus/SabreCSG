@@ -1,5 +1,7 @@
 ﻿namespace Sabresaurus.SabreCSG
 {
+	using System.Collections.Generic;
+	using System;
 	using UnityEngine;
 
 	public class HollowBoxBrush : CompoundBrush
@@ -20,7 +22,7 @@
 			}
 		}
 
-		public float BrushSize
+		public Vector3 BrushSize
 		{
 			get
 			{
@@ -60,12 +62,12 @@
 		/// </summary>
 		[SerializeField]
 		private float wallThickness = 0.25f;
-		
+
 		/// <summary>
 		/// The size of the brush bounds, set by inspector [set] button.
 		/// </summary>
 		[SerializeField]
-		private float brushSize = 2.0f;
+		private Vector3 brushSize = new Vector3( 2, 2, 2 );
 
 		public override void UpdateVisibility()
 		{
@@ -87,15 +89,13 @@
 				localBounds.size.y > wallThickness * 2.0f &&
 				localBounds.size.z > wallThickness * 2.0f )
 			{
-				localBounds.size = Vector3.one * brushSize;
-
-				Vector3 baseSize = localBounds.size;
+				localBounds.size = brushSize;
 
 				generatedBrushes[0].Mode = CSGMode.Add;
-				BrushUtility.Resize( generatedBrushes[0], baseSize );
+				BrushUtility.Resize( generatedBrushes[0], localBounds.size );
 
 				generatedBrushes[1].Mode = CSGMode.Subtract;
-				BrushUtility.Resize( generatedBrushes[1], baseSize - new Vector3( wallThickness * 2, wallThickness * 2, wallThickness * 2 ) );
+				BrushUtility.Resize( generatedBrushes[1], localBounds.size - new Vector3( wallThickness * 2, wallThickness * 2, wallThickness * 2 ) );
 
 				for( int i = 0; i < BrushCount; i++ )
 				{
