@@ -1,7 +1,5 @@
 ﻿namespace Sabresaurus.SabreCSG
 {
-	using System.Collections.Generic;
-	using System;
 	using UnityEngine;
 
 	public class HollowBoxBrush : CompoundBrush
@@ -22,18 +20,6 @@
 			}
 		}
 
-		public Vector3 BrushSize
-		{
-			get
-			{
-				return brushSize;
-			}
-			set
-			{
-				brushSize = value;
-			}
-		}
-
 		/// <summary>
 		/// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
 		/// </summary>
@@ -50,10 +36,20 @@
 		{
 			get
 			{
-				// If the brush is too small for walls, just default to a single brush to not break things ok!
-				return ( localBounds.size.x > wallThickness * 2.0f &&
-					localBounds.size.y > wallThickness * 2.0f &&
-					localBounds.size.z > wallThickness * 2.0f ) ? 2 : 1;
+				// If the brush is too small for walls, just default to a single brush.
+				return ( IsBrushXYZTooSmall ) ? 2 : 1;
+			}
+		}
+
+		/// <summary>
+		/// Is the size of the bounds X, Y, and Z above the minimum size?
+		/// </summary>
+		/// <returns></returns>
+		public bool IsBrushXYZTooSmall
+		{
+			get
+			{
+				return localBounds.size.x > wallThickness * 2.0f && localBounds.size.z > wallThickness * 2.0f && localBounds.size.y > wallThickness * 2;
 			}
 		}
 
@@ -62,12 +58,6 @@
 		/// </summary>
 		[SerializeField]
 		private float wallThickness = 0.25f;
-
-		/// <summary>
-		/// The size of the brush bounds, set by inspector [set] button.
-		/// </summary>
-		[SerializeField]
-		private Vector3 brushSize = new Vector3( 2, 2, 2 );
 
 		public override void UpdateVisibility()
 		{
@@ -85,12 +75,8 @@
 				generatedBrushes[i].HasCollision = this.HasCollision;
 			}
 
-			if( localBounds.size.x > wallThickness * 2.0f &&
-				localBounds.size.y > wallThickness * 2.0f &&
-				localBounds.size.z > wallThickness * 2.0f )
+			if( IsBrushXYZTooSmall )
 			{
-				localBounds.size = brushSize;
-
 				generatedBrushes[0].Mode = CSGMode.Add;
 				BrushUtility.Resize( generatedBrushes[0], localBounds.size );
 
@@ -103,6 +89,10 @@
 					generatedBrushes[i].Invalidate( true );
 				}
 			}
+			else
+			{
+				BrushUtility.Resize( generatedBrushes[0], localBounds.size );
+			}
 		}
 
 		private Polygon[] GeneratePolys( int index )
@@ -111,39 +101,11 @@
 
 			for( int i = 0; i < 6; i++ )
 			{
-				GenerateNormals( output[i] );
-				GenerateUvCoordinates( output[i] );
+				output[i].ResetVertexNormals();
+				output[i].GenerateUvCoordinates();
 			}
 
 			return output;
-		}
-
-		/// <summary>
-		/// Generates the UV coordinates for a <see cref="Polygon"/> automatically.
-		/// </summary>
-		/// <param name="polygon">The polygon to be updated.</param>
-		private void GenerateUvCoordinates( Polygon polygon )
-		{
-			// stolen code from the surface editor "AutoUV".
-			Vector3 planeNormal = polygon.Plane.normal;
-			Quaternion cancellingRotation = Quaternion.Inverse( Quaternion.LookRotation( -planeNormal ) );
-			// Sets the UV at each point to the position on the plane
-			for( int i = 0; i < polygon.Vertices.Length; i++ )
-			{
-				Vector3 position = polygon.Vertices[i].Position;
-				Vector2 uv = ( cancellingRotation * position ) * 0.5f;
-				polygon.Vertices[i].UV = uv;
-			}
-		}
-
-		private void GenerateNormals( Polygon polygon )
-		{
-			Plane plane = new Plane( polygon.Vertices[1].Position, polygon.Vertices[2].Position, polygon.Vertices[3].Position );
-
-			foreach( Vertex vertex in polygon.Vertices )
-			{
-				vertex.Normal = plane.normal;
-			}
 		}
 	}
 }
