@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG
         // Also calculate tangents (needed for Unity's built in bump mapping)
         public bool GenerateTangents = true;
 
-        public bool OptimizeGeometry = true;
+        public bool OptimizeGeometry = false;
 
         public bool SaveMeshesAsAssets = false;
 
