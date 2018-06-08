@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG
     //	[ExecuteInEditMode]
     public class CSGModelBase : MonoBehaviour
     {
-        public const string VERSION_STRING = "1.7.1";
+        public const string VERSION_STRING = "1.7.2";
         protected const string DEFAULT_FALLBACK_MATERIAL_PATH = "Materials/Default_Map";
 
         // Limit to how many vertices a Unity mesh can hold, before it must be split into a second mesh (just under 2^16)
