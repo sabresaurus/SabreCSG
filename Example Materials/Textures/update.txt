@@ -2,9 +2,16 @@ Content updated by Daniel Cornelius (Kerfuffles)
 Wood, soil, and grass diffuse textures provided by Textures.com (formerly CGTextures.com)
 
 [06.09.2018]
-+ added scsg_soilsand_0 material and its relevant content
-+ added scsg_grass_0 material and its relevant content
-+ added scsg_glass_0, scsg_glass_1 materials and its relevant content
++ added materials and their content:
+ scsg_soilsand_0
+ scsg_grass_0
+ scsg_glass_0
+ scsg_glass_1
+ scsg_concbare_0
+ scsg_mebare_0
+ scsg_metreadplate_0
+ scsg_osb_0
+
 * modified scsg_bricks_0 to have better looking grout
 - removed scsg_bricks_0_n2.tga
 
