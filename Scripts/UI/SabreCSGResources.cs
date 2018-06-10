@@ -177,6 +177,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D VolumeIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Volume.png");
+            }
+        }
+
         public static Texture2D NoCSGIconTexture
         {
             get
@@ -656,6 +664,11 @@ namespace Sabresaurus.SabreCSG
         public static Material GetSubtractMaterial()
         {
             return (Material)LoadObject("Materials/Subtract.mat");
+        }
+
+        public static Material GetVolumeMaterial()
+        {
+            return (Material)LoadObject("Materials/Volume.mat");
         }
 
         public static Material GetCollisionMaterial()

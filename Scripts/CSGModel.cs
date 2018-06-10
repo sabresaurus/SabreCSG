@@ -414,7 +414,11 @@ namespace Sabresaurus.SabreCSG
 
                         if (Selection.Contains(brushGameObject))
                         {
-                            if (!brushes[brushIndex].IsVisible)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = new Color32(192, 192, 192, 255);
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
                             {
                                 outlineColor = new Color(0.6f, 1.0f, 0.6f);
                             }
@@ -436,7 +440,11 @@ namespace Sabresaurus.SabreCSG
                         }
                         else if (CurrentSettings.BrushesVisible)
                         {
-                            if (!brushes[brushIndex].IsVisible)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = Color.black;
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
                             {
                                 outlineColor = new Color(0.0f, 1.0f, 0.0f);
                             }
@@ -1188,6 +1196,10 @@ namespace Sabresaurus.SabreCSG
                     if (gameObject.GetComponent<GroupBrush>())
                     {
                         Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
+                    }
+                    else if (brushBase.Mode == CSGMode.Volume)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.VolumeIconTexture, iconMaterial);
                     }
                     else if (!brushBase.IsVisible)
                     {

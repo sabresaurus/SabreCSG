@@ -751,7 +751,11 @@ namespace Sabresaurus.SabreCSG
 
 #if UNITY_EDITOR
             Material material;
-            if (!IsVisible)
+            if (this.mode == CSGMode.Volume)
+            {
+                material = SabreCSGResources.GetVolumeMaterial();
+            }
+            else if (!IsVisible)
             {
                 material = SabreCSGResources.GetCollisionMaterial();
             }
