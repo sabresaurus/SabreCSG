@@ -416,7 +416,7 @@ namespace Sabresaurus.SabreCSG
                         {
                             if (brushes[brushIndex].Mode == CSGMode.Volume)
                             {
-                                outlineColor = brushes[brushIndex].Volume ? Color32.Lerp(brushes[brushIndex].Volume.BrushWireframeColor, new Color32(255, 255, 255, 255), 0.5f) : new Color32(192, 192, 192, 255);
+                                outlineColor = new Color32(192, 192, 192, 255);
                             }
                             else if (!brushes[brushIndex].IsVisible)
                             {
@@ -442,7 +442,7 @@ namespace Sabresaurus.SabreCSG
                         {
                             if (brushes[brushIndex].Mode == CSGMode.Volume)
                             {
-                                outlineColor = brushes[brushIndex].Volume ? brushes[brushIndex].Volume.BrushWireframeColor : new Color32(0, 0, 0, 255);
+                                outlineColor = new Color32(0, 0, 0, 255);
                             }
                             else if (!brushes[brushIndex].IsVisible)
                             {

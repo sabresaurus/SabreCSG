@@ -30,30 +30,6 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
-        /// Gets the brush preview color shown in the editor.
-        /// </summary>
-        /// <returns>The volume material.</returns>
-        public virtual Color32 BrushPreviewColor
-        {
-            get
-            {
-                return new Color32(127, 127, 127, 255);
-            }
-        }
-
-        /// <summary>
-        /// Gets the brush wireframe color shown in the editor.
-        /// </summary>
-        /// <returns>The volume material.</returns>
-        public virtual Color32 BrushWireframeColor
-        {
-            get
-            {
-                return new Color32(0, 0, 0, 255);
-            }
-        }
-
-        /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
         /// <returns>True if a property changed or else false.</returns>
