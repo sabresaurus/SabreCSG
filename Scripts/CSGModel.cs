@@ -2002,6 +2002,8 @@ namespace Sabresaurus.SabreCSG
             Transform[] volumes = csgModelTransform.FindChildren(Constants.GameObjectVolumeComponentIdentifier);
             for (int i = 0; i < volumes.Length; i++)
             {
+                // make sure they are visible again.
+                volumes[i].hideFlags = HideFlags.None;
                 // give them a more recognizable name.
                 volumes[i].name = volumes[i].parent.name + " (Volume)";
                 if (meshGroup != null)
