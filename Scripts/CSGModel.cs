@@ -1998,6 +1998,20 @@ namespace Sabresaurus.SabreCSG
                 meshGroup.SetParent(csgModelTransform.parent, true);
             }
 
+            // find all built volumes:
+            Transform[] volumes = csgModelTransform.FindChildren(Constants.GameObjectVolumeComponentIdentifier);
+            for (int i = 0; i < volumes.Length; i++)
+            {
+                // give them a more recognizable name.
+                volumes[i].name = volumes[i].parent.name + " (Volume)";
+                if (meshGroup != null)
+                    // Reanchor the volumes to the mesh group.
+                    volumes[i].SetParent(meshGroup, true);
+                else
+                    // Reanchor the volumes to the parent of the CSG Model
+                    volumes[i].SetParent(csgModelTransform.parent, true);
+            }
+
             // Remove the CSG Model and its brushes
             DestroyImmediate(csgModelTransform.gameObject);
         }
