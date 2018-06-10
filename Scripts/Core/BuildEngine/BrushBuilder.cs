@@ -74,8 +74,8 @@ namespace Sabresaurus.SabreCSG
 							// Remove any polygons that are contained in an earlier addition
 							RemoveInteriorPolygons(brushChunks, intersectingBrushCaches[i], excludedPolygons, polygonsRemoved);
 						}
-						else
-						{
+						else if (intersectingBrushCaches[i].Mode == CSGMode.Subtract)
+                        {
 							// Restore any polygons that were removed when inside an addition but are now inside a subsequent subtraction
 							RestoreInteriorPolygons(brushChunks, intersectingBrushCaches[i], excludedPolygons, polygonsRemoved);
 						}
@@ -87,8 +87,8 @@ namespace Sabresaurus.SabreCSG
 							// Remove any polygons that will be contrained by a later additive brush
 							RemoveInteriorPolygons(brushChunks, intersectingBrushCaches[i], excludedPolygons, polygonsRemoved);
 						}
-						else
-						{
+						else if (intersectingBrushCaches[i].Mode == CSGMode.Subtract)
+                        {
 							// If the later brush is subtractive, extract any subtractive polygons and add to these chunks
 							ExtractSubtractionPolygons(brushCache, brushChunks, intersectingBrushCaches[i], isCollisionPass);
 						}
@@ -151,8 +151,8 @@ namespace Sabresaurus.SabreCSG
 //					DebugExclude.DisplayChunk(DebugExclude.hackyHolder, brushChunks[i], brushIndex);
 //				}
 			}
-			else // Subtract
-			{
+			else if (brushCache.Mode == CSGMode.Subtract)
+            {
 				// Do nothing for subtractive brushes. This is handled by the additive brushes they interact with
 				if(isCollisionPass)
 				{

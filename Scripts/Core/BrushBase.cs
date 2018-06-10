@@ -9,7 +9,13 @@ using UnityEngine.Serialization;
 
 namespace Sabresaurus.SabreCSG
 {
-	public enum CSGMode { Add, Subtract };
+	public enum CSGMode
+    {
+        Add,
+        Subtract,
+        Volume
+    };
+
     [ExecuteInEditMode]
 	public abstract class BrushBase : MonoBehaviour
 	{
@@ -25,7 +31,10 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField]
 		protected bool isVisible = true;
 
-		protected bool destroyed = false;
+        [SerializeField]
+        protected Volume volume = null;
+
+        protected bool destroyed = false;
 
         protected string previousHierarchyName = "";
 
@@ -39,6 +48,21 @@ namespace Sabresaurus.SabreCSG
 			{
 				if (this.mode != value)
 				{
+                    if (value == CSGMode.Volume)
+                    {
+                        // limitation: volume mode can only be set on primitive brushes for now.
+                        if (this.GetType() != typeof(PrimitiveBrush))
+                        {
+                            return;
+                        }
+                        // limitation: prevent users from setting compound brush primitives to volumes.
+                        if (((PrimitiveBrush)this).BrushController != null)
+                        {
+                            return;
+                        }
+                        // we prevent this so that we can add our own unique compound brush workflow in later SabreCSG versions.
+                    }
+
 					this.mode = value;
 
 					Invalidate(true);
@@ -89,6 +113,22 @@ namespace Sabresaurus.SabreCSG
 				hasCollision = value;
 			}
 		}
+
+        /// <summary>
+        /// Gets or sets the volume associated with the brush (for <see cref="CSGMode.Volume"/>).
+        /// </summary>
+        /// <value>The volume.</value>
+        public Volume Volume
+        {
+            get
+            {
+                return volume;
+            }
+            set
+            {
+                volume = value;
+            }
+        }
 
         /// <summary>
         /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.

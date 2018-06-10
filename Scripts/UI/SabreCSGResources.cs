@@ -93,6 +93,8 @@ namespace Sabresaurus.SabreCSG
                 return ButtonSphereTexture;
             else if (brushType == PrimitiveBrushType.Cone)
                 return ButtonConeTexture;
+            else if (brushType == PrimitiveBrushType.Capsule)
+                return ButtonCapsuleTexture;
             else
                 return ButtonCubeTexture;
         }
@@ -172,6 +174,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/Subtract.png");
+            }
+        }
+
+        public static Texture2D VolumeIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Volume.png");
             }
         }
 
@@ -268,6 +278,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
+            }
+        }
+
+        public static Texture2D ButtonCapsuleTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCapsule.png");
             }
         }
 
@@ -444,6 +462,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentInsert.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentExtrudeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentExtrude.png");
             }
         }
 
@@ -638,6 +664,11 @@ namespace Sabresaurus.SabreCSG
         public static Material GetSubtractMaterial()
         {
             return (Material)LoadObject("Materials/Subtract.mat");
+        }
+
+        public static Material GetVolumeMaterial()
+        {
+            return (Material)LoadObject("Materials/Volume.mat");
         }
 
         public static Material GetCollisionMaterial()

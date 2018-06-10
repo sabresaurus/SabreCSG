@@ -162,6 +162,18 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static bool ShowHiddenGameObjectsInInspector
+        {
+            get
+            {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ShowHiddenGameObjectsInInspector", 0) != 0;
+            }
+            set
+            {
+                PlayerPrefs.SetInt(KEY_PREFIX + "ShowHiddenGameObjectsInInspector", value ? 1 : 0);
+            }
+        }
+
         public static bool ReducedHandleThreshold
         {
             get

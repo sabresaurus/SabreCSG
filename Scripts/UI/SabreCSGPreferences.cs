@@ -94,6 +94,15 @@ namespace Sabresaurus.SabreCSG
                 SceneView.RepaintAll();
             }
 
+            EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowHiddenGameObjectsInInspector = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInInspector, "Show hidden game objects in inspector");
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
+
             GUILayout.Space(10);
 
             if (GUILayout.Button("Change key mappings"))

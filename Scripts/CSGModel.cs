@@ -414,7 +414,11 @@ namespace Sabresaurus.SabreCSG
 
                         if (Selection.Contains(brushGameObject))
                         {
-                            if (!brushes[brushIndex].IsVisible)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = new Color32(192, 192, 192, 255);
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
                             {
                                 outlineColor = new Color(0.6f, 1.0f, 0.6f);
                             }
@@ -436,7 +440,11 @@ namespace Sabresaurus.SabreCSG
                         }
                         else if (CurrentSettings.BrushesVisible)
                         {
-                            if (!brushes[brushIndex].IsVisible)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = new Color32(0, 0, 0, 255);
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
                             {
                                 outlineColor = new Color(0.0f, 1.0f, 0.0f);
                             }
@@ -1188,6 +1196,10 @@ namespace Sabresaurus.SabreCSG
                     if (gameObject.GetComponent<GroupBrush>())
                     {
                         Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
+                    }
+                    else if (brushBase.Mode == CSGMode.Volume)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.VolumeIconTexture, iconMaterial);
                     }
                     else if (!brushBase.IsVisible)
                     {
@@ -1980,8 +1992,26 @@ namespace Sabresaurus.SabreCSG
             Transform meshGroup = csgModelTransform.Find("MeshGroup");
             if (meshGroup != null)
             {
+                // If the CSG Model is disabled we also disable the mesh group.
+                meshGroup.gameObject.SetActive(csgModelTransform.gameObject.activeSelf);
                 // Reanchor the meshes to the parent of the CSG Model
                 meshGroup.SetParent(csgModelTransform.parent, true);
+            }
+
+            // find all built volumes:
+            Transform[] volumes = csgModelTransform.FindChildren(Constants.GameObjectVolumeComponentIdentifier);
+            for (int i = 0; i < volumes.Length; i++)
+            {
+                // make sure they are visible again.
+                volumes[i].hideFlags = HideFlags.None;
+                // give them a more recognizable name.
+                volumes[i].name = volumes[i].parent.name + " (Volume)";
+                if (meshGroup != null)
+                    // Reanchor the volumes to the mesh group.
+                    volumes[i].SetParent(meshGroup, true);
+                else
+                    // Reanchor the volumes to the parent of the CSG Model
+                    volumes[i].SetParent(csgModelTransform.parent, true);
             }
 
             // Remove the CSG Model and its brushes
