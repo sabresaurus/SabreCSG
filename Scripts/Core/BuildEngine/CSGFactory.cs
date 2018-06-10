@@ -491,6 +491,7 @@ namespace Sabresaurus.SabreCSG
                             BrushFactory.GenerateMeshFromPolygonsFast(brushes[brushIndex].GetPolygons(), ref mesh, 0.0f);
                             GameObject gameObject = CreateVolumeMesh(rootTransform, mesh);
                             gameObject.transform.position = brushes[brushIndex].transform.position;
+                            gameObject.transform.rotation = brushes[brushIndex].transform.rotation;
                             // execute custom volume generation code:
                             volume.OnCreateVolume(gameObject);
                         }
