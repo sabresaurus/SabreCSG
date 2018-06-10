@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNITY_EDITOR || RUNTIME_CSG
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -11,26 +13,65 @@ namespace Sabresaurus.SabreCSG
     [System.Serializable]
     public class Volume : ScriptableObject
     {
-#if UNITY_EDITOR
         /// <summary>
         /// Gets the brush preview material shown in the editor.
         /// </summary>
         /// <returns>The volume material.</returns>
-        public virtual Material GetBrushPreviewMaterial()
+        public virtual Material BrushPreviewMaterial
         {
-            return SabreCSGResources.GetVolumeMaterial();
+            get
+            {
+#if RUNTIME_CSG && !UNITY_EDITOR
+                return null;
+#else
+                return SabreCSGResources.GetVolumeMaterial();
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Gets the brush preview color shown in the editor.
+        /// </summary>
+        /// <returns>The volume material.</returns>
+        public virtual Color32 BrushPreviewColor
+        {
+            get
+            {
+                return new Color32(127, 127, 127, 255);
+            }
+        }
+
+        /// <summary>
+        /// Gets the brush wireframe color shown in the editor.
+        /// </summary>
+        /// <returns>The volume material.</returns>
+        public virtual Color32 BrushWireframeColor
+        {
+            get
+            {
+                return new Color32(0, 0, 0, 255);
+            }
         }
 
         /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
-        public virtual void OnInspectorGUI()
+        /// <returns>True if a property changed or else false.</returns>
+        public virtual bool OnInspectorGUI()
         {
-            
+            return false;
         }
 
         /// <summary>
-        /// Searches the main C# assembly for volumes that can be instantiated.
+        /// Called when the volume is created in the editor.
+        /// </summary>
+        /// <param name="volume">The generated volume game object.</param>
+        public virtual void OnCreateVolume(GameObject volume)
+        {
+        }
+
+        /// <summary>
+        /// Searches the main C# assembly for volume types that can be instantiated.
         /// </summary>
         /// <returns>All matched volume types.</returns>
         public static List<Type> FindAllInAssembly()
@@ -59,6 +100,7 @@ namespace Sabresaurus.SabreCSG
 
             return matchedTypes;
         }
-#endif
     }
 }
+
+#endif

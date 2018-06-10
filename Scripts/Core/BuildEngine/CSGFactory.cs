@@ -476,8 +476,29 @@ namespace Sabresaurus.SabreCSG
 					MeshGroupManager.BuildCollision(meshGroupHolder, buildContext.CollisionPolygonIndex, buildSettings, collisionMeshDictionary);
 				}
 
-				// All done
-				DateTime time2 = DateTime.Now;
+                // generate all of the volume brushes:
+                // this should probably be implemented in such a way that only changed volume brushes get updated,
+                // problem is that the cleanup above removes all of them.
+                for (int brushIndex = 0; brushIndex < brushes.Count; brushIndex++)
+                {
+                    if (brushes[brushIndex].Mode == CSGMode.Volume && brushes[brushIndex].Volume != null)
+                    {
+                        Volume volume = brushes[brushIndex].Volume;
+                        if (volume != null)
+                        {
+                            // create the game object with convex mesh collider:
+                            Mesh mesh = new Mesh();
+                            BrushFactory.GenerateMeshFromPolygonsFast(brushes[brushIndex].GetPolygons(), ref mesh, 0.0f);
+                            GameObject gameObject = CreateVolumeMesh(rootTransform, mesh);
+                            gameObject.transform.position = brushes[brushIndex].transform.position;
+                            // execute custom volume generation code:
+                            volume.OnCreateVolume(gameObject);
+                        }
+                    }
+                }
+
+                // All done
+                DateTime time2 = DateTime.Now;
 
 				buildContext.buildMetrics.BuildMetaData = (time1-buildStartTime).TotalSeconds + " " + (time2-time1).TotalSeconds + " " + brushesBuilt;
 				buildContext.buildMetrics.BuildTime = (float)(DateTime.Now - buildStartTime).TotalSeconds;
@@ -546,6 +567,28 @@ namespace Sabresaurus.SabreCSG
 
                 return colliderMesh;
             }
-        }
+
+            public static GameObject CreateVolumeMesh(Transform rootTransform, Mesh mesh)
+            {
+                meshGroup = rootTransform.Find("MeshGroup");
+                // Create a grouping object which will act as a parent for all the per material meshes
+                if (meshGroup == null)
+                {
+                    meshGroup = new GameObject("MeshGroup").transform;
+                    meshGroup.parent = rootTransform;
+                }
+
+                GameObject volumeMesh = new GameObject("VolumeMesh", typeof(MeshCollider));
+                volumeMesh.transform.SetParent(meshGroup, false);
+
+                // Set the mesh to be used for triggers.
+                MeshCollider meshCollider = volumeMesh.GetComponent<MeshCollider>();
+                meshCollider.sharedMesh = mesh;
+                meshCollider.convex = true;
+                meshCollider.isTrigger = true;
+
+                return volumeMesh;
+            }
+    }
     }
 #endif

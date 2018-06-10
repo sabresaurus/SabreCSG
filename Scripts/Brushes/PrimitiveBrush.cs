@@ -753,7 +753,7 @@ namespace Sabresaurus.SabreCSG
             Material material;
             if (this.mode == CSGMode.Volume)
             {
-                material = SabreCSGResources.GetVolumeMaterial();
+                material = Volume ? Volume.BrushPreviewMaterial : SabreCSGResources.GetVolumeMaterial();
             }
             else if (!IsVisible)
             {
@@ -995,6 +995,12 @@ namespace Sabresaurus.SabreCSG
             // copy the world position as compound brush children brushes have position 0,0,0.
             // once parented they will end up at world position 0,0,0 if this step isn't done.
             newObject.transform.position = this.transform.position;
+
+            // properly duplicate the volume type.
+            if (Volume != null)
+            {
+                Volume = ScriptableObject.Instantiate(Volume);
+            }
 
             return newObject;
         }

@@ -121,11 +121,13 @@ namespace Sabresaurus.SabreCSG
                         }
 
                         // custom volume inspector:
-                        BrushTarget.Volume.OnInspectorGUI();
-
-                        if (serializedObject.targetObject != null)
+                        if (BrushTarget.Volume.OnInspectorGUI())
                         {
-                            serializedObject.ApplyModifiedProperties();
+                            if (serializedObject.targetObject != null)
+                            {
+                                serializedObject.ApplyModifiedProperties();
+                                System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
+                            }
                         }
                     }
                 }
