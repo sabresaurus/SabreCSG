@@ -101,7 +101,7 @@ namespace Sabresaurus.SabreCSG
                                     break;
                             }
                         }
-                        selected = EditorGUILayout.Popup("Volume Type", selected, volumeTypes.Select(v => v.Name).ToArray());
+                        selected = EditorGUILayout.Popup("Volume Type", selected, volumeTypes.Select(v => v.Name + " (" + v.Namespace + ")").ToArray());
 
                         // set the brush volume type:
                         for (int i = 0; i < BrushTargets.Length; i++)

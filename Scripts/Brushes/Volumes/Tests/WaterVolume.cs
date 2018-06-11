@@ -1,11 +1,9 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using Sabresaurus.SabreCSG;
+using UnityEngine.Events;
 
 namespace DeleteMeBeforePublishing
 {
@@ -19,22 +17,22 @@ namespace DeleteMeBeforePublishing
         [SerializeField]
         public int thickness = 0;
 
+#if UNITY_EDITOR
         /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
         /// <returns>True if a property changed or else false.</returns>
         public override bool OnInspectorGUI()
         {
-#if UNITY_EDITOR
             UnityEditor.EditorGUILayout.LabelField("Water Volume");
 
             int previousThickness = thickness;
             thickness = UnityEditor.EditorGUILayout.IntField("Thickness", thickness);
             if (thickness != previousThickness)
-                return true; // true when a property changed, the brush invalidates and stores all changes.
-#endif
+                return true;
             return false;
         }
+#endif
 
         /// <summary>
         /// Called when the volume is created in the editor.

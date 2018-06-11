@@ -13,6 +13,7 @@ namespace Sabresaurus.SabreCSG
     [System.Serializable]
     public class Volume : ScriptableObject
     {
+#if UNITY_EDITOR
         /// <summary>
         /// Gets the brush preview material shown in the editor.
         /// </summary>
@@ -21,11 +22,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-#if RUNTIME_CSG && !UNITY_EDITOR
-                return null;
-#else
                 return SabreCSGResources.GetVolumeMaterial();
-#endif
             }
         }
 
@@ -36,14 +33,6 @@ namespace Sabresaurus.SabreCSG
         public virtual bool OnInspectorGUI()
         {
             return false;
-        }
-
-        /// <summary>
-        /// Called when the volume is created in the editor.
-        /// </summary>
-        /// <param name="volume">The generated volume game object.</param>
-        public virtual void OnCreateVolume(GameObject volume)
-        {
         }
 
         /// <summary>
@@ -75,6 +64,15 @@ namespace Sabresaurus.SabreCSG
             }
 
             return matchedTypes;
+        }
+#endif
+
+        /// <summary>
+        /// Called when the volume is created in the editor.
+        /// </summary>
+        /// <param name="volume">The generated volume game object.</param>
+        public virtual void OnCreateVolume(GameObject volume)
+        {
         }
     }
 }
