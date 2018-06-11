@@ -588,7 +588,7 @@ namespace Sabresaurus.SabreCSG
                 GameObject volumeMesh = new GameObject(Constants.GameObjectVolumeComponentIdentifier, typeof(MeshCollider));
                 volumeMesh.transform.SetParent(parent, false);
 #if UNITY_EDITOR
-                if (!CurrentSettings.ShowHiddenGameObjectsInInspector)
+                if (!CurrentSettings.ShowHiddenGameObjectsInHierarchy)
                         volumeMesh.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
 #endif
 
