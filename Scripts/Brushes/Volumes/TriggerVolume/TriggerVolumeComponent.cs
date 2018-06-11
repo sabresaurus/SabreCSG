@@ -1,9 +1,9 @@
-﻿namespace Sabresaurus.SabreCSG
-{
-	using System;
-	using System.Collections.Generic;
-	using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace Sabresaurus.SabreCSG
+{
 	public class TriggerVolumeComponent : MonoBehaviour
 	{
 		public VolumeEventType volumeEventType;
