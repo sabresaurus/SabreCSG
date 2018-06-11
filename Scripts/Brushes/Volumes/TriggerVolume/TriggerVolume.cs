@@ -1,21 +1,18 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
-	/// <summary>
-	/// Simple water volume example for Kerfuffles.
-	/// </summary>
-	/// <seealso cref="Sabresaurus.SabreCSG.Volume"/>
+    /// <summary>
+    /// Executes trigger logic when objects interact with the volume.
+    /// </summary>
+    /// <seealso cref="Sabresaurus.SabreCSG.Volume"/>
 	[Serializable]
 	public class TriggerVolume : Volume
 	{
-		//[SerializeField]
-		//public int thickness = 0;
-
 		[SerializeField]
 		public TriggerVolumeEventType volumeEventType = TriggerVolumeEventType.SendMessage;
 
@@ -41,9 +38,17 @@ namespace Sabresaurus.SabreCSG
 		public TriggerVolumeEvent onExitEvent;
 
 #if UNITY_EDITOR
-        public override bool OnInspectorGUI()
+        /// <summary>
+        /// Called when the inspector GUI is drawn in the editor.
+        /// </summary>
+        /// <param name="selectedVolumes">The selected volumes in the editor (for multi-editing).</param>
+        /// <returns>True if a property changed or else false.</returns>
+        public override bool OnInspectorGUI(Volume[] selectedVolumes)
 		{
-			GUILayout.BeginVertical( "Box" );
+            var triggerVolumes = selectedVolumes.Cast<TriggerVolume>();
+            bool invalidate = false;
+
+            GUILayout.BeginVertical( "Box" );
 			{
 				UnityEditor.EditorGUILayout.LabelField( "Trigger Options", UnityEditor.EditorStyles.boldLabel );
 				GUILayout.Space( 4 );
@@ -52,11 +57,50 @@ namespace Sabresaurus.SabreCSG
 
 				GUILayout.BeginVertical();
 				{
-					volumeEventType = (TriggerVolumeEventType)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Event Type" ), volumeEventType );
-					triggerMode = (TriggerVolumeTriggerMode)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Mode", "What kind of trigger events do we want to use?" ), triggerMode );
-					layerMask = UnityEditor.EditorGUILayout.LayerField( new GUIContent( "Layer", "The layer that is detected by this trigger." ), layerMask );
-					filterTag = UnityEditor.EditorGUILayout.TagField( new GUIContent( "Tag", "The tag that is detected by this trigger." ), filterTag );
-					triggerOnce = UnityEditor.EditorGUILayout.Toggle( new GUIContent( "Trigger Once", "Is this a one use only trigger?" ), triggerOnce );
+                    TriggerVolumeEventType previousVolumeEventType;
+                    volumeEventType = (TriggerVolumeEventType)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Event Type" ), previousVolumeEventType = volumeEventType);
+                    if (volumeEventType != previousVolumeEventType)
+                    {
+                        foreach (TriggerVolume volume in triggerVolumes)
+                            volume.volumeEventType = volumeEventType;
+                        invalidate = true;
+                    }
+
+                    TriggerVolumeTriggerMode previousTriggerMode;
+                    triggerMode = (TriggerVolumeTriggerMode)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Mode", "What kind of trigger events do we want to use?" ), previousTriggerMode = triggerMode );
+                    if (triggerMode != previousTriggerMode)
+                    {
+                        foreach (TriggerVolume volume in triggerVolumes)
+                            volume.triggerMode = triggerMode;
+                        invalidate = true;
+                    }
+
+                    LayerMask previousLayerMask;
+                    layerMask = UnityEditor.EditorGUILayout.LayerField( new GUIContent( "Layer", "The layer that is detected by this trigger." ), previousLayerMask = layerMask);
+                    if (layerMask != previousLayerMask)
+                    {
+                        foreach (TriggerVolume volume in triggerVolumes)
+                            volume.layerMask = layerMask;
+                        invalidate = true;
+                    }
+
+                    string previousFilterTag;
+					filterTag = UnityEditor.EditorGUILayout.TagField( new GUIContent( "Tag", "The tag that is detected by this trigger." ), previousFilterTag = filterTag);
+                    if (filterTag != previousFilterTag)
+                    {
+                        foreach (TriggerVolume volume in triggerVolumes)
+                            volume.filterTag = filterTag;
+                        invalidate = true;
+                    }
+
+                    bool previousTriggerOnce;
+					triggerOnce = UnityEditor.EditorGUILayout.Toggle( new GUIContent( "Trigger Once", "Is this a one use only trigger?" ), previousTriggerOnce = triggerOnce );
+                    if (triggerOnce != previousTriggerOnce)
+                    {
+                        foreach (TriggerVolume volume in triggerVolumes)
+                            volume.triggerOnce = triggerOnce;
+                        invalidate = true;
+                    }
 				}
 				GUILayout.EndVertical();
 
@@ -87,31 +131,27 @@ namespace Sabresaurus.SabreCSG
 					if( UnityEditor.EditorGUI.EndChangeCheck() )
 					{
 						tv.ApplyModifiedProperties();
-						return true;
-					}
-				}
+                        foreach (TriggerVolume volume in triggerVolumes)
+                        {
+                            volume.onEnterEvent = onEnterEvent;
+                            volume.onStayEvent = onStayEvent;
+                            volume.onExitEvent = onExitEvent;
+                        }
+                        invalidate = true;
+                    }
+                }
 				GUILayout.EndVertical();
 
 				UnityEditor.EditorGUI.indentLevel = 0;
 			}
 			GUILayout.EndVertical();
 
-			base.OnInspectorGUI();
-
-			if( ChangeCheck() == true )
-				return true;
-
-			return false;
+			return invalidate;
 		}
 #endif
 
         public override void OnCreateVolume( GameObject volume )
 		{
-			//WaterVolumeComponent component = volume.AddComponent<WaterVolumeComponent>();
-			//component.thickness = thickness;
-
-			base.OnCreateVolume( volume );
-
 			TriggerVolumeComponent tvc = volume.AddComponent<TriggerVolumeComponent>();
 			tvc.volumeEventType = volumeEventType;
 			tvc.triggerMode = triggerMode;
@@ -121,44 +161,6 @@ namespace Sabresaurus.SabreCSG
 			tvc.onEnterEvent = onEnterEvent;
 			tvc.onStayEvent = onStayEvent;
 			tvc.onExitEvent = onExitEvent;
-		}
-
-		protected bool ChangeCheck()
-		{
-            TriggerVolumeEventType oldTT = volumeEventType;
-            TriggerVolumeTriggerMode oldTM = triggerMode;
-			string oldTag = filterTag;
-			LayerMask oldLM = layerMask;
-			bool oldTO = triggerOnce;
-			TriggerVolumeEvent oldOEnterE = onEnterEvent;
-			TriggerVolumeEvent oldOStayE = onStayEvent;
-			TriggerVolumeEvent oldOExitE = onExitEvent;
-
-			if( volumeEventType != oldTT )
-				return true;
-
-			if( triggerMode != oldTM )
-				return true;
-
-			if( filterTag != oldTag )
-				return true;
-
-			if( layerMask != oldLM )
-				return true;
-
-			if( triggerOnce != oldTO )
-				return true;
-
-			if( oldOEnterE != onEnterEvent )
-				return true;
-
-			if( oldOStayE != onStayEvent )
-				return true;
-
-			if( oldOExitE != onExitEvent )
-				return true;
-
-			return false;
 		}
 	}
 }

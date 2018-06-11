@@ -30,8 +30,9 @@ namespace Sabresaurus.SabreCSG
         /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
+        /// <param name="selectedVolumes">The selected volumes in the editor (for multi-editing).</param>
         /// <returns>True if a property changed or else false.</returns>
-        public virtual bool OnInspectorGUI()
+        public virtual bool OnInspectorGUI(Volume[] selectedVolumes)
         {
             return false;
         }
