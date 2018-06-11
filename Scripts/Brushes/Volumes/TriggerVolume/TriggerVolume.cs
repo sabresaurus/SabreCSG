@@ -17,10 +17,10 @@ namespace Sabresaurus.SabreCSG
 		//public int thickness = 0;
 
 		[SerializeField]
-		public VolumeEventType volumeEventType = VolumeEventType.SendMessage;
+		public TriggerVolumeEventType volumeEventType = TriggerVolumeEventType.SendMessage;
 
 		[SerializeField]
-		public TriggerMode triggerMode = TriggerMode.Enter;
+		public TriggerVolumeTriggerMode triggerMode = TriggerVolumeTriggerMode.Enter;
 
 		[SerializeField]
 		public string filterTag = "Untagged";
@@ -52,8 +52,8 @@ namespace Sabresaurus.SabreCSG
 
 				GUILayout.BeginVertical();
 				{
-					volumeEventType = (VolumeEventType)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Event Type" ), volumeEventType );
-					triggerMode = (TriggerMode)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Mode", "What kind of trigger events do we want to use?" ), triggerMode );
+					volumeEventType = (TriggerVolumeEventType)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Event Type" ), volumeEventType );
+					triggerMode = (TriggerVolumeTriggerMode)UnityEditor.EditorGUILayout.EnumPopup( new GUIContent( "Trigger Mode", "What kind of trigger events do we want to use?" ), triggerMode );
 					layerMask = UnityEditor.EditorGUILayout.LayerField( new GUIContent( "Layer", "The layer that is detected by this trigger." ), layerMask );
 					filterTag = UnityEditor.EditorGUILayout.TagField( new GUIContent( "Tag", "The tag that is detected by this trigger." ), filterTag );
 					triggerOnce = UnityEditor.EditorGUILayout.Toggle( new GUIContent( "Trigger Once", "Is this a one use only trigger?" ), triggerOnce );
@@ -125,8 +125,8 @@ namespace Sabresaurus.SabreCSG
 
 		protected bool ChangeCheck()
 		{
-			VolumeEventType oldTT = volumeEventType;
-			TriggerMode oldTM = triggerMode;
+            TriggerVolumeEventType oldTT = volumeEventType;
+            TriggerVolumeTriggerMode oldTM = triggerMode;
 			string oldTag = filterTag;
 			LayerMask oldLM = layerMask;
 			bool oldTO = triggerOnce;
@@ -161,23 +161,6 @@ namespace Sabresaurus.SabreCSG
 			return false;
 		}
 	}
-
-	[Serializable]
-	public enum VolumeEventType : byte
-	{
-		SendMessage = 0
-	};
-
-	[Serializable]
-	public enum TriggerMode : byte
-	{
-		Enter = 0,
-		Exit = 2,
-		Stay = 4,
-		EnterExit = 8,
-		EnterStay = 16,
-		All = 32
-	};
 }
 
 #endif
