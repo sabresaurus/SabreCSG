@@ -592,12 +592,12 @@ namespace Sabresaurus.SabreCSG
                 GameObject volumeMesh = new GameObject(Constants.GameObjectVolumeComponentIdentifier, typeof(MeshCollider));
                 volumeMesh.transform.SetParent(parent, false);
 #if UNITY_EDITOR
-            if (!CurrentSettings.ShowHiddenGameObjectsInInspector)
-                    volumeMesh.hideFlags = HideFlags.HideInHierarchy;
+                if (!CurrentSettings.ShowHiddenGameObjectsInInspector)
+                        volumeMesh.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
 #endif
 
-            // Set the mesh to be used for triggers.
-            MeshCollider meshCollider = volumeMesh.GetComponent<MeshCollider>();
+                // Set the mesh to be used for triggers.
+                MeshCollider meshCollider = volumeMesh.GetComponent<MeshCollider>();
                 meshCollider.sharedMesh = mesh;
                 meshCollider.convex = true;
                 meshCollider.isTrigger = true;
