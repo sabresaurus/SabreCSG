@@ -14,6 +14,7 @@ namespace Sabresaurus.SabreCSG
     public class Volume : ScriptableObject
     {
 #if UNITY_EDITOR
+
         /// <summary>
         /// Gets the brush preview material shown in the editor.
         /// </summary>
@@ -65,6 +66,7 @@ namespace Sabresaurus.SabreCSG
 
             return matchedTypes;
         }
+
 #endif
 
         /// <summary>

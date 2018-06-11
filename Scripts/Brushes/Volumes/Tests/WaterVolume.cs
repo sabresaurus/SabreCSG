@@ -1,9 +1,8 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
+using Sabresaurus.SabreCSG;
 using System;
 using UnityEngine;
-using Sabresaurus.SabreCSG;
-using UnityEngine.Events;
 
 namespace DeleteMeBeforePublishing
 {
@@ -18,6 +17,7 @@ namespace DeleteMeBeforePublishing
         public int thickness = 0;
 
 #if UNITY_EDITOR
+
         /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
@@ -29,9 +29,10 @@ namespace DeleteMeBeforePublishing
             int previousThickness = thickness;
             thickness = UnityEditor.EditorGUILayout.IntField("Thickness", thickness);
             if (thickness != previousThickness)
-                return true;
+                return true; // true when a property changed, the brush invalidates and stores all changes.
             return false;
         }
+
 #endif
 
         /// <summary>
@@ -45,4 +46,5 @@ namespace DeleteMeBeforePublishing
         }
     }
 }
+
 #endif
