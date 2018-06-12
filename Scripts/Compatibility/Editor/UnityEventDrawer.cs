@@ -260,7 +260,11 @@ namespace UnityEditorInternal
             else if (modeEnum != PersistentListenerMode.Void && modeEnum != PersistentListenerMode.EventDefined)
                 EditorGUI.PropertyField(argRect, argument, GUIContent.none);
 
+#if UNITY_5
+            using (new EditorGUI.DisabledGroupScope(listenerTarget.objectReferenceValue == null))
+#else
             using (new EditorGUI.DisabledScope(listenerTarget.objectReferenceValue == null))
+#endif
             {
                 EditorGUI.BeginProperty(functionRect, GUIContent.none, methodName);
                 {
@@ -308,7 +312,7 @@ namespace UnityEditorInternal
                         //MethodInfo dynMethod = typeof(UnityEventBase).GetMethod("FindMethod", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(string), typeof(object), typeof(PersistentListenerMode), typeof(Type) }, new ParameterModifier[] { }); // BindingFlags.NonPublic | BindingFlags.Instance, 
                         buttonContent = (GUIContent)typeof(GUIContent).GetMethod("Temp", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, new ParameterModifier[] { }).Invoke(null, new object[] { buttonLabel.ToString() });
 
-                       // HENRY: buttonContent = GUIContent.Temp(buttonLabel.ToString());
+                        // HENRY: buttonContent = GUIContent.Temp(buttonLabel.ToString());
                     }
 
                     if (GUI.Button(functionRect, buttonContent, EditorStyles.popup))
