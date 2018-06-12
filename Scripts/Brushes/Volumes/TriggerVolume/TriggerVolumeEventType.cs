@@ -2,9 +2,10 @@
 
 namespace Sabresaurus.SabreCSG
 {
-    [Serializable]
-    public enum TriggerVolumeEventType : byte
-    {
-        SendMessage = 0
-    };
+	[Serializable]
+	public enum TriggerVolumeEventType : byte
+	{
+		SendMessage = 0, 
+		UnityEvent = 2
+	};
 }

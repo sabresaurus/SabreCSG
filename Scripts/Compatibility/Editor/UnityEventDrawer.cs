@@ -26,7 +26,7 @@ namespace UnityEditorInternal
 
         public static GUIContent TrTextContent(string text, string tooltip = null, Texture icon = null)
         {
-            string key = string.Format("{0}|{1}", text ?? "", tooltip ?? "");
+            //string key = string.Format("{0}|{1}", text ?? "", tooltip ?? "");
             return new GUIContent(text, icon, tooltip);
         }
 
