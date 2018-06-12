@@ -61,6 +61,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         [SerializeField]
         public Vector3 relativeTorque = new Vector3(0.0f, 0.0f, 0.0f);
 
+        /// <summary>
+        /// The gravity settings applied to rigid bodies inside the volume.
+        /// </summary>
+        [SerializeField]
+        public PhysicsVolumeGravityMode gravity = PhysicsVolumeGravityMode.None;
+
 #if UNITY_EDITOR
 
         /// <summary>
@@ -224,6 +230,30 @@ namespace Sabresaurus.SabreCSG.Volumes
             }
             GUILayout.EndVertical();
 
+            // general options:
+
+            GUILayout.BeginVertical("Box");
+            {
+                UnityEditor.EditorGUILayout.LabelField("General Options", UnityEditor.EditorStyles.boldLabel);
+                GUILayout.Space(4);
+
+                UnityEditor.EditorGUI.indentLevel = 1;
+                GUILayout.BeginVertical();
+                {
+                    PhysicsVolumeGravityMode previousPhysicsVolumeGravityMode;
+                    gravity = (PhysicsVolumeGravityMode)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Gravity", "The gravity settings applied to rigid bodies inside the volume."), previousPhysicsVolumeGravityMode = gravity);
+                    if (previousPhysicsVolumeGravityMode != gravity)
+                    {
+                        foreach (PhysicsVolume volume in physicsVolumes)
+                            volume.gravity = gravity;
+                        invalidate = true;
+                    }
+                }
+                GUILayout.EndVertical();
+                UnityEditor.EditorGUI.indentLevel = 0;
+            }
+            GUILayout.EndVertical();
+
             return invalidate; // true when a property changed, the brush invalidates and stores all changes.
         }
 
@@ -244,6 +274,7 @@ namespace Sabresaurus.SabreCSG.Volumes
             component.torque = torque;
             component.relativeTorqueForceMode = relativeTorqueForceMode;
             component.relativeTorque = relativeTorque;
+            component.gravity = gravity;
         }
     }
 }

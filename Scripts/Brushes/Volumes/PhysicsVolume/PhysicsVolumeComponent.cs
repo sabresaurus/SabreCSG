@@ -10,6 +10,33 @@ namespace Sabresaurus.SabreCSG.Volumes
     public class PhysicsVolumeComponent : MonoBehaviour
     {
         /// <summary>
+        /// Represents a rigidbody that is currently inside of the volume.
+        /// </summary>
+        private class TrackedRigidbody
+        {
+            /// <summary>
+            /// The rigidbody inside of the volume.
+            /// </summary>
+            public Rigidbody rigidbody;
+
+            /// <summary>
+            /// Whether the rigidbody had gravity before entering the volume.
+            /// </summary>
+            public bool hadGravity;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="TrackedRigidbody"/> class.
+            /// </summary>
+            /// <param name="rigidbody">The rigidbody inside of the volume.</param>
+            public TrackedRigidbody(Rigidbody rigidbody)
+            {
+                // track information about the rigidbody.
+                this.rigidbody = rigidbody;
+                this.hadGravity = rigidbody.useGravity;
+            }
+        }
+
+        /// <summary>
         /// The force mode applied to rigid bodies.
         /// </summary>
         public PhysicsVolumeForceMode forceMode = PhysicsVolumeForceMode.Force;
@@ -50,9 +77,14 @@ namespace Sabresaurus.SabreCSG.Volumes
         public Vector3 relativeTorque = new Vector3(0.0f, 0.0f, 0.0f);
 
         /// <summary>
+        /// The gravity settings applied to rigid bodies inside the volume.
+        /// </summary>
+        public PhysicsVolumeGravityMode gravity = PhysicsVolumeGravityMode.None;
+
+        /// <summary>
         /// The rigid bodies we are tracking as they entered the volume.
         /// </summary>
-        private List<Rigidbody> rigidBodies;
+        private List<TrackedRigidbody> rigidBodies;
 
         /// <summary>
         /// Called whenever the volume is enabled.
@@ -60,15 +92,16 @@ namespace Sabresaurus.SabreCSG.Volumes
         private void OnEnable()
         {
             // time may have passed, reset our list of rigid bodies.
-            rigidBodies = new List<Rigidbody>();
+            rigidBodies = new List<TrackedRigidbody>();
         }
 
         private void FixedUpdate()
         {
-            // iterate the rigid bodies in reverse.
+            // iterate the tracked rigid bodies in reverse.
             for (int i = rigidBodies.Count - 1; i >= 0; i--)
             {
-                Rigidbody rigidbody = rigidBodies[i];
+                TrackedRigidbody trackedRigidbody = rigidBodies[i];
+                Rigidbody rigidbody = trackedRigidbody.rigidbody;
                 // if the rigid body was deleted, stop tracking it.
                 if (!rigidbody)
                 {
@@ -78,9 +111,6 @@ namespace Sabresaurus.SabreCSG.Volumes
                 // apply the force to the rigid body.
                 switch (forceMode)
                 {
-                    case PhysicsVolumeForceMode.None:
-                        break;
-
                     case PhysicsVolumeForceMode.Force:
                         rigidbody.AddForce(force, ForceMode.Force);
                         break;
@@ -100,9 +130,6 @@ namespace Sabresaurus.SabreCSG.Volumes
                 // apply the relative force to the rigid body.
                 switch (relativeForceMode)
                 {
-                    case PhysicsVolumeForceMode.None:
-                        break;
-
                     case PhysicsVolumeForceMode.Force:
                         rigidbody.AddRelativeForce(relativeForce, ForceMode.Force);
                         break;
@@ -122,9 +149,6 @@ namespace Sabresaurus.SabreCSG.Volumes
                 // apply the torque to the rigid body.
                 switch (torqueForceMode)
                 {
-                    case PhysicsVolumeForceMode.None:
-                        break;
-
                     case PhysicsVolumeForceMode.Force:
                         rigidbody.AddTorque(torque, ForceMode.Force);
                         break;
@@ -144,9 +168,6 @@ namespace Sabresaurus.SabreCSG.Volumes
                 // apply the relative torque to the rigid body.
                 switch (relativeTorqueForceMode)
                 {
-                    case PhysicsVolumeForceMode.None:
-                        break;
-
                     case PhysicsVolumeForceMode.Force:
                         rigidbody.AddRelativeTorque(relativeTorque, ForceMode.Force);
                         break;
@@ -175,8 +196,20 @@ namespace Sabresaurus.SabreCSG.Volumes
             if (!other) return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
-            if (!rigidBodies.Contains(rigidbody))
-                rigidBodies.Add(rigidbody);
+            if (rigidBodies.Find(r => r.rigidbody == rigidbody) == null)
+                rigidBodies.Add(new TrackedRigidbody(rigidbody));
+            // apply the gravity mode to the rigid body.
+            switch (gravity)
+            {
+                case PhysicsVolumeGravityMode.Enable:
+                    rigidbody.useGravity = true;
+                    break;
+                case PhysicsVolumeGravityMode.Disable:
+                case PhysicsVolumeGravityMode.ZeroGravity:
+                case PhysicsVolumeGravityMode.ZeroGravityRestore:
+                    rigidbody.useGravity = false;
+                    break;
+            }
         }
 
         /// <summary>
@@ -188,7 +221,19 @@ namespace Sabresaurus.SabreCSG.Volumes
             if (!other) return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
-            rigidBodies.Remove(rigidbody);
+            int index = rigidBodies.FindIndex(r => r.rigidbody == rigidbody);
+            TrackedRigidbody trackedRigidbody = rigidBodies[index];
+            rigidBodies.RemoveAt(index);
+            // apply the gravity mode to the rigid body.
+            switch (gravity)
+            {
+                case PhysicsVolumeGravityMode.ZeroGravity:
+                    rigidbody.useGravity = true;
+                    break;
+                case PhysicsVolumeGravityMode.ZeroGravityRestore:
+                    rigidbody.useGravity = trackedRigidbody.hadGravity;
+                    break;
+            }
         }
     }
 }
