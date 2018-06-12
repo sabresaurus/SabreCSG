@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
     public enum PhysicsVolumeForceMode
     {

@@ -1,4 +1,4 @@
-﻿namespace Sabresaurus.SabreCSG
+﻿namespace Sabresaurus.SabreCSG.Volumes
 {
 	public enum TriggerVolumeParamTypeCode : byte
 	{

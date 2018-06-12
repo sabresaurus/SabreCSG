@@ -5,13 +5,13 @@ using UnityEditor;
 using System.Collections.Generic;
 using System;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
 	public static class TriggerVolumeUIUtils
 	{
-		public static List<SendMessageEvent> DrawSendMessageEventInspector( GUIContent label, List<SendMessageEvent> events )
+		public static List<TriggerVolumeSendMessageEvent> DrawSendMessageEventInspector( GUIContent label, List<TriggerVolumeSendMessageEvent> events )
 		{
-			List<SendMessageEvent> evnts = events;
+			List<TriggerVolumeSendMessageEvent> evnts = events;
 
 			GUILayout.BeginVertical( "Box", GUILayout.ExpandWidth( true ) );
 			{
@@ -23,7 +23,7 @@ namespace Sabresaurus.SabreCSG
 
 					if( GUILayout.Button( "+", EditorStyles.miniButton ) )
 					{
-						evnts.Add( new SendMessageEvent( null, string.Empty, true ) );
+						evnts.Add( new TriggerVolumeSendMessageEvent( null, string.Empty, true ) );
 					}
 				}
 				GUILayout.EndHorizontal();

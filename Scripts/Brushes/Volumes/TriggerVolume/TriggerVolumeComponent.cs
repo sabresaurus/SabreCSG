@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
 	public class TriggerVolumeComponent : MonoBehaviour
 	{
@@ -14,9 +14,9 @@ namespace Sabresaurus.SabreCSG
 		public TriggerVolumeEvent onEnterEvent;
 		public TriggerVolumeEvent onStayEvent;
 		public TriggerVolumeEvent onExitEvent;
-		public List<SendMessageEvent> smOnEnterEvent;
-		public List<SendMessageEvent> smOnStayEvent;
-		public List<SendMessageEvent> smOnExitEvent;
+		public List<TriggerVolumeSendMessageEvent> smOnEnterEvent;
+		public List<TriggerVolumeSendMessageEvent> smOnStayEvent;
+		public List<TriggerVolumeSendMessageEvent> smOnExitEvent;
 
 		private bool isTriggered = false;
 
@@ -43,7 +43,7 @@ namespace Sabresaurus.SabreCSG
 					}
 					else
 					{
-						foreach( SendMessageEvent e in smOnEnterEvent )
+						foreach(TriggerVolumeSendMessageEvent e in smOnEnterEvent )
 						{
 							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
 
@@ -75,7 +75,7 @@ namespace Sabresaurus.SabreCSG
 					}
 					else
 					{
-						foreach( SendMessageEvent e in smOnExitEvent )
+						foreach(TriggerVolumeSendMessageEvent e in smOnExitEvent )
 						{
 							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
 
@@ -108,7 +108,7 @@ namespace Sabresaurus.SabreCSG
 					}
 					else
 					{
-						foreach( SendMessageEvent e in smOnStayEvent )
+						foreach(TriggerVolumeSendMessageEvent e in smOnStayEvent )
 						{
 							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
     /// <summary>
     /// Applies forces to rigid bodies inside of the volume.

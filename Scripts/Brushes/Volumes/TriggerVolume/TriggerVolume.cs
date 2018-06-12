@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
     /// <summary>
     /// Executes trigger logic when objects interact with the volume.
@@ -39,13 +39,13 @@ namespace Sabresaurus.SabreCSG
         public TriggerVolumeEvent onExitEvent;
 
         [SerializeField]
-        public List<SendMessageEvent> smOnEnterEvent;
+        public List<TriggerVolumeSendMessageEvent> smOnEnterEvent;
 
         [SerializeField]
-        public List<SendMessageEvent> smOnStayEvent;
+        public List<TriggerVolumeSendMessageEvent> smOnStayEvent;
 
         [SerializeField]
-        public List<SendMessageEvent> smOnExitEvent;
+        public List<TriggerVolumeSendMessageEvent> smOnExitEvent;
 
 #if UNITY_EDITOR
 

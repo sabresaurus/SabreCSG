@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.SabreCSG.Volumes
 {
 	[Serializable]
 	public enum TriggerVolumeEventType : byte
