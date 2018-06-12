@@ -67,6 +67,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         [SerializeField]
         public PhysicsVolumeGravityMode gravity = PhysicsVolumeGravityMode.None;
 
+        /// <summary>
+        /// The layer mask to limit the effects of the physics volume to specific layers.
+        /// </summary>
+        [SerializeField]
+        public LayerMask layer = -1;
+
 #if UNITY_EDITOR
 
         /// <summary>
@@ -248,6 +254,15 @@ namespace Sabresaurus.SabreCSG.Volumes
                             volume.gravity = gravity;
                         invalidate = true;
                     }
+
+                    LayerMask previousLayerMask;
+                    layer = SabreGUILayout.LayerMaskField(new GUIContent("Layer Mask", "The layer mask to limit the effects of the physics volume to specific layers."), (previousLayerMask = layer).value);
+                    if (previousLayerMask != layer)
+                    {
+                        foreach (PhysicsVolume volume in physicsVolumes)
+                            volume.layer = layer;
+                        invalidate = true;
+                    }
                 }
                 GUILayout.EndVertical();
                 UnityEditor.EditorGUI.indentLevel = 0;
@@ -256,7 +271,6 @@ namespace Sabresaurus.SabreCSG.Volumes
 
             return invalidate; // true when a property changed, the brush invalidates and stores all changes.
         }
-
 #endif
 
         /// <summary>
@@ -275,6 +289,7 @@ namespace Sabresaurus.SabreCSG.Volumes
             component.relativeTorqueForceMode = relativeTorqueForceMode;
             component.relativeTorque = relativeTorque;
             component.gravity = gravity;
+            component.layer = layer;
         }
     }
 }

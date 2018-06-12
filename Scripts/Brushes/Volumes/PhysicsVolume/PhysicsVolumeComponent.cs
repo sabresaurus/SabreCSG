@@ -82,6 +82,11 @@ namespace Sabresaurus.SabreCSG.Volumes
         public PhysicsVolumeGravityMode gravity = PhysicsVolumeGravityMode.None;
 
         /// <summary>
+        /// The layer mask to limit the effects of the physics volume to specific layers.
+        /// </summary>
+        public LayerMask layer = -1;
+
+        /// <summary>
         /// The rigid bodies we are tracking as they entered the volume.
         /// </summary>
         private List<TrackedRigidbody> rigidBodies;
@@ -194,6 +199,9 @@ namespace Sabresaurus.SabreCSG.Volumes
         private void OnTriggerEnter(Collider other)
         {
             if (!other) return;
+            // apply the layer mask limit.
+            if (!layer.Contains(other.gameObject.layer))
+                return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
             if (rigidBodies.Find(r => r.rigidbody == rigidbody) == null)
@@ -219,6 +227,9 @@ namespace Sabresaurus.SabreCSG.Volumes
         private void OnTriggerExit(Collider other)
         {
             if (!other) return;
+            // apply the layer mask limit.
+            if (!layer.Contains(other.gameObject.layer))
+                return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
             int index = rigidBodies.FindIndex(r => r.rigidbody == rigidbody);
