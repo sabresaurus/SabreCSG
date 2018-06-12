@@ -39,12 +39,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         /// <summary>
         /// The force mode applied to rigid bodies.
         /// </summary>
-        public PhysicsVolumeForceMode forceMode = PhysicsVolumeForceMode.Force;
+        public PhysicsVolumeForceMode forceMode = PhysicsVolumeForceMode.None;
 
         /// <summary>
         /// The force applied to rigid bodies.
         /// </summary>
-        public Vector3 force = new Vector3(0.0f, 10.0f, 0.0f);
+        public Vector3 force = new Vector3(0.0f, 0.0f, 0.0f);
 
         /// <summary>
         /// The relative force mode applied to rigid bodies.
