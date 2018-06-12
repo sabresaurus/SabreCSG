@@ -50,6 +50,17 @@ namespace Sabresaurus.SabreCSG.Volumes
 #if UNITY_EDITOR
 
         /// <summary>
+        /// Gets the brush preview material shown in the editor.
+        /// </summary>
+        public override Material BrushPreviewMaterial
+        {
+            get
+            {
+                return (Material)SabreCSGResources.LoadObject("Resources/Materials/scsg_volume_trigger.mat");
+            }
+        }
+
+        /// <summary>
         /// Called when the inspector GUI is drawn in the editor.
         /// </summary>
         /// <param name="selectedVolumes">The selected volumes in the editor (for multi-editing).</param>

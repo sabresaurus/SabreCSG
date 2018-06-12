@@ -41,7 +41,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="sabrePath">Path local to the SabreCSG folder</param>
         /// <returns></returns>
-        private static Object LoadObject(string sabrePath)
+        public static Object LoadObject(string sabrePath)
         {
             bool found = false;
 
