@@ -117,7 +117,8 @@ namespace Sabresaurus.SabreCSG
 
 				GUILayout.BeginVertical();
 				{
-					UnityEditor.SerializedObject tv = new UnityEditor.SerializedObject( this );
+#if UNITY_2018
+                    UnityEditor.SerializedObject tv = new UnityEditor.SerializedObject( this );
 					UnityEditor.SerializedProperty prop1 = tv.FindProperty( "onEnterEvent" );
 					UnityEditor.SerializedProperty prop2 = tv.FindProperty( "onStayEvent" );
 					UnityEditor.SerializedProperty prop3 = tv.FindProperty( "onExitEvent" );
@@ -139,6 +140,63 @@ namespace Sabresaurus.SabreCSG
                         }
                         invalidate = true;
                     }
+#else
+                    var e = UnityEditor.Editor.CreateEditor(this);
+                    if (e != null)
+                    {
+                        UnityEditor.EditorGUI.BeginChangeCheck();
+                        var so = e.serializedObject;
+                        so.Update();
+                        var prop = so.GetIterator();
+                        prop.NextVisible(true);
+                        while (prop.NextVisible(true))
+                        {
+                            string path = prop.propertyPath;
+                            if (path == "onEnterEvent")
+                            {
+                                UnityEditor.EditorGUILayout.LabelField("On Enter Event", UnityEditor.EditorStyles.boldLabel);
+                                UnityEditor.EditorGUILayout.HelpBox("This Unity version has a bug that does not save the value you enter in the event. Please make use of the fields below them instead. If you know why this happens and a way to fix it, please contact us!", UnityEditor.MessageType.Warning);
+                            }
+                            if (path == "onStayEvent")
+                            {
+                                UnityEditor.EditorGUILayout.Space();
+                                UnityEditor.EditorGUILayout.LabelField("On Stay Event", UnityEditor.EditorStyles.boldLabel);
+                                UnityEditor.EditorGUILayout.HelpBox("This Unity version has a bug that does not save the value you enter in the event. Please make use of the fields below them instead. If you know why this happens and a way to fix it, please contact us!", UnityEditor.MessageType.Warning);
+                            }
+                            if (path == "onExitEvent")
+                            {
+                                UnityEditor.EditorGUILayout.Space();
+                                UnityEditor.EditorGUILayout.LabelField("On Exit Event", UnityEditor.EditorStyles.boldLabel);
+                                UnityEditor.EditorGUILayout.HelpBox("This Unity version has a bug that does not save the value you enter in the event. Please make use of the fields below them instead. If you know why this happens and a way to fix it, please contact us!", UnityEditor.MessageType.Warning);
+                            }
+                            if (path != "onEnterEvent" && path != "onStayEvent" && path != "onExitEvent")
+                            {
+                                int idx = path.IndexOf(".data[");
+                                if (idx == -1)
+                                    continue;
+                                int end = path.IndexOf(']', idx);
+                                int num;
+                                if (!Int32.TryParse(path.Substring(idx + 6, end - idx - 6), out num))
+                                    continue;
+                                if (!path.Contains("m_IntArgument") && !path.Contains("m_FloatArgument") && !path.Contains("m_StringArgument") && !path.Contains("m_BoolArgument"))
+                                    continue;
+                            }
+                            UnityEditor.EditorGUILayout.PropertyField(prop, new GUIContent("Event " + prop.propertyPath.Replace("onEnterEvent", "").Replace("onStayEvent", "").Replace("onExitEvent", "").Replace(".m_PersistentCalls.m_Calls.Array.data[", "").Replace("].m_Arguments.m_", " ").Replace("Argument", " Argument")));
+                        }
+
+                        if (UnityEditor.EditorGUI.EndChangeCheck())
+                        {
+                            so.ApplyModifiedProperties();
+                            foreach (TriggerVolume volume in triggerVolumes)
+                            {
+                                volume.onEnterEvent = onEnterEvent;
+                                volume.onStayEvent = onStayEvent;
+                                volume.onExitEvent = onExitEvent;
+                            }
+                            invalidate = true;
+                        }
+                    }
+#endif
                 }
 				GUILayout.EndVertical();
 
