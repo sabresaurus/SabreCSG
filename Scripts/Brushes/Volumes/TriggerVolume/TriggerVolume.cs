@@ -15,7 +15,7 @@ namespace Sabresaurus.SabreCSG.Volumes
     public class TriggerVolume : Volume
     {
         [SerializeField]
-        public TriggerVolumeEventType volumeEventType = TriggerVolumeEventType.SendMessage;
+        public TriggerVolumeEventType volumeEventType = TriggerVolumeEventType.UnityEvent;
 
         [SerializeField]
         public TriggerVolumeTriggerMode triggerMode = TriggerVolumeTriggerMode.Enter;
