@@ -6,8 +6,8 @@ namespace Sabresaurus.SabreCSG
 {
 	public class TriggerVolumeComponent : MonoBehaviour
 	{
-		public VolumeEventType volumeEventType;
-		public TriggerMode triggerMode;
+		public TriggerVolumeEventType volumeEventType;
+		public TriggerVolumeTriggerMode triggerMode;
 		public LayerMask layerMask;
 		public string filterTag;
 		public bool triggerOnce;

@@ -95,7 +95,7 @@ namespace Sabresaurus.SabreCSG
             }
 
             EditorGUI.BeginChangeCheck();
-            CurrentSettings.ShowHiddenGameObjectsInInspector = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInInspector, "Show hidden game objects in inspector");
+            CurrentSettings.ShowHiddenGameObjectsInHierarchy = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInHierarchy, "Show hidden game objects in hierarchy");
             if (EditorGUI.EndChangeCheck())
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
