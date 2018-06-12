@@ -1,10 +1,13 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
 
 namespace Sabresaurus.SabreCSG.Volumes
 {
-	[System.Serializable]
-	public class TriggerVolumeEvent : UnityEvent
-	{
-	}
+    /// <summary>
+    /// The unity event for the <see cref="TriggerVolume" />.
+    /// </summary>
+    /// <seealso cref="UnityEngine.Events.UnityEvent" />
+    [System.Serializable]
+    public class TriggerVolumeEvent : UnityEvent
+    {
+    }
 }

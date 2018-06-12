@@ -1,7 +1,6 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -14,38 +13,53 @@ namespace Sabresaurus.SabreCSG.Volumes
     [Serializable]
     public class TriggerVolume : Volume
     {
+        /// <summary>
+        /// The trigger type, this is reserved for future use.
+        /// </summary>
         [SerializeField]
-        public TriggerVolumeEventType volumeEventType = TriggerVolumeEventType.UnityEvent;
+        public TriggerVolumeTriggerType triggerType = TriggerVolumeTriggerType.UnityEvent;
 
+        /// <summary>
+        /// Whether to use a filter tag.
+        /// </summary>
         [SerializeField]
-        public TriggerVolumeTriggerMode triggerMode = TriggerVolumeTriggerMode.Enter;
+        public bool useFilterTag = false;
 
+        /// <summary>
+        /// The filter tag to limit the colliders that can invoke the trigger.
+        /// </summary>
         [SerializeField]
         public string filterTag = "Untagged";
 
+        /// <summary>
+        /// The layer mask to limit the colliders that can invoke the trigger.
+        /// </summary>
         [SerializeField]
-        public LayerMask layerMask = 0;
+        public LayerMask layer = -1;
 
+        /// <summary>
+        /// Whether the trigger can only be instigated once.
+        /// </summary>
         [SerializeField]
-        public bool triggerOnce = false;
+        public bool triggerOnceOnly = false;
 
+        /// <summary>
+        /// The event called when a collider enters the trigger volume.
+        /// </summary>
         [SerializeField]
         public TriggerVolumeEvent onEnterEvent;
 
+        /// <summary>
+        /// The event called when a collider stays in the trigger volume.
+        /// </summary>
         [SerializeField]
         public TriggerVolumeEvent onStayEvent;
 
+        /// <summary>
+        /// The event called when a collider exits the trigger volume.
+        /// </summary>
         [SerializeField]
         public TriggerVolumeEvent onExitEvent;
-
-        [SerializeField]
-        public List<TriggerVolumeSendMessageEvent> smOnEnterEvent;
-
-        [SerializeField]
-        public List<TriggerVolumeSendMessageEvent> smOnStayEvent;
-
-        [SerializeField]
-        public List<TriggerVolumeSendMessageEvent> smOnExitEvent;
 
 #if UNITY_EDITOR
 
@@ -79,48 +93,53 @@ namespace Sabresaurus.SabreCSG.Volumes
 
                 GUILayout.BeginVertical();
                 {
-                    TriggerVolumeEventType previousVolumeEventType;
-                    volumeEventType = (TriggerVolumeEventType)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Trigger Event Type"), previousVolumeEventType = volumeEventType);
-                    if (volumeEventType != previousVolumeEventType)
-                    {
-                        foreach (TriggerVolume volume in triggerVolumes)
-                            volume.volumeEventType = volumeEventType;
-                        invalidate = true;
-                    }
+                    // this is hidden so that we can introduce more trigger types in the future.
 
-                    TriggerVolumeTriggerMode previousTriggerMode;
-                    triggerMode = (TriggerVolumeTriggerMode)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Trigger Mode", "What kind of trigger events do we want to use?"), previousTriggerMode = triggerMode);
-                    if (triggerMode != previousTriggerMode)
-                    {
-                        foreach (TriggerVolume volume in triggerVolumes)
-                            volume.triggerMode = triggerMode;
-                        invalidate = true;
-                    }
+                    //TriggerVolumeTriggerType previousVolumeEventType;
+                    //triggerType = (TriggerVolumeTriggerType)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Trigger Type"), previousVolumeEventType = triggerType);
+                    //if (triggerType != previousVolumeEventType)
+                    //{
+                    //    foreach (TriggerVolume volume in triggerVolumes)
+                    //        volume.triggerType = triggerType;
+                    //    invalidate = true;
+                    //}
 
                     LayerMask previousLayerMask;
-                    layerMask = UnityEditor.EditorGUILayout.LayerField(new GUIContent("Layer", "The layer that is detected by this trigger."), previousLayerMask = layerMask);
-                    if (layerMask != previousLayerMask)
+                    layer = SabreGUILayout.LayerMaskField(new GUIContent("Layer Mask", "The layer mask to limit the colliders that can invoke the trigger."), (previousLayerMask = layer).value);
+                    if (previousLayerMask != layer)
                     {
                         foreach (TriggerVolume volume in triggerVolumes)
-                            volume.layerMask = layerMask;
+                            volume.layer = layer;
                         invalidate = true;
                     }
 
-                    string previousFilterTag;
-                    filterTag = UnityEditor.EditorGUILayout.TagField(new GUIContent("Tag", "The tag that is detected by this trigger."), previousFilterTag = filterTag);
-                    if (filterTag != previousFilterTag)
+                    bool previousUseFilterTag;
+                    useFilterTag = UnityEditor.EditorGUILayout.Toggle(new GUIContent("Use Filter Tag", "Whether to use a filter tag."), previousUseFilterTag = useFilterTag);
+                    if (useFilterTag != previousUseFilterTag)
                     {
                         foreach (TriggerVolume volume in triggerVolumes)
-                            volume.filterTag = filterTag;
+                            volume.useFilterTag = useFilterTag;
                         invalidate = true;
+                    }
+
+                    if (useFilterTag)
+                    {
+                        string previousFilterTag;
+                        filterTag = UnityEditor.EditorGUILayout.TagField(new GUIContent("Filter Tag", "The filter tag to limit the colliders that can invoke the trigger."), previousFilterTag = filterTag);
+                        if (filterTag != previousFilterTag)
+                        {
+                            foreach (TriggerVolume volume in triggerVolumes)
+                                volume.filterTag = filterTag;
+                            invalidate = true;
+                        }
                     }
 
                     bool previousTriggerOnce;
-                    triggerOnce = UnityEditor.EditorGUILayout.Toggle(new GUIContent("Trigger Once", "Is this a one use only trigger?"), previousTriggerOnce = triggerOnce);
-                    if (triggerOnce != previousTriggerOnce)
+                    triggerOnceOnly = UnityEditor.EditorGUILayout.Toggle(new GUIContent("Trigger Once Only", "Whether the trigger can only be instigated once."), previousTriggerOnce = triggerOnceOnly);
+                    if (triggerOnceOnly != previousTriggerOnce)
                     {
                         foreach (TriggerVolume volume in triggerVolumes)
-                            volume.triggerOnce = triggerOnce;
+                            volume.triggerOnceOnly = triggerOnceOnly;
                         invalidate = true;
                     }
                 }
@@ -135,7 +154,7 @@ namespace Sabresaurus.SabreCSG.Volumes
                 UnityEditor.EditorGUILayout.LabelField("Trigger Events", UnityEditor.EditorStyles.boldLabel);
                 GUILayout.Space(4);
 
-                if (volumeEventType == TriggerVolumeEventType.UnityEvent)
+                if (triggerType == TriggerVolumeTriggerType.UnityEvent)
                 {
                     UnityEditor.EditorGUI.indentLevel = 1;
 
@@ -148,27 +167,9 @@ namespace Sabresaurus.SabreCSG.Volumes
 
                         UnityEditor.EditorGUI.BeginChangeCheck();
 
-                        if (triggerMode == TriggerVolumeTriggerMode.Enter ||
-                            triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-                            triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-                            triggerMode == TriggerVolumeTriggerMode.All)
-                        {
-                            UnityEditor.EditorGUILayout.PropertyField(prop1);
-                        }
-
-                        if (triggerMode == TriggerVolumeTriggerMode.Stay ||
-                            triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-                            triggerMode == TriggerVolumeTriggerMode.All)
-                        {
-                            UnityEditor.EditorGUILayout.PropertyField(prop2);
-                        }
-
-                        if (triggerMode == TriggerVolumeTriggerMode.Exit ||
-                            triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-                            triggerMode == TriggerVolumeTriggerMode.All)
-                        {
-                            UnityEditor.EditorGUILayout.PropertyField(prop3);
-                        }
+                        UnityEditor.EditorGUILayout.PropertyField(prop1);
+                        UnityEditor.EditorGUILayout.PropertyField(prop2);
+                        UnityEditor.EditorGUILayout.PropertyField(prop3);
 
                         if (UnityEditor.EditorGUI.EndChangeCheck())
                         {
@@ -186,43 +187,6 @@ namespace Sabresaurus.SabreCSG.Volumes
 
                     UnityEditor.EditorGUI.indentLevel = 0;
                 }
-                else
-                {
-                    UnityEditor.EditorGUI.BeginChangeCheck();
-
-                    if (triggerMode == TriggerVolumeTriggerMode.Enter ||
-                        triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-                        triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-                        triggerMode == TriggerVolumeTriggerMode.All)
-                    {
-                        smOnEnterEvent = TriggerVolumeUIUtils.DrawSendMessageEventInspector(new GUIContent("On Enter Message ()"), smOnEnterEvent);
-                    }
-
-                    if (triggerMode == TriggerVolumeTriggerMode.Stay ||
-                        triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-                        triggerMode == TriggerVolumeTriggerMode.All)
-                    {
-                        smOnStayEvent = TriggerVolumeUIUtils.DrawSendMessageEventInspector(new GUIContent("On Stay Message ()"), smOnStayEvent);
-                    }
-
-                    if (triggerMode == TriggerVolumeTriggerMode.Exit ||
-                        triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-                        triggerMode == TriggerVolumeTriggerMode.All)
-                    {
-                        smOnExitEvent = TriggerVolumeUIUtils.DrawSendMessageEventInspector(new GUIContent("On Exit Message ()"), smOnExitEvent);
-                    }
-
-                    if (UnityEditor.EditorGUI.EndChangeCheck())
-                    {
-                        foreach (TriggerVolume volume in triggerVolumes)
-                        {
-                            volume.smOnEnterEvent = smOnEnterEvent;
-                            volume.smOnStayEvent = smOnStayEvent;
-                            volume.smOnExitEvent = smOnExitEvent;
-                        }
-                        invalidate = true;
-                    }
-                }
             }
             GUILayout.EndVertical();
 
@@ -231,20 +195,21 @@ namespace Sabresaurus.SabreCSG.Volumes
 
 #endif
 
+        /// <summary>
+        /// Called when the volume is created in the editor.
+        /// </summary>
+        /// <param name="volume">The generated volume game object.</param>
         public override void OnCreateVolume(GameObject volume)
         {
             TriggerVolumeComponent tvc = volume.AddComponent<TriggerVolumeComponent>();
-            tvc.volumeEventType = volumeEventType;
-            tvc.triggerMode = triggerMode;
+            tvc.triggerType = triggerType;
+            tvc.useFilterTag = useFilterTag;
             tvc.filterTag = filterTag;
-            tvc.layerMask = layerMask;
-            tvc.triggerOnce = triggerOnce;
+            tvc.layer = layer;
+            tvc.triggerOnceOnly = triggerOnceOnly;
             tvc.onEnterEvent = onEnterEvent;
             tvc.onStayEvent = onStayEvent;
             tvc.onExitEvent = onExitEvent;
-            tvc.smOnEnterEvent = smOnEnterEvent;
-            tvc.smOnStayEvent = smOnStayEvent;
-            tvc.smOnExitEvent = smOnExitEvent;
         }
     }
 }

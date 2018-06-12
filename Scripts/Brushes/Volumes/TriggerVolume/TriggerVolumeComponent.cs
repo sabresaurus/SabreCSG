@@ -1,122 +1,134 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.Volumes
 {
-	public class TriggerVolumeComponent : MonoBehaviour
-	{
-		public TriggerVolumeEventType volumeEventType;
-		public TriggerVolumeTriggerMode triggerMode;
-		public LayerMask layerMask;
-		public string filterTag;
-		public bool triggerOnce;
-		public TriggerVolumeEvent onEnterEvent;
-		public TriggerVolumeEvent onStayEvent;
-		public TriggerVolumeEvent onExitEvent;
-		public List<TriggerVolumeSendMessageEvent> smOnEnterEvent;
-		public List<TriggerVolumeSendMessageEvent> smOnStayEvent;
-		public List<TriggerVolumeSendMessageEvent> smOnExitEvent;
+    /// <summary>
+    /// Executes trigger logic when objects interact with the volume.
+    /// </summary>
+    /// <seealso cref="UnityEngine.MonoBehaviour" />
+    public class TriggerVolumeComponent : MonoBehaviour
+    {
+        /// <summary>
+        /// The trigger type, this is reserved for future use.
+        /// </summary>
+        public TriggerVolumeTriggerType triggerType = TriggerVolumeTriggerType.UnityEvent;
 
-		private bool isTriggered = false;
+        /// <summary>
+        /// Whether to use a filter tag.
+        /// </summary>
+        public bool useFilterTag = false;
 
-		private void OnTriggerEnter( Collider other )
-		{
-			if( triggerMode == TriggerVolumeTriggerMode.Enter ||
-				triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-				triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-				triggerMode == TriggerVolumeTriggerMode.All )
-			{
-				if( other.tag == filterTag && other.gameObject.layer == layerMask )
-				{
-					if( isTriggered )
-						return;
+        /// <summary>
+        /// The filter tag to limit the colliders that can invoke the trigger.
+        /// </summary>
+        public string filterTag = "Untagged";
 
-					if( triggerOnce )
-					{
-						isTriggered = true;
-					}
+        /// <summary>
+        /// The layer mask to limit the colliders that can invoke the trigger.
+        /// </summary>
+        public LayerMask layer = -1;
 
-					if( volumeEventType == TriggerVolumeEventType.UnityEvent )
-					{
-						onEnterEvent.Invoke();
-					}
-					else
-					{
-						foreach(TriggerVolumeSendMessageEvent e in smOnEnterEvent )
-						{
-							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
+        /// <summary>
+        /// Whether the trigger can only be instigated once.
+        /// </summary>
+        public bool triggerOnceOnly = false;
 
-							//Debug.Log( "AAAAAAAAAAAAAAAAAAAA = Enter" );
-						}
-					}
-				}
-			}
-		}
+        /// <summary>
+        /// The event called when a collider enters the trigger volume.
+        /// </summary>
+        public TriggerVolumeEvent onEnterEvent;
 
-		private void OnTriggerExit( Collider other )
-		{
-			if( triggerMode == TriggerVolumeTriggerMode.Exit ||
-				triggerMode == TriggerVolumeTriggerMode.EnterExit ||
-				triggerMode == TriggerVolumeTriggerMode.All )
-			{
-				if( other.tag == filterTag && other.gameObject.layer == layerMask )
-				{
-					if( isTriggered )
-						return;
+        /// <summary>
+        /// The event called when a collider stays in the trigger volume.
+        /// </summary>
+        public TriggerVolumeEvent onStayEvent;
 
-					if( triggerOnce )
-					{
-						isTriggered = true;
-					}
-					if( volumeEventType == TriggerVolumeEventType.UnityEvent )
-					{
-						onExitEvent.Invoke();
-					}
-					else
-					{
-						foreach(TriggerVolumeSendMessageEvent e in smOnExitEvent )
-						{
-							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
+        /// <summary>
+        /// The event called when a collider exits the trigger volume.
+        /// </summary>
+        public TriggerVolumeEvent onExitEvent;
 
-							//Debug.Log( "AAAAAAAAAAAAAAAAAAAA = Exit" );
-						}
-					}
-				}
-			}
-		}
+        /// <summary>
+        /// Whether the trigger can still be triggered (used with <see cref="triggerOnceOnly"/>).
+        /// </summary>
+        private bool canTrigger = true;
 
-		private void OnTriggerStay( Collider other )
-		{
-			if( triggerMode == TriggerVolumeTriggerMode.Stay ||
-				triggerMode == TriggerVolumeTriggerMode.EnterStay ||
-				triggerMode == TriggerVolumeTriggerMode.All )
-			{
-				if( other.tag == filterTag && other.gameObject.layer == layerMask )
-				{
-					if( isTriggered )
-						return;
+        /// <summary>
+        /// Called when a collider enters the volume.
+        /// </summary>
+        /// <param name="other">The collider that entered the volume.</param>
+        private void OnTriggerEnter(Collider other)
+        {
+            // ignore empty events.
+            if (onEnterEvent.GetPersistentEventCount() == 0) return;
+            // tag filter:
+            if (useFilterTag && other.tag != filterTag) return;
+            // layer filter:
+            if (!layer.Contains(other.gameObject.layer)) return;
+            // trigger once only:
+            if (!triggerOnceOnly) canTrigger = true;
+            if (!canTrigger) return;
+            if (triggerOnceOnly) canTrigger = false;
 
-					if( triggerOnce )
-					{
-						isTriggered = true;
-					}
+            switch (triggerType)
+            {
+                case TriggerVolumeTriggerType.UnityEvent:
+                    onEnterEvent.Invoke();
+                    break;
+            }
+        }
 
-					if( volumeEventType == TriggerVolumeEventType.UnityEvent )
-					{
-						onStayEvent.Invoke();
-					}
-					else
-					{
-						foreach(TriggerVolumeSendMessageEvent e in smOnStayEvent )
-						{
-							e.target.SendMessage( e.message, e.value, SendMessageOptions.DontRequireReceiver );
+        /// <summary>
+        /// Called when a collider exits the volume.
+        /// </summary>
+        /// <param name="other">The collider that exited the volume.</param>
+        private void OnTriggerExit(Collider other)
+        {
+            // ignore empty events.
+            if (onExitEvent.GetPersistentEventCount() == 0) return;
+            // tag filter:
+            if (useFilterTag && other.tag != filterTag) return;
+            // layer filter:
+            if (!layer.Contains(other.gameObject.layer)) return;
+            // trigger once only:
+            if (!triggerOnceOnly) canTrigger = true;
+            if (!canTrigger) return;
+            if (triggerOnceOnly) canTrigger = false;
 
-							//Debug.Log( "AAAAAAAAAAAAAAAAAAAA = Stay" );
-						}
-					}
-				}
-			}
-		}
-	}
+            // tag filter:
+            if (useFilterTag && other.tag != filterTag) return;
+
+            switch (triggerType)
+            {
+                case TriggerVolumeTriggerType.UnityEvent:
+                    onExitEvent.Invoke();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Called every frame while a collider stays inside the volume.
+        /// </summary>
+        /// <param name="other">The collider that is inside of the volume.</param>
+        private void OnTriggerStay(Collider other)
+        {
+            // ignore empty events.
+            if (onStayEvent.GetPersistentEventCount() == 0) return;
+            // tag filter:
+            if (useFilterTag && other.tag != filterTag) return;
+            // layer filter:
+            if (!layer.Contains(other.gameObject.layer)) return;
+            // trigger once only:
+            if (!triggerOnceOnly) canTrigger = true;
+            if (!canTrigger) return;
+            if (triggerOnceOnly) canTrigger = false;
+
+            switch (triggerType)
+            {
+                case TriggerVolumeTriggerType.UnityEvent:
+                    onStayEvent.Invoke();
+                    break;
+            }
+        }
+    }
 }

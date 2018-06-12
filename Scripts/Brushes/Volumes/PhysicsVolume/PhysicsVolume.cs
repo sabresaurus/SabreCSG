@@ -246,21 +246,21 @@ namespace Sabresaurus.SabreCSG.Volumes
                 UnityEditor.EditorGUI.indentLevel = 1;
                 GUILayout.BeginVertical();
                 {
-                    PhysicsVolumeGravityMode previousPhysicsVolumeGravityMode;
-                    gravity = (PhysicsVolumeGravityMode)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Gravity", "The gravity settings applied to rigid bodies inside the volume."), previousPhysicsVolumeGravityMode = gravity);
-                    if (previousPhysicsVolumeGravityMode != gravity)
-                    {
-                        foreach (PhysicsVolume volume in physicsVolumes)
-                            volume.gravity = gravity;
-                        invalidate = true;
-                    }
-
                     LayerMask previousLayerMask;
                     layer = SabreGUILayout.LayerMaskField(new GUIContent("Layer Mask", "The layer mask to limit the effects of the physics volume to specific layers."), (previousLayerMask = layer).value);
                     if (previousLayerMask != layer)
                     {
                         foreach (PhysicsVolume volume in physicsVolumes)
                             volume.layer = layer;
+                        invalidate = true;
+                    }
+
+                    PhysicsVolumeGravityMode previousPhysicsVolumeGravityMode;
+                    gravity = (PhysicsVolumeGravityMode)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Gravity", "The gravity settings applied to rigid bodies inside the volume."), previousPhysicsVolumeGravityMode = gravity);
+                    if (previousPhysicsVolumeGravityMode != gravity)
+                    {
+                        foreach (PhysicsVolume volume in physicsVolumes)
+                            volume.gravity = gravity;
                         invalidate = true;
                     }
                 }
