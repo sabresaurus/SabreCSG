@@ -73,6 +73,18 @@ namespace Sabresaurus.SabreCSG.Volumes
         [SerializeField]
         public LayerMask layer = -1;
 
+        /// <summary>
+        /// Whether to use a filter tag.
+        /// </summary>
+        [SerializeField]
+        public bool useFilterTag = false;
+
+        /// <summary>
+        /// The filter tag to limit the effects of the physics volume to specific tags.
+        /// </summary>
+        [SerializeField]
+        public string filterTag = "Untagged";
+
 #if UNITY_EDITOR
 
         /// <summary>
@@ -255,6 +267,27 @@ namespace Sabresaurus.SabreCSG.Volumes
                         invalidate = true;
                     }
 
+                    bool previousBoolean;
+                    useFilterTag = UnityEditor.EditorGUILayout.Toggle(new GUIContent("Use Filter Tag", "Whether to use a filter tag."), previousBoolean = useFilterTag);
+                    if (useFilterTag != previousBoolean)
+                    {
+                        foreach (PhysicsVolume volume in physicsVolumes)
+                            volume.useFilterTag = useFilterTag;
+                        invalidate = true;
+                    }
+
+                    if (useFilterTag)
+                    {
+                        string previousString;
+                        filterTag = UnityEditor.EditorGUILayout.TagField(new GUIContent("Filter Tag", "The filter tag to limit the effects of the physics volume to specific tags."), previousString = filterTag);
+                        if (filterTag != previousString)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.filterTag = filterTag;
+                            invalidate = true;
+                        }
+                    }
+
                     PhysicsVolumeGravityMode previousPhysicsVolumeGravityMode;
                     gravity = (PhysicsVolumeGravityMode)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Gravity", "The gravity settings applied to rigid bodies inside the volume."), previousPhysicsVolumeGravityMode = gravity);
                     if (previousPhysicsVolumeGravityMode != gravity)
@@ -290,6 +323,8 @@ namespace Sabresaurus.SabreCSG.Volumes
             component.relativeTorque = relativeTorque;
             component.gravity = gravity;
             component.layer = layer;
+            component.useFilterTag = useFilterTag;
+            component.filterTag = filterTag;
         }
     }
 }

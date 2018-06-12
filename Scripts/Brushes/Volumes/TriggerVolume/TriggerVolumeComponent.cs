@@ -95,9 +95,6 @@ namespace Sabresaurus.SabreCSG.Volumes
             if (!canTrigger) return;
             if (triggerOnceOnly) canTrigger = false;
 
-            // tag filter:
-            if (useFilterTag && other.tag != filterTag) return;
-
             switch (triggerType)
             {
                 case TriggerVolumeTriggerType.UnityEvent:

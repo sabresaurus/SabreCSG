@@ -87,6 +87,16 @@ namespace Sabresaurus.SabreCSG.Volumes
         public LayerMask layer = -1;
 
         /// <summary>
+        /// Whether to use a filter tag.
+        /// </summary>
+        public bool useFilterTag = false;
+
+        /// <summary>
+        /// The filter tag to limit the effects of the physics volume to specific tags.
+        /// </summary>
+        public string filterTag = "Untagged";
+
+        /// <summary>
         /// The rigid bodies we are tracking as they entered the volume.
         /// </summary>
         private List<TrackedRigidbody> rigidBodies;
@@ -200,8 +210,9 @@ namespace Sabresaurus.SabreCSG.Volumes
         {
             if (!other) return;
             // apply the layer mask limit.
-            if (!layer.Contains(other.gameObject.layer))
-                return;
+            if (!layer.Contains(other.gameObject.layer)) return;
+            // apply the tag filter.
+            if (useFilterTag && other.tag != filterTag) return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
             if (rigidBodies.Find(r => r.rigidbody == rigidbody) == null)
@@ -228,8 +239,9 @@ namespace Sabresaurus.SabreCSG.Volumes
         {
             if (!other) return;
             // apply the layer mask limit.
-            if (!layer.Contains(other.gameObject.layer))
-                return;
+            if (!layer.Contains(other.gameObject.layer)) return;
+            // apply the tag filter.
+            if (useFilterTag && other.tag != filterTag) return;
             Rigidbody rigidbody = other.GetComponent<Rigidbody>();
             if (!rigidbody) return;
             int index = rigidBodies.FindIndex(r => r.rigidbody == rigidbody);
