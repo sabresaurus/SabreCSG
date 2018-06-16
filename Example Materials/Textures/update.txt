@@ -1,11 +1,25 @@
 Content updated by Daniel Cornelius (Kerfuffles) 
-Wood textures provided by Textures.com (formerly CGTextures.com)
+Wood, soil, and grass diffuse textures provided by Textures.com (formerly CGTextures.com)
 
-[3.28.2018]
+[06.09.2018]
++ added materials and their content:
+ scsg_soilsand_0
+ scsg_grass_0
+ scsg_glass_0
+ scsg_glass_1
+ scsg_concbare_0
+ scsg_mebare_0
+ scsg_metreadplate_0
+ scsg_osb_0
+
+* modified scsg_bricks_0 to have better looking grout
+- removed scsg_bricks_0_n2.tga
+
+[03.28.2018]
 * fixed wrong project version - was using the wrong version of unity and had .meta issues with older versions.
 * added credit for wood textures to the top of update.txt
 
-[3.27.2018]
+[03.27.2018]
 * updated all materials
 * updated all textures
 * updated default materials to use mobile diffuse shaders
