@@ -1737,6 +1737,22 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static void RebuildAllVolumes()
+        {
+            CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
+            for (int i = 0; i < csgModels.Length; i++)
+            {
+                List<Brush> brushes = csgModels[i].brushes;
+                for (int j = 0; j < brushes.Count; j++)
+                {
+                    if (brushes[j] != null)
+                    {
+                        brushes[j].RebuildVolume();
+                    }
+                }
+            }
+        }
+
         public override Material GetDefaultFallbackMaterial()
         {
             if (!Application.isPlaying)

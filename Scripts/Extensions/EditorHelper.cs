@@ -381,6 +381,7 @@ namespace Sabresaurus.SabreCSG
                     if (brush != null && brush.Volume != null)
                     {
                         brush.Volume = ScriptableObject.Instantiate(brush.Volume);
+                        brush.RebuildVolume();
                     }
                 }
                 // Finished duplicating, select all new objects

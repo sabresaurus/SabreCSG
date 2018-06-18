@@ -99,7 +99,7 @@ namespace Sabresaurus.SabreCSG
             if (EditorGUI.EndChangeCheck())
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
-                CSGModel.UpdateAllBrushesVisibility();
+                CSGModel.RebuildAllVolumes();
                 SceneView.RepaintAll();
             }
 

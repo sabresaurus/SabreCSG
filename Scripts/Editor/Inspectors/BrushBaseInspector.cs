@@ -137,7 +137,7 @@ namespace Sabresaurus.SabreCSG
                                 if (serializedObject.targetObject != null)
                                 {
                                     serializedObject.ApplyModifiedProperties();
-                                    System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
+                                    System.Array.ForEach(volumeBrushes, item => item.Invalidate(true));
                                 }
                             }
                         }

@@ -265,9 +265,6 @@ namespace Sabresaurus.SabreCSG
 					// Intersecting builders can probably be calculated at edit time
 					BrushBuilder.Build(allBrushCaches[brushIndex], brushIndex, allBrushCaches, false);
 
-                    // Build volume brushes.
-                    BuildVolumes(brushIndex);
-
                     brushesBuilt++;
 
 					// If we are not required to build collision (either for this brush, or at all) then we've built it!
@@ -507,39 +504,6 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-        internal static void BuildVolumes(int brushIndex)
-        {
-            // remove volumes from brushes that are no longer volumes:
-            if (brushes[brushIndex].Mode != CSGMode.Volume && brushes[brushIndex].Volume != null)
-            {
-                // set volume handle to null.
-                brushes[brushIndex].Volume = null;
-                // delete any built volume.
-                Transform volume1 = brushes[brushIndex].transform.Find(Constants.GameObjectVolumeComponentIdentifier);
-                if (volume1 != null)
-                    GameObject.DestroyImmediate(volume1.gameObject);
-            }
-
-            // generate all of the volume brushes:
-            if (brushes[brushIndex].Mode == CSGMode.Volume && brushes[brushIndex].Volume != null)
-            {
-                // remove any existing built volume:
-                Transform volume2 = brushes[brushIndex].transform.Find(Constants.GameObjectVolumeComponentIdentifier);
-                if (volume2 != null)
-                    GameObject.DestroyImmediate(volume2.gameObject);
-
-                // create the game object with convex mesh collider:
-                Mesh mesh = new Mesh();
-                BrushFactory.GenerateMeshFromPolygonsFast(brushes[brushIndex].GetPolygons(), ref mesh, 0.0f);
-                GameObject gameObject = CreateVolumeMesh(brushes[brushIndex].transform, mesh);
-                gameObject.transform.position = brushes[brushIndex].transform.position;
-                gameObject.transform.rotation = brushes[brushIndex].transform.rotation;
-
-                // execute custom volume generation code:
-                brushes[brushIndex].Volume.OnCreateVolume(gameObject);
-            }
-        }
-
        
             
 
@@ -581,24 +545,6 @@ namespace Sabresaurus.SabreCSG
                 colliderMesh.GetComponent<MeshCollider>().sharedMesh = mesh;
 
                 return colliderMesh;
-            }
-
-            public static GameObject CreateVolumeMesh(Transform parent, Mesh mesh)
-            {
-                GameObject volumeMesh = new GameObject(Constants.GameObjectVolumeComponentIdentifier, typeof(MeshCollider));
-                volumeMesh.transform.SetParent(parent, false);
-#if UNITY_EDITOR
-                if (!CurrentSettings.ShowHiddenGameObjectsInHierarchy)
-                        volumeMesh.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
-#endif
-
-                // Set the mesh to be used for triggers.
-                MeshCollider meshCollider = volumeMesh.GetComponent<MeshCollider>();
-                meshCollider.sharedMesh = mesh;
-                meshCollider.convex = true;
-                meshCollider.isTrigger = true;
-
-                return volumeMesh;
             }
     }
     }
