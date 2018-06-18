@@ -18,7 +18,7 @@ namespace Sabresaurus.SabreCSG
             {
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
                 GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
-                if (GUILayout.Button(new GUIContent(" Show Editor", SabreCSGResources.ButtonShapeEditorTexture, "Show 2D Shape Editor"), createBrushStyle))
+                if (GUILayout.Button(new GUIContent(" Shape Editor", SabreCSGResources.ButtonShapeEditorTexture, "Show 2D Shape Editor"), createBrushStyle))
                 {
                     // display the 2d shape ditor.
                     ShapeEditorWindow.Init();
