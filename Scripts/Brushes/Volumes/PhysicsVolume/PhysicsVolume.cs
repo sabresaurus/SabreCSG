@@ -20,6 +20,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         public PhysicsVolumeForceMode forceMode = PhysicsVolumeForceMode.None;
 
         /// <summary>
+        /// The force space mode applied to rigid bodies.
+        /// </summary>
+        [SerializeField]
+        public PhysicsVolumeForceSpace forceSpace = PhysicsVolumeForceSpace.Relative;
+
+        /// <summary>
         /// The force applied to rigid bodies.
         /// </summary>
         [SerializeField]
@@ -30,6 +36,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         /// </summary>
         [SerializeField]
         public PhysicsVolumeForceMode relativeForceMode = PhysicsVolumeForceMode.None;
+
+        /// <summary>
+        /// The relative force space mode applied to rigid bodies.
+        /// </summary>
+        [SerializeField]
+        public PhysicsVolumeForceSpace relativeForceSpace = PhysicsVolumeForceSpace.Relative;
 
         /// <summary>
         /// The relative force applied to rigid bodies.
@@ -44,6 +56,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         public PhysicsVolumeForceMode torqueForceMode = PhysicsVolumeForceMode.None;
 
         /// <summary>
+        /// The torque force space mode applied to rigid bodies.
+        /// </summary>
+        [SerializeField]
+        public PhysicsVolumeForceSpace torqueSpace = PhysicsVolumeForceSpace.Relative;
+
+        /// <summary>
         /// The torque applied to rigid bodies.
         /// </summary>
         [SerializeField]
@@ -54,6 +72,12 @@ namespace Sabresaurus.SabreCSG.Volumes
         /// </summary>
         [SerializeField]
         public PhysicsVolumeForceMode relativeTorqueForceMode = PhysicsVolumeForceMode.None;
+
+        /// <summary>
+        /// The relative torque force space mode applied to rigid bodies.
+        /// </summary>
+        [SerializeField]
+        public PhysicsVolumeForceSpace relativeTorqueSpace = PhysicsVolumeForceSpace.Relative;
 
         /// <summary>
         /// The relative torque applied to rigid bodies.
@@ -139,6 +163,15 @@ namespace Sabresaurus.SabreCSG.Volumes
                                 volume.force = force;
                             invalidate = true;
                         }
+
+                        PhysicsVolumeForceSpace previousPhysicsVolumeForceSpace;
+                        forceSpace = (PhysicsVolumeForceSpace)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Force Space", "The force space mode."), previousPhysicsVolumeForceSpace = forceSpace);
+                        if (previousPhysicsVolumeForceSpace != forceSpace)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.forceSpace = forceSpace;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -175,6 +208,15 @@ namespace Sabresaurus.SabreCSG.Volumes
                         {
                             foreach (PhysicsVolume volume in physicsVolumes)
                                 volume.relativeForce = relativeForce;
+                            invalidate = true;
+                        }
+
+                        PhysicsVolumeForceSpace previousPhysicsVolumeForceSpace;
+                        relativeForceSpace = (PhysicsVolumeForceSpace)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Force Space", "The relative force space mode."), previousPhysicsVolumeForceSpace = relativeForceSpace);
+                        if (previousPhysicsVolumeForceSpace != relativeForceSpace)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.relativeForceSpace = relativeForceSpace;
                             invalidate = true;
                         }
                     }
@@ -215,6 +257,15 @@ namespace Sabresaurus.SabreCSG.Volumes
                                 volume.torque = torque;
                             invalidate = true;
                         }
+
+                        PhysicsVolumeForceSpace previousPhysicsVolumeForceSpace;
+                        torqueSpace = (PhysicsVolumeForceSpace)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Force Space", "The torque force space mode."), previousPhysicsVolumeForceSpace = torqueSpace);
+                        if (previousPhysicsVolumeForceSpace != torqueSpace)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.torqueSpace = torqueSpace;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -251,6 +302,15 @@ namespace Sabresaurus.SabreCSG.Volumes
                         {
                             foreach (PhysicsVolume volume in physicsVolumes)
                                 volume.relativeTorque = relativeTorque;
+                            invalidate = true;
+                        }
+
+                        PhysicsVolumeForceSpace previousPhysicsVolumeForceSpace;
+                        relativeTorqueSpace = (PhysicsVolumeForceSpace)UnityEditor.EditorGUILayout.EnumPopup(new GUIContent("Force Space", "The relative torque force space mode."), previousPhysicsVolumeForceSpace = relativeTorqueSpace);
+                        if (previousPhysicsVolumeForceSpace != relativeTorqueSpace)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.relativeTorqueSpace = relativeTorqueSpace;
                             invalidate = true;
                         }
                     }
@@ -327,12 +387,16 @@ namespace Sabresaurus.SabreCSG.Volumes
         {
             PhysicsVolumeComponent component = volume.AddComponent<PhysicsVolumeComponent>();
             component.forceMode = forceMode;
+            component.forceSpace = forceSpace;
             component.force = force;
             component.relativeForceMode = relativeForceMode;
+            component.relativeForceSpace = relativeForceSpace;
             component.relativeForce = relativeForce;
             component.torqueForceMode = torqueForceMode;
+            component.torqueSpace = torqueSpace;
             component.torque = torque;
             component.relativeTorqueForceMode = relativeTorqueForceMode;
+            component.relativeTorqueSpace = relativeTorqueSpace;
             component.relativeTorque = relativeTorque;
             component.gravity = gravity;
             component.layer = layer;
