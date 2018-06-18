@@ -2021,7 +2021,7 @@ namespace Sabresaurus.SabreCSG
                 // make sure they are visible and editable again.
                 volumes[i].gameObject.hideFlags = HideFlags.None;
                 // give them a more recognizable name.
-                volumes[i].name = volumes[i].parent.name + " (Volume)";
+                volumes[i].name = volumes[i].parent.name.Replace(" Brush ", " Volume ");
                 if (meshGroup != null)
                     // Reanchor the volumes to the mesh group.
                     volumes[i].SetParent(meshGroup, true);
