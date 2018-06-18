@@ -409,6 +409,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ShapeEditorRestoreTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRestore.png");
+            }
+        }
+
         public static Texture2D ShapeEditorRotate90LeftTexture
         {
             get
