@@ -428,5 +428,16 @@ namespace Sabresaurus.SabreCSG
             string z = MathHelper.RoundFloat(bounds.size.z, 0.0001f).ToString(CultureInfo.InvariantCulture);
             return x + " x " + y + " x " + z;
         }
+
+        /// <summary>
+        /// Determines whether the layer mask contains the specified layer.
+        /// </summary>
+        /// <param name="layerMask">The layer mask.</param>
+        /// <param name="layer">The layer to check for.</param>
+        /// <returns><c>true</c> if the layer mask contains the specified layer; otherwise, <c>false</c>.</returns>
+        internal static bool Contains(this LayerMask layerMask, int layer)
+        {
+            return layerMask == (layerMask | (1 << layer));
+        }
     }
 }
