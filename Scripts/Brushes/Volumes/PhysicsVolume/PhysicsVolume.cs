@@ -127,15 +127,18 @@ namespace Sabresaurus.SabreCSG.Volumes
                         invalidate = true;
                     }
 
-                    Vector3 previousVector3;
-                    UnityEditor.EditorGUIUtility.wideMode = true;
-                    force = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of force."), previousVector3 = force);
-                    UnityEditor.EditorGUIUtility.wideMode = false;
-                    if (previousVector3 != force)
+                    if (forceMode != PhysicsVolumeForceMode.None)
                     {
-                        foreach (PhysicsVolume volume in physicsVolumes)
-                            volume.force = force;
-                        invalidate = true;
+                        Vector3 previousVector3;
+                        UnityEditor.EditorGUIUtility.wideMode = true;
+                        force = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of force."), previousVector3 = force);
+                        UnityEditor.EditorGUIUtility.wideMode = false;
+                        if (previousVector3 != force)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.force = force;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -162,15 +165,18 @@ namespace Sabresaurus.SabreCSG.Volumes
                         invalidate = true;
                     }
 
-                    Vector3 previousVector3;
-                    UnityEditor.EditorGUIUtility.wideMode = true;
-                    relativeForce = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of relative force."), previousVector3 = relativeForce);
-                    UnityEditor.EditorGUIUtility.wideMode = false;
-                    if (previousVector3 != relativeForce)
+                    if (relativeForceMode != PhysicsVolumeForceMode.None)
                     {
-                        foreach (PhysicsVolume volume in physicsVolumes)
-                            volume.relativeForce = relativeForce;
-                        invalidate = true;
+                        Vector3 previousVector3;
+                        UnityEditor.EditorGUIUtility.wideMode = true;
+                        relativeForce = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of relative force."), previousVector3 = relativeForce);
+                        UnityEditor.EditorGUIUtility.wideMode = false;
+                        if (previousVector3 != relativeForce)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.relativeForce = relativeForce;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -197,15 +203,18 @@ namespace Sabresaurus.SabreCSG.Volumes
                         invalidate = true;
                     }
 
-                    Vector3 previousVector3;
-                    UnityEditor.EditorGUIUtility.wideMode = true;
-                    torque = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of torque force."), previousVector3 = torque);
-                    UnityEditor.EditorGUIUtility.wideMode = false;
-                    if (previousVector3 != torque)
+                    if (torqueForceMode != PhysicsVolumeForceMode.None)
                     {
-                        foreach (PhysicsVolume volume in physicsVolumes)
-                            volume.torque = torque;
-                        invalidate = true;
+                        Vector3 previousVector3;
+                        UnityEditor.EditorGUIUtility.wideMode = true;
+                        torque = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of torque force."), previousVector3 = torque);
+                        UnityEditor.EditorGUIUtility.wideMode = false;
+                        if (previousVector3 != torque)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.torque = torque;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -232,15 +241,18 @@ namespace Sabresaurus.SabreCSG.Volumes
                         invalidate = true;
                     }
 
-                    Vector3 previousVector3;
-                    UnityEditor.EditorGUIUtility.wideMode = true;
-                    relativeTorque = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of relative torque force."), previousVector3 = relativeTorque);
-                    UnityEditor.EditorGUIUtility.wideMode = false;
-                    if (previousVector3 != relativeTorque)
+                    if (relativeTorqueForceMode != PhysicsVolumeForceMode.None)
                     {
-                        foreach (PhysicsVolume volume in physicsVolumes)
-                            volume.relativeTorque = relativeTorque;
-                        invalidate = true;
+                        Vector3 previousVector3;
+                        UnityEditor.EditorGUIUtility.wideMode = true;
+                        relativeTorque = UnityEditor.EditorGUILayout.Vector3Field(new GUIContent("Force", "The amount of relative torque force."), previousVector3 = relativeTorque);
+                        UnityEditor.EditorGUIUtility.wideMode = false;
+                        if (previousVector3 != relativeTorque)
+                        {
+                            foreach (PhysicsVolume volume in physicsVolumes)
+                                volume.relativeTorque = relativeTorque;
+                            invalidate = true;
+                        }
                     }
                 }
                 GUILayout.EndVertical();
@@ -304,6 +316,7 @@ namespace Sabresaurus.SabreCSG.Volumes
 
             return invalidate; // true when a property changed, the brush invalidates and stores all changes.
         }
+
 #endif
 
         /// <summary>
