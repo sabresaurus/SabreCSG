@@ -23,9 +23,9 @@ namespace Sabresaurus.SabreCSG
                     // display the 2d shape ditor.
                     ShapeEditorWindow.Init();
                 }
-                if (GUILayout.Button(new GUIContent(" Load Project", SabreCSGResources.ShapeEditorOpenTexture, "Load Embedded Project Into 2D Shape Editor"), createBrushStyle))
+                if (GUILayout.Button(new GUIContent(" Restore Project", SabreCSGResources.ShapeEditorRestoreTexture, "Load Embedded Project Into 2D Shape Editor"), createBrushStyle))
                 {
-                    if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to load the embedded project?\r\nAny unsaved work in the 2D Shape Editor will be lost!", "Yes", "No"))
+                    if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to restore the embedded project?\r\nAny unsaved work in the 2D Shape Editor will be lost!", "Yes", "No"))
                     {
                         // display the 2d shape ditor.
                         ShapeEditorWindow window = ShapeEditorWindow.InitAndGetHandle();
