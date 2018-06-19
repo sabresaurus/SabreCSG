@@ -118,7 +118,7 @@ namespace Sabresaurus.SabreCSG.Volumes
         {
             get
             {
-                return (Material)SabreCSGResources.LoadObject("Resources/Materials/scsg_volume_physics.mat");
+                return (Material)SabreCSGResources.LoadObject("Materials/scsg_volume_physics.mat");
             }
         }
 
