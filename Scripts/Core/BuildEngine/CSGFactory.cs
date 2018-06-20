@@ -265,7 +265,7 @@ namespace Sabresaurus.SabreCSG
 					// Intersecting builders can probably be calculated at edit time
 					BrushBuilder.Build(allBrushCaches[brushIndex], brushIndex, allBrushCaches, false);
 
-					brushesBuilt++;
+                    brushesBuilt++;
 
 					// If we are not required to build collision (either for this brush, or at all) then we've built it!
 					if(!shouldBuildCollision[brushIndex] || !buildSettings.GenerateCollisionMeshes)
@@ -476,8 +476,8 @@ namespace Sabresaurus.SabreCSG
 					MeshGroupManager.BuildCollision(meshGroupHolder, buildContext.CollisionPolygonIndex, buildSettings, collisionMeshDictionary);
 				}
 
-				// All done
-				DateTime time2 = DateTime.Now;
+                // All done
+                DateTime time2 = DateTime.Now;
 
 				buildContext.buildMetrics.BuildMetaData = (time1-buildStartTime).TotalSeconds + " " + (time2-time1).TotalSeconds + " " + brushesBuilt;
 				buildContext.buildMetrics.BuildTime = (float)(DateTime.Now - buildStartTime).TotalSeconds;
@@ -546,6 +546,6 @@ namespace Sabresaurus.SabreCSG
 
                 return colliderMesh;
             }
-        }
+    }
     }
 #endif

@@ -9,7 +9,13 @@ using UnityEngine.Serialization;
 
 namespace Sabresaurus.SabreCSG
 {
-	public enum CSGMode { Add, Subtract };
+	public enum CSGMode
+    {
+        Add,
+        Subtract,
+        Volume
+    };
+
     [ExecuteInEditMode]
 	public abstract class BrushBase : MonoBehaviour
 	{
@@ -25,7 +31,10 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField]
 		protected bool isVisible = true;
 
-		protected bool destroyed = false;
+        [SerializeField]
+        protected Volume volume = null;
+
+        protected bool destroyed = false;
 
         protected string previousHierarchyName = "";
 
@@ -39,6 +48,21 @@ namespace Sabresaurus.SabreCSG
 			{
 				if (this.mode != value)
 				{
+                    if (value == CSGMode.Volume)
+                    {
+                        // limitation: volume mode can only be set on primitive brushes for now.
+                        if (this.GetType() != typeof(PrimitiveBrush))
+                        {
+                            return;
+                        }
+                        // limitation: prevent users from setting compound brush primitives to volumes.
+                        if (((PrimitiveBrush)this).BrushController != null)
+                        {
+                            return;
+                        }
+                        // we prevent this so that we can add our own unique compound brush workflow in later SabreCSG versions.
+                    }
+
 					this.mode = value;
 
 					Invalidate(true);
@@ -91,6 +115,22 @@ namespace Sabresaurus.SabreCSG
 		}
 
         /// <summary>
+        /// Gets or sets the volume associated with the brush (for <see cref="CSGMode.Volume"/>).
+        /// </summary>
+        /// <value>The volume.</value>
+        public Volume Volume
+        {
+            get
+            {
+                return volume;
+            }
+            set
+            {
+                volume = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the beautiful name of the brush used in auto-generation of the hierarchy name.
         /// </summary>
         /// <value>The beautiful name of the brush.</value>
@@ -131,6 +171,67 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
+        /// Rebuilds the volume, creating or deleting the volume component and applying new settings.
+        /// </summary>
+        internal void RebuildVolume()
+        {
+            // volumes can only be primitive brushes at the moment.
+            if (GetType() != typeof(PrimitiveBrush)) return;
+            PrimitiveBrush self = (PrimitiveBrush)this;
+
+            // remove volumes from brushes that are no longer volumes:
+            if (Mode != CSGMode.Volume && Volume != null)
+            {
+                // set volume handle to null.
+                Volume = null;
+                // delete any built volume.
+                Transform volume1 = transform.Find(Constants.GameObjectVolumeComponentIdentifier);
+                if (volume1 != null)
+                    GameObject.DestroyImmediate(volume1.gameObject);
+            }
+
+            // generate all of the volume brushes:
+            if (Mode == CSGMode.Volume && Volume != null)
+            {
+                // remove any existing built volume:
+                Transform volume2 = transform.Find(Constants.GameObjectVolumeComponentIdentifier);
+                if (volume2 != null)
+                    GameObject.DestroyImmediate(volume2.gameObject);
+
+                // create the game object with convex mesh collider:
+                Mesh mesh = new Mesh();
+                BrushFactory.GenerateMeshFromPolygonsFast(self.GetPolygons(), ref mesh, 0.0f);
+                GameObject gameObject = CreateVolumeMeshCollider(mesh);
+                gameObject.transform.position = transform.position;
+                gameObject.transform.rotation = transform.rotation;
+
+                // execute custom volume generation code:
+                Volume.OnCreateVolume(gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Creates the game object for the volume brush including a mesh collider.
+        /// </summary>
+        /// <param name="mesh">The mesh to be used for the mesh collider.</param>
+        /// <returns>The created game object.</returns>
+        internal GameObject CreateVolumeMeshCollider(Mesh mesh)
+        {
+            GameObject volumeMesh = new GameObject(Constants.GameObjectVolumeComponentIdentifier, typeof(MeshCollider));
+            volumeMesh.transform.SetParent(transform, false);
+#if UNITY_EDITOR
+            if (!CurrentSettings.ShowHiddenGameObjectsInHierarchy)
+                volumeMesh.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
+#endif
+            // Set the mesh to be used for triggers.
+            MeshCollider meshCollider = volumeMesh.GetComponent<MeshCollider>();
+            meshCollider.sharedMesh = mesh;
+            meshCollider.convex = true;
+            meshCollider.isTrigger = true;
+            return volumeMesh;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this brush supports CSG operations. Setting this to false
         /// will hide CSG brush related options in the editor.
         /// <para>For example a <see cref="GroupBrush"/> does not have any CSG operations.</para>
@@ -140,9 +241,15 @@ namespace Sabresaurus.SabreCSG
 
         public virtual void Invalidate(bool polygonsChanged)
         {
-            // when a modification to a brush occured we update the auto-generated name.
+            // when a modification to a brush occured:
             if (polygonsChanged)
+            {
+                // we update the auto-generated name.
                 UpdateGeneratedHierarchyName();
+
+                // we rebuild the volumes.
+                RebuildVolume();
+            }
         }
 
 		public abstract void UpdateVisibility();
