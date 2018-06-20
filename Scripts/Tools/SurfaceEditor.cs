@@ -1016,7 +1016,7 @@ namespace Sabresaurus.SabreCSG
 
                 Vector3 worldCenterPoint = brushTransform.TransformPoint(currentPolygon.GetCenterPoint());
                 // Offset the gizmo so it's very slightly above the polygon, to avoid depth fighting
-                if (brush.Mode == CSGMode.Add)
+                if (brush.Mode == CSGMode.Add || brush.Mode == CSGMode.Volume)
                 {
                     worldCenterPoint += normal * 0.02f;
                 }
@@ -1072,7 +1072,7 @@ namespace Sabresaurus.SabreCSG
                             toDeselect.Add(polygon);
                         }
                     }
-                    else
+                    else if (brush.Mode == CSGMode.Subtract)
                     {
                         // is the camera on the positive side of the plane?
                         if (Vector3.Dot(brush.transform.TransformDirection(polygon.Plane.normal), Camera.current.transform.position - brush.transform.TransformPoint(polygon.GetCenterPoint())) < 0)

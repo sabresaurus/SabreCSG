@@ -41,7 +41,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="sabrePath">Path local to the SabreCSG folder</param>
         /// <returns></returns>
-        private static Object LoadObject(string sabrePath)
+        public static Object LoadObject(string sabrePath)
         {
             bool found = false;
 
@@ -198,6 +198,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/FinalBuild.png");
+            }
+        }
+
+        public static Texture2D VolumeIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Volume.png");
             }
         }
 
@@ -414,6 +422,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ShapeEditorOpen.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorRestoreTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRestore.png");
             }
         }
 
@@ -672,6 +688,11 @@ namespace Sabresaurus.SabreCSG
         public static Material GetSubtractMaterial()
         {
             return (Material)LoadObject("Materials/Subtract.mat");
+        }
+
+        public static Material GetVolumeMaterial()
+        {
+            return (Material)LoadObject("Materials/Volume.mat");
         }
 
         public static Material GetCollisionMaterial()
