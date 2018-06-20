@@ -101,12 +101,12 @@ namespace Sabresaurus.SabreCSG
 		protected static List<Brush> CalculateIntersectingBrushes(Brush sourceBrush, List<Brush> brushes, bool isCollisionPass)
 		{	
 			// If the brush is not CSG it can't intersect any brushes!
-			if(sourceBrush.IsNoCSG)
+			if(sourceBrush.IsNoCSG || sourceBrush.Mode == CSGMode.Volume)
 			{
 				return new List<Brush>();
 			}
-			// Return empty lists if the pass is not relevant
-			if(isCollisionPass)
+            // Return empty lists if the pass is not relevant
+            if (isCollisionPass)
 			{
 				if(!sourceBrush.hasCollision)
 				{
@@ -150,9 +150,9 @@ namespace Sabresaurus.SabreCSG
 				if(!Brush.IsInvalidForBuild(brushes[i]))
 				{
 					// Skip any brushes not suitable for the pass
-					if(brushes[i].isNoCSG)
+					if(brushes[i].isNoCSG || brushes[i].mode == CSGMode.Volume)
 					{
-						// NoCSG brushes skip the CSG calcs
+						// NoCSG and volume brushes skip the CSG calcs
 						continue;
 					}
 					else if(isCollisionPass && !brushes[i].HasCollision)
@@ -195,9 +195,9 @@ namespace Sabresaurus.SabreCSG
 				if(!Brush.IsInvalidForBuild(brushes[i]))
 				{
 					// Skip any brushes not suitable for the pass
-					if(brushes[i].isNoCSG)
+					if(brushes[i].isNoCSG || brushes[i].mode == CSGMode.Volume)
 					{
-						// NoCSG brushes skip the CSG calcs
+						// NoCSG and volume brushes skip the CSG calcs
 						continue;
 					}
 					else if(isCollisionPass && !brushes[i].HasCollision)

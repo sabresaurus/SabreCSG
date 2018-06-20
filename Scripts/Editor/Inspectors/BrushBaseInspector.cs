@@ -77,9 +77,76 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
+            // volume editing:
+            if (BrushTargets.Any(b => b.Mode == CSGMode.Volume))
+            {
+                using (new NamedVerticalScope("Volume"))
+                {
+                    // find all of the volume types in the project:
+                    List<System.Type> volumeTypes = Volume.FindAllInAssembly();
+                    if (volumeTypes.Count == 0)
+                    {
+                        EditorGUILayout.LabelField("No volume types could be found!");
+                    }
+                    else
+                    {
+                        // find all of the volume brushes that are currently selected.
+                        BrushBase[] volumeBrushes = BrushTargets.Where(b => b.Mode == CSGMode.Volume).ToArray();
+
+                        // make sure all volume brushes are of the same type (for multi-editing).
+                        object brushTargetVolumeType = BrushTarget.Volume ? BrushTarget.Volume.GetType() : null;
+                        if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == brushTargetVolumeType))
+                        {
+                            EditorGUILayout.LabelField("Cannot multi-edit volumes of different types!");
+                        }
+                        else
+                        {
+                            // let the user pick a volume type:
+                            int selected = 0;
+                            if (BrushTarget.Volume != null)
+                            {
+                                for (int i = 0; i < volumeTypes.Count; i++)
+                                {
+                                    selected = i;
+                                    if (BrushTarget.Volume.GetType() == volumeTypes[i])
+                                        break;
+                                }
+                            }
+                            selected = EditorGUILayout.Popup("Volume Type", selected, volumeTypes.Select(v => v.Name + " (" + v.Namespace + ")").ToArray());
+
+                            // set the brush volume type:
+                            for (int i = 0; i < volumeBrushes.Length; i++)
+                            {
+                                BrushBase target = volumeBrushes[i];
+
+                                // if the brush does not have a volume yet or the wrong one, create the selected type now:
+                                if (target.Volume == null || target.Volume.GetType() != volumeTypes[selected])
+                                {
+                                    target.Volume = (Volume)ScriptableObject.CreateInstance(volumeTypes[selected]);
+                                    if (serializedObject.targetObject != null)
+                                    {
+                                        serializedObject.ApplyModifiedProperties();
+                                        System.Array.ForEach(volumeBrushes, item => item.Invalidate(true));
+                                    }
+                                }
+                            }
+
+                            // custom volume inspector:
+                            if (BrushTarget.Volume.OnInspectorGUI(volumeBrushes.Select(b => b.Volume).ToArray()))
+                            {
+                                if (serializedObject.targetObject != null)
+                                {
+                                    serializedObject.ApplyModifiedProperties();
+                                    System.Array.ForEach(volumeBrushes, item => item.Invalidate(true));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // custom inspector:
             DoInspectorGUI();
-
 
             // generic brush editing:
             using (new NamedVerticalScope("Order"))

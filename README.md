@@ -26,9 +26,17 @@ SabreCSG was originally sold on the [Unity Asset Store](https://www.assetstore.u
 
 Documentation and videos on how to use SabreCSG are available at the [SabreCSG Learn website](http://sabrecsg.com/learn/) or the [wiki](https://github.com/sabresaurus/SabreCSG/wiki).
 
-## Discord:
+## Download
 
-Official SabreCSG Discord Server: [https://discord.gg/pFAS5rK](https://discord.gg/pFAS5rK)!
+[![Download SabreCSG](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-1.png)](https://github.com/sabresaurus/SabreCSG/archive/master.zip)
+
+[![Installation Instructions](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-4.png)](https://youtu.be/KDheSZcagsw?t=30)
+
+## Documentation
+
+[![Visit Wiki Pages](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-3.png)](https://github.com/sabresaurus/SabreCSG/wiki)
+
+[![Join the Official SabreCSG Discord Server](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-2.png)](https://discord.gg/pFAS5rK)
 
 ## Donations:
 

@@ -751,7 +751,11 @@ namespace Sabresaurus.SabreCSG
 
 #if UNITY_EDITOR
             Material material;
-            if (!IsVisible)
+            if (this.mode == CSGMode.Volume)
+            {
+                material = Volume ? Volume.BrushPreviewMaterial : SabreCSGResources.GetVolumeMaterial();
+            }
+            else if (!IsVisible)
             {
                 material = SabreCSGResources.GetCollisionMaterial();
             }
@@ -807,7 +811,7 @@ namespace Sabresaurus.SabreCSG
             if (meshRenderer != null)
             {
 #if UNITY_EDITOR
-                meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
+                meshRenderer.enabled = mode == CSGMode.Volume || (isVisible && !CurrentSettings.ShowBrushesAsWireframes);
 #else
                 meshRenderer.enabled = isVisible;
 #endif
@@ -991,6 +995,12 @@ namespace Sabresaurus.SabreCSG
             // copy the world position as compound brush children brushes have position 0,0,0.
             // once parented they will end up at world position 0,0,0 if this step isn't done.
             newObject.transform.position = this.transform.position;
+
+            // properly duplicate the volume type.
+            if (Volume != null)
+            {
+                Volume = ScriptableObject.Instantiate(Volume);
+            }
 
             return newObject;
         }
