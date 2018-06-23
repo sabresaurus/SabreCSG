@@ -92,9 +92,10 @@ namespace Sabresaurus.SabreCSG
                     {
                         // find all of the volume brushes that are currently selected.
                         BrushBase[] volumeBrushes = BrushTargets.Where(b => b.Mode == CSGMode.Volume).ToArray();
+                        BrushBase volumeTarget = volumeBrushes.Contains(BrushTarget) ? BrushTarget : volumeBrushes.Last();
 
                         // make sure all volume brushes are of the same type (for multi-editing).
-                        object brushTargetVolumeType = BrushTarget.Volume ? BrushTarget.Volume.GetType() : null;
+                        object brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
                         if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == brushTargetVolumeType))
                         {
                             EditorGUILayout.LabelField("Cannot multi-edit volumes of different types!");
@@ -103,12 +104,12 @@ namespace Sabresaurus.SabreCSG
                         {
                             // let the user pick a volume type:
                             int selected = 0;
-                            if (BrushTarget.Volume != null)
+                            if (volumeTarget.Volume != null)
                             {
                                 for (int i = 0; i < volumeTypes.Count; i++)
                                 {
                                     selected = i;
-                                    if (BrushTarget.Volume.GetType() == volumeTypes[i])
+                                    if (volumeTarget.Volume.GetType() == volumeTypes[i])
                                         break;
                                 }
                             }
@@ -132,7 +133,7 @@ namespace Sabresaurus.SabreCSG
                             }
 
                             // custom volume inspector:
-                            if (BrushTarget.Volume.OnInspectorGUI(volumeBrushes.Select(b => b.Volume).ToArray()))
+                            if (volumeTarget.Volume.OnInspectorGUI(volumeBrushes.Select(b => b.Volume).ToArray()))
                             {
                                 if (serializedObject.targetObject != null)
                                 {
