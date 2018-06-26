@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Sabresaurus.SabreCSG.ShapeEditor
 {
@@ -624,28 +625,59 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     gridMaterial = new Material(shader);
                 }
 
+                bool isOpenGL = false;
+
+                if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore
+#if !UNITY_5_3_OR_NEWER
+                    || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGL2
+#endif
+#if UNITY_5_1 || UNITY_5_2 || UNITY_5_3_0 || UNITY_5_3_1 || UNITY_5_3_2 || UNITY_5_3_3 || UNITY_5_3_OR_NEWER
+                    || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2
+                    || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3
+#endif
+                  )
+                {
+                    isOpenGL = true;
+                }
+
+
                 // draw the grid using the special grid shader:
                 bool docked = isDocked;
                 gridMaterial.SetFloat("_OffsetX", GetViewportRect().x + (docked ? 2 : 0)); // why is this neccesary, what's moving?
-#if UNITY_EDITOR_WIN
-                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 0 : 3)); // why is this neccesary, what's moving?
-#else
-                gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 3 : 0)); // why is this neccesary, what's moving?
-#endif
+                if (isOpenGL)
+                {
+                    if (EditorGUIUtility.pixelsPerPoint > 1)
+                    {
+                        gridMaterial.SetFloat("_OffsetY", (docked ? 3 : 0)); // why is this neccesary, what's moving?
+                    }
+                    else
+                    {
+                        gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 3 : 0)); // why is this neccesary, what's moving?
+                    }
+                }
+                else
+                {
+                    gridMaterial.SetFloat("_OffsetY", GetViewportRect().y + (docked ? 0 : 3)); // why is this neccesary, what's moving?
+                }
+
                 gridMaterial.SetFloat("_ScrollX", viewportScroll.x);
                 gridMaterial.SetFloat("_ScrollY", viewportScroll.y);
                 gridMaterial.SetFloat("_Zoom", gridScale);
                 gridMaterial.SetFloat("_Height", GetViewportRect().height);
                 gridMaterial.SetTexture("_Background", backgroundImage);
-#if UNITY_EDITOR_WIN
-                gridMaterial.SetInt("_IsOpenGL", 0);
-                lineMaterial.SetInt("_IsOpenGL", 0);
-                lineMaterial.SetFloat("_CutoffY", 35.0f);
+                titleContent.text = GetViewportRect().height.ToString();
+
+
+#if UNITY_5_4_OR_NEWER
+                gridMaterial.SetFloat("_PixelsPerPoint", EditorGUIUtility.pixelsPerPoint);
 #else
-                gridMaterial.SetInt("_IsOpenGL", 1);
-                lineMaterial.SetInt("_IsOpenGL", 1);
-                lineMaterial.SetFloat("_CutoffY", GetViewportRect().height);
+                gridMaterial.SetFloat("_PixelsPerPoint", 1);
 #endif
+
+                lineMaterial.SetFloat("_Height", GetViewportRect().height);
+
+                lineMaterial.SetFloat("_CutoffY", 35.0f);
+
                 gridMaterial.SetPass(0);
 
                 GL.Begin(GL.QUADS);
@@ -655,7 +687,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GlDrawRectangle(viewportRect.x, viewportRect.y, viewportRect.width, viewportRect.height);
                 GL.End();
                 ///////////////////////////////////////////////////////////////////////////////////
-
+                
                 lineMaterial.SetPass(0);
 
                 GL.PushMatrix();

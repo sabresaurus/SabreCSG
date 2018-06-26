@@ -6,10 +6,9 @@
 		_OffsetY ("Offset Y", Float) = 0.0
 		_ScrollX ("Scroll X", Float) = 0.0
 		_ScrollY ("Scroll Y", Float) = 0.0
-		_Zoom ("Zoom", Float) = 16.0
+        _Zoom ("Zoom", Float) = 16.0
+		_PixelsPerPoint ("Pixels Per Point", Float) = 1.0
 		_Background ("Background", 2D) = "white" { }
-		_IsOpenGL ("Is OpenGL", Int) = 0
-		_Height ("Height", Float) = 0
 	}
 
 	SubShader
@@ -52,27 +51,29 @@
 				float _ScrollX;
 				float _ScrollY;
 				float _Zoom;
-				float4 _Background_TexelSize;
-				sampler2D _Background;
-				int _IsOpenGL;
-				float _Height;
+                float _PixelsPerPoint;
+                float4 _Background_TexelSize;
+                sampler2D _Background;
+                float _Height;
 
 				// fragment shader
 				fixed4 frag(v2f IN) : SV_Target
 				{
-					// calculate grid offset and scrolling.
-					float4 pos = IN.pos;
-					pos.x -= _OffsetX + _ScrollX;
+                    float4 pos = IN.pos;
+#if UNITY_UV_STARTS_AT_TOP
+                    pos.y -= _PixelsPerPoint * _OffsetY;
+#else
+                    pos.y = _Height - pos.y;
+                    pos.y += _PixelsPerPoint * _OffsetY;
+#endif
+                    pos /= _PixelsPerPoint;
 
-					// special handling for opengl on mac computers.
-					if (_IsOpenGL)
-						pos.y -= _OffsetY - _ScrollY + _Height;
-					else
-						pos.y -= _OffsetY + _ScrollY;
+                    pos.x -= _OffsetX + _ScrollX;
+                    pos.y -=  _ScrollY;
 
 					// the 1x1 grid line light gray color.
 					fixed4 col;
-					col = fixed4(0.922f, 0.922f, 0.922f, 1.0f);
+                    col = fixed4(0.922f, 0.922f, 0.922f, 1.0f);
 
 					// calculate zoom.
 					float s8 = (_Zoom * 8);

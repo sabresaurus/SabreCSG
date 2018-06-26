@@ -3,7 +3,6 @@
 	Properties
 	{
 		_CutoffY ("Cutoff Y", Float) = 0.0
-		_IsOpenGL ("Is OpenGL", Int) = 0
 	}
 
 	SubShader
@@ -35,8 +34,8 @@
 					float4 pos : SV_POSITION;
 				};
 
-				int _IsOpenGL;
 				float _CutoffY;
+                float _Height;
 
 				// vertex shader
 				v2f vert(appdata IN)
@@ -56,10 +55,14 @@
 				{
 					fixed4 col;
 					col = IN.color;
-					if (IN.pos.y < _CutoffY && _IsOpenGL == 0)
-						discard;
-					else if (IN.pos.y > _CutoffY && _IsOpenGL == 1)
-						discard;
+#if UNITY_UV_STARTS_AT_TOP
+                    if (IN.pos.y < _CutoffY)
+                        discard;
+#else
+                    if (IN.pos.y > _Height - _CutoffY )
+                        discard;
+#endif
+
 					return col;
 				}
 			ENDCG
