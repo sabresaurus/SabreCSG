@@ -59,7 +59,7 @@
                     if (IN.pos.y < _CutoffY)
                         discard;
 #else
-                    if (IN.pos.y > _Height - _CutoffY )
+                    if (IN.pos.y > _Height)
                         discard;
 #endif
 

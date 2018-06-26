@@ -640,13 +640,17 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     isOpenGL = true;
                 }
 
+                float pixelsPerPoint = 1;
+#if UNITY_5_4_OR_NEWER
+                pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
+#endif
 
                 // draw the grid using the special grid shader:
                 bool docked = isDocked;
                 gridMaterial.SetFloat("_OffsetX", GetViewportRect().x + (docked ? 2 : 0)); // why is this neccesary, what's moving?
                 if (isOpenGL)
                 {
-                    if (EditorGUIUtility.pixelsPerPoint > 1)
+                    if (pixelsPerPoint > 1)
                     {
                         gridMaterial.SetFloat("_OffsetY", (docked ? 3 : 0)); // why is this neccesary, what's moving?
                     }
@@ -665,14 +669,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 gridMaterial.SetFloat("_Zoom", gridScale);
                 gridMaterial.SetFloat("_Height", GetViewportRect().height);
                 gridMaterial.SetTexture("_Background", backgroundImage);
-                titleContent.text = GetViewportRect().height.ToString();
-
-
-#if UNITY_5_4_OR_NEWER
-                gridMaterial.SetFloat("_PixelsPerPoint", EditorGUIUtility.pixelsPerPoint);
-#else
-                gridMaterial.SetFloat("_PixelsPerPoint", 1);
-#endif
+                gridMaterial.SetFloat("_PixelsPerPoint", pixelsPerPoint);
 
                 lineMaterial.SetFloat("_Height", GetViewportRect().height);
 
