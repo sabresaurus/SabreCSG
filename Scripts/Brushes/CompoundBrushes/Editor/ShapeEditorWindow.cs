@@ -670,11 +670,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 gridMaterial.SetFloat("_Height", GetViewportRect().height);
                 gridMaterial.SetTexture("_Background", backgroundImage);
                 gridMaterial.SetFloat("_PixelsPerPoint", pixelsPerPoint);
-
-                lineMaterial.SetFloat("_Height", GetViewportRect().height);
-
-                lineMaterial.SetFloat("_CutoffY", 35.0f);
-
                 gridMaterial.SetPass(0);
 
                 GL.Begin(GL.QUADS);
@@ -684,7 +679,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 GlDrawRectangle(viewportRect.x, viewportRect.y, viewportRect.width, viewportRect.height);
                 GL.End();
                 ///////////////////////////////////////////////////////////////////////////////////
-                
+
+                lineMaterial.SetFloat("_Height", GetViewportRect().height);
+                lineMaterial.SetFloat("_CutoffY", 35.0f);
                 lineMaterial.SetPass(0);
 
                 GL.PushMatrix();

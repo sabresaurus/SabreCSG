@@ -59,6 +59,7 @@
 				// fragment shader
 				fixed4 frag(v2f IN) : SV_Target
 				{
+					// calculate grid offset and scrolling.
                     float4 pos = IN.pos;
 #if UNITY_UV_STARTS_AT_TOP
                     pos.y -= _PixelsPerPoint * _OffsetY;
@@ -105,7 +106,6 @@
 					// draw the user background.
 					fixed2 size = fixed2(_Background_TexelSize.z * (_Zoom / 16), _Background_TexelSize.w * (_Zoom / 16));
 					fixed2 offset = fixed2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
-
 					if (offset.x > 0 && offset.y > 0 && offset.x < size.x && offset.y < size.y)
 						col = tex2D(_Background, fixed2(offset.x / size.x, offset.y / -size.y)).rgba;
 
