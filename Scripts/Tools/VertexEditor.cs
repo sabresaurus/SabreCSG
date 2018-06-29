@@ -920,9 +920,63 @@ namespace Sabresaurus.SabreCSG
 			}
 		
 			GUILayout.EndHorizontal();
-		}
 
-		List<Vertex> SelectedVerticesOfBrush(Brush brush)
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Chamfer", EditorStyles.miniButton))
+            {
+                if (selectedEdges != null)
+                {
+                    List<KeyValuePair<Vertex, Brush>> newSelectedVertices = new List<KeyValuePair<Vertex, Brush>>();
+                    foreach (PrimitiveBrush brush in targetBrushes)
+                    {
+                        Undo.RecordObject(brush.transform, "Chamfer Edge");
+                        Undo.RecordObject(brush, "Chamfer Edge");
+                        Polygon[] polygons = brush.GetPolygons();
+
+                        for (int j = 0; j < selectedEdges.Count; j++)
+                        {
+                            // First check if this edge actually belongs to the brush
+                            Brush parentBrush = selectedVertices[selectedEdges[j].Vertex1];
+
+                            if (parentBrush == brush)
+                            {
+                                List<Polygon> resultPolygons;
+                                if (PolygonFactory.ChamferPolygons(new List<Polygon>(polygons), selectedEdges, 0.1f, 3, out resultPolygons))
+                                {
+                                    brush.SetPolygons(resultPolygons.ToArray());
+                                }
+                                
+                                //for (int i = 0; i < polygons.Length; i++)
+                                //{
+                                //    Vertex newVertex;
+                                //    if (EdgeUtility.SplitPolygonAtEdge(polygons[i], selectedEdges[j], out newVertex))
+                                //    {
+                                //        newSelectedVertices.Add(new KeyValuePair<Vertex, Brush>(newVertex, brush));
+                                //    }
+                                //}
+                            }
+                        }
+
+                        brush.Invalidate(true);
+                    }
+
+                    ClearSelection();
+
+                    for (int i = 0; i < newSelectedVertices.Count; i++)
+                    {
+                        Brush brush = newSelectedVertices[i].Value;
+                        Vertex vertex = newSelectedVertices[i].Key;
+
+                        SelectVertices(brush, brush.GetPolygons(), new List<Vertex>() { vertex });
+                    }
+                }
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        List<Vertex> SelectedVerticesOfBrush(Brush brush)
 		{
 			List<Vertex> refinedSelection = new List<Vertex>();
 
@@ -949,7 +1003,7 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Draw UI specific to this editor
-			Rect rectangle = new Rect(0, 50, 140, 160);
+			Rect rectangle = new Rect(0, 50, 140, 180);
 			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
 			toolbar.normal.background = SabreCSGResources.ClearTexture;
 			toolbar.fixedHeight = rectangle.height;
