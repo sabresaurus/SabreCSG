@@ -24,14 +24,14 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		[MenuItem( "SabreCSG/Material Palette Window", priority = 0 )]
 		private static void Init()
 		{
-			window = EditorWindow.GetWindow<MaterialPaletteWindow>( true, "Material Palette", true );
+			window = EditorWindow.GetWindow<MaterialPaletteWindow>( true, "Material Palette" );
 
-			window.minSize = new Vector2( 548, 256 );
-			window.maxSize = new Vector2( 548, 4096 );
+			window.minSize = new Vector2( 650, 256 );
+			window.maxSize = new Vector2( 650, 4096 );
 
 			Load();
 
-			window.ShowUtility();
+			window.Show();
 		}
 
 		[InitializeOnLoadMethod]
@@ -60,11 +60,15 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				// top toolbar
 				DrawToolBar();
 
-				// material grid
-				DrawGrid();
+				GUILayout.BeginHorizontal();
+				{
+					// material grid
+					DrawGrid();
 
-				// bottom toolbar
-				DrawBottomToolbar();
+					// tag list
+					DrawTagList();
+				}
+				GUILayout.EndHorizontal();
 			}
 			GUILayout.EndVertical();
 
@@ -87,35 +91,33 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		}
 
 		// tags list, etc.
-		private void DrawBottomToolbar()
+		private void DrawTagList()
 		{
-			GUILayout.Space( 2 );
-
-			GUILayout.BeginVertical( GUILayout.Height( 128 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( false ) );
+			GUILayout.BeginVertical( GUILayout.Width( 98 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( true ) );
 			{
-				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, false, false );
+				GUILayout.Label( new GUIContent( "Tags", "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
+
+				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, "CurveEditorBackground" );
 				{
 					for( int i = 0; i < assetLabels.Length; i++ )
 					{
-						GUILayout.Space( 2 );
-						int columnIndex = i % 9;
+						EditorGUI.indentLevel = 0;
 
-						if( columnIndex == 0 )
+						if( i % 2 != 0 ) // show odd background
 						{
-							GUILayout.BeginHorizontal();
-							GUILayout.Space( 2 );
+							GUI.backgroundColor = new Color32( 170, 170, 170, 255 );
+						}
+						else // show even background
+						{
+							GUI.backgroundColor = new Color32( 200, 200, 200, 255 );
 						}
 
-						if( GUILayout.Button( assetLabels[i], "AssetLabel" ) )
+						if( GUILayout.Button( assetLabels[i], SabreCSGResources.MPAssetTagLabel, GUILayout.ExpandHeight( true ), GUILayout.ExpandWidth( true ) ) )
 						{
 							filter = assetLabels[i];
 							Load();
 						}
-
-						if( ( columnIndex == 8 ) || i == assetLabels.Length - 1 )
-						{
-							GUILayout.EndHorizontal();
-						}
+						GUI.backgroundColor = Color.white;
 					}
 				}
 				GUILayout.EndScrollView();

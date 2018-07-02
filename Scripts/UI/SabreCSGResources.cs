@@ -548,6 +548,22 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+		public static GUIStyle MPAssetTagLabel
+		{
+			get
+			{
+				GUIStyle s = new GUIStyle( "WindowBackground" );
+				s.normal.textColor = Color.white;
+				s.onHover.textColor = Color.yellow;
+				s.active.textColor = Color.grey;
+				s.contentOffset = new Vector2( 2, 0 );
+				s.margin = new RectOffset( 0, 0, 1, 1 );
+				s.padding = new RectOffset( 0, 0, 1, 1 );
+
+				return s;
+			}
+		}
+
 		public static GUIStyle MPLToolbarBG
 		{
 			get
