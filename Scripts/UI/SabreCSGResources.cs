@@ -161,26 +161,6 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static GUIStyle MaterialPaletteLToolbarBG
-		{
-			get
-			{
-				GUIStyle style = new GUIStyle();
-				style.normal.background = (Texture2D)LoadObject( "Internal/MaterialPalette/MaterialPaletteLToolbarBG.tga" );
-				style.normal.background.alphaIsTransparency = true;
-
-				return style;
-			}
-		}
-
-		public static Texture2D MaterialPaletteNoTexture
-		{
-			get
-			{
-				return (Texture2D)LoadObject( "Internal/MaterialPalette/MaterialPaletteNoTexture.tga" );
-			}
-		}
-
 		public static Texture2D AddIconTexture
 		{
 			get
@@ -557,7 +537,38 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		public static GUIStyle MaterialPaletteAssetPreviewBackground( int width, int height )
+		public static GUIStyle MPAssetPreviewLabel
+		{
+			get
+			{
+				GUIStyle s = new GUIStyle( "TL Range Overlay" );
+				s.normal.textColor = Color.white;
+
+				return s;
+			}
+		}
+
+		public static GUIStyle MPLToolbarBG
+		{
+			get
+			{
+				GUIStyle style = new GUIStyle();
+				style.normal.background = (Texture2D)LoadObject( "Internal/MaterialPalette/MaterialPaletteLToolbarBG.tga" );
+				style.normal.background.alphaIsTransparency = true;
+
+				return style;
+			}
+		}
+
+		public static Texture2D MPNoTexture
+		{
+			get
+			{
+				return (Texture2D)LoadObject( "Internal/MaterialPalette/MaterialPaletteNoTexture.tga" );
+			}
+		}
+
+		public static GUIStyle MPAssetPreviewBackground( int width, int height )
 		{
 			GUIStyle style = new GUIStyle();
 			style.normal.background = (Texture2D)LoadObject( "Internal/MaterialPalette/MaterialPaletteAssetPreviewBG.tga" );

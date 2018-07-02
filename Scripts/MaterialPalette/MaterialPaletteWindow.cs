@@ -15,7 +15,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 	{
 		private static MaterialPaletteWindow window;
 		private static Material[] mats;
-		private static List<GUIContent> labels = new List<GUIContent>();
 		private static string[] assetLabels = new string[]{ };
 		private static string filter = string.Empty;
 		private static MaterialThumbSize mts = MaterialThumbSize.Large;
@@ -25,29 +24,24 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		[MenuItem( "SabreCSG/Material Palette Window", priority = 0 )]
 		private static void Init()
 		{
-			window = EditorWindow.GetWindow<MaterialPaletteWindow>( "Material Palette" );
+			window = EditorWindow.GetWindow<MaterialPaletteWindow>( true, "Material Palette", true );
 
 			window.minSize = new Vector2( 548, 256 );
 			window.maxSize = new Vector2( 548, 4096 );
 
 			Load();
 
-			window.Show();
+			window.ShowUtility();
 		}
 
 		[InitializeOnLoadMethod]
 		private static void Load()
 		{
-			labels.Clear();
+			// ensure all arrays and lists are clear, and upate them
 			assetLabels = new string[] { };
 
 			mats = MaterialPaletteHelper.GetAllMaterials( filter );
 			assetLabels = MaterialPaletteHelper.GetAssetLabels();
-
-			foreach( Material m in mats )
-			{
-				labels.Add( new GUIContent( MaterialPaletteHelper.GetMaterialThumb( m ), m.name ) );
-			}
 
 			mts = (MaterialThumbSize)EditorPrefs.GetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)MaterialThumbSize.Medium );
 		}
@@ -74,14 +68,25 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 			GUILayout.EndVertical();
 
+			// update any prefs when the GUI changes, to ensure things are saved.
 			if( EditorGUI.EndChangeCheck() )
 			{
 				EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
 			}
-
-			Repaint(); // ensure things are drawn responsively
 		}
 
+		// we only want the window to update when its focused, to save CPU time.
+		private void OnFocus()
+		{
+			EditorApplication.update += Repaint;
+		}
+
+		private void OnLostFocus()
+		{
+			EditorApplication.update -= Repaint;
+		}
+
+		// tags list, etc.
 		private void DrawBottomToolbar()
 		{
 			GUILayout.Space( 2 );
@@ -101,7 +106,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 							GUILayout.Space( 2 );
 						}
 
-						if( GUILayout.Button( assetLabels[i], "Tag TextField" ) )
+						if( GUILayout.Button( assetLabels[i], "AssetLabel" ) )
 						{
 							filter = assetLabels[i];
 							Load();
@@ -118,6 +123,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUILayout.EndVertical();
 		}
 
+		// top toolbar - refresh, thumbnail size, etc.
 		private void DrawToolBar()
 		{
 			GUILayout.BeginHorizontal( EditorStyles.toolbarButton, GUILayout.ExpandWidth( true ) );
@@ -154,6 +160,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUILayout.EndHorizontal();
 		}
 
+		// preview area - thumbnails, etc.
 		private void DrawGrid()
 		{
 			GUILayout.BeginVertical();
@@ -168,7 +175,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 					previewsScrollPos = GUILayout.BeginScrollView( previewsScrollPos, false, false );
 					{
-						for( int i = 0; i < labels.Count; i++ )
+						for( int i = 0; i < mats.Length; i++ )
 						{
 							int numColumns = 4;
 							switch( mts )
@@ -194,26 +201,43 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 								GUILayout.Space( 4 );
 							}
 
-							if( GUILayout.Button( labels[i], SabreCSGResources.MaterialPaletteAssetPreviewBackground( (int)mts, (int)mts ), GUILayout.Width( (int)mts ), GUILayout.Height( (int)mts ) ) )
+							if( GUILayout.Button( new GUIContent( "", mats[i].name ), SabreCSGResources.MPAssetPreviewBackground( (int)mts, (int)mts ), GUILayout.Width( (int)mts ), GUILayout.Height( (int)mts ) ) )
 							{
-								MaterialPaletteHelper.ApplyMaterial( mats[i] );
+								ApplyMaterial( mats[i] );
 							}
+							MaterialPaletteHelper.DrawPreviewThumb( mats[i], GUILayoutUtility.GetLastRect(), mts );
+							//if( Event.current.type == EventType.Repaint )
 
 							//GUILayout.Space( 2 );
 
-							if( ( columnIndex == numColumns - 1 || i == labels.Count - 1 ) )
+							if( ( columnIndex == numColumns - 1 || i == mats.Length - 1 ) )
 							{
 								GUILayout.EndHorizontal();
 							}
 						}
-
-						//currentSelectedMaterial = GUILayout.SelectionGrid( currentSelectedMaterial, labels.ToArray(), 4, SabreCSGResources.MaterialPaletteAssetPreviewBackground, GUILayout.Width( position.width - 200 ) );
 					}
 					GUILayout.EndScrollView();
 				}
 				GUILayout.EndHorizontal();
 			}
 			GUILayout.EndVertical();
+		}
+
+		/// <summary>
+		/// Apply a material to the selected CSGModel face.
+		/// </summary>
+		/// <param name="mat"></param>
+		private void ApplyMaterial( Material mat )
+		{
+			CSGModel activeModel = CSGModel.GetActiveCSGModel();
+
+			if( activeModel != null )
+			{
+				SurfaceEditor se = (SurfaceEditor)activeModel.GetTool( MainMode.Face );
+				se.SetSelectionMaterial( mat );
+
+				SceneView.lastActiveSceneView.ShowNotification( new GUIContent( "Applied Material: \n" + mat.name ) );
+			}
 		}
 	}
 }
