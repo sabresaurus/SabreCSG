@@ -17,6 +17,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private static Material[] mats;
 		private static string[] assetLabels = new string[]{ };
 		private static string filter = string.Empty;
+		private static bool onlyUsedTags = false;
 		private static MaterialThumbSize mts = MaterialThumbSize.Large;
 		private Vector2 previewsScrollPos = Vector2.zero;
 		private Vector2 labelsScrollPos = Vector2.zero;
@@ -29,6 +30,8 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			window.minSize = new Vector2( 650, 256 );
 			window.maxSize = new Vector2( 650, 4096 );
 
+			EditorApplication.update += window.Repaint;
+
 			Load();
 
 			window.Show();
@@ -38,17 +41,27 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private static void Load()
 		{
 			// ensure all arrays and lists are clear, and upate them
-			assetLabels = new string[] { };
+			LoadAssetTags();
 
 			mats = MaterialPaletteHelper.GetAllMaterials( filter );
-			assetLabels = MaterialPaletteHelper.GetAssetLabels();
 
 			mts = (MaterialThumbSize)EditorPrefs.GetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)MaterialThumbSize.Medium );
+			onlyUsedTags = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false );
+
+			Debug.Log( "Loaded: [" + mats.Length + "] materials, with tag filter [" + filter + "]" );
+		}
+
+		private static void LoadAssetTags()
+		{
+			assetLabels = new string[] { };
+			assetLabels = MaterialPaletteHelper.GetAssetLabels( onlyUsedTags );
 		}
 
 		private void OnDestroy()
 		{
 			EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
+			EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
+			EditorApplication.update -= Repaint;
 		}
 
 		private void OnGUI()
@@ -69,6 +82,26 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 					DrawTagList();
 				}
 				GUILayout.EndHorizontal();
+
+				// status bar
+				GUILayout.BeginHorizontal( GUILayout.Height( 16 ) );
+				{
+					GUILayout.Space( 4 );
+					GUILayout.Label( "Materials: " + mats.Length );
+
+					GUILayout.FlexibleSpace();
+
+					GUILayout.Label( new GUIContent( "Used Tags Only", "Show only asset tag labels used in the project." ) );
+
+					bool oldUsedTags;
+					onlyUsedTags = EditorGUILayout.Toggle( oldUsedTags = onlyUsedTags, GUILayout.Width( 16 ) );
+
+					if( oldUsedTags != onlyUsedTags )
+						LoadAssetTags();
+
+					GUILayout.Space( 4 );
+				}
+				GUILayout.EndHorizontal();
 			}
 			GUILayout.EndVertical();
 
@@ -76,18 +109,8 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			if( EditorGUI.EndChangeCheck() )
 			{
 				EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
+				EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
 			}
-		}
-
-		// we only want the window to update when its focused, to save CPU time.
-		private void OnFocus()
-		{
-			EditorApplication.update += Repaint;
-		}
-
-		private void OnLostFocus()
-		{
-			EditorApplication.update -= Repaint;
 		}
 
 		// tags list, etc.
@@ -95,7 +118,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			GUILayout.BeginVertical( GUILayout.Width( 98 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( true ) );
 			{
-				GUILayout.Label( new GUIContent( "Tags", "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
+				string tagLabel = onlyUsedTags ? "Tags (Used Only)" : "Tags";
+
+				GUILayout.Label( new GUIContent( tagLabel, "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
 
 				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, "CurveEditorBackground" );
 				{
@@ -112,7 +137,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 							GUI.backgroundColor = new Color32( 200, 200, 200, 255 );
 						}
 
-						if( GUILayout.Button( assetLabels[i], SabreCSGResources.MPAssetTagLabel, GUILayout.ExpandHeight( true ), GUILayout.ExpandWidth( true ) ) )
+						if( GUILayout.Button( assetLabels[i], SabreCSGResources.MPAssetTagLabel, GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( true ) ) )
 						{
 							filter = assetLabels[i];
 							Load();

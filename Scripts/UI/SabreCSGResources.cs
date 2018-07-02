@@ -543,6 +543,10 @@ namespace Sabresaurus.SabreCSG
 			{
 				GUIStyle s = new GUIStyle( "TL Range Overlay" );
 				s.normal.textColor = Color.white;
+				s.contentOffset = new Vector2( 2, 0 );
+				s.margin = new RectOffset( 0, 0, 1, 1 );
+				s.padding = new RectOffset( 0, 0, 1, 1 );
+				s.clipping = TextClipping.Clip;
 
 				return s;
 			}
@@ -556,6 +560,7 @@ namespace Sabresaurus.SabreCSG
 				s.normal.textColor = Color.white;
 				s.onHover.textColor = Color.yellow;
 				s.active.textColor = Color.grey;
+				s.fixedHeight = 16;
 				s.contentOffset = new Vector2( 2, 0 );
 				s.margin = new RectOffset( 0, 0, 1, 1 );
 				s.padding = new RectOffset( 0, 0, 1, 1 );

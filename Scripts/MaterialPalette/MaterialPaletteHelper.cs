@@ -12,19 +12,37 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 	{
 		public static List<string> excludedMaterials = new List<string>();
 
-		public static string[] GetAssetLabels()
+		public static string[] GetAssetLabels( bool onlyUsed )
 		{
-			BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-			var labels = (Dictionary<string, float>)typeof( AssetDatabase ).InvokeMember( "GetAllLabels", flags, null, null, null );
-
-			List<string> labelText = new List<string>();
-
-			foreach( string l in labels.Keys )
+			if( onlyUsed )
 			{
-				labelText.Add( l );
-			}
+				List<string> assetLabels = new List<string>();
+				Material[] mats = GetAllMaterials( "" );
 
-			return labelText.Distinct().ToArray(); // no duplicates
+				foreach( Material m in mats )
+				{
+					foreach( string s in AssetDatabase.GetLabels( m ) )
+					{
+						assetLabels.Add( s );
+					}
+				}
+
+				return assetLabels.Distinct().ToArray();
+			}
+			else
+			{
+				BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
+				var labels = (Dictionary<string, float>)typeof( AssetDatabase ).InvokeMember( "GetAllLabels", flags, null, null, null );
+
+				List<string> labelText = new List<string>();
+
+				foreach( string l in labels.Keys )
+				{
+					labelText.Add( l );
+				}
+
+				return labelText.Distinct().ToArray(); // no duplicates
+			}
 		}
 
 		public static Texture2D GetMaterialThumb( Material mat )
