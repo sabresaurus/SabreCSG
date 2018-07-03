@@ -1,9 +1,6 @@
 ﻿#if UNITY_EDITOR
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,8 +18,26 @@ namespace Sabresaurus.SabreCSG
         /// <value>The title of the popup window.</value>
         public string Title { get; set; }
 
-        private float m_Width;
+        /// <summary>
+        /// Gets or sets the width of the popup window.
+        /// </summary>
+        /// <value>The width of the popup window.</value>
+        public float Width { get; set; }
+
+        /// <summary>
+        /// Gets the height of the popup window.
+        /// </summary>
+        /// <value>The height of the popup window.</value>
+        public float Height { get { return m_Height; } }
+
+        /// <summary>
+        /// The height of the popup window.
+        /// </summary>
         private float m_Height = 20.0f;
+
+        /// <summary>
+        /// The OnGUI action.
+        /// </summary>
         private Action<Rect> m_OnGuiAction;
 
         /// <summary>
@@ -31,7 +46,7 @@ namespace Sabresaurus.SabreCSG
         private ToolSettingsPopup(string title, float width, Action<Rect> onGUI) : base()
         {
             Title = title;
-            m_Width = width;
+            Width = width;
             m_OnGuiAction = onGUI;
         }
 
@@ -41,7 +56,7 @@ namespace Sabresaurus.SabreCSG
         /// <returns>Gets the size of the popup window.</returns>
         public override Vector2 GetWindowSize()
         {
-            return new Vector2(m_Width, m_Height);
+            return new Vector2(Width, m_Height);
         }
 
         /// <summary>
@@ -60,6 +75,17 @@ namespace Sabresaurus.SabreCSG
             // automatically determine the popup height.
             if (scope.ScopeRect.height != 1)
                 m_Height = scope.ScopeRect.height + 8;
+        }
+
+        /// <summary>
+        /// Shows a tool settings popup window.
+        /// </summary>
+        /// <param name="title">The title of the popup window.</param>
+        /// <param name="onGUI">The OnGUI contents of the popup window.</param>
+        /// <returns>The popup window handle.</returns>
+        public static ToolSettingsPopup Show(string title, Action<Rect> onGUI)
+        {
+            return Show(title, 300, onGUI);
         }
 
         /// <summary>

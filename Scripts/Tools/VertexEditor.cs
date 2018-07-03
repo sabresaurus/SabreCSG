@@ -930,7 +930,7 @@ namespace Sabresaurus.SabreCSG
             {
                 if (Event.current.button == 1)
                 {
-                    ToolSettingsPopup.Show("Chamfer", 200, (rect) => {
+                    ToolSettingsPopup.Show("Chamfer", 205, (rect) => {
                         chamferDistance = EditorGUILayout.FloatField(new GUIContent("Distance", "The size of the chamfered curve."), chamferDistance);
                         if (chamferDistance < 0.0f) chamferDistance = 0.0f;
                         chamferIterations = EditorGUILayout.IntField(new GUIContent("Iterations", "The amount of iterations determines how detailed the chamfer is (e.g. 1 is a simple bevel)."), chamferIterations);
