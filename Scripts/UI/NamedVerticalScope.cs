@@ -11,6 +11,13 @@ namespace Sabresaurus.SabreCSG
 
         string name;
 
+        Rect scopeRect;
+        /// <summary>
+        /// Gets the scope rectangle.
+        /// </summary>
+        /// <value>The scope rectangle.</value>
+        public Rect ScopeRect { get { return scopeRect; } }
+
         public NamedVerticalScope(string name)
             : base(EditorStyles.helpBox)
         {
@@ -36,6 +43,7 @@ namespace Sabresaurus.SabreCSG
             style.border = new RectOffset(10, 32, 1, 1);
 
             Rect lastRect = GUILayoutUtility.GetLastRect();
+            scopeRect = lastRect;
             //GUI.DrawTexture(lastRect, EditorGUIUtility.whiteTexture);
 
             lastRect.x += 1;

@@ -29,6 +29,9 @@ namespace Sabresaurus.SabreCSG
 		float weldTolerance = 0.1f;
 		float scale = 1f;
 
+        float chamferDistance = 0.1f;
+        int chamferIterations = 3;
+
         Vertex movingVertex;
 
 		void ClearSelection()
@@ -923,52 +926,55 @@ namespace Sabresaurus.SabreCSG
 
             GUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Chamfer", EditorStyles.miniButton))
+            if (GUILayout.Button(new GUIContent("Chamfer", "Right click to configure."), EditorStyles.miniButton))
             {
-                if (selectedEdges != null)
+                if (Event.current.button == 1)
                 {
-                    List<KeyValuePair<Vertex, Brush>> newSelectedVertices = new List<KeyValuePair<Vertex, Brush>>();
-                    foreach (PrimitiveBrush brush in targetBrushes)
+                    ToolSettingsPopup.Show("Chamfer", 200, (rect) => {
+                        chamferDistance = EditorGUILayout.FloatField(new GUIContent("Distance", "The size of the chamfered curve."), chamferDistance);
+                        if (chamferDistance < 0.0f) chamferDistance = 0.0f;
+                        chamferIterations = EditorGUILayout.IntField(new GUIContent("Iterations", "The amount of iterations determines how detailed the chamfer is (e.g. 1 is a simple bevel)."), chamferIterations);
+                        if (chamferIterations < 1) chamferIterations = 1;
+                    });
+                }
+                else
+                {
+                    if (selectedEdges != null)
                     {
-                        Undo.RecordObject(brush.transform, "Chamfer Edge");
-                        Undo.RecordObject(brush, "Chamfer Edge");
-                        Polygon[] polygons = brush.GetPolygons();
-
-                        for (int j = 0; j < selectedEdges.Count; j++)
+                        List<KeyValuePair<Vertex, Brush>> newSelectedVertices = new List<KeyValuePair<Vertex, Brush>>();
+                        foreach (PrimitiveBrush brush in targetBrushes)
                         {
-                            // First check if this edge actually belongs to the brush
-                            Brush parentBrush = selectedVertices[selectedEdges[j].Vertex1];
+                            Undo.RecordObject(brush.transform, "Chamfer Edge");
+                            Undo.RecordObject(brush, "Chamfer Edge");
+                            Polygon[] polygons = brush.GetPolygons();
 
-                            if (parentBrush == brush)
+                            for (int j = 0; j < selectedEdges.Count; j++)
                             {
-                                List<Polygon> resultPolygons;
-                                if (PolygonFactory.ChamferPolygons(new List<Polygon>(polygons), selectedEdges, 0.1f, 3, out resultPolygons))
+                                // First check if this edge actually belongs to the brush
+                                Brush parentBrush = selectedVertices[selectedEdges[j].Vertex1];
+
+                                if (parentBrush == brush)
                                 {
-                                    brush.SetPolygons(resultPolygons.ToArray());
+                                    List<Polygon> resultPolygons;
+                                    if (PolygonFactory.ChamferPolygons(new List<Polygon>(polygons), selectedEdges, chamferDistance, chamferIterations, out resultPolygons))
+                                    {
+                                        brush.SetPolygons(resultPolygons.ToArray());
+                                    }
                                 }
-                                
-                                //for (int i = 0; i < polygons.Length; i++)
-                                //{
-                                //    Vertex newVertex;
-                                //    if (EdgeUtility.SplitPolygonAtEdge(polygons[i], selectedEdges[j], out newVertex))
-                                //    {
-                                //        newSelectedVertices.Add(new KeyValuePair<Vertex, Brush>(newVertex, brush));
-                                //    }
-                                //}
                             }
+
+                            brush.Invalidate(true);
                         }
 
-                        brush.Invalidate(true);
-                    }
+                        ClearSelection();
 
-                    ClearSelection();
+                        for (int i = 0; i < newSelectedVertices.Count; i++)
+                        {
+                            Brush brush = newSelectedVertices[i].Value;
+                            Vertex vertex = newSelectedVertices[i].Key;
 
-                    for (int i = 0; i < newSelectedVertices.Count; i++)
-                    {
-                        Brush brush = newSelectedVertices[i].Value;
-                        Vertex vertex = newSelectedVertices[i].Key;
-
-                        SelectVertices(brush, brush.GetPolygons(), new List<Vertex>() { vertex });
+                            SelectVertices(brush, brush.GetPolygons(), new List<Vertex>() { vertex });
+                        }
                     }
                 }
             }

@@ -555,24 +555,21 @@ namespace Sabresaurus.SabreCSG
                 // find the two polygons connected to the edge.
                 Polygon[] matchingPolygons = polygons.Where(p => Polygon.ContainsEdge(p, edge)).ToArray();
                 if (matchingPolygons.Length != 2) { resultPolygons = null; return false; };
-                //Debug.Log("1: OK");
 
+                // find the actual edges on the polygons (which helps determine their direction for the chamfer).
                 Edge realEdge1;
                 Polygon.FindEdge(matchingPolygons[0], edge, out realEdge1);
                 Edge realEdge2;
                 Polygon.FindEdge(matchingPolygons[1], edge, out realEdge2);
 
                 // calculate clipping plane position:
-                Vector3 v1 = realEdge1.Vertex1.Position - GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
-                Vector3 v2 = realEdge1.Vertex2.Position - GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
-                Vector3 v3 = realEdge2.Vertex2.Position - GetNormal(realEdge2.Vertex1.Position, realEdge2.Vertex2.Position, matchingPolygons[1].GetCenterPoint()).normalized * distance;
+                Vector3 v1 = realEdge1.Vertex1.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v2 = realEdge1.Vertex2.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v3 = realEdge2.Vertex2.Position - ChamferPolygons_GetNormal(realEdge2.Vertex1.Position, realEdge2.Vertex2.Position, matchingPolygons[1].GetCenterPoint()).normalized * distance;
 
                 for (int i = 0; i < iterations; i++)
                 {
                     float t = (1.0f / iterations);
-                    //Vector3 c = realEdge1.Vertex1.Position;
-                    //Vector3 p1 = ShapeEditor.Bezier.GetPoint(v1, Vector3.Lerp(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, t * i), v3, t * i);
-                    //Vector3 p2 = ShapeEditor.Bezier.GetPoint(v1, Vector3.Lerp(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, t * (i + 1)), v3, t * (i + 1));
                     Vector3 p1 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * i);
                     Vector3 p2 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * (i + 1));
                     clippingPlanes.Add(new Plane(
@@ -580,9 +577,6 @@ namespace Sabresaurus.SabreCSG
                         p2,
                         p1 + (v1 - v2).normalized
                     ));
-
-                    // v1 top, v3 bottom, v2 other side of the edge.
-                    // bezier handle: between realEdge1.Vertex1.Position and realEdge2.Vertex2.Position
                 }
             }
 
@@ -601,7 +595,8 @@ namespace Sabresaurus.SabreCSG
             return true;
         }
 
-        internal static Vector3 GetNormal(Vector3 a, Vector3 b, Vector3 c)
+        // todo: this should probably be moved somewhere else...
+        private static Vector3 ChamferPolygons_GetNormal(Vector3 a, Vector3 b, Vector3 c)
         {
             Vector3 side1 = b - a;
             Vector3 side2 = c - a;
