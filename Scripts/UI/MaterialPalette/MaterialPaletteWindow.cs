@@ -115,7 +115,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 				GUILayout.Label( new GUIContent( tagLabel, "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
 
-				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, "CurveEditorBackground" );
+				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, Styles.MPScrollViewBackground );
 				{
 					for( int i = 0; i < assetLabels.Length; i++ )
 					{

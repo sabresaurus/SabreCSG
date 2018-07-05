@@ -63,7 +63,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 					{
 						GUILayout.Label( "Tags to Add", EditorStyles.boldLabel );
 
-						labelsToAddScrollPos = GUILayout.BeginScrollView( labelsToAddScrollPos, "CurveEditorBackground" );
+						labelsToAddScrollPos = GUILayout.BeginScrollView( labelsToAddScrollPos, Styles.MPScrollViewBackground );
 						{
 							for( int i = 0; i < labelsToAdd.Count; i++ )
 							{
@@ -99,7 +99,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 						GUILayout.Label( "Tags on Material", EditorStyles.miniLabel );
 
 						// tags on material
-						GUILayout.BeginVertical( "CurveEditorBackground", GUILayout.Height( 42 ) );
+						GUILayout.BeginVertical( Styles.MPScrollViewBackground, GUILayout.Height( 42 ) );
 						{
 							labelsOnMaterialScrollPos = GUILayout.BeginScrollView( labelsOnMaterialScrollPos, true, false );
 							{
@@ -125,7 +125,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 					{
 						GUILayout.Label( "All Tags", EditorStyles.miniLabel );
 
-						allLabelsScrollPos = GUILayout.BeginScrollView( allLabelsScrollPos, "CurveEditorBackground" );
+						allLabelsScrollPos = GUILayout.BeginScrollView( allLabelsScrollPos, Styles.MPScrollViewBackground );
 						{
 							for( int i = 0; i < allLabels.Count; i++ )
 							{
@@ -163,7 +163,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				GUILayout.Label( new GUIContent( "Used Tags", "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
 
-				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, "CurveEditorBackground" );
+				labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, Styles.MPScrollViewBackground );
 				{
 					for( int i = 0; i < existingLabels.Count; i++ )
 					{

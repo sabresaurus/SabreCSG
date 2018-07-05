@@ -54,6 +54,20 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 		}
 
+		public static GUIStyle MPScrollViewBackground
+		{
+			get
+			{
+#if UNITY_5
+				GUIStyle s = new GUIStyle( "AnimationCurveEditorBackground" );
+#else
+				GUIStyle s = new GUIStyle("CurveEditorBackground");
+#endif
+
+				return s;
+			}
+		}
+
 		public static GUIStyle MPAssetPreviewBackground( int width, int height )
 		{
 			GUIStyle s = new GUIStyle();
