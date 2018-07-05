@@ -2,6 +2,7 @@
 
 /* TODO:
  * Search
+ * Fix tag list toggle refresh
  */
 
 using System.Reflection;
@@ -18,6 +19,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private static string[] assetLabels = new string[]{ };
 		private static string filter = string.Empty;
 		private static bool onlyUsedTags = false;
+		private static bool useSphereMaterialPreview = false;
 		private static MaterialThumbSize mts = MaterialThumbSize.Large;
 		private Vector2 previewsScrollPos = Vector2.zero;
 		private Vector2 labelsScrollPos = Vector2.zero;
@@ -27,17 +29,14 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			window = EditorWindow.GetWindow<MaterialPaletteWindow>( true, "Material Palette" );
 
-			window.minSize = new Vector2( 650, 256 );
-			window.maxSize = new Vector2( 650, 4096 );
-
-			EditorApplication.update += window.Repaint;
+			window.minSize = new Vector2( 680, 256 );
+			window.maxSize = new Vector2( 680, 4096 );
 
 			Load();
 
 			window.Show();
 		}
 
-		[InitializeOnLoadMethod]
 		private static void Load()
 		{
 			// ensure all arrays and lists are clear, and upate them
@@ -47,28 +46,34 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 			mts = (MaterialThumbSize)EditorPrefs.GetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)MaterialThumbSize.Medium );
 			onlyUsedTags = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false );
+			useSphereMaterialPreview = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.SpherePreview", false );
 
-			Debug.Log( "Loaded: [" + mats.Length + "] materials, with tag filter [" + filter + "]" );
+			//Debug.Log( "Loaded: [" + mats.Length + "] materials, with tag filter [" + filter + "]" );
 		}
 
 		private static void LoadAssetTags()
 		{
 			assetLabels = new string[] { };
-			assetLabels = MaterialPaletteHelper.GetAssetLabels( onlyUsedTags );
+			assetLabels = MaterialPaletteHelper.GetAssetLabels( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false ) );
 		}
 
 		private void OnDestroy()
 		{
 			EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
 			EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
-			EditorApplication.update -= Repaint;
+			EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
 		}
 
 		private void OnGUI()
 		{
+			if( mats == null || assetLabels == null )
+			{
+				Load();
+			}
+
 			EditorGUI.BeginChangeCheck();
 
-			GUILayout.BeginVertical();
+			GUILayout.BeginVertical( "GameViewBackground" );
 			{
 				// top toolbar
 				DrawToolBar();
@@ -84,39 +89,27 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				GUILayout.EndHorizontal();
 
 				// status bar
-				GUILayout.BeginHorizontal( GUILayout.Height( 16 ) );
-				{
-					GUILayout.Space( 4 );
-					GUILayout.Label( "Materials: " + mats.Length );
-
-					GUILayout.FlexibleSpace();
-
-					GUILayout.Label( new GUIContent( "Used Tags Only", "Show only asset tag labels used in the project." ) );
-
-					bool oldUsedTags;
-					onlyUsedTags = EditorGUILayout.Toggle( oldUsedTags = onlyUsedTags, GUILayout.Width( 16 ) );
-
-					if( oldUsedTags != onlyUsedTags )
-						LoadAssetTags();
-
-					GUILayout.Space( 4 );
-				}
-				GUILayout.EndHorizontal();
+				DrawStatusBar();
 			}
 			GUILayout.EndVertical();
 
 			// update any prefs when the GUI changes, to ensure things are saved.
 			if( EditorGUI.EndChangeCheck() )
 			{
+				LoadAssetTags();
+
 				EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
 				EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
+				EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
 			}
+
+			Repaint();
 		}
 
 		// tags list, etc.
 		private void DrawTagList()
 		{
-			GUILayout.BeginVertical( GUILayout.Width( 98 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( true ) );
+			GUILayout.BeginVertical( "Box", GUILayout.Width( 110 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( true ) );
 			{
 				string tagLabel = onlyUsedTags ? "Tags (Used Only)" : "Tags";
 
@@ -130,14 +123,14 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 						if( i % 2 != 0 ) // show odd background
 						{
-							GUI.backgroundColor = new Color32( 170, 170, 170, 255 );
+							GUI.backgroundColor = new Color32( 150, 150, 150, 255 );
 						}
 						else // show even background
 						{
 							GUI.backgroundColor = new Color32( 200, 200, 200, 255 );
 						}
 
-						if( GUILayout.Button( assetLabels[i], SabreCSGResources.MPAssetTagLabel, GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( true ) ) )
+						if( GUILayout.Button( assetLabels[i], Styles.MPAssetTagLabel, GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( true ) ) )
 						{
 							filter = assetLabels[i];
 							Load();
@@ -148,6 +141,45 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				GUILayout.EndScrollView();
 			}
 			GUILayout.EndVertical();
+		}
+
+		// status bar
+		private void DrawStatusBar()
+		{
+			GUILayout.BeginHorizontal( "HelpBox", GUILayout.Height( 16 ) );
+			{
+				GUILayout.Space( 4 );
+				GUILayout.Label( "Materials: " + mats.Length );
+
+				GUILayout.FlexibleSpace();
+
+				GUILayout.Label( new GUIContent( "Use Sphere Preview", "Use the built in material preview thumbnail instead?" ) );
+
+				bool oldSpherePreview;
+				useSphereMaterialPreview = EditorGUILayout.Toggle( oldSpherePreview = useSphereMaterialPreview, "OL Toggle", GUILayout.Width( 16 ) );
+
+				if( oldSpherePreview != useSphereMaterialPreview )
+				{
+					if( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.SpherePreview" ) != useSphereMaterialPreview )
+						EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
+				}
+
+				GUILayout.Label( new GUIContent( "Used Tags Only", "Show only asset tag labels used in the project." ) );
+
+				bool oldUsedTags;
+				onlyUsedTags = EditorGUILayout.Toggle( oldUsedTags = onlyUsedTags, "OL Toggle", GUILayout.Width( 16 ) );
+
+				if( oldUsedTags != onlyUsedTags )
+				{
+					LoadAssetTags();
+
+					if( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags" ) != onlyUsedTags )
+						EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
+				}
+
+				GUILayout.Space( 4 );
+			}
+			GUILayout.EndHorizontal();
 		}
 
 		// top toolbar - refresh, thumbnail size, etc.
@@ -192,13 +224,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			GUILayout.BeginVertical();
 			{
-				GUILayout.BeginHorizontal( "GameViewBackground", GUILayout.ExpandHeight( true ) );
+				GUILayout.BeginHorizontal( GUILayout.ExpandHeight( true ) );
 				{
 					//BeginWindows();
 					//GUILayout.Window( 1000, new Rect( 0, 18, 200, position.height - 18 ), LeftToolbar, "", SabreCSGResources.MaterialPaletteLToolbarBG ).Overlaps( position );
 					//EndWindows();
-
-					GUILayout.Space( 2 );
 
 					previewsScrollPos = GUILayout.BeginScrollView( previewsScrollPos, false, false );
 					{
@@ -228,14 +258,12 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 								GUILayout.Space( 4 );
 							}
 
-							if( GUILayout.Button( new GUIContent( "", mats[i].name ), SabreCSGResources.MPAssetPreviewBackground( (int)mts, (int)mts ), GUILayout.Width( (int)mts ), GUILayout.Height( (int)mts ) ) )
-							{
-								ApplyMaterial( mats[i] );
-							}
-							MaterialPaletteHelper.DrawPreviewThumb( mats[i], GUILayoutUtility.GetLastRect(), mts );
-							//if( Event.current.type == EventType.Repaint )
-
-							//GUILayout.Space( 2 );
+							PreviewTile pt = new PreviewTile();
+							pt.material = mats[i];
+							pt.materialThumbSize = mts;
+							pt.labelFontColor = Color.white;
+							pt.renderSpherePreview = useSphereMaterialPreview;
+							pt.Draw( GUILayoutUtility.GetLastRect(), this );
 
 							if( ( columnIndex == numColumns - 1 || i == mats.Length - 1 ) )
 							{
@@ -248,23 +276,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				GUILayout.EndHorizontal();
 			}
 			GUILayout.EndVertical();
-		}
-
-		/// <summary>
-		/// Apply a material to the selected CSGModel face.
-		/// </summary>
-		/// <param name="mat"></param>
-		private void ApplyMaterial( Material mat )
-		{
-			CSGModel activeModel = CSGModel.GetActiveCSGModel();
-
-			if( activeModel != null )
-			{
-				SurfaceEditor se = (SurfaceEditor)activeModel.GetTool( MainMode.Face );
-				se.SetSelectionMaterial( mat );
-
-				SceneView.lastActiveSceneView.ShowNotification( new GUIContent( "Applied Material: \n" + mat.name ) );
-			}
 		}
 	}
 }
