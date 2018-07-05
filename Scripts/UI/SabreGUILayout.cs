@@ -365,6 +365,30 @@ namespace Sabresaurus.SabreCSG
             GUI.color = fillColor;
             GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
         }
+
+        /// <summary>
+        /// Displays a field for layer masks.
+        /// </summary>
+        /// <param name="label">The label to show.</param>
+        /// <param name="mask">The current mask.</param>
+        /// <returns>The new mask.</returns>
+        public static int LayerMaskField(GUIContent label, int mask)
+        {
+            System.Collections.Generic.List<string> layerNames = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < 32; i++)
+            {
+                string layerName = UnityEditorInternal.InternalEditorUtility.GetLayerName(i);
+                //if (!(layerName == string.Empty))
+                //{
+                layerNames.Add(layerName);
+                //}
+            }
+
+            // this currently shows a lot of empty entries.
+            // we should figure out which ones are empty, not display those and fix the layer mask accordingly.
+
+            return EditorGUILayout.MaskField(label, mask, layerNames.ToArray());
+        }
     }
 }
 #endif

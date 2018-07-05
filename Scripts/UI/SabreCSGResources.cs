@@ -41,7 +41,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="sabrePath">Path local to the SabreCSG folder</param>
         /// <returns></returns>
-        private static Object LoadObject(string sabrePath)
+        public static Object LoadObject(string sabrePath)
         {
             bool found = false;
 
@@ -406,6 +406,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ShapeEditorOpen.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorRestoreTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRestore.png");
             }
         }
 

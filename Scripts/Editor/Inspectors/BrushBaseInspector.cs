@@ -90,43 +90,56 @@ namespace Sabresaurus.SabreCSG
                     }
                     else
                     {
-                        // let the user pick a volume type:
-                        int selected = 0;
-                        if (BrushTarget.Volume != null)
+                        // find all of the volume brushes that are currently selected.
+                        BrushBase[] volumeBrushes = BrushTargets.Where(b => b.Mode == CSGMode.Volume).ToArray();
+                        BrushBase volumeTarget = volumeBrushes.Contains(BrushTarget) ? BrushTarget : volumeBrushes.Last();
+
+                        // make sure all volume brushes are of the same type (for multi-editing).
+                        object brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
+                        if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == brushTargetVolumeType))
                         {
-                            for (int i = 0; i < volumeTypes.Count; i++)
-                            {
-                                selected = i;
-                                if (BrushTarget.Volume.GetType() == volumeTypes[i])
-                                    break;
-                            }
+                            EditorGUILayout.LabelField("Cannot multi-edit volumes of different types!");
                         }
-                        selected = EditorGUILayout.Popup("Volume Type", selected, volumeTypes.Select(v => v.Name).ToArray());
-
-                        // set the brush volume type:
-                        for (int i = 0; i < BrushTargets.Length; i++)
+                        else
                         {
-                            BrushBase target = BrushTargets[i];
-
-                            // if the brush does not have a volume yet or the wrong one, create the selected type now:
-                            if (target.Volume == null || target.Volume.GetType() != volumeTypes[selected])
+                            // let the user pick a volume type:
+                            int selected = 0;
+                            if (volumeTarget.Volume != null)
                             {
-                                target.Volume = (Volume)ScriptableObject.CreateInstance(volumeTypes[selected]);
+                                for (int i = 0; i < volumeTypes.Count; i++)
+                                {
+                                    selected = i;
+                                    if (volumeTarget.Volume.GetType() == volumeTypes[i])
+                                        break;
+                                }
+                            }
+                            selected = EditorGUILayout.Popup("Volume Type", selected, volumeTypes.Select(v => v.Name + " (" + v.Namespace + ")").ToArray());
+
+                            // set the brush volume type:
+                            for (int i = 0; i < volumeBrushes.Length; i++)
+                            {
+                                BrushBase target = volumeBrushes[i];
+
+                                // if the brush does not have a volume yet or the wrong one, create the selected type now:
+                                if (target.Volume == null || target.Volume.GetType() != volumeTypes[selected])
+                                {
+                                    target.Volume = (Volume)ScriptableObject.CreateInstance(volumeTypes[selected]);
+                                    if (serializedObject.targetObject != null)
+                                    {
+                                        serializedObject.ApplyModifiedProperties();
+                                        System.Array.ForEach(volumeBrushes, item => item.Invalidate(true));
+                                    }
+                                }
+                            }
+
+                            // custom volume inspector:
+                            if (volumeTarget.Volume.OnInspectorGUI(volumeBrushes.Select(b => b.Volume).ToArray()))
+                            {
                                 if (serializedObject.targetObject != null)
                                 {
                                     serializedObject.ApplyModifiedProperties();
-                                    System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
+                                    System.Array.ForEach(volumeBrushes, item => item.Invalidate(true));
                                 }
-                            }
-                        }
-
-                        // custom volume inspector:
-                        if (BrushTarget.Volume.OnInspectorGUI())
-                        {
-                            if (serializedObject.targetObject != null)
-                            {
-                                serializedObject.ApplyModifiedProperties();
-                                System.Array.ForEach(BrushTargets, item => item.Invalidate(true));
                             }
                         }
                     }
