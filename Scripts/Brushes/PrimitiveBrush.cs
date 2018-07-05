@@ -811,7 +811,7 @@ namespace Sabresaurus.SabreCSG
             if (meshRenderer != null)
             {
 #if UNITY_EDITOR
-                meshRenderer.enabled = isVisible && !CurrentSettings.ShowBrushesAsWireframes;
+                meshRenderer.enabled = mode == CSGMode.Volume || (isVisible && !CurrentSettings.ShowBrushesAsWireframes);
 #else
                 meshRenderer.enabled = isVisible;
 #endif

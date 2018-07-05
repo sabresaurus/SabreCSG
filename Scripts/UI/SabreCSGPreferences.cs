@@ -94,12 +94,18 @@ namespace Sabresaurus.SabreCSG
                 SceneView.RepaintAll();
             }
 
+            EditorGUILayout.Space();
+            EditorGUI.indentLevel = 1;
+            EditorGUILayout.LabelField("Developer Options", EditorStyles.boldLabel);
+            EditorGUI.indentLevel = 0;
+            EditorGUILayout.Space();
+
             EditorGUI.BeginChangeCheck();
-            CurrentSettings.ShowHiddenGameObjectsInInspector = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInInspector, "Show hidden game objects in inspector");
+            CurrentSettings.ShowHiddenGameObjectsInHierarchy = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInHierarchy, "Show hidden game objects in hierarchy");
             if (EditorGUI.EndChangeCheck())
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
-                CSGModel.UpdateAllBrushesVisibility();
+                CSGModel.RebuildAllVolumes();
                 SceneView.RepaintAll();
             }
 

@@ -1737,6 +1737,22 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static void RebuildAllVolumes()
+        {
+            CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
+            for (int i = 0; i < csgModels.Length; i++)
+            {
+                List<Brush> brushes = csgModels[i].brushes;
+                for (int j = 0; j < brushes.Count; j++)
+                {
+                    if (brushes[j] != null)
+                    {
+                        brushes[j].RebuildVolume();
+                    }
+                }
+            }
+        }
+
         public override Material GetDefaultFallbackMaterial()
         {
             if (!Application.isPlaying)
@@ -2002,10 +2018,10 @@ namespace Sabresaurus.SabreCSG
             Transform[] volumes = csgModelTransform.FindChildren(Constants.GameObjectVolumeComponentIdentifier);
             for (int i = 0; i < volumes.Length; i++)
             {
-                // make sure they are visible again.
-                volumes[i].hideFlags = HideFlags.None;
+                // make sure they are visible and editable again.
+                volumes[i].gameObject.hideFlags = HideFlags.None;
                 // give them a more recognizable name.
-                volumes[i].name = volumes[i].parent.name + " (Volume)";
+                volumes[i].name = volumes[i].parent.name.Replace(" Brush ", " Volume ");
                 if (meshGroup != null)
                     // Reanchor the volumes to the mesh group.
                     volumes[i].SetParent(meshGroup, true);
