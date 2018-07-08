@@ -61,8 +61,8 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				GUILayout.BeginHorizontal( "Box", GUILayout.ExpandWidth( true ) );
 				{
-					GUILayout.Label( "Add New", GUILayout.Width( 56 ) );
-					newTagStr = GUILayout.TextField( newTagStr, EditorStyles.textField, GUILayout.Width( 140 ) );
+					GUILayout.Label( "Add New Label", GUILayout.Width( 90 ) );
+					newTagStr = GUILayout.TextField( newTagStr, EditorStyles.textField, GUILayout.Width( 170 ) );
 
 					if( GUILayout.Button( "", "OL Plus", GUILayout.Height( 16 ), GUILayout.Width( 16 ) ) )
 					{
