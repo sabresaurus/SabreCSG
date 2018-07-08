@@ -8,10 +8,18 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.MaterialPalette
 {
-	internal static class MaterialPaletteHelper
+	internal static class MPHelper
 	{
+		/// <summary>
+		/// List of materials to exclude from drawing in <see cref="MaterialPaletteWindow"/>
+		/// </summary>
 		public static List<string> excludedMaterials = new List<string>();
 
+		/// <summary>
+		/// Gets labels from assets in the project.
+		/// </summary>
+		/// <param name="onlyUsed">Get only used labels?</param>
+		/// <returns></returns>
 		public static string[] GetAssetLabels( bool onlyUsed )
 		{
 			if( onlyUsed )
@@ -45,6 +53,12 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 		}
 
+		/// <summary>
+		/// Gets all materials in the project, filtered by label,
+		/// excluding editor, and generated font materials.
+		/// </summary>
+		/// <param name="filter">The asset label to use when filtering.</param>
+		/// <returns></returns>
 		public static Material[] GetAllMaterials( string filter )
 		{
 			List<Material> mats = new List<Material>();

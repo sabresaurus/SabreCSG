@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.MaterialPalette
 {
-	public class MaterialPaletteTagPopup : EditorWindow
+	public class MPLabelEditorWindow : EditorWindow
 	{
 		public Material material = null;
 		public MaterialPaletteWindow parent = null;
@@ -18,6 +18,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private Vector2 allLabelsScrollPos = Vector2.zero;
 		private Vector2 labelsToAddScrollPos = Vector2.zero;
 		private Vector2 labelsOnMaterialScrollPos = Vector2.zero;
+		private string newTagStr;
 
 		private void OnGUI()
 		{
@@ -30,6 +31,8 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 					if( GUILayout.Button( "Apply", EditorStyles.toolbarButton ) )
 					{
 						AddTagsToMaterial();
+						parent.Load();
+
 						Close();
 					}
 					GUI.color = Color.white;
@@ -56,12 +59,27 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			GUILayout.BeginVertical();
 			{
+				GUILayout.BeginHorizontal( "Box", GUILayout.ExpandWidth( true ) );
+				{
+					GUILayout.Label( "Add New", GUILayout.Width( 56 ) );
+					newTagStr = GUILayout.TextField( newTagStr, EditorStyles.textField, GUILayout.Width( 140 ) );
+
+					if( GUILayout.Button( "", "OL Plus", GUILayout.Height( 16 ), GUILayout.Width( 16 ) ) )
+					{
+						if( newTagStr != string.Empty )
+							labelsToAdd.Add( newTagStr );
+					}
+				}
+				GUILayout.EndHorizontal();
+
 				GUILayout.BeginHorizontal();
 				{
 					// tags to add
 					GUILayout.BeginVertical( "Box", GUILayout.ExpandHeight( true ), GUILayout.ExpandWidth( true ) );
 					{
 						GUILayout.Label( "Tags to Add", EditorStyles.boldLabel );
+
+						// add new field
 
 						labelsToAddScrollPos = GUILayout.BeginScrollView( labelsToAddScrollPos, Styles.MPScrollViewBackground );
 						{
@@ -193,8 +211,8 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void OnEnable()
 		{
-			string[] el = MaterialPaletteHelper.GetAssetLabels( true );
-			string[] al = MaterialPaletteHelper.GetAssetLabels( false );
+			string[] el = MPHelper.GetAssetLabels( true );
+			string[] al = MPHelper.GetAssetLabels( false );
 
 			for( int i = 0; i < el.Length; i++ )
 			{

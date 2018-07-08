@@ -7,7 +7,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 {
 	public class PreviewTile
 	{
-		public MaterialThumbSize materialThumbSize = MaterialThumbSize.Medium;
+		public ThumbSize materialThumbSize = ThumbSize.Medium;
 		public Material material = null;
 		public Color32 labelFontColor = Color.yellow;
 		public bool renderSpherePreview = false;
@@ -16,7 +16,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			if( material == null )
 			{
-				Debug.LogError( "Material is null! Please assign a material using PreviewTile.material." );
+				parent.Repaint();
+				parent.Load(); // ensure list is updated, a material was removed from the project.
+
 				return;
 			}
 
@@ -28,31 +30,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			lastRect.x += 2;
 			lastRect.y += 2;
 
-			// assign material button
-			if( GUILayout.Button( new GUIContent( "", material.name ),
-				Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ),
-				GUILayout.Width( (int)thumbSize.x ), GUILayout.Height( (int)thumbSize.y ) ) )
-			{
-				if( Event.current.button == 1 )
-				{
-					MaterialPaletteTagPopup mp = EditorWindow.GetWindow<MaterialPaletteTagPopup>( true, "Tag Editor - " + material.name );
-					mp.material = material;
-					mp.parent = parent;
-					mp.existingMaterialLabels = FindTags();
-
-					for( int i = 0; i < mp.existingMaterialLabels.Length; i++ )
-					{
-						mp.labelsToAdd.Add( mp.existingMaterialLabels[i] );
-					}
-
-					Rect popupLocation = new Rect( parent.position.x - 400,
-													parent.position.y - ( ( parent.position.height * 0.5f ) + 7 ),
-													400, 300 );
-					mp.ShowAsDropDown( popupLocation, new Vector2( 400, 300 ) );
-				}
-				else
-					ApplyMaterial( material );
-			}
+			MPGUI.ContextButton( new GUIContent( "", material.name ),
+				new Vector2( thumbSize.x, thumbSize.y ),
+				ApplyMaterial, DisplayLabelPopup,
+				material, parent,
+				Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
 
 			// material preview
 			RenderThumb( GUILayoutUtility.GetLastRect() );
@@ -63,24 +45,23 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			labelRect.y += thumbSize.y - 16;
 
 			// material label
-			if( !( Event.current.type == EventType.Repaint
-					&& lastRect.Contains( Event.current.mousePosition ) ) )
+			if( !( lastRect.Contains( Event.current.mousePosition ) ) )
 			{
 				switch( materialThumbSize )
 				{
-					case MaterialThumbSize.Large:
+					case ThumbSize.Large:
 						GUI.contentColor = labelFontColor;
 						GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
 						GUI.contentColor = Color.white;
 						break;
 
-					case MaterialThumbSize.Medium:
+					case ThumbSize.Medium:
 						GUI.contentColor = labelFontColor;
 						GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
 						GUI.contentColor = Color.white;
 						break;
 
-					case MaterialThumbSize.Small:
+					case ThumbSize.Small:
 						break;
 				}
 			}
@@ -125,6 +106,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void RenderThumb( Rect rect )
 		{
+			if( material == null )
+				return;
+
 			if( material.HasProperty( "_MainTex" ) && !renderSpherePreview )
 			{
 				if( material.GetTexture( "_MainTex" ) != null )
@@ -181,6 +165,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private Texture2D GetMaterialThumb()
 		{
+			if( material == null )
+				return Styles.MPNoTexture;
+
 			if( !material.HasProperty( "_MainTex" ) )
 			{
 				return Styles.MPNoTexture;
@@ -189,17 +176,38 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			return AssetPreview.GetAssetPreview( material );
 		}
 
-		private void ApplyMaterial( Material mat )
+		private void ApplyMaterial( object mat )
 		{
 			CSGModel activeModel = CSGModel.GetActiveCSGModel();
+			Material m = (Material)mat;
 
 			if( activeModel != null )
 			{
 				SurfaceEditor se = (SurfaceEditor)activeModel.GetTool( MainMode.Face );
-				se.SetSelectionMaterial( mat );
+				se.SetSelectionMaterial( m );
 
-				SceneView.lastActiveSceneView.ShowNotification( new GUIContent( "Applied Material: \n" + mat.name ) );
+				SceneView.lastActiveSceneView.ShowNotification( new GUIContent( "Applied Material: \n" + m.name ) );
 			}
+		}
+
+		private void DisplayLabelPopup( object parent )
+		{
+			MPLabelEditorWindow mp = EditorWindow.GetWindow<MPLabelEditorWindow>( true, "Tag Editor - " + material.name );
+			MaterialPaletteWindow mpw = (MaterialPaletteWindow)parent;
+
+			mp.material = material;
+			mp.parent = mpw;
+			mp.existingMaterialLabels = FindTags();
+
+			for( int i = 0; i < mp.existingMaterialLabels.Length; i++ )
+			{
+				mp.labelsToAdd.Add( mp.existingMaterialLabels[i] );
+			}
+
+			Rect popupLocation = new Rect( mpw.position.x - 400,
+											mpw.position.y - ( ( mpw.position.height * 0.5f ) + 7 ),
+											400, 300 );
+			mp.ShowAsDropDown( popupLocation, new Vector2( 400, 300 ) );
 		}
 	}
 }

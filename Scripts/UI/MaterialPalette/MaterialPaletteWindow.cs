@@ -20,9 +20,24 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private static string filter = string.Empty;
 		private static bool onlyUsedTags = false;
 		private static bool useSphereMaterialPreview = false;
-		private static MaterialThumbSize mts = MaterialThumbSize.Large;
+		private static ThumbSize mts = ThumbSize.Large;
 		private Vector2 previewsScrollPos = Vector2.zero;
 		private Vector2 labelsScrollPos = Vector2.zero;
+
+		public void Load()
+		{
+			Repaint();
+			// ensure all arrays and lists are clear, and upate them
+			LoadAssetTags();
+
+			mats = MPHelper.GetAllMaterials( filter );
+
+			mts = (ThumbSize)EditorPrefs.GetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)ThumbSize.Medium );
+			onlyUsedTags = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false );
+			useSphereMaterialPreview = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.SpherePreview", false );
+
+			//Debug.Log( "Loaded: [" + mats.Length + "] materials, with tag filter [" + filter + "]" );
+		}
 
 		[MenuItem( "SabreCSG/Material Palette Window", priority = 0 )]
 		private static void Init()
@@ -31,30 +46,14 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 			window.minSize = new Vector2( 680, 256 );
 			window.maxSize = new Vector2( 680, 4096 );
-
-			Load();
-
+			window.Load();
 			window.Show();
-		}
-
-		private static void Load()
-		{
-			// ensure all arrays and lists are clear, and upate them
-			LoadAssetTags();
-
-			mats = MaterialPaletteHelper.GetAllMaterials( filter );
-
-			mts = (MaterialThumbSize)EditorPrefs.GetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)MaterialThumbSize.Medium );
-			onlyUsedTags = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false );
-			useSphereMaterialPreview = EditorPrefs.GetBool( "SabreCSG.MaterialPalette.SpherePreview", false );
-
-			//Debug.Log( "Loaded: [" + mats.Length + "] materials, with tag filter [" + filter + "]" );
 		}
 
 		private static void LoadAssetTags()
 		{
 			assetLabels = new string[] { };
-			assetLabels = MaterialPaletteHelper.GetAssetLabels( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false ) );
+			assetLabels = MPHelper.GetAssetLabels( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", false ) );
 		}
 
 		private void OnDestroy()
@@ -66,12 +65,12 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void OnGUI()
 		{
+			Repaint();
 			if( mats == null || assetLabels == null )
 			{
 				Load();
+				return;
 			}
-
-			EditorGUI.BeginChangeCheck();
 
 			GUILayout.BeginVertical( "GameViewBackground" );
 			{
@@ -88,22 +87,22 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				}
 				GUILayout.EndHorizontal();
 
+				EditorGUI.BeginChangeCheck();
+
 				// status bar
 				DrawStatusBar();
+
+				// update any prefs when the GUI changes, to ensure things are saved.
+				if( EditorGUI.EndChangeCheck() )
+				{
+					LoadAssetTags();
+
+					EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
+					EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
+					EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
+				}
 			}
 			GUILayout.EndVertical();
-
-			// update any prefs when the GUI changes, to ensure things are saved.
-			if( EditorGUI.EndChangeCheck() )
-			{
-				LoadAssetTags();
-
-				EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
-				EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
-				EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
-			}
-
-			Repaint();
 		}
 
 		// tags list, etc.
@@ -187,7 +186,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		{
 			GUILayout.BeginHorizontal( EditorStyles.toolbarButton, GUILayout.ExpandWidth( true ) );
 			{
-				mts = (MaterialThumbSize)EditorGUILayout.EnumPopup( new GUIContent( "", "Thumbnail Size" ), mts, EditorStyles.toolbarDropDown, GUILayout.Width( 100 ) );
+				mts = (ThumbSize)EditorGUILayout.EnumPopup( new GUIContent( "", "Thumbnail Size" ), mts, EditorStyles.toolbarDropDown, GUILayout.Width( 100 ) );
 
 				if( filter != string.Empty )
 				{
@@ -226,10 +225,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				GUILayout.BeginHorizontal( GUILayout.ExpandHeight( true ) );
 				{
-					//BeginWindows();
-					//GUILayout.Window( 1000, new Rect( 0, 18, 200, position.height - 18 ), LeftToolbar, "", SabreCSGResources.MaterialPaletteLToolbarBG ).Overlaps( position );
-					//EndWindows();
-
 					previewsScrollPos = GUILayout.BeginScrollView( previewsScrollPos, false, false );
 					{
 						for( int i = 0; i < mats.Length; i++ )
@@ -237,15 +232,15 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 							int numColumns = 4;
 							switch( mts )
 							{
-								case MaterialThumbSize.Small:
+								case ThumbSize.Small:
 									numColumns = 15;
 									break;
 
-								case MaterialThumbSize.Medium:
+								case ThumbSize.Medium:
 									numColumns = 8;
 									break;
 
-								case MaterialThumbSize.Large:
+								case ThumbSize.Large:
 									numColumns = 4;
 									break;
 							}
