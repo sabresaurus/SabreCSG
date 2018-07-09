@@ -24,25 +24,24 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		public static bool ContextButton( GUIContent text, Vector2 size, Action onLeftClick, Action onRightClick, GUIStyle style = null )
 		{
 			GUIStyle s = style ?? "Button";
+			bool isPressed = false;
 
-			if( onLeftClick != null && onRightClick != null )
+			if( onLeftClick != null && onRightClick != null
+				&& size != null )
 			{
 				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
 				{
 					if( Event.current.button == 1 )
 					{
 						onRightClick();
-						return false;
+						isPressed = false;
 					}
-					else
-					{
-						onLeftClick();
-						return true;
-					}
+					onLeftClick();
+					isPressed = true;
 				}
 			}
 
-			return false;
+			return isPressed;
 		}
 
 		/// <summary>
@@ -62,25 +61,28 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUIStyle style = null )
 		{
 			GUIStyle s = style ?? "Button";
+			bool isPressed = false;
 
-			if( onLeftClick != null && onRightClick != null )
+			if( onLeftClick != null && onRightClick != null
+				&& size != null
+				&& leftClickParam != null && rightClickParam != null )
 			{
 				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
 				{
 					if( Event.current.button == 1 )
 					{
 						onRightClick( rightClickParam );
-						return false;
+						isPressed = false;
 					}
 					else
 					{
 						onLeftClick( leftClickParam );
-						return true;
+						isPressed = true;
 					}
 				}
 			}
 
-			return false;
+			return isPressed;
 		}
 	}
 }

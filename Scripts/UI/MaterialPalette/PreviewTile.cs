@@ -11,17 +11,10 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		public Material material = null;
 		public Color32 labelFontColor = Color.yellow;
 		public bool renderSpherePreview = false;
+		public MaterialPaletteWindow parent;
 
-		public void Draw( Rect lastRect, MaterialPaletteWindow parent )
+		public void Draw( Rect lastRect )
 		{
-			if( material == null )
-			{
-				parent.Repaint();
-				parent.Load(); // ensure list is updated, a material was removed from the project.
-
-				return;
-			}
-
 			Vector2 thumbSize = new Vector2( (int)materialThumbSize, (int)materialThumbSize );
 
 			lastRect.width -= 4;
@@ -30,11 +23,21 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			lastRect.x += 2;
 			lastRect.y += 2;
 
-			MPGUI.ContextButton( new GUIContent( "", material.name ),
-				new Vector2( thumbSize.x, thumbSize.y ),
-				ApplyMaterial, DisplayLabelPopup,
-				material, parent,
-				Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
+			if( material.name == "Deleted Material" )
+			{
+				MPGUI.ContextButton( new GUIContent( "", material.name ),
+					new Vector2( thumbSize.x, thumbSize.y ),
+					parent.Load, parent.Load,
+					Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
+			}
+			else
+			{
+				MPGUI.ContextButton( new GUIContent( "", material.name ),
+					new Vector2( thumbSize.x, thumbSize.y ),
+					ApplyMaterial, DisplayLabelPopup,
+					material, parent,
+					Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
+			}
 
 			// material preview
 			RenderThumb( GUILayoutUtility.GetLastRect() );
@@ -106,51 +109,51 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void RenderThumb( Rect rect )
 		{
-			if( material == null )
-				return;
-
-			if( material.HasProperty( "_MainTex" ) && !renderSpherePreview )
+			if( material != null )
 			{
-				if( material.GetTexture( "_MainTex" ) != null )
+				if( material.HasProperty( "_MainTex" ) && !renderSpherePreview )
 				{
-					GUI.Label( rect, material.GetTexture( "_MainTex" ) );
-				}
-				else
-				{
-					if( material.HasProperty( "_Color" ) )
+					if( material.GetTexture( "_MainTex" ) != null )
 					{
-						Color col = material.GetColor( "_Color" ).gamma;
-						GUI.color = col;
+						GUI.Label( rect, material.GetTexture( "_MainTex" ) );
 					}
 					else
 					{
-						GUI.Label( rect, Styles.MPNoTexture );
-					}
-
-					if( material.HasProperty( "_EmissionColor" ) )
-					{
-						Color col = material.GetColor( "_EmissionColor" ).gamma;
-						if( col != Color.black )
+						if( material.HasProperty( "_Color" ) )
 						{
+							Color col = material.GetColor( "_Color" ).gamma;
 							GUI.color = col;
 						}
 						else
 						{
 							GUI.Label( rect, Styles.MPNoTexture );
 						}
-					}
 
-					GUI.DrawTexture( rect, EditorGUIUtility.whiteTexture );
-					GUI.color = Color.white;
+						if( material.HasProperty( "_EmissionColor" ) )
+						{
+							Color col = material.GetColor( "_EmissionColor" ).gamma;
+							if( col != Color.black )
+							{
+								GUI.color = col;
+							}
+							else
+							{
+								GUI.Label( rect, Styles.MPNoTexture );
+							}
+						}
+
+						GUI.DrawTexture( rect, EditorGUIUtility.whiteTexture );
+						GUI.color = Color.white;
+					}
 				}
-			}
-			else if( renderSpherePreview )
-			{
-				GUI.DrawTexture( rect, GetMaterialThumb() );
-			}
-			else
-			{
-				GUI.Label( rect, Styles.MPNoTexture );
+				else if( renderSpherePreview )
+				{
+					GUI.DrawTexture( rect, GetMaterialThumb() ?? SabreCSGResources.ClearTexture );
+				}
+				else
+				{
+					GUI.Label( rect, Styles.MPNoTexture );
+				}
 			}
 		}
 
@@ -165,9 +168,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private Texture2D GetMaterialThumb()
 		{
-			if( material == null )
-				return Styles.MPNoTexture;
-
 			if( !material.HasProperty( "_MainTex" ) )
 			{
 				return Styles.MPNoTexture;

@@ -65,11 +65,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void OnGUI()
 		{
-			Repaint();
 			if( mats == null || assetLabels == null )
 			{
 				Load();
-				return;
 			}
 
 			GUILayout.BeginVertical( "GameViewBackground" );
@@ -95,14 +93,16 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				// update any prefs when the GUI changes, to ensure things are saved.
 				if( EditorGUI.EndChangeCheck() )
 				{
-					LoadAssetTags();
-
 					EditorPrefs.SetInt( "SabreCSG.MaterialPalette.ThumbSize", (int)mts );
 					EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
 					EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
+
+					LoadAssetTags();
 				}
 			}
 			GUILayout.EndVertical();
+
+			Repaint();
 		}
 
 		// tags list, etc.
@@ -154,27 +154,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 				GUILayout.Label( new GUIContent( "Use Sphere Preview", "Use the built in material preview thumbnail instead?" ) );
 
-				bool oldSpherePreview;
-				useSphereMaterialPreview = EditorGUILayout.Toggle( oldSpherePreview = useSphereMaterialPreview, "OL Toggle", GUILayout.Width( 16 ) );
-
-				if( oldSpherePreview != useSphereMaterialPreview )
-				{
-					if( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.SpherePreview" ) != useSphereMaterialPreview )
-						EditorPrefs.SetBool( "SabreCSG.MaterialPalette.SpherePreview", useSphereMaterialPreview );
-				}
+				useSphereMaterialPreview = EditorGUILayout.Toggle( useSphereMaterialPreview, "OL Toggle", GUILayout.Width( 16 ) );
 
 				GUILayout.Label( new GUIContent( "Used Tags Only", "Show only asset tag labels used in the project." ) );
 
-				bool oldUsedTags;
-				onlyUsedTags = EditorGUILayout.Toggle( oldUsedTags = onlyUsedTags, "OL Toggle", GUILayout.Width( 16 ) );
-
-				if( oldUsedTags != onlyUsedTags )
-				{
-					LoadAssetTags();
-
-					if( EditorPrefs.GetBool( "SabreCSG.MaterialPalette.OnlyUsedTags" ) != onlyUsedTags )
-						EditorPrefs.SetBool( "SabreCSG.MaterialPalette.OnlyUsedTags", onlyUsedTags );
-				}
+				onlyUsedTags = EditorGUILayout.Toggle( onlyUsedTags, "OL Toggle", GUILayout.Width( 16 ) );
 
 				GUILayout.Space( 4 );
 			}
@@ -253,12 +237,27 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 								GUILayout.Space( 4 );
 							}
 
-							PreviewTile pt = new PreviewTile();
-							pt.material = mats[i];
-							pt.materialThumbSize = mts;
-							pt.labelFontColor = Color.white;
-							pt.renderSpherePreview = useSphereMaterialPreview;
-							pt.Draw( GUILayoutUtility.GetLastRect(), this );
+							if( mats[i] != null )
+							{
+								PreviewTile pt = new PreviewTile();
+								pt.parent = this;
+								pt.material = mats[i];
+								pt.materialThumbSize = mts;
+								pt.labelFontColor = Color.white;
+								pt.renderSpherePreview = useSphereMaterialPreview;
+								pt.Draw( GUILayoutUtility.GetLastRect() );
+							}
+							else
+							{
+								PreviewTile pt = new PreviewTile();
+								pt.parent = this;
+								pt.material = new Material( Shader.Find( "Standard" ) );
+								pt.material.name = "Deleted Material";
+								pt.materialThumbSize = mts;
+								pt.labelFontColor = Color.white;
+								pt.renderSpherePreview = useSphereMaterialPreview;
+								pt.Draw( GUILayoutUtility.GetLastRect() );
+							}
 
 							if( ( columnIndex == numColumns - 1 || i == mats.Length - 1 ) )
 							{
