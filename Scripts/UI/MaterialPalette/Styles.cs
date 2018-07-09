@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+
+using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.MaterialPalette
 {
@@ -82,3 +84,4 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		}
 	}
 }
+#endif
