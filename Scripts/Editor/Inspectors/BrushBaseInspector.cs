@@ -80,8 +80,10 @@ namespace Sabresaurus.SabreCSG
             // volume editing:
             if (BrushTargets.Any(b => b.Mode == CSGMode.Volume))
             {
-                using (new NamedVerticalScope("Volume"))
+                using (NamedVerticalScope scope = new NamedVerticalScope("Volume"))
                 {
+                    scope.WikiLink = "Brush-Volumes";
+
                     // find all of the volume types in the project:
                     List<System.Type> volumeTypes = Volume.FindAllInAssembly();
                     if (volumeTypes.Count == 0)
@@ -150,8 +152,10 @@ namespace Sabresaurus.SabreCSG
             DoInspectorGUI();
 
             // generic brush editing:
-            using (new NamedVerticalScope("Order"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Order"))
             {
+                scope.WikiLink = "Tutorial-1#additive-and-subtractive-brushes";
+
                 List<BrushBase> orderedTargets = BrushTargets.ToList();
                 orderedTargets.RemoveAll(item => (item == null));
                 orderedTargets.Sort((x, y) => x.transform.GetSiblingIndex().CompareTo(y.transform.GetSiblingIndex()));
