@@ -997,13 +997,18 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < Selection.gameObjects.Length; i++)
             {
                 // Skip any selected prefabs in the project window
+#if UNITY_2018_2
+				if(PrefabUtility.GetCorrespondingObjectFromSource(Selection.gameObjects[i]) == null
+#else
                 if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
-                    && PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
-                {
-                    continue;
-                }
+#endif
+					&& PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
 
-                PrimitiveBrush primitiveBrush = Selection.gameObjects[i].GetComponent<PrimitiveBrush>();
+				{
+					continue;
+				}
+
+				PrimitiveBrush primitiveBrush = Selection.gameObjects[i].GetComponent<PrimitiveBrush>();
                 CSGModel csgModel = Selection.gameObjects[i].GetComponent<CSGModel>();
 
                 if (csgModel == null)
@@ -1144,7 +1149,7 @@ namespace Sabresaurus.SabreCSG
 
 #endif
 
-        public void SetLastSelectedBrush(Brush brush)
+		public void SetLastSelectedBrush(Brush brush)
         {
             lastSelectedBrush = brush;
         }

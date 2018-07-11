@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG
         private const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
         private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 360);
 
-        private static Event cachedEvent;
+        //private static Event cachedEvent;
 
         public static void CreateAndShow()
         {
