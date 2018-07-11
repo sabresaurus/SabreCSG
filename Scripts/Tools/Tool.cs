@@ -61,8 +61,8 @@ namespace Sabresaurus.SabreCSG
             PrimitiveBrush newPrimaryBrush = null;
 
 			// Make sure it's not null and that it isn't a prefab in the project
-#if UNITY_2018_2
 			if(selectedGameObject != null
+#if UNITY_2018_2
 				&& !(PrefabUtility.GetCorrespondingObjectFromSource(selectedGameObject) == null
 #else
                 && !(PrefabUtility.GetPrefabParent(selectedGameObject) == null
