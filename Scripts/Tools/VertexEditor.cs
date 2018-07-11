@@ -926,58 +926,10 @@ namespace Sabresaurus.SabreCSG
 
             GUILayout.BeginHorizontal();
 
-            if (GUILayout.Button(new GUIContent("Chamfer", "Right click to configure."), EditorStyles.miniButton))
-            {
-                if (Event.current.button == 1)
-                {
-                    ToolSettingsPopup.Show("Chamfer", 205, (rect) => {
-                        chamferDistance = EditorGUILayout.FloatField(new GUIContent("Distance", "The size of the chamfered curve."), chamferDistance);
-                        if (chamferDistance < 0.0f) chamferDistance = 0.0f;
-                        chamferIterations = EditorGUILayout.IntField(new GUIContent("Iterations", "The amount of iterations determines how detailed the chamfer is (e.g. 1 is a simple bevel)."), chamferIterations);
-                        if (chamferIterations < 1) chamferIterations = 1;
-                    });
-                }
-                else
-                {
-                    if (selectedEdges != null)
-                    {
-                        List<KeyValuePair<Vertex, Brush>> newSelectedVertices = new List<KeyValuePair<Vertex, Brush>>();
-                        foreach (PrimitiveBrush brush in targetBrushes)
-                        {
-                            Undo.RecordObject(brush.transform, "Chamfer Edge");
-                            Undo.RecordObject(brush, "Chamfer Edge");
-                            Polygon[] polygons = brush.GetPolygons();
-
-                            for (int j = 0; j < selectedEdges.Count; j++)
-                            {
-                                // First check if this edge actually belongs to the brush
-                                Brush parentBrush = selectedVertices[selectedEdges[j].Vertex1];
-
-                                if (parentBrush == brush)
-                                {
-                                    List<Polygon> resultPolygons;
-                                    if (PolygonFactory.ChamferPolygons(new List<Polygon>(polygons), selectedEdges, chamferDistance, chamferIterations, out resultPolygons))
-                                    {
-                                        brush.SetPolygons(resultPolygons.ToArray());
-                                    }
-                                }
-                            }
-
-                            brush.Invalidate(true);
-                        }
-
-                        ClearSelection();
-
-                        for (int i = 0; i < newSelectedVertices.Count; i++)
-                        {
-                            Brush brush = newSelectedVertices[i].Value;
-                            Vertex vertex = newSelectedVertices[i].Key;
-
-                            SelectVertices(brush, brush.GetPolygons(), new List<Vertex>() { vertex });
-                        }
-                    }
-                }
-            }
+            SabreGUILayout.RightClickMiniButton("Chamfer", "Bevels or smoothly rounds sharp edges",
+                () => OnEdgeChamfer(false),
+                () => OnEdgeChamfer(true)
+            );
 
             GUILayout.EndHorizontal();
         }
@@ -1434,6 +1386,65 @@ namespace Sabresaurus.SabreCSG
             }
 
             return foundAnyPoints;
+        }
+
+        /// <summary>
+        /// Called when the chamfer edge button is pressed.
+        /// </summary>
+        /// <param name="popup">If set to <c>true</c> displays the configuration popup.</param>
+        private void OnEdgeChamfer(bool popup)
+        {
+            if (selectedEdges == null) return;
+
+            if (popup)
+            {
+                // create a chamfer configuration popup window.
+                ToolSettingsPopup.Create("Chamfer Settings", 205, (rect) => {
+                    chamferDistance = EditorGUILayout.FloatField(new GUIContent("Distance", "The size of the chamfered curve."), chamferDistance);
+                    if (chamferDistance < 0.0f) chamferDistance = 0.0f;
+                    chamferIterations = EditorGUILayout.IntField(new GUIContent("Iterations", "The amount of iterations determines how detailed the chamfer is (e.g. 1 is a simple bevel)."), chamferIterations);
+                    if (chamferIterations < 1) chamferIterations = 1;
+                })
+                .AddConfirmButton("Chamfer", () => OnEdgeChamfer(false))
+                .Show();
+
+                return;
+            }
+
+            List<KeyValuePair<Vertex, Brush>> newSelectedVertices = new List<KeyValuePair<Vertex, Brush>>();
+            foreach (PrimitiveBrush brush in targetBrushes)
+            {
+                Undo.RecordObject(brush.transform, "Chamfer Edge");
+                Undo.RecordObject(brush, "Chamfer Edge");
+                Polygon[] polygons = brush.GetPolygons();
+
+                for (int j = 0; j < selectedEdges.Count; j++)
+                {
+                    // First check if this edge actually belongs to the brush
+                    Brush parentBrush = selectedVertices[selectedEdges[j].Vertex1];
+
+                    if (parentBrush == brush)
+                    {
+                        List<Polygon> resultPolygons;
+                        if (PolygonFactory.ChamferPolygons(new List<Polygon>(polygons), selectedEdges, chamferDistance, chamferIterations, out resultPolygons))
+                        {
+                            brush.SetPolygons(resultPolygons.ToArray());
+                        }
+                    }
+                }
+
+                brush.Invalidate(true);
+            }
+
+            ClearSelection();
+
+            for (int i = 0; i < newSelectedVertices.Count; i++)
+            {
+                Brush brush = newSelectedVertices[i].Value;
+                Vertex vertex = newSelectedVertices[i].Key;
+
+                SelectVertices(brush, brush.GetPolygons(), new List<Vertex>() { vertex });
+            }
         }
 
         public override void Deactivated ()

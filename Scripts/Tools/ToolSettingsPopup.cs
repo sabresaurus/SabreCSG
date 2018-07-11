@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -31,6 +32,12 @@ namespace Sabresaurus.SabreCSG
         public float Height { get { return m_Height; } }
 
         /// <summary>
+        /// Gets or sets the wiki link.
+        /// </summary>
+        /// <value>The wiki link.</value>
+        public string WikiLink { get; set; }
+
+        /// <summary>
         /// The height of the popup window.
         /// </summary>
         private float m_Height = 20.0f;
@@ -39,6 +46,11 @@ namespace Sabresaurus.SabreCSG
         /// The OnGUI action.
         /// </summary>
         private Action<Rect> m_OnGuiAction;
+
+        /// <summary>
+        /// The custom buttons to be shown.
+        /// </summary>
+        private Dictionary<string, Action> m_ConfirmButtons = new Dictionary<string, Action>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolSettingsPopup"/> class.
@@ -69,7 +81,21 @@ namespace Sabresaurus.SabreCSG
             NamedVerticalScope scope;
             using (scope = new NamedVerticalScope(Title))
             {
+                // configure the scope.
+                scope.IsPopupWindow = true;
+                scope.OnCloseAction = editorWindow.Close;
+                scope.WikiLink = WikiLink;
+
+                // call the custom gui action.
                 m_OnGuiAction.Invoke(rect);
+
+                // add any registered buttons.
+                foreach (var customButton in m_ConfirmButtons)
+                    if (GUILayout.Button(customButton.Key))
+                    {
+                        customButton.Value.Invoke();
+                        editorWindow.Close();
+                    }
             }
 
             // automatically determine the popup height.
@@ -78,28 +104,62 @@ namespace Sabresaurus.SabreCSG
         }
 
         /// <summary>
-        /// Shows a tool settings popup window.
+        /// Registers a button to be shown to the user with an action called when it's pressed.
+        /// </summary>
+        /// <param name="button">The button name to be shown.</param>
+        /// <param name="action">The action called when the button is clicked.</param>
+        /// <returns>The <see cref="this"/> reference for chaining.</returns>
+        public ToolSettingsPopup AddConfirmButton(string button, Action action)
+        {
+            // add the custom button.
+            if (!m_ConfirmButtons.ContainsKey(button))
+                m_ConfirmButtons.Add(button, action);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the wiki link (either a shorthand like 'Tutorial-1' or a full link starting with 'http').
+        /// </summary>
+        /// <param name="link">The link to the internet page.</param>
+        /// <returns>The <see cref="this"/> reference for chaining.</returns>
+        public ToolSettingsPopup SetWikiLink(string link)
+        {
+            // set the wiki link.
+            WikiLink = link;
+            return this;
+        }
+
+        /// <summary>
+        /// Shows the tool settings popup window. Call this method last.
+        /// </summary>
+        /// <returns>The <see cref="this"/> reference for chaining.</returns>
+        public ToolSettingsPopup Show()
+        {
+            PopupWindow.Show(new Rect(Event.current.mousePosition, new Vector2(0, 0)), this);
+            return this;
+        }
+
+        /// <summary>
+        /// Creates a tool settings popup window.
         /// </summary>
         /// <param name="title">The title of the popup window.</param>
         /// <param name="onGUI">The OnGUI contents of the popup window.</param>
         /// <returns>The popup window handle.</returns>
-        public static ToolSettingsPopup Show(string title, Action<Rect> onGUI)
+        public static ToolSettingsPopup Create(string title, Action<Rect> onGUI)
         {
-            return Show(title, 300, onGUI);
+            return Create(title, 300, onGUI);
         }
 
         /// <summary>
-        /// Shows a tool settings popup window.
+        /// Creates a tool settings popup window.
         /// </summary>
         /// <param name="title">The title of the popup window.</param>
         /// <param name="width">The width of the popup window.</param>
         /// <param name="onGUI">The OnGUI contents of the popup window.</param>
         /// <returns>The popup window handle.</returns>
-        public static ToolSettingsPopup Show(string title, float width, Action<Rect> onGUI)
+        public static ToolSettingsPopup Create(string title, float width, Action<Rect> onGUI)
         {
-            ToolSettingsPopup popup;
-            PopupWindow.Show(new Rect(Event.current.mousePosition, new Vector2(0, 0)), popup = new ToolSettingsPopup(title, width, onGUI));
-            return popup;
+            return new ToolSettingsPopup(title, width, onGUI);
         }
     }
 }
