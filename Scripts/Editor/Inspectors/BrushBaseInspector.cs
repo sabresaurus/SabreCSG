@@ -95,8 +95,8 @@ namespace Sabresaurus.SabreCSG
                         BrushBase volumeTarget = volumeBrushes.Contains(BrushTarget) ? BrushTarget : volumeBrushes.Last();
 
                         // make sure all volume brushes are of the same type (for multi-editing).
-                        object brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
-                        if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == (System.Type)brushTargetVolumeType))
+                        System.Type brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
+                        if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == brushTargetVolumeType))
                         {
                             EditorGUILayout.LabelField("Cannot multi-edit volumes of different types!");
                         }

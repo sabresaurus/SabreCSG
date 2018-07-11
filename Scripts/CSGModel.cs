@@ -996,18 +996,17 @@ namespace Sabresaurus.SabreCSG
 
             for (int i = 0; i < Selection.gameObjects.Length; i++)
             {
+                // Skip any selected prefabs in the project window
 #if UNITY_2018_2
 				if(PrefabUtility.GetCorrespondingObjectFromSource(Selection.gameObjects[i]) == null
 #else
-				if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
+                if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
 #endif
 					&& PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
 
 				{
 					continue;
 				}
-
-				// Skip any selected prefabs in the project window
 
 				PrimitiveBrush primitiveBrush = Selection.gameObjects[i].GetComponent<PrimitiveBrush>();
                 CSGModel csgModel = Selection.gameObjects[i].GetComponent<CSGModel>();
