@@ -34,10 +34,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				MPGUI.ContextButton( new GUIContent( "", material.name ),
 					new Vector2( thumbSize.x, thumbSize.y ),
-					ApplyMaterial, DisplayLabelPopup,
-					material, parent,
+					ApplyMaterial, DisplayLabelPopup, FindAndSelectMaterial,
+					material, parent, material,
 					Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
 			}
+
 
 			// material preview
 			RenderThumb( GUILayoutUtility.GetLastRect() );
@@ -164,6 +165,15 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			Material mat = (Material)AssetDatabase.LoadMainAssetAtPath( asset );
 
 			return AssetDatabase.GetLabels( mat );
+		}
+		private void FindAndSelectMaterial( object material )
+		{
+			Material m = (Material)material;
+			string[] guids = AssetDatabase.FindAssets( "t:Material " + m.name );
+			string asset = AssetDatabase.GUIDToAssetPath( guids[0] );
+			Material mat = (Material)AssetDatabase.LoadMainAssetAtPath( asset );
+			Selection.activeObject = mat;
+			EditorGUIUtility.PingObject( mat );
 		}
 
 		private Texture2D GetMaterialThumb()

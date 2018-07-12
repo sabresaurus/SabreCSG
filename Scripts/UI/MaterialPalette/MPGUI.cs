@@ -84,6 +84,54 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 			return isPressed;
 		}
+
+		/// <summary>
+		/// Creates a button with a middle, or alt + RMB, and right-click context option.
+		/// </summary>
+		/// <param name="text">The text to display, with optional tooltip.</param>
+		/// <param name="size">The size of this button.</param>
+		/// <param name="onLeftClick">The left-click delegate to execute.</param>
+		/// <param name="onRightClick">The right-click delegate to execute.</param>
+		/// <param name="onMiddleClick">The middle or alt + rmb click delegate to execute.</param>
+		/// <param name="leftClickParam">The object for onLeftClick to handle.</param>
+		/// <param name="rightClickParam">The object for onRightClick to handle.</param>
+		/// <param name="middleClickParam">The object for onMiddleClick to handle.</param>
+		/// <param name="style">Optional style to display the button as.</param>
+		/// <returns></returns>
+		public static bool ContextButton( GUIContent text, Vector2 size,
+			Action<object> onLeftClick, Action<object> onRightClick, Action<object> onMiddleClick,
+			object leftClickParam, object rightClickParam, object middleClickParam,
+			GUIStyle style = null )
+		{
+			GUIStyle s = style ?? "Button";
+			bool isPressed = false;
+
+			if( onLeftClick != null && onRightClick != null && onMiddleClick != null
+				&& size != null
+				&& leftClickParam != null && rightClickParam != null && middleClickParam != null )
+			{
+				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
+				{
+					if( Event.current.button == 1 && !Event.current.alt )
+					{
+						onRightClick( rightClickParam );
+						isPressed = false;
+					}
+					else if( Event.current.button == 2 || Event.current.button == 1 && Event.current.alt )
+					{
+						onMiddleClick( middleClickParam );
+						isPressed = false;
+					}
+					else
+					{
+						onLeftClick( leftClickParam );
+						isPressed = true;
+					}
+				}
+			}
+
+			return isPressed;
+		}
 	}
 }
 
