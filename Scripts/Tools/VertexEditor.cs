@@ -926,7 +926,7 @@ namespace Sabresaurus.SabreCSG
 
             GUILayout.BeginHorizontal();
 
-            SabreGUILayout.RightClickMiniButton("Chamfer", "Bevels or smoothly rounds sharp edges",
+            SabreGUILayout.RightClickMiniButton("Chamfer", "Bevels or rounds sharp edges",
                 () => OnEdgeChamfer(false),
                 () => OnEdgeChamfer(true)
             );
