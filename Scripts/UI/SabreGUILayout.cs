@@ -46,7 +46,7 @@ namespace Sabresaurus.SabreCSG
 
         public static void RightClickMiniButton(GUIContent content, Action onLeftClicked, Action onRightClicked)
         {
-            bool buttonPressed = GUILayout.Button(new GUIContent(content.text, content.tooltip + " (right click to configure)."), EditorStyles.miniButton);
+            bool buttonPressed = GUILayout.Button(new GUIContent(content.text, content.tooltip + "\nRight click to configure..."), EditorStyles.miniButton);
             if (Event.current.type == EventType.Repaint)
             {
                 Rect rect = GUILayoutUtility.GetLastRect();
