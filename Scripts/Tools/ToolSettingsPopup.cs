@@ -38,9 +38,15 @@ namespace Sabresaurus.SabreCSG
         public string WikiLink { get; set; }
 
         /// <summary>
+        /// Whether an additional repaint has been done when the popup window is first shown. This is
+        /// used to accurately calculate the height.
+        /// </summary>
+        private bool m_DidExtraRepaint = false;
+
+        /// <summary>
         /// The height of the popup window.
         /// </summary>
-        private float m_Height = 20.0f;
+        private float m_Height = 0.0f;
 
         /// <summary>
         /// The OnGUI action.
@@ -101,6 +107,15 @@ namespace Sabresaurus.SabreCSG
             // automatically determine the popup height.
             if (scope.ScopeRect.height != 1)
                 m_Height = scope.ScopeRect.height + 8;
+
+            // when the dialog is shown for the first time the height is wrong.
+            // if the user has the mouse hovering over it then Unity will repaint and fix it.
+            // to make sure it's always visible, we force an additional repaint here.
+            if (!m_DidExtraRepaint)
+            {
+                editorWindow.Repaint();
+                m_DidExtraRepaint = true;
+            }
         }
 
         /// <summary>
