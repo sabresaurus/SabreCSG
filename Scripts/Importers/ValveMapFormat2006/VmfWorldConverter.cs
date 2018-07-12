@@ -12,17 +12,22 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
     /// </summary>
     public static class VmfWorldConverter
     {
+        private const float inchesInMeters = 0.03125f; // 1/32
+
         /// <summary>
         /// Imports the specified world into the SabreCSG model.
         /// </summary>
         /// <param name="model">The model to import into.</param>
         /// <param name="world">The world to be imported.</param>
         /// <param name="scale">The scale modifier.</param>
-        public static void Import(CSGModel model, VmfWorld world, int scale = 32)
+        public static void Import(CSGModelBase model, VmfWorld world)
         {
             try
             {
                 model.BeginUpdate();
+
+                // create a material searcher to associate materials automatically.
+                MaterialSearcher materialSearcher = new MaterialSearcher();
 
                 // group all the brushes together.
                 GroupBrush groupBrush = new GameObject("Source Engine Map").AddComponent<GroupBrush>();
@@ -49,7 +54,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                     for (int j = solid.Sides.Count; j-- > 0;)
                     {
                         VmfSolidSide side = solid.Sides[j];
-                        Plane clip = new Plane(pr.transform.InverseTransformPoint(new Vector3(side.Plane.P1.X, side.Plane.P1.Z, side.Plane.P1.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P2.X, side.Plane.P2.Z, side.Plane.P2.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P3.X, side.Plane.P3.Z, side.Plane.P3.Y) / scale));
+                        Plane clip = new Plane(pr.transform.InverseTransformPoint(new Vector3(side.Plane.P1.X, side.Plane.P1.Z, side.Plane.P1.Y) * inchesInMeters), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P2.X, side.Plane.P2.Z, side.Plane.P2.Y) * inchesInMeters), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P3.X, side.Plane.P3.Z, side.Plane.P3.Y) * inchesInMeters));
                         ClipUtility.ApplyClipPlane(pr, clip, false);
 
                         // find the polygons associated with the clipping plane.
@@ -63,8 +68,26 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                             // detect collision-only brushes.
                             if (IsInvisibleMaterial(side.Material))
                                 pr.IsVisible = false;
-                            // try finding the material in the project.
-                            polygon.Material = FindMaterial(side.Material);
+                            // find the material in the unity project automatically.
+                            Material material;
+                            // try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
+                            string materialName = side.Material.Replace("/", ".");
+                            if (materialName.Contains('.'))
+                            {
+                                // try finding both 'BRICK.BRICKWALL052D' and 'BRICKWALL052D'.
+                                string tiny = materialName.Substring(materialName.LastIndexOf('.') + 1);
+                                material = materialSearcher.FindMaterial(new string[] { materialName, tiny });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + materialName + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                            }
+                            else
+                            {
+                                // only try finding 'BRICKWALL052D'.
+                                material = materialSearcher.FindMaterial(new string[] { materialName });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + materialName + "' but it couldn't be found in the project.");
+                            }
+                            polygon.Material = material;
                             // calculate the texture coordinates.
                             int w = 256;
                             int h = 256;
@@ -73,7 +96,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 w = polygon.Material.mainTexture.width;
                                 h = polygon.Material.mainTexture.height;
                             }
-                            CalculateTextureCoordinates(polygon, w, h, side.UAxis, side.VAxis, scale);
+                            CalculateTextureCoordinates(pr, polygon, w, h, side.UAxis, side.VAxis);
                         }
                     }
 
@@ -129,7 +152,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                         for (int j = solid.Sides.Count; j-- > 0;)
                         {
                             VmfSolidSide side = solid.Sides[j];
-                            Plane clip = new Plane(pr.transform.InverseTransformPoint(new Vector3(side.Plane.P1.X, side.Plane.P1.Z, side.Plane.P1.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P2.X, side.Plane.P2.Z, side.Plane.P2.Y) / scale), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P3.X, side.Plane.P3.Z, side.Plane.P3.Y) / scale));
+                            Plane clip = new Plane(pr.transform.InverseTransformPoint(new Vector3(side.Plane.P1.X, side.Plane.P1.Z, side.Plane.P1.Y) * inchesInMeters), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P2.X, side.Plane.P2.Z, side.Plane.P2.Y) * inchesInMeters), pr.transform.InverseTransformPoint(new Vector3(side.Plane.P3.X, side.Plane.P3.Z, side.Plane.P3.Y) * inchesInMeters));
                             ClipUtility.ApplyClipPlane(pr, clip, false);
 
                             // find the polygons associated with the clipping plane.
@@ -143,8 +166,26 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                 // detect collision-only brushes.
                                 if (IsInvisibleMaterial(side.Material))
                                     pr.IsVisible = false;
-                                // try finding the material in the project.
-                                polygon.Material = FindMaterial(side.Material);
+                                // find the material in the unity project automatically.
+                                Material material;
+                                // try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
+                                string materialName = side.Material.Replace("/", ".");
+                                if (materialName.Contains('.'))
+                                {
+                                    // try finding both 'BRICK.BRICKWALL052D' and 'BRICKWALL052D'.
+                                    string tiny = materialName.Substring(materialName.LastIndexOf('.') + 1);
+                                    material = materialSearcher.FindMaterial(new string[] { materialName, tiny });
+                                    if (material == null)
+                                        Debug.Log("SabreCSG: Tried to find material '" + materialName + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                                }
+                                else
+                                {
+                                    // only try finding 'BRICKWALL052D'.
+                                    material = materialSearcher.FindMaterial(new string[] { materialName });
+                                    if (material == null)
+                                        Debug.Log("SabreCSG: Tried to find material '" + materialName + "' but it couldn't be found in the project.");
+                                }
+                                polygon.Material = material;
                                 // calculate the texture coordinates.
                                 int w = 256;
                                 int h = 256;
@@ -153,7 +194,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                                     w = polygon.Material.mainTexture.width;
                                     h = polygon.Material.mainTexture.height;
                                 }
-                                CalculateTextureCoordinates(polygon, w, h, side.UAxis, side.VAxis, scale);
+                                CalculateTextureCoordinates(pr, polygon, w, h, side.UAxis, side.VAxis);
                             }
                         }
 
@@ -183,27 +224,32 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             }
         }
 
-        // shoutouts to Stefan Hajnoczi for your map importer giving me a clue on how to do this.
-        private static void CalculateTextureCoordinates(Polygon polygon, int textureWidth, int textureHeight, VmfAxis UAxis, VmfAxis VAxis, int scale)
+        // shoutouts to Aleksi Juvani for your vmf importer giving me a clue on why my textures were misaligned.
+        // had to add the world space position of the brush to the calculations! https://github.com/aleksijuvani
+        private static void CalculateTextureCoordinates(PrimitiveBrush pr, Polygon polygon, int textureWidth, int textureHeight, VmfAxis UAxis, VmfAxis VAxis)
         {
+            UAxis.Translation = UAxis.Translation % textureWidth;
+            VAxis.Translation = VAxis.Translation % textureHeight;
+
+            if (UAxis.Translation < -textureWidth / 2f)
+                UAxis.Translation += textureWidth;
+
+            if (VAxis.Translation < -textureHeight / 2f)
+                VAxis.Translation += textureHeight;
+
             // calculate texture coordinates.
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
-                float U, V;
+                var vertex = pr.transform.position + polygon.Vertices[i].Position;
 
-                Plane uplane = new Plane(new Vector3(UAxis.Vector.X, UAxis.Vector.Z, UAxis.Vector.Y), UAxis.Translation);
-                Plane vplane = new Plane(new Vector3(VAxis.Vector.X, VAxis.Vector.Z, VAxis.Vector.Y), VAxis.Translation);
+                Vector3 uaxis = new Vector3(UAxis.Vector.X, UAxis.Vector.Z, UAxis.Vector.Y);
+                Vector3 vaxis = new Vector3(VAxis.Vector.X, VAxis.Vector.Z, VAxis.Vector.Y);
 
-                U = Vector3.Dot(uplane.normal, polygon.Vertices[i].Position);
-                U = (U / textureWidth) / (UAxis.Scale / scale);
-                U = U + (UAxis.Translation / textureWidth);
+                var u = Vector3.Dot(vertex, uaxis) / (textureWidth * (UAxis.Scale * inchesInMeters)) + UAxis.Translation / textureWidth;
+                var v = Vector3.Dot(vertex, vaxis) / (textureHeight * (VAxis.Scale * inchesInMeters)) + VAxis.Translation / textureHeight;
 
-                V = Vector3.Dot(vplane.normal, polygon.Vertices[i].Position);
-                V = (V / textureHeight) / (VAxis.Scale / scale);
-                V = V + (VAxis.Translation / textureHeight);
-
-                polygon.Vertices[i].UV.x = U;
-                polygon.Vertices[i].UV.y = 1.0f - V;
+                polygon.Vertices[i].UV.x = u;
+                polygon.Vertices[i].UV.y = -v;
             }
         }
 
@@ -275,38 +321,6 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
                     return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Attempts to find a material in the project by name.
-        /// </summary>
-        /// <param name="name">The material name to search for.</param>
-        /// <returns>The material if found or null.</returns>
-        private static Material FindMaterial(string name)
-        {
-#if UNITY_EDITOR
-            // first try finding the fully qualified texture name with '/' replaced by '.' so 'BRICK.BRICKWALL052D'.
-            name = name.Replace("/", ".");
-            string texture = "";
-            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
-            if (guid == null)
-            {
-                // if it couldn't be found try a simplified name like 'BRICKWALL052D'.
-                texture = name;
-                if (name.Contains('.'))
-                    texture = name.Substring(name.LastIndexOf('.') + 1);
-                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
-            }
-            // if a material could be found using either option:
-            if (guid != null)
-            {
-                // load the material.
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-            }
-            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
-#endif
-            return null;
         }
     }
 }

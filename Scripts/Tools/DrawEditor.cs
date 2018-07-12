@@ -945,7 +945,7 @@ namespace Sabresaurus.SabreCSG
                 {
                     GL.Color(Color.blue);
                 }
-                else
+                else if (csgMode == CSGMode.Subtract)
                 {
                     GL.Color(Color.yellow);
                 }

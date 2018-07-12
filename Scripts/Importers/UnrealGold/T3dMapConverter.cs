@@ -18,11 +18,14 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         /// <param name="model">The model to import into.</param>
         /// <param name="map">The map to be imported.</param>
         /// <param name="scale">The scale modifier.</param>
-        public static void Import(CSGModel model, T3dMap map, int scale = 64)
+        public static void Import(CSGModelBase model, T3dMap map, int scale = 64)
         {
             try
             {
                 model.BeginUpdate();
+
+                // create a material searcher to associate materials automatically.
+                MaterialSearcher materialSearcher = new MaterialSearcher();
 
                 List<T3dActor> brushes = map.Brushes;
                 Brush[] sabreBrushes = new Brush[brushes.Count];
@@ -43,12 +46,35 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         T3dPolygon tpolygon = tbrush.Polygons[i];
 
                         // find the material in the unity project automatically.
-                        Material material = FindMaterial(tpolygon.Texture);
+                        Material material;
+                        if (tpolygon.Texture.Contains('.'))
+                        {
+                            // try finding both 'PlayrShp.Ceiling.Hullwk' and 'Hullwk'.
+                            string tiny = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
+                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture, tiny });
+                            if (material == null)
+                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                        }
+                        else
+                        {
+                            // only try finding 'Hullwk'.
+                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture });
+                            if (material == null)
+                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' but it couldn't be found in the project.");
+                        }
 
                         Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
                         for (int j = 0; j < tpolygon.Vertices.Count; j++)
                         {
-                            vertices[j] = new Vertex(ToVector3(tpolygon.Vertices[j]) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
+                            // main-scale
+                            // scale around pivot point.
+                            Vector3 vertexPosition = ToVector3(tpolygon.Vertices[j]);
+                            Vector3 pivot = ToVector3(tactor.PrePivot);
+                            Vector3 difference = vertexPosition - pivot;
+                            vertexPosition = difference.Multiply(ToVector3Raw(tactor.MainScale)) + pivot;
+
+                            // post-scale
+                            vertices[j] = new Vertex(vertexPosition.Multiply(ToVector3Raw(tactor.PostScale)) / (float)scale, ToVector3(tpolygon.Normal), GenerateUV(tpolygon, j, material));
                         }
 
                         // detect the polygon flags.
@@ -59,7 +85,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         polygons[i] = new Polygon(vertices, material, false, userExcludeFromFinal);
                     }
 
-                    // position and rotate the brushes.
+                    // position and rotate the brushes around their pivot point.
                     Transform transform = model.CreateCustomBrush(polygons).transform;
                     transform.position = (ToVector3(tactor.Location) / (float)scale) - (ToVector3(tactor.PrePivot) / (float)scale);
                     Vector3 axis;
@@ -126,6 +152,16 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
             return new Vector3(-vector3.X, vector3.Z, vector3.Y);
         }
 
+        /// <summary>
+        /// Converts <see cref="T3dVector3"/> to <see cref="Vector3"/>.
+        /// </summary>
+        /// <param name="vector3">The <see cref="T3dVector3"/> to be converted.</param>
+        /// <returns>The <see cref="Vector3"/>.</returns>
+        private static Vector3 ToVector3Raw(T3dVector3 vector3)
+        {
+            return new Vector3(vector3.X, vector3.Z, vector3.Y);
+        }
+
         private static float DotProduct(float ax, float ay, float az, float bx, float by, float bz)
         {
             return (ax * bx) + (ay * by) + (az * bz);
@@ -168,37 +204,6 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
             quaternion.z = -quaternion.z;
 
             return quaternion;
-        }
-
-        /// <summary>
-        /// Attempts to find a material in the project by name.
-        /// </summary>
-        /// <param name="name">The material name to search for.</param>
-        /// <returns>The material if found or null.</returns>
-        private static Material FindMaterial(string name)
-        {
-#if UNITY_EDITOR
-            // first try finding the fully qualified texture name like 'PlayrShp.Ceiling.Hullwk'.
-            string texture = "";
-            string guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + name).FirstOrDefault();
-            if (guid == null)
-            {
-                // if it couldn't be found try a simplified name which UnrealEd typically exports like 'Hullwk'.
-                texture = name;
-                if (name.Contains('.'))
-                    texture = name.Substring(name.LastIndexOf('.') + 1);
-                guid = UnityEditor.AssetDatabase.FindAssets("t:Material " + texture).FirstOrDefault();
-            }
-            // if a material could be found using either option:
-            if (guid != null)
-            {
-                // load the material.
-                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                return UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(path);
-            }
-            else { Debug.Log("SabreCSG: Tried to find material '" + name + "' and also as '" + texture + "' but it couldn't be found in the project."); }
-#endif
-            return null;
         }
     }
 }

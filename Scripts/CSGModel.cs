@@ -414,7 +414,15 @@ namespace Sabresaurus.SabreCSG
 
                         if (Selection.Contains(brushGameObject))
                         {
-                            if (brushes[brushIndex].IsNoCSG)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = new Color32(192, 192, 192, 255);
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
+                            {
+                                outlineColor = new Color(0.6f, 1.0f, 0.6f);
+                            }
+                            else if (brushes[brushIndex].IsNoCSG)
                             {
                                 outlineColor = new Color(1f, 0.6f, 1.0f);
                             }
@@ -432,7 +440,15 @@ namespace Sabresaurus.SabreCSG
                         }
                         else if (CurrentSettings.BrushesVisible)
                         {
-                            if (brushes[brushIndex].IsNoCSG)
+                            if (brushes[brushIndex].Mode == CSGMode.Volume)
+                            {
+                                outlineColor = new Color32(0, 0, 0, 255);
+                            }
+                            else if (!brushes[brushIndex].IsVisible)
+                            {
+                                outlineColor = new Color(0.0f, 1.0f, 0.0f);
+                            }
+                            else if (brushes[brushIndex].IsNoCSG)
                             {
                                 outlineColor = new Color(0.8f, 0.3f, 1.0f);
                             }
@@ -981,13 +997,18 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < Selection.gameObjects.Length; i++)
             {
                 // Skip any selected prefabs in the project window
+#if UNITY_2018_2
+				if(PrefabUtility.GetCorrespondingObjectFromSource(Selection.gameObjects[i]) == null
+#else
                 if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
-                    && PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
-                {
-                    continue;
-                }
+#endif
+					&& PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
 
-                PrimitiveBrush primitiveBrush = Selection.gameObjects[i].GetComponent<PrimitiveBrush>();
+				{
+					continue;
+				}
+
+				PrimitiveBrush primitiveBrush = Selection.gameObjects[i].GetComponent<PrimitiveBrush>();
                 CSGModel csgModel = Selection.gameObjects[i].GetComponent<CSGModel>();
 
                 if (csgModel == null)
@@ -1128,7 +1149,7 @@ namespace Sabresaurus.SabreCSG
 
 #endif
 
-        public void SetLastSelectedBrush(Brush brush)
+		public void SetLastSelectedBrush(Brush brush)
         {
             lastSelectedBrush = brush;
         }
@@ -1180,6 +1201,14 @@ namespace Sabresaurus.SabreCSG
                     if (gameObject.GetComponent<GroupBrush>())
                     {
                         Graphics.DrawTexture(drawRect, SabreCSGResources.GroupIconTexture, iconMaterial);
+                    }
+                    else if (brushBase.Mode == CSGMode.Volume)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.VolumeIconTexture, iconMaterial);
+                    }
+                    else if (!brushBase.IsVisible)
+                    {
+                        Graphics.DrawTexture(drawRect, SabreCSGResources.CollisionIconTexture, iconMaterial);
                     }
                     else if (brushBase.IsNoCSG)
                     {
@@ -1713,6 +1742,22 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static void RebuildAllVolumes()
+        {
+            CSGModel[] csgModels = Resources.FindObjectsOfTypeAll<CSGModel>();
+            for (int i = 0; i < csgModels.Length; i++)
+            {
+                List<Brush> brushes = csgModels[i].brushes;
+                for (int j = 0; j < brushes.Count; j++)
+                {
+                    if (brushes[j] != null)
+                    {
+                        brushes[j].RebuildVolume();
+                    }
+                }
+            }
+        }
+
         public override Material GetDefaultFallbackMaterial()
         {
             if (!Application.isPlaying)
@@ -1968,8 +2013,26 @@ namespace Sabresaurus.SabreCSG
             Transform meshGroup = csgModelTransform.Find("MeshGroup");
             if (meshGroup != null)
             {
+                // If the CSG Model is disabled we also disable the mesh group.
+                meshGroup.gameObject.SetActive(csgModelTransform.gameObject.activeSelf);
                 // Reanchor the meshes to the parent of the CSG Model
                 meshGroup.SetParent(csgModelTransform.parent, true);
+            }
+
+            // find all built volumes:
+            Transform[] volumes = csgModelTransform.FindChildren(Constants.GameObjectVolumeComponentIdentifier);
+            for (int i = 0; i < volumes.Length; i++)
+            {
+                // make sure they are visible and editable again.
+                volumes[i].gameObject.hideFlags = HideFlags.None;
+                // give them a more recognizable name.
+                volumes[i].name = volumes[i].parent.name.Replace(" Brush ", " Volume ");
+                if (meshGroup != null)
+                    // Reanchor the volumes to the mesh group.
+                    volumes[i].SetParent(meshGroup, true);
+                else
+                    // Reanchor the volumes to the parent of the CSG Model
+                    volumes[i].SetParent(csgModelTransform.parent, true);
             }
 
             // Remove the CSG Model and its brushes

@@ -12,7 +12,7 @@ Using Constructive Solid Geometry techniques SabreCSG allows you to add and subt
 
 SabreCSG was originally sold on the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/47418), but as of 14th October 2016 has been [open sourced](http://sabrecsg.com/2016/10/14/sabrecsg-released-as-open-source/) under the MIT License (see LICENSE for details). It is now maintained on this [Github repository](https://github.com/sabresaurus/SabreCSG).
 
-Core Features:
+## Core Features:
 
 - Boolean CSG algorithm supporting partial rebuilding.
 - Draw tools to rapidly create levels by drawing brushes directly.
@@ -25,3 +25,21 @@ Core Features:
 - Experimental Code API - Experimental support for procedurally generating levels through code.
 
 Documentation and videos on how to use SabreCSG are available at the [SabreCSG Learn website](http://sabrecsg.com/learn/) or the [wiki](https://github.com/sabresaurus/SabreCSG/wiki).
+
+## Download
+
+[![Download SabreCSG](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-1.png)](https://github.com/sabresaurus/SabreCSG/archive/master.zip)
+
+[![Installation Instructions](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-4.png)](https://youtu.be/KDheSZcagsw?t=30)
+
+## Documentation
+
+[![Visit Wiki Pages](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-3.png)](https://github.com/sabresaurus/SabreCSG/wiki)
+
+[![Join the Official SabreCSG Discord Server](https://github.com/sabresaurus/SabreCSG/wiki/images/home/home-button-2.png)](https://discord.gg/pFAS5rK)
+
+## Donations:
+
+If you love SabreCSG and wish to say thanks then please feel free to make a donation. Your donations are a huge motivator to continue the development of SabreCSG.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/henrydejongh)

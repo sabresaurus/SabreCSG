@@ -41,7 +41,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="sabrePath">Path local to the SabreCSG folder</param>
         /// <returns></returns>
-        private static Object LoadObject(string sabrePath)
+        public static Object LoadObject(string sabrePath)
         {
             bool found = false;
 
@@ -93,6 +93,8 @@ namespace Sabresaurus.SabreCSG
                 return ButtonSphereTexture;
             else if (brushType == PrimitiveBrushType.Cone)
                 return ButtonConeTexture;
+            else if (brushType == PrimitiveBrushType.Capsule)
+                return ButtonCapsuleTexture;
             else
                 return ButtonCubeTexture;
         }
@@ -175,6 +177,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D VolumeIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Volume.png");
+            }
+        }
+
         public static Texture2D NoCSGIconTexture
         {
             get
@@ -188,6 +198,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/Group.png");
+            }
+        }
+
+        public static Texture2D CollisionIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/Collision.png");
             }
         }
 
@@ -260,6 +278,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ButtonCone.png");
+            }
+        }
+
+        public static Texture2D ButtonCapsuleTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonCapsule.png");
             }
         }
 
@@ -383,6 +409,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ShapeEditorRestoreTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorRestore.png");
+            }
+        }
+
         public static Texture2D ShapeEditorRotate90LeftTexture
         {
             get
@@ -436,6 +470,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentInsert.png");
+            }
+        }
+
+        public static Texture2D ShapeEditorSegmentExtrudeTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ShapeEditorSegmentExtrude.png");
             }
         }
 
@@ -630,6 +672,16 @@ namespace Sabresaurus.SabreCSG
         public static Material GetSubtractMaterial()
         {
             return (Material)LoadObject("Materials/Subtract.mat");
+        }
+
+        public static Material GetVolumeMaterial()
+        {
+            return (Material)LoadObject("Materials/Volume.mat");
+        }
+
+        public static Material GetCollisionMaterial()
+        {
+            return (Material)LoadObject("Materials/Collision.mat");
         }
 
         public static Material GetPlaneMaterial()

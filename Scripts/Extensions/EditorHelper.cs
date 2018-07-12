@@ -375,6 +375,14 @@ namespace Sabresaurus.SabreCSG
 					newObjects[i] = Selection.activeGameObject;
                     // Remove the 'Brush (1)', 'Brush (2)', etc. from the name.
                     newObjects[i].name = Regex.Replace(newObjects[i].name, " \\(\\d+\\)$", "");
+
+                    // If we are dealing with a brush, properly duplicate the volume type.
+                    BrushBase brush = newObjects[i].GetComponent<BrushBase>();
+                    if (brush != null && brush.Volume != null)
+                    {
+                        brush.Volume = ScriptableObject.Instantiate(brush.Volume);
+                        brush.RebuildVolume();
+                    }
                 }
                 // Finished duplicating, select all new objects
                 Selection.objects = newObjects;

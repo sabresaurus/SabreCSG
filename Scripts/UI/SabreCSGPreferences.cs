@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG
         private const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
         private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 360);
 
-        private static Event cachedEvent;
+        //private static Event cachedEvent;
 
         public static void CreateAndShow()
         {
@@ -91,6 +91,21 @@ namespace Sabresaurus.SabreCSG
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
                 CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
+
+            EditorGUILayout.Space();
+            EditorGUI.indentLevel = 1;
+            EditorGUILayout.LabelField("Developer Options", EditorStyles.boldLabel);
+            EditorGUI.indentLevel = 0;
+            EditorGUILayout.Space();
+
+            EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowHiddenGameObjectsInHierarchy = GUILayout.Toggle(CurrentSettings.ShowHiddenGameObjectsInHierarchy, "Show hidden game objects in hierarchy");
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                CSGModel.RebuildAllVolumes();
                 SceneView.RepaintAll();
             }
 
