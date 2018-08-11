@@ -712,6 +712,26 @@ namespace Sabresaurus.SabreCSG
             return false;
         }
 
+        internal static bool FindEdge(Polygon polygon, Edge candidateEdge, out Edge foundEdge)
+        {
+            // Check if any of the edges in the polygon match the candidate edge (including reversed order)
+            for (int i = 0; i < polygon.Vertices.Length; i++)
+            {
+                Vector3 position1 = polygon.Vertices[i].Position;
+                Vector3 position2 = polygon.Vertices[(i + 1) % polygon.Vertices.Length].Position;
+
+                if ((candidateEdge.Vertex1.Position == position1 && candidateEdge.Vertex2.Position == position2)
+                   || (candidateEdge.Vertex2.Position == position1 && candidateEdge.Vertex1.Position == position2))
+                {
+                    foundEdge = new Edge(polygon.Vertices[i], polygon.Vertices[(i + 1) % polygon.Vertices.Length]);
+                    return true;
+                }
+            }
+            // None found that matched
+            foundEdge = null;
+            return false;
+        }
+
         #endregion Static Methods
     }
 }

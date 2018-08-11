@@ -130,8 +130,10 @@ namespace Sabresaurus.SabreCSG
 
             PrimitiveBrushType? activeType = (selectedTypes.Length == 1) ? (PrimitiveBrushType?)selectedTypes[0] : null;
 
-            using (new NamedVerticalScope("Type"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Type"))
             {
+                scope.WikiLink = "Brush-Properties#prisms-and-other-brush-types";
+
                 GUILayout.BeginHorizontal();
 
                 float areaWidth = drawableWidth - 18;
@@ -218,8 +220,10 @@ namespace Sabresaurus.SabreCSG
                 GUILayout.EndHorizontal();
             }
 
-            using (new NamedVerticalScope("Size"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Size"))
             {
+                scope.WikiLink = "Brush-Properties#rescaling";
+
                 if (GUILayout.Button(new GUIContent("Reset Bounds", "Resets the bounds of the brush to [2,2,2]")))
                 {
                     ResetBounds();
@@ -327,8 +331,10 @@ namespace Sabresaurus.SabreCSG
                 GUILayout.EndHorizontal();
             }
 
-            using (new NamedVerticalScope("Misc"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Misc"))
             {
+                scope.WikiLink = "Brush-Properties#importing-brushes-from-meshes";
+
                 // Import Row
                 GUILayout.BeginHorizontal();
                 sourceMesh = EditorGUILayout.ObjectField(sourceMesh, typeof(Mesh), false) as Mesh;
