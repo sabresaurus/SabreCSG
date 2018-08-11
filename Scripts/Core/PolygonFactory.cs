@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -540,11 +541,72 @@ namespace Sabresaurus.SabreCSG
             }
             return vertices;
         }
-#endregion
 
-#region PRIVATE
-		// Used to sort a collection of Vectors in a clockwise direction
-		internal class SortVectorsClockwise : IComparer<Vector3>
+        internal static bool ChamferPolygons(List<Polygon> polygons, List<Edge> edges, float distance, int iterations, out List<Polygon> resultPolygons)
+        {
+            // list of clipping planes.
+            List<Plane> clippingPlanes = new List<Plane>();
+
+            // iterate through all edges and calculate the clipping planes.
+            for (int e = 0; e < edges.Count; e++)
+            {
+                Edge edge = edges[e];
+
+                // find the two polygons connected to the edge.
+                Polygon[] matchingPolygons = polygons.Where(p => Polygon.ContainsEdge(p, edge)).ToArray();
+                if (matchingPolygons.Length != 2) { resultPolygons = null; return false; };
+
+                // find the actual edges on the polygons (which helps determine their direction for the chamfer).
+                Edge realEdge1;
+                Polygon.FindEdge(matchingPolygons[0], edge, out realEdge1);
+                Edge realEdge2;
+                Polygon.FindEdge(matchingPolygons[1], edge, out realEdge2);
+
+                // calculate clipping plane position:
+                Vector3 v1 = realEdge1.Vertex1.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v2 = realEdge1.Vertex2.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v3 = realEdge2.Vertex2.Position - ChamferPolygons_GetNormal(realEdge2.Vertex1.Position, realEdge2.Vertex2.Position, matchingPolygons[1].GetCenterPoint()).normalized * distance;
+
+                for (int i = 0; i < iterations; i++)
+                {
+                    float t = (1.0f / iterations);
+                    Vector3 p1 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * i);
+                    Vector3 p2 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * (i + 1));
+                    clippingPlanes.Add(new Plane(
+                        p1,
+                        p2,
+                        p1 + (v1 - v2).normalized
+                    ));
+                }
+            }
+
+            // copy the input polygons.
+            resultPolygons = polygons.DeepCopy();
+
+            // clip the polygons.
+            for (int i = 0; i < clippingPlanes.Count; i++)
+            {
+                List<Polygon> polygonsFront;
+                List<Polygon> polygonsBack;
+                if (SplitPolygonsByPlane(resultPolygons, clippingPlanes[i], false, out polygonsFront, out polygonsBack))
+                    resultPolygons = polygonsFront;
+            }
+
+            return true;
+        }
+
+        // todo: this should probably be moved somewhere else...
+        private static Vector3 ChamferPolygons_GetNormal(Vector3 a, Vector3 b, Vector3 c)
+        {
+            Vector3 side1 = b - a;
+            Vector3 side2 = c - a;
+            return Vector3.Cross(side1, side2).normalized;
+        }
+        #endregion
+
+        #region PRIVATE
+        // Used to sort a collection of Vectors in a clockwise direction
+        internal class SortVectorsClockwise : IComparer<Vector3>
 		{
 			Quaternion cancellingRotation; // Used to transform the positions from an arbitrary plane to the XY plane
 			Vector3 rotatedCenter; // Transformed center point, used as the center point to find the angles around
