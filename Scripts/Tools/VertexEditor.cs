@@ -1406,6 +1406,7 @@ namespace Sabresaurus.SabreCSG
                     if (chamferIterations < 1) chamferIterations = 1;
                 })
                 .AddConfirmButton("Chamfer", () => OnEdgeChamfer(false))
+                .SetWikiLink("Brush-Tools-Vertex#chamfer-edges")
                 .Show();
 
                 return;
