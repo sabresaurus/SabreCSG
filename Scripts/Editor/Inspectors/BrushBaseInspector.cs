@@ -80,8 +80,10 @@ namespace Sabresaurus.SabreCSG
             // volume editing:
             if (BrushTargets.Any(b => b.Mode == CSGMode.Volume))
             {
-                using (new NamedVerticalScope("Volume"))
+                using (NamedVerticalScope scope = new NamedVerticalScope("Volume"))
                 {
+                    scope.WikiLink = "Brush-Volumes";
+
                     // find all of the volume types in the project:
                     List<System.Type> volumeTypes = Volume.FindAllInAssembly();
                     if (volumeTypes.Count == 0)
@@ -95,7 +97,7 @@ namespace Sabresaurus.SabreCSG
                         BrushBase volumeTarget = volumeBrushes.Contains(BrushTarget) ? BrushTarget : volumeBrushes.Last();
 
                         // make sure all volume brushes are of the same type (for multi-editing).
-                        object brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
+                        System.Type brushTargetVolumeType = volumeTarget.Volume ? volumeTarget.Volume.GetType() : null;
                         if (volumeBrushes.Length > 1 && !volumeBrushes.All(b => b.Volume.GetType() == brushTargetVolumeType))
                         {
                             EditorGUILayout.LabelField("Cannot multi-edit volumes of different types!");
@@ -150,8 +152,10 @@ namespace Sabresaurus.SabreCSG
             DoInspectorGUI();
 
             // generic brush editing:
-            using (new NamedVerticalScope("Order"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Order"))
             {
+                scope.WikiLink = "Tutorial-1#additive-and-subtractive-brushes";
+
                 List<BrushBase> orderedTargets = BrushTargets.ToList();
                 orderedTargets.RemoveAll(item => (item == null));
                 orderedTargets.Sort((x, y) => x.transform.GetSiblingIndex().CompareTo(y.transform.GetSiblingIndex()));

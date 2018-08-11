@@ -39,10 +39,15 @@ namespace Sabresaurus.SabreCSG
 			{
 				BrushBase matchedBrushBase = Selection.gameObjects[i].GetComponent<BrushBase>();
 
-				// If we've selected a brush base that isn't a prefab in the project 
+				// If we've selected a brush base that isn't a prefab in the project
+
 				if(matchedBrushBase != null
-					&& !(PrefabUtility.GetPrefabParent(matchedBrushBase.gameObject) == null 
-						&& PrefabUtility.GetPrefabObject(matchedBrushBase.transform) != null))
+#if UNITY_2018_2
+						&& !(PrefabUtility.GetCorrespondingObjectFromSource(matchedBrushBase.gameObject) == null
+#else
+						&& !(PrefabUtility.GetPrefabParent(matchedBrushBase.gameObject) == null 
+#endif
+							&& PrefabUtility.GetPrefabObject(matchedBrushBase.transform) != null))
 				{
 					brushBases.Add(matchedBrushBase);
 				}
@@ -55,17 +60,21 @@ namespace Sabresaurus.SabreCSG
             BrushBase newPrimaryBrushBase = null;
             PrimitiveBrush newPrimaryBrush = null;
 
-            // Make sure it's not null and that it isn't a prefab in the project
-            if(selectedGameObject != null
+			// Make sure it's not null and that it isn't a prefab in the project
+			if(selectedGameObject != null
+#if UNITY_2018_2
+				&& !(PrefabUtility.GetCorrespondingObjectFromSource(selectedGameObject) == null
+#else
                 && !(PrefabUtility.GetPrefabParent(selectedGameObject) == null
-                        && PrefabUtility.GetPrefabObject(selectedGameObject.transform) != null))
-            {
-                newPrimaryBrushBase = selectedGameObject.GetComponent<BrushBase>();// brushBases.FirstOrDefault();
-                newPrimaryBrush = selectedGameObject.GetComponent<PrimitiveBrush>();// primitiveBrushes.Where(item => item != null).FirstOrDefault();
-            }
+#endif
+						&& PrefabUtility.GetPrefabObject(selectedGameObject.transform) != null))
+			{
+				newPrimaryBrushBase = selectedGameObject.GetComponent<BrushBase>();// brushBases.FirstOrDefault();
+				newPrimaryBrush = selectedGameObject.GetComponent<PrimitiveBrush>();// primitiveBrushes.Where(item => item != null).FirstOrDefault();
+			}
 
-            // If the primary brush base has changed
-            if (primaryTargetBrushBase != newPrimaryBrushBase
+			// If the primary brush base has changed
+			if (primaryTargetBrushBase != newPrimaryBrushBase
 				|| (primaryTargetBrushBase == null && newPrimaryBrushBase != null)) // Special case for undo where references are equal but one is null
 			{
 				primaryTargetBrushBase = newPrimaryBrushBase;
