@@ -74,8 +74,10 @@ namespace Sabresaurus.SabreCSG
             DrawDefaultInspector();
 
             this.serializedObject.Update();
-            using (new NamedVerticalScope("Build Settings"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Build Settings"))
             {
+                scope.WikiLink = "Build-Settings";
+
                 EditorGUIUtility.fieldWidth = 0;
                 EditorGUIUtility.labelWidth = 160;
 
@@ -171,8 +173,10 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.EndHorizontal();
             }
 
-            using (new NamedVerticalScope("Export"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Export"))
             {
+                scope.WikiLink = "Build-Settings#exporting-obj-files";
+
                 if (GUILayout.Button("Export All To OBJ"))
                 {
                     csgModel.ExportOBJ(false);

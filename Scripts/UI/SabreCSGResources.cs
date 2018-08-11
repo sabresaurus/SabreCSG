@@ -321,6 +321,22 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D GroupHeaderButtonCloseTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/GroupHeaderButtonClose.png");
+            }
+        }
+
+        public static Texture2D GroupHeaderButtonHelpTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/GroupHeaderButtonHelp.png");
+            }
+        }
+
         public static Texture2D ShapeEditorCreatePolygonTexture
         {
             get
@@ -534,6 +550,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ImporterBackground.png");
+            }
+        }
+
+        public static Texture2D MouseRightClickHintTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/MouseRightClickHint.png");
             }
         }
 

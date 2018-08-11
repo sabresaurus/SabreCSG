@@ -39,7 +39,33 @@ namespace Sabresaurus.SabreCSG
 			return buttonPressed;
 		}
 
-	    public static bool Toggle(bool value, string title, params GUILayoutOption[] options)
+        public static void RightClickMiniButton(string text, string tooltip, Action onLeftClicked, Action onRightClicked)
+        {
+            RightClickMiniButton(new GUIContent(text, tooltip), onLeftClicked, onRightClicked);
+        }
+
+        public static void RightClickMiniButton(GUIContent content, Action onLeftClicked, Action onRightClicked)
+        {
+            bool buttonPressed = GUILayout.Button(new GUIContent(content.text, content.tooltip + "\nRight click to configure..."), EditorStyles.miniButton);
+            if (Event.current.type == EventType.Repaint)
+            {
+                Rect rect = GUILayoutUtility.GetLastRect();
+                float offset = rect.width - 9;
+                rect.height = 13;
+                rect.width = 13;
+                rect.y += 1;
+                rect.x = offset;
+                GUI.DrawTexture(rect, SabreCSGResources.MouseRightClickHintTexture);
+            }
+            // detect mouse right-click and invoke the callback.
+            if (buttonPressed && Event.current.button == 1)
+                onRightClicked.Invoke();
+            // use the actual button bool to determine a button press and invoke the callback.
+            else if (buttonPressed)
+                onLeftClicked.Invoke();
+        }
+
+        public static bool Toggle(bool value, string title, params GUILayoutOption[] options)
 	    {
 	        value = GUILayout.Toggle(value, title, EditorStyles.toolbarButton, options);
 	        return value;
