@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG
 		protected class Tab
 		{
 			public string Name = "";
-			public List<Object> selectedObjects = new List<Object>();
+			public List<Object> trackedObjects = new List<Object>();
 		}
 
 		enum DropInType { Replace, InsertAfter };
@@ -94,14 +94,13 @@ namespace Sabresaurus.SabreCSG
         void OnGUI()
         {
             Event e = Event.current;
-            //Debug.Log(e.type);
             
 #if UNITY_5_4_OR_NEWER
 			int columnCount = (int)(Screen.width / EditorGUIUtility.pixelsPerPoint) / (width + SPACING);
 #else
             int columnCount = Screen.width / (width + SPACING);
 #endif
-			List<Object> selectedObjects = tabs[activeTab].selectedObjects;
+			List<Object> selectedObjects = tabs[activeTab].trackedObjects;
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
             GUILayout.Space(8);
             //GUILayout.Box(new GUIContent(), GUILayout.ExpandWidth(true));
@@ -538,15 +537,19 @@ namespace Sabresaurus.SabreCSG
 			{
 				tabs.Add(new Tab());
 			}
-			List<Object> selectedObjects = tabs[tabIndex].selectedObjects;
+			List<Object> selectedObjects = tabs[tabIndex].trackedObjects;
             StringBuilder output = new StringBuilder();
             for (int i = 0; i < selectedObjects.Count; i++)
             {
                 if(selectedObjects[i] != null)
                 {
-                    string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(selectedObjects[i]));
+	                string assetPath = AssetDatabase.GetAssetPath(selectedObjects[i]);
+	                string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
+	                // Save both the GUID and the path in case the GUID changes
                     output.Append(guid);
+	                output.Append(":");
+	                output.Append(assetPath);
                     output.Append(",");
                 }
             }
@@ -557,10 +560,11 @@ namespace Sabresaurus.SabreCSG
 			{
 				key += tabIndex;
 			}
-
+	        
 			PlayerPrefs.SetString(key, outputString);
 
 			PlayerPrefs.SetString(key + "-Tab", tabs[tabIndex].Name);
+	        PlayerPrefs.Save();
         }
 
 		void Load(int tabIndex)
@@ -570,7 +574,7 @@ namespace Sabresaurus.SabreCSG
 				tabs.Add(new Tab());
 			}
 
-			tabs[tabIndex].selectedObjects.Clear();
+			tabs[tabIndex].trackedObjects.Clear();
 
 			string key = PlayerPrefKeyPrefix;
 			if(tabIndex > 0)
@@ -578,17 +582,31 @@ namespace Sabresaurus.SabreCSG
 				key += tabIndex;
 			}
 
-			string selectionString = PlayerPrefs.GetString(key);
-            string[] newGUIDs = selectionString.Split(',');
-            for (int i = 0; i < newGUIDs.Length; i++)
+			string trackedString = PlayerPrefs.GetString(key);
+            string[] trackedObjectStrings = trackedString.Split(',');
+            foreach (string trackedObjectString in trackedObjectStrings)
             {
-                string path = AssetDatabase.GUIDToAssetPath(newGUIDs[i]);
-                Object mainAsset = AssetDatabase.LoadMainAssetAtPath(path);
+	            // Get the guid, for older versions this is the only thing in the string, for newer versions it's the
+	            // left side of a colon. Either way Split()[0] works  
+	            string guid = trackedObjectString.Split(':')[0];
+	            
+	            // Even when we have a path tracked, construct it fresh from the GUID in case the file has moved and
+	            // there's a new one with the old path. We should always try to track on the GUID since that's what
+	            // Unity does
+	            string path = AssetDatabase.GUIDToAssetPath(trackedObjectString);
+	            Object mainAsset = AssetDatabase.LoadMainAssetAtPath(path);
 
-                if(mainAsset != null)
-                {
-					tabs[tabIndex].selectedObjects.Add(mainAsset);
-                }
+	            if (mainAsset == null && trackedObjectString.Contains(":"))
+	            {
+		            // Couldn't find an asset for that GUID, try the path we saved
+		            path = trackedObjectString.Split(':')[1];
+		            mainAsset = AssetDatabase.LoadMainAssetAtPath(path);
+	            }
+
+	            if(mainAsset != null)
+	            {
+		            tabs[tabIndex].trackedObjects.Add(mainAsset);
+	            }
             }
 			tabs[tabIndex].Name = PlayerPrefs.GetString(key + "-Tab");
         }
