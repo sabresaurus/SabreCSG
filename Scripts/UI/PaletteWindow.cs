@@ -593,7 +593,7 @@ namespace Sabresaurus.SabreCSG
                 // Even when we have a path tracked, construct it fresh from the GUID in case the file has moved and
                 // there's a new one with the old path. We should always try to track on the GUID since that's what
                 // Unity does
-                string path = AssetDatabase.GUIDToAssetPath(trackedObjectString);
+                string path = AssetDatabase.GUIDToAssetPath(guid);
                 Object mainAsset = AssetDatabase.LoadMainAssetAtPath(path);
 
                 if (mainAsset == null && trackedObjectString.Contains(":"))
