@@ -14,8 +14,10 @@ namespace Sabresaurus.SabreCSG
     {
         public override void DoInspectorGUI()
         {
-            using (new NamedVerticalScope("Shape Editor Brush"))
+            using (NamedVerticalScope scope = new NamedVerticalScope("Shape Editor Brush"))
             {
+                scope.WikiLink = "2D-Shape-Editor#embedded-projects";
+
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
                 GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
                 if (GUILayout.Button(new GUIContent(" Shape Editor", SabreCSGResources.ButtonShapeEditorTexture, "Show 2D Shape Editor"), createBrushStyle))
