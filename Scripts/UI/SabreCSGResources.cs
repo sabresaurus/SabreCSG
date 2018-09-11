@@ -537,11 +537,19 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public static Texture2D ImporterImporterValveMapFormat2006Texture
+        public static Texture2D ImporterValveMapFormat2006Texture
         {
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ImporterValveMapFormat2006.png");
+            }
+        }
+
+        public static Texture2D ImporterQuake1Texture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ImporterQuake1.png");
             }
         }
 
