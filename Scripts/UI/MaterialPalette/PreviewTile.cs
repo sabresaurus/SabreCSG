@@ -10,11 +10,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		public ThumbSize materialThumbSize = ThumbSize.Medium;
 		public Material material = null;
 		public Color32 labelFontColor = Color.yellow;
-		public bool renderSpherePreview = false;
-		public MaterialPaletteWindow parent;
+		public MPWindow parent;
 
 		public void Draw( Rect lastRect )
 		{
+			// TODO: this is done a few times. Maybe create an operator to convert Vector2 to ThumbSize?
 			Vector2 thumbSize = new Vector2( (int)materialThumbSize, (int)materialThumbSize );
 
 			lastRect.width -= 4;
@@ -25,6 +25,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 			if( material.name == "Deleted Material" )
 			{
+				// TODO: might be a better way to do this
 				MPGUI.ContextButton( new GUIContent( "", material.name ),
 					new Vector2( thumbSize.x, thumbSize.y ),
 					parent.Load, parent.Load,
@@ -34,17 +35,17 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				MPGUI.ContextButton( new GUIContent( "", material.name ),
 					new Vector2( thumbSize.x, thumbSize.y ),
-					ApplyMaterial, DisplayLabelPopup, FindAndSelectMaterial,
+					MPHelper.ApplyMaterial, DisplayTagEditor, MPHelper.FindAndSelectMaterial,
 					material, parent, material,
 					Styles.MPAssetPreviewBackground( (int)thumbSize.x, (int)thumbSize.y ) );
 			}
 
-
 			// material preview
-			RenderThumb( GUILayoutUtility.GetLastRect() );
+			MPGraphics.RenderThumb( GUILayoutUtility.GetLastRect(), material );
 
+			// label rect + offset
 			lastRect = GUILayoutUtility.GetLastRect();// get the thumb rect
-			Rect labelRect = lastRect;
+			Rect labelRect = new Rect( lastRect.x, lastRect.y, lastRect.width, 16 );
 
 			labelRect.y += thumbSize.y - 16;
 
@@ -73,141 +74,18 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			// hightlight
 			if( lastRect.Contains( Event.current.mousePosition ) )
 			{
-				RenderHightlightOutline( GUILayoutUtility.GetLastRect() );
+				MPGraphics.RenderHightlightOutline( GUILayoutUtility.GetLastRect(), /*magenta*/ new Color32( 255, 0, 255, 255 ) );
 			}
 		}
 
-		private void RenderHightlightOutline( Rect lastRect )
+		private void DisplayTagEditor( object parent )
 		{
-			Material m = new Material( Shader.Find( "Unlit/Color" ) );
-			m.color = new Color32( 255, 0, 255, 255 );
-
-			m.SetPass( 0 );
-
-			GL.PushMatrix();
-			GL.LoadPixelMatrix();
-			GL.Begin( GL.LINES );
-			GL.Color( m.color );
-
-			lastRect.width += lastRect.x;
-			lastRect.height += lastRect.y;
-
-			GL.Vertex3( lastRect.x, lastRect.y, 0 ); // left
-			GL.Vertex3( lastRect.x, lastRect.height, 0 );
-
-			GL.Vertex3( lastRect.width, lastRect.height, 0 ); // right
-			GL.Vertex3( lastRect.width, lastRect.y, 0 );
-
-			GL.Vertex3( lastRect.x, lastRect.yMin, 0 ); // top
-			GL.Vertex3( lastRect.width, lastRect.yMin, 0 );
-
-			GL.Vertex3( lastRect.x, lastRect.height, 0 );
-			GL.Vertex3( lastRect.width, lastRect.height, 0 );
-
-			GL.End();
-			GL.PopMatrix();
-		}
-
-		private void RenderThumb( Rect rect )
-		{
-			if( material != null )
-			{
-				if( material.HasProperty( "_MainTex" ) && !renderSpherePreview )
-				{
-					if( material.GetTexture( "_MainTex" ) != null )
-					{
-						GUI.Label( rect, material.GetTexture( "_MainTex" ) );
-					}
-					else
-					{
-						if( material.HasProperty( "_Color" ) )
-						{
-							Color col = material.GetColor( "_Color" ).gamma;
-							GUI.color = col;
-						}
-						else
-						{
-							GUI.Label( rect, Styles.MPNoTexture );
-						}
-
-						if( material.HasProperty( "_EmissionColor" ) )
-						{
-							Color col = material.GetColor( "_EmissionColor" ).gamma;
-							if( col != Color.black )
-							{
-								GUI.color = col;
-							}
-							else
-							{
-								GUI.Label( rect, Styles.MPNoTexture );
-							}
-						}
-
-						GUI.DrawTexture( rect, EditorGUIUtility.whiteTexture );
-						GUI.color = Color.white;
-					}
-				}
-				else if( renderSpherePreview )
-				{
-					GUI.DrawTexture( rect, GetMaterialThumb() ?? SabreCSGResources.ClearTexture );
-				}
-				else
-				{
-					GUI.Label( rect, Styles.MPNoTexture );
-				}
-			}
-		}
-
-		private string[] FindTags()
-		{
-			string[] guids = AssetDatabase.FindAssets( "t:Material " + material.name );
-			string asset = AssetDatabase.GUIDToAssetPath( guids[0] );
-			Material mat = (Material)AssetDatabase.LoadMainAssetAtPath( asset );
-
-			return AssetDatabase.GetLabels( mat );
-		}
-		private void FindAndSelectMaterial( object material )
-		{
-			Material m = (Material)material;
-			string[] guids = AssetDatabase.FindAssets( "t:Material " + m.name );
-			string asset = AssetDatabase.GUIDToAssetPath( guids[0] );
-			Material mat = (Material)AssetDatabase.LoadMainAssetAtPath( asset );
-			Selection.activeObject = mat;
-			EditorGUIUtility.PingObject( mat );
-		}
-
-		private Texture2D GetMaterialThumb()
-		{
-			if( !material.HasProperty( "_MainTex" ) )
-			{
-				return Styles.MPNoTexture;
-			}
-
-			return AssetPreview.GetAssetPreview( material );
-		}
-
-		private void ApplyMaterial( object mat )
-		{
-			CSGModel activeModel = CSGModel.GetActiveCSGModel();
-			Material m = (Material)mat;
-
-			if( activeModel != null )
-			{
-				SurfaceEditor se = (SurfaceEditor)activeModel.GetTool( MainMode.Face );
-				se.SetSelectionMaterial( m );
-
-				SceneView.lastActiveSceneView.ShowNotification( new GUIContent( "Applied Material: \n" + m.name ) );
-			}
-		}
-
-		private void DisplayLabelPopup( object parent )
-		{
-			MPLabelEditorWindow mp = EditorWindow.GetWindow<MPLabelEditorWindow>( true, "Tag Editor - " + material.name );
-			MaterialPaletteWindow mpw = (MaterialPaletteWindow)parent;
+			MPTagEditorWindow mp = EditorWindow.GetWindow<MPTagEditorWindow>( true, "Tag Editor - " + material.name );
+			MPWindow mpw = (MPWindow)parent;
 
 			mp.material = material;
 			mp.parent = mpw;
-			mp.existingMaterialLabels = FindTags();
+			mp.existingMaterialLabels = MPHelper.GetLabelsForMaterial( mp.material );
 
 			for( int i = 0; i < mp.existingMaterialLabels.Length; i++ )
 			{

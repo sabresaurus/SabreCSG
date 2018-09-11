@@ -6,16 +6,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 {
 	public static class Styles
 	{
-		public static GUIStyle MPMiniScrollbar
-		{
-			get
-			{
-				GUIStyle s = new GUIStyle();
-
-				return s;
-			}
-		}
-
 		public static GUIStyle MPAssetPreviewLabel
 		{
 			get
@@ -48,6 +38,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 		}
 
+		// TODO: maybe not used anymore
 		public static Texture2D MPNoTexture
 		{
 			get
@@ -63,7 +54,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 #if UNITY_5
 				GUIStyle s = new GUIStyle( "AnimationCurveEditorBackground" );
 #else
-				GUIStyle s = new GUIStyle("CurveEditorBackground");
+				GUIStyle s = new GUIStyle( "CurveEditorBackground" );
 #endif
 
 				return s;
@@ -84,4 +75,5 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		}
 	}
 }
+
 #endif

@@ -4,6 +4,7 @@ using System;
 
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace Sabresaurus.SabreCSG.MaterialPalette
 {
@@ -26,8 +27,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUIStyle s = style ?? "Button";
 			bool isPressed = false;
 
-			if( onLeftClick != null && onRightClick != null
-				&& size != null )
+			if( onLeftClick != null && onRightClick != null )
 			{
 				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
 				{
@@ -64,7 +64,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			bool isPressed = false;
 
 			if( onLeftClick != null && onRightClick != null
-				&& size != null
 				&& leftClickParam != null && rightClickParam != null )
 			{
 				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
@@ -107,7 +106,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			bool isPressed = false;
 
 			if( onLeftClick != null && onRightClick != null && onMiddleClick != null
-				&& size != null
 				&& leftClickParam != null && rightClickParam != null && middleClickParam != null )
 			{
 				if( GUILayout.Button( text, s, GUILayout.Width( size.x ), GUILayout.Height( size.y ), GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( false ) ) )
@@ -131,6 +129,23 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 
 			return isPressed;
+		}
+
+		public static void BeginStatusBar( string textContent, GUIStyle style )
+		{
+			if( style == null )
+				style = "OL box";
+
+			GUILayout.BeginHorizontal( style, GUILayout.Height( 20 ) );
+
+			GUILayout.Label( textContent );
+
+			GUILayout.FlexibleSpace();
+		}
+
+		public static void EndStatusBar()
+		{
+			GUILayout.EndHorizontal();
 		}
 	}
 }

@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace Sabresaurus.SabreCSG.MaterialPalette
 {
-	public class MPLabelEditorWindow : EditorWindow
+	public class MPTagEditorWindow : EditorWindow
 	{
 		public Material material = null;
-		public MaterialPaletteWindow parent = null;
+		public MPWindow parent = null;
 		public string[] existingMaterialLabels = new string[]{ };
 		public List<string> labelsToAdd = new List<string>();
 
@@ -20,7 +20,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 		private Vector2 allLabelsScrollPos = Vector2.zero;
 		private Vector2 labelsToAddScrollPos = Vector2.zero;
 		private Vector2 labelsOnMaterialScrollPos = Vector2.zero;
-		private string newTagStr;
+		private string newTagStr = string.Empty;
 
 		private void OnGUI()
 		{
@@ -77,6 +77,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				GUILayout.BeginHorizontal();
 				{
 					// tags to add
+					// TODO: possibly modularize this to get rid of clutter/redundancy
 					GUILayout.BeginVertical( "Box", GUILayout.ExpandHeight( true ), GUILayout.ExpandWidth( true ) );
 					{
 						GUILayout.Label( "Tags to Add", EditorStyles.boldLabel );
@@ -140,6 +141,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 					GUILayout.EndVertical();
 
 					// all tags
+					// TODO: possibly modularize this to get rid of clutter/redundancy
 					GUILayout.BeginVertical( "Box", GUILayout.Width( 98 ),
 						GUILayout.ExpandHeight( true ), GUILayout.ExpandWidth( true ) );
 					{
@@ -177,6 +179,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUILayout.EndVertical();
 		}
 
+		// TODO: possibly modularize this to get rid of clutter/redundancy
 		private void DrawTagList()
 		{
 			GUILayout.BeginVertical( "Box", GUILayout.Width( 98 ), GUILayout.ExpandWidth( true ), GUILayout.ExpandHeight( true ) );
@@ -213,8 +216,10 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void OnEnable()
 		{
-			string[] el = MPHelper.GetAssetLabels( true );
-			string[] al = MPHelper.GetAssetLabels( false );
+			List<Material> untagged = new List<Material>();
+			List<Material> tagged = new List<Material>();
+			string[] el = MPHelper.GetAssetLabels( "", out untagged, out tagged );
+			string[] al = MPHelper.GetAllAssetLabels();
 
 			for( int i = 0; i < el.Length; i++ )
 			{
@@ -226,6 +231,10 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				if( !existingLabels.Contains( al[i] ) )
 					allLabels.Add( al[i] );
 			}
+
+			// clean up garbage
+			untagged = null;
+			tagged = null;
 		}
 
 		private void AddTagsToMaterial()
