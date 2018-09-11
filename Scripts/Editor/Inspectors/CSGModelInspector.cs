@@ -260,7 +260,7 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.Space();
                 //
 
-                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterQuake1Texture, "Quake 1 Importer", "Henry de Jongh");
+                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterQuake1Texture, "Quake 1 Importer", "Jasmine Mickle");
 
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Import Quake 1 Map (*.map)"))
@@ -285,7 +285,7 @@ namespace Sabresaurus.SabreCSG
 
                 if (GUILayout.Button("?", GUILayout.Width(16)))
                 {
-                    EditorUtility.DisplayDialog("Quake 1 Importer", "This importer was created with the lovely help and guidance of Jasmine Mickle.\n\nImportant Notes:\n* It will try to find the materials in your project automatically.", "Okay");
+                    EditorUtility.DisplayDialog("Quake 1 Importer", "This importer (parser by Henry de Jongh) was created using Trenchbroom 2.0.6.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. It will replace any leading '*' with '#' like '#teleport'.\n\nKnown Issues:\n* 45 degree angled walls may not have correct UV texture coordinates (are not correctly picking the dominant axis because there are two).\n* Negative vertex coordinates may not have correct UV texture coordinates (feel free to contribute improved UV mapping code if you know how it works, we had to guess most of the maths).", "Okay");
                 }
                 EditorGUILayout.EndHorizontal();
                 GuiLayoutEndImporterSection();
