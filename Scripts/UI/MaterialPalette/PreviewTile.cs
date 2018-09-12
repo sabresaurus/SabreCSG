@@ -7,7 +7,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 {
 	public class PreviewTile
 	{
-		public ThumbSize materialThumbSize = ThumbSize.Medium;
+		public int materialThumbSize = (int)ThumbSize.Medium;
 		public Material material = null;
 		public Color32 labelFontColor = Color.yellow;
 		public MPWindow parent;
@@ -52,22 +52,20 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			// material label
 			if( !( lastRect.Contains( Event.current.mousePosition ) ) )
 			{
-				switch( materialThumbSize )
+				if( materialThumbSize <= 128 )
 				{
-					case ThumbSize.Large:
-						GUI.contentColor = labelFontColor;
-						GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
-						GUI.contentColor = Color.white;
-						break;
-
-					case ThumbSize.Medium:
-						GUI.contentColor = labelFontColor;
-						GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
-						GUI.contentColor = Color.white;
-						break;
-
-					case ThumbSize.Small:
-						break;
+					GUI.contentColor = labelFontColor;
+					GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
+					GUI.contentColor = Color.white;
+				}
+				if( materialThumbSize <= 64 )
+				{
+					GUI.contentColor = labelFontColor;
+					GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
+					GUI.contentColor = Color.white;
+				}
+				else
+				{
 				}
 			}
 

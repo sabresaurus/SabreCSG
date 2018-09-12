@@ -131,22 +131,36 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			return isPressed;
 		}
 
-		public static void BeginStatusBar( string textContent, GUIStyle style )
+		public static void BeginStatusBar( GUIStyle style )
 		{
 			if( style == null )
 				style = "OL box";
 
 			GUILayout.BeginHorizontal( style, GUILayout.Height( 20 ) );
-
-			GUILayout.Label( textContent );
-
-			GUILayout.FlexibleSpace();
 		}
 
-		public static void EndStatusBar()
+		public static void EndStatusBar( string textContent )
 		{
+			GUILayout.FlexibleSpace();
+			GUILayout.Label( textContent );
 			GUILayout.EndHorizontal();
 		}
+
+		public static void EndStatusBar( GUIContent textContent )
+		{
+			GUILayout.FlexibleSpace();
+			GUILayout.Label( textContent );
+			GUILayout.EndHorizontal();
+		}
+
+		public static void EndStatusBar( Texture icon, string tooltip )
+		{
+			GUILayout.FlexibleSpace();
+			GUILayout.Label( new GUIContent( icon, tooltip ) );
+			GUILayout.EndHorizontal();
+		}
+
+		//new GUIContent( textContent.image, textContent.tooltip )
 	}
 }
 
