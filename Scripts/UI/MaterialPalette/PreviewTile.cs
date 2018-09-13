@@ -7,15 +7,14 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 {
 	public class PreviewTile
 	{
-		public int materialThumbSize = (int)ThumbSize.Medium;
+		public int materialThumbSize = 64;
 		public Material material = null;
 		public Color32 labelFontColor = Color.yellow;
 		public MPWindow parent;
 
 		public void Draw( Rect lastRect )
 		{
-			// TODO: this is done a few times. Maybe create an operator to convert Vector2 to ThumbSize?
-			Vector2 thumbSize = new Vector2( (int)materialThumbSize, (int)materialThumbSize );
+			Vector2 thumbSize = new Vector2( materialThumbSize, materialThumbSize );
 
 			lastRect.width -= 4;
 			lastRect.height -= 4;
@@ -52,27 +51,18 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			// material label
 			if( !( lastRect.Contains( Event.current.mousePosition ) ) )
 			{
-				if( materialThumbSize <= 128 )
+				if( materialThumbSize >= 80 )
 				{
 					GUI.contentColor = labelFontColor;
 					GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
 					GUI.contentColor = Color.white;
-				}
-				if( materialThumbSize <= 64 )
-				{
-					GUI.contentColor = labelFontColor;
-					GUI.Label( labelRect, material.name, Styles.MPAssetPreviewLabel );
-					GUI.contentColor = Color.white;
-				}
-				else
-				{
 				}
 			}
 
 			// hightlight
 			if( lastRect.Contains( Event.current.mousePosition ) )
 			{
-				MPGraphics.RenderHightlightOutline( GUILayoutUtility.GetLastRect(), /*magenta*/ new Color32( 255, 0, 255, 255 ) );
+				MPGraphics.RenderHightlightOutline( GUILayoutUtility.GetLastRect(), /*white*/ new Color32( 255, 255, 255, 255 ) );
 			}
 		}
 
