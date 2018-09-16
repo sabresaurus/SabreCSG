@@ -1,6 +1,9 @@
 ﻿#if UNITY_EDITOR
 
+// TODO: Filter
+
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -41,15 +44,30 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 		}
 
+		private List<Material> All
+		{
+			get
+			{
+				List<Material> final = new List<Material>();
+				final.AddRange( untagged );
+				final.AddRange( tagged );
+
+				return final;
+			}
+		}
+
 		private static MPWindow window;
 		private string[] labels = new string[]{ };
 		private List<Material> untagged = new List<Material>();
 		private List<Material> tagged = new List<Material>();
 		private List<Material> current = new List<Material>();
-
+		private List<Material> all = new List<Material>();
 		private int previewSize = 64;
+		private int tagListWidth = 128;
 		private string filter = "";
+		private bool tagListVisible = false;
 		private Vector2 scrollPosGrid = Vector2.zero;
+		private Vector2 labelsScrollPos;
 
 		public void Load()
 		{
@@ -68,15 +86,18 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			window.Show();
 		}
 
-		private void OnDestroy()
+		private void Update()
 		{
+			if( filter != string.Empty )
+			{
+			}
 		}
 
 		private void OnGUI()
 		{
-			GUILayout.BeginVertical( "GameViewBackground" );
+			GUILayout.BeginVertical( "GameViewBackground", GUILayout.Height( window.position.height ), GUILayout.ExpandHeight( true ) );
 			{
-				GUILayout.BeginHorizontal();
+				GUILayout.BeginHorizontal( GUILayout.ExpandHeight( true ) );
 				{
 					DrawGrid();
 				}
@@ -91,15 +112,11 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 
 		private void DrawGrid()
 		{
-			GUILayout.BeginVertical(); //Styles.MPScrollViewBackground );
+			GUILayout.BeginVertical( GUILayout.Width( window.position.width - ( ( tagListVisible ) ? tagListWidth : 0 ) ), GUILayout.Height( window.position.height - 32 ) ); //Styles.MPScrollViewBackground );
 			{
-				scrollPosGrid = GUILayout.BeginScrollView( scrollPosGrid, false, false, GUILayout.ExpandHeight( true ) );
+				scrollPosGrid = GUILayout.BeginScrollView( scrollPosGrid, false, false, GUILayout.Width( window.position.width - ( ( tagListVisible ) ? tagListWidth : 0 ) ) );
 				{
-#if UNITY_5_4_OR_NEWER
-					int numColumns = (int)( Screen.width / EditorGUIUtility.pixelsPerPoint ) / ( previewSize + 4 );
-#else
-					int numColumns = Screen.width / ( previewSize + 4 );
-#endif
+					int numColumns = ( (int)window.position.width - ( ( tagListVisible ) ? tagListWidth : 0 ) ) / ( previewSize + 4 );
 
 					for( int i = 0; i < current.Count; i++ )
 					{
@@ -140,6 +157,39 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 				GUILayout.EndScrollView();
 			}
 			GUILayout.EndVertical();
+
+			if( tagListVisible )
+			{
+				GUILayout.BeginVertical( "Box", GUILayout.Width( tagListWidth ) );
+				{
+					GUILayout.Label( new GUIContent( "Tags", "Project-defined tags assigned by the user when importing an asset." ), EditorStyles.miniLabel );
+
+					labelsScrollPos = GUILayout.BeginScrollView( labelsScrollPos, Styles.MPScrollViewBackground );
+					{
+						for( int i = 0; i < labels.Length; i++ )
+						{
+							EditorGUI.indentLevel = 0;
+
+							if( i % 2 != 0 ) // show odd background
+							{
+								GUI.backgroundColor = new Color32( 150, 150, 150, 255 );
+							}
+							else // show even background
+							{
+								GUI.backgroundColor = new Color32( 200, 200, 200, 255 );
+							}
+
+							if( GUILayout.Button( labels[i], Styles.MPAssetTagLabel, GUILayout.ExpandHeight( false ), GUILayout.ExpandWidth( true ) ) )
+							{
+								filter = labels[i];
+							}
+							GUI.backgroundColor = Color.white;
+						}
+					}
+					GUILayout.EndScrollView();
+				}
+				GUILayout.EndVertical();
+			}
 		}
 
 		private void DrawStatusBar()
@@ -159,6 +209,9 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			{
 				previewSize = (int)GUILayout.HorizontalSlider( previewSize, 32, 128, GUILayout.Width( 100 ) );
 				GUILayout.Label( previewSize.ToString(), GUILayout.Width( 24 ) );
+
+				GUILayout.FlexibleSpace();
+				tagListVisible = GUILayout.Toggle( tagListVisible, "", "OL Toggle" );
 			}
 			MPGUI.EndStatusBar( EditorGUIUtility.IconContent( "console.infoicon.sml" ).image, sb.ToString() );
 		}

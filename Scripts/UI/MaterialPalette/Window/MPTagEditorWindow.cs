@@ -219,7 +219,7 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			List<Material> untagged = new List<Material>();
 			List<Material> tagged = new List<Material>();
 			string[] el = MPHelper.GetAssetLabels( "", out untagged, out tagged );
-			string[] al = MPHelper.GetAllAssetLabels();
+			string[] al = MPHelper.Reflection.GetAllAssetLabels();
 
 			for( int i = 0; i < el.Length; i++ )
 			{

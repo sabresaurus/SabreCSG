@@ -159,8 +159,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			GUILayout.Label( new GUIContent( icon, tooltip ) );
 			GUILayout.EndHorizontal();
 		}
-
-		//new GUIContent( textContent.image, textContent.tooltip )
 	}
 }
 

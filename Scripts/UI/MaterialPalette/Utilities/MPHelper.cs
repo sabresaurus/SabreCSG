@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +11,110 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 {
 	internal static class MPHelper
 	{
+		internal class Reflection
+		{
+			private const BindingFlags ALL_FLAGS = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+			public static object GetValue( object target, Type type, string member )
+			{
+				try
+				{
+					PropertyInfo i = type.GetProperty( member, ALL_FLAGS );
+
+					if( i != null )
+					{
+						return i.GetValue( target, null );
+					}
+
+					FieldInfo f = type.GetField( member, ALL_FLAGS );
+
+					if( f != null )
+					{
+						return f.GetValue( target );
+					}
+
+					return null;
+				}
+				catch( Exception e )
+				{
+					Debug.LogException( e );
+					return null;
+				}
+			}
+
+			public static void SetValue( object target, string member, object value )
+			{
+				try
+				{
+					PropertyInfo i = target.GetType().GetProperty( member, ALL_FLAGS );
+
+					if( i != null )
+					{
+						i.SetValue( target, value, ALL_FLAGS, null, null, null );
+					}
+
+					FieldInfo f = target.GetType().GetField( member, ALL_FLAGS );
+
+					if( f != null )
+					{
+						f.SetValue( target, value );
+					}
+				}
+				catch( Exception e )
+				{
+					Debug.LogException( e );
+				}
+			}
+
+			/// <summary>
+			/// Gets all asset labels, including built-in ones.
+			/// </summary>
+			/// <returns></returns>
+			public static string[] GetAllAssetLabels()
+			{
+				BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
+				var labels = (Dictionary<string, float>)typeof( AssetDatabase ).InvokeMember( "GetAllLabels", flags, null, null, null );
+
+				List<string> labelText = new List<string>();
+
+				foreach( string l in labels.Keys )
+				{
+					labelText.Add( l );
+				}
+
+				return labelText.Distinct().ToArray(); // no duplicates
+			}
+
+			private static Type GetType( string type )
+			{
+				try
+				{
+					Type t = Type.GetType( type );
+
+					if( t == null )
+					{
+						IEnumerable<Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+						foreach( Assembly a in assemblies )
+						{
+							t = a.GetType( type );
+
+							if( t != null )
+							{
+								return t;
+							}
+						}
+					}
+					return t;
+				}
+				catch( Exception e )
+				{
+					Debug.LogException( e );
+					return null;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Gets labels from assets in the project.
 		/// </summary>
@@ -36,25 +141,6 @@ namespace Sabresaurus.SabreCSG.MaterialPalette
 			}
 
 			return assetLabels.Distinct().ToArray();
-		}
-
-		/// <summary>
-		/// Gets all asset labels, including built-in ones.
-		/// </summary>
-		/// <returns></returns>
-		public static string[] GetAllAssetLabels()
-		{
-			BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.InvokeMethod;
-			var labels = (Dictionary<string, float>)typeof( AssetDatabase ).InvokeMember( "GetAllLabels", flags, null, null, null );
-
-			List<string> labelText = new List<string>();
-
-			foreach( string l in labels.Keys )
-			{
-				labelText.Add( l );
-			}
-
-			return labelText.Distinct().ToArray(); // no duplicates
 		}
 
 		/// <summary>
