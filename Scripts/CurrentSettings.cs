@@ -14,6 +14,7 @@ namespace Sabresaurus.SabreCSG
 
 		Clip,
 		Draw,
+        Paint,
 	};
 
 	public enum OverrideMode

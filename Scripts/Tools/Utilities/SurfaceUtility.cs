@@ -41,7 +41,7 @@ namespace Sabresaurus.SabreCSG
 		/// <param name="polygon">Polygon whose vertices will be smoothed.</param>
 		/// <param name="allPolygons">All polygons used to provide context for how they vertex normal should be smoothed, typically the brush's polygons. Note that this can include the provided Polygon as it will simply be skipped.</param>
 		/// <param name="smoothingAngle">Maximum angle between polygons that can be considered for smoothing.</param>
-		public static void SmoothPolygon(Polygon polygon, Polygon[] allPolygons, float smoothingAngle = 60)
+		public static void SmoothPolygon(Polygon polygon, Polygon[] brushPolygons, float smoothingAngle = 60)
 		{
 			for (int i = 0; i < polygon.Vertices.Length; i++) 
 			{
@@ -52,9 +52,9 @@ namespace Sabresaurus.SabreCSG
 				Vector3 newNormal = sourceNormal;
 				int totalNormalCount = 1;
 
-				for (int j = 0; j < allPolygons.Length; j++) 
+				for (int j = 0; j < brushPolygons.Length; j++) 
 				{
-					Polygon otherPolygon = allPolygons[j];
+					Polygon otherPolygon = brushPolygons[j];
 					// Ignore the same polygon
 					if(otherPolygon != polygon)
 					{
@@ -76,6 +76,169 @@ namespace Sabresaurus.SabreCSG
 				vertex.Normal = newNormal * (1f / totalNormalCount);
 			} 
 		}
+
+        private static List<Plane> Test_GetPlanes(Polygon polygon, Vector3 axis1, Vector3 axis2)
+        {
+            List<Plane> planes = new List<Plane>();
+
+            float minAxis2 = Vector3.Dot(axis2, polygon.Vertices[0].Position);
+            float maxAxis2 = Vector3.Dot(axis2, polygon.Vertices[0].Position);
+
+            float minAxis1 = Vector3.Dot(axis1, polygon.Vertices[0].Position);
+            float maxAxis1 = Vector3.Dot(axis1, polygon.Vertices[0].Position);
+
+            foreach (Vertex vertex in polygon.Vertices)
+            {
+                float dotRight = Vector3.Dot(axis2, vertex.Position);
+                float dotUp = Vector3.Dot(axis1, vertex.Position);
+
+                if (dotRight > maxAxis2)
+                    maxAxis2 = dotRight;
+                if (dotRight < minAxis2)
+                    minAxis2 = dotRight;
+
+                if (dotUp > maxAxis1)
+                    maxAxis1 = dotUp;
+                if (dotUp < minAxis1)
+                    minAxis1 = dotUp;
+            }
+
+            int startAxis2 = Mathf.FloorToInt(minAxis2 + 1);
+            int endAxis2 = Mathf.CeilToInt(maxAxis2 - 1);
+
+            if (endAxis2 > startAxis2)
+            {
+                for (int i = 0; i <= endAxis2 - startAxis2; i++)
+                {
+                    planes.Add(new Plane(-axis2, startAxis2 + i));
+                }
+            }
+
+            int startAxis1 = Mathf.FloorToInt(minAxis1 + 1);
+            int endAxis1 = Mathf.CeilToInt(maxAxis1 - 1);
+
+            if (endAxis1 > startAxis1)
+            {
+                for (int i = 0; i <= endAxis1 - startAxis1; i++)
+                {
+                    planes.Add(new Plane(-axis1, startAxis1 + i));
+                }
+            }
+
+            return planes;
+        }
+
+        private static List<Polygon> Test_Split(List<Polygon> list, List<Plane> splitPlanes)
+        {
+            foreach (Plane plane in splitPlanes)
+            {
+                List<Polygon> out1;
+                List<Polygon> out2;
+                if (PolygonFactory.SplitCoplanarPolygonsByPlane(list, plane, out out1, out out2, true))
+                {
+                    out1.AddRange(out2); // Concat together
+                    list = out1;
+                }
+            }
+
+            return list;
+        }
+
+        public static Polygon[] DensifyPolygon(Polygon referencePolygon, Polygon[] brushPolygons)
+        {
+            // Convert to a resizable list
+            List<Polygon> brushPolygonsList = new List<Polygon>(brushPolygons);
+            // Remove the reference polygon since we're replacing it
+            brushPolygonsList.Remove(referencePolygon);
+
+            Vector3 axis1 = (referencePolygon.Vertices[1].Position - referencePolygon.Vertices[0].Position).normalized;
+            Vector3 axis2 = (referencePolygon.Vertices[2].Position - referencePolygon.Vertices[1].Position).normalized;
+
+            List<Plane> splitPlanes = Test_GetPlanes(referencePolygon, axis1, axis2);
+            List<Polygon> splitPolygons = Test_Split(new List<Polygon>(){ referencePolygon}, splitPlanes);
+
+            // Add in the split polygons that are replacing referencePolygon
+            brushPolygonsList.AddRange(splitPolygons);
+
+            return brushPolygonsList.ToArray();
+
+        }
+
+        public static Polygon[] SimplifyPolygon(Polygon referencePolygon, Polygon[] brushPolygons)
+        {
+            Plane testPlane = referencePolygon.Plane;
+
+            List<Polygon> filteredPolygons = new List<Polygon>();
+            foreach (Polygon brushPolygon in brushPolygons)
+            {
+                if (brushPolygon.Plane.normal == testPlane.normal && brushPolygon.Plane.distance == testPlane.distance)
+                {
+                    filteredPolygons.Add(brushPolygon);
+                }
+            }
+
+            Vector3 axis1 = (referencePolygon.Vertices[1].Position - referencePolygon.Vertices[0].Position).normalized;
+            Vector3 axis2 = (referencePolygon.Vertices[2].Position - referencePolygon.Vertices[1].Position).normalized;
+
+            // This is a massive hack, by rotating the axis by 45 degrees it simplifies finding the min, max
+            Quaternion rotation = Quaternion.AngleAxis(45f, referencePolygon.Plane.normal);
+            axis1 = rotation * axis1;
+            axis2 = rotation * axis2;
+
+            Vertex vertexMinAxis1;
+            Vertex vertexMaxAxis1;
+            Vertex vertexMinAxis2;
+            Vertex vertexMaxAxis2;
+            GetMinMax(filteredPolygons, axis1, out vertexMinAxis1, out vertexMaxAxis1);
+            GetMinMax(filteredPolygons, axis2, out vertexMinAxis2, out vertexMaxAxis2);
+
+            Polygon newPolygon = referencePolygon.DeepCopy();
+            newPolygon.SetVertices(new Vertex[]
+                {
+                    vertexMinAxis1, vertexMinAxis2, vertexMaxAxis1, vertexMaxAxis2,
+                });
+
+            List<Polygon> outputPolygons = new List<Polygon>(brushPolygons);
+
+            foreach (var item in filteredPolygons)
+            {
+                outputPolygons.Remove(item);
+            }
+
+            outputPolygons.Add(newPolygon);
+
+            return outputPolygons.ToArray();
+        }
+
+        private static void GetMinMax(List<Polygon> sourcePolygons, Vector3 axis, out Vertex minVertex, out Vertex maxVertex)
+        {
+            minVertex = sourcePolygons[0].Vertices[0];
+            maxVertex = sourcePolygons[0].Vertices[0];
+
+            float minAxis = Vector3.Dot(axis, sourcePolygons[0].Vertices[0].Position);
+            float maxAxis = Vector3.Dot(axis, sourcePolygons[0].Vertices[0].Position);
+
+            foreach (Polygon sourcePolygon in sourcePolygons)
+            {
+                foreach (Vertex vertex in sourcePolygon.Vertices)
+                {
+                    Vector3 vertexPosition = vertex.Position;
+                    float dotAxis = Vector3.Dot(vertexPosition, axis);
+
+                    if(dotAxis < minAxis)
+                    {
+                        minAxis = dotAxis;
+                        minVertex = vertex;
+                    }
+
+                    if(dotAxis > maxAxis)
+                    {
+                        maxAxis = dotAxis;
+                        maxVertex = vertex;
+                    }
+                }
+            }
+        }
 
 		/// <summary>
 		/// Creates a brush by extruding a supplied polygon by a specified extrusion distance.

@@ -29,6 +29,14 @@ namespace Sabresaurus.SabreCSG
 		float weldTolerance = 0.1f;
 		float scale = 1f;
 
+        public override Rect ToolbarRect
+        {
+            get
+            {
+                return new Rect(6, 40, 140, 160);
+            }
+        }
+
 		void ClearSelection()
 		{
 			selectedEdges.Clear();
@@ -626,7 +634,7 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void OnToolbarGUI(int windowID)
+        public override void OnToolbarGUI(int windowID)
 		{
 			GUILayout.Label("Vertex", SabreGUILayout.GetTitleStyle());
 
@@ -921,13 +929,6 @@ namespace Sabresaurus.SabreCSG
 			{
 				DrawVertices(sceneView, e);
 			}
-
-			// Draw UI specific to this editor
-			Rect rectangle = new Rect(0, 50, 140, 160);
-			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
-			toolbar.normal.background = SabreCSGResources.ClearTexture;
-			toolbar.fixedHeight = rectangle.height;
-			GUILayout.Window(140002, rectangle, OnToolbarGUI, "", toolbar);
 		}
 
 		void OnMouseDown (SceneView sceneView, Event e)

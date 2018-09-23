@@ -16,8 +16,8 @@ namespace Sabresaurus.SabreCSG
 		// Used in Resize WidgetMode, for example to rotate using the resize handle
 		enum ActiveMode { None, Resize, Translate, Rotate };
 
-		ActiveMode currentMode = ActiveMode.None;
-		WidgetMode widgetMode = WidgetMode.Bounds;
+        WidgetMode widgetMode = WidgetMode.Bounds;
+        ActiveMode currentMode = ActiveMode.None;
 
         ResizeHandlePair? selectedResizeHandlePair = null;
         int selectedResizePointIndex = -1; // -1 is unset, 0 is Point1, 1 is Point2
@@ -72,6 +72,14 @@ namespace Sabresaurus.SabreCSG
 			new ResizeHandlePair(new Vector3(0,1,0)),
 			new ResizeHandlePair(new Vector3(0,0,1)),
 		};
+
+        public override Rect ToolbarRect
+        {
+            get
+            {
+                return new Rect(6, 40, 200, 40);
+            }
+        }
 
         public override void OnSceneGUI(SceneView sceneView, Event e)
         {
@@ -1154,16 +1162,10 @@ namespace Sabresaurus.SabreCSG
 				}
 				DrawResizeHandles(sceneView, e);
 			}
-
-			GUIStyle style = new GUIStyle(EditorStyles.toolbar);
-			style.normal.background = SabreCSGResources.ClearTexture;
-			Rect rectangle = new Rect(0, 50, 300, 50);
-			style.fixedHeight = rectangle.height;
-			GUILayout.Window(140007, rectangle, OnTopToolbarGUI, "", style);
 		}
 
-		private void OnTopToolbarGUI(int windowID)
-		{
+        public override void OnToolbarGUI(int windowID)
+        {
 			widgetMode = SabreGUILayout.DrawEnumGrid(widgetMode, GUILayout.Width(67));
 
 			GUILayout.BeginHorizontal(GUILayout.Width(200));

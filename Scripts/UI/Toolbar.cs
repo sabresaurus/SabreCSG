@@ -60,6 +60,7 @@ namespace Sabresaurus.SabreCSG
 			style = new GUIStyle(EditorStyles.toolbar);
 
 			style.normal.background = SabreCSGResources.ClearTexture;
+
 			rectangle = new Rect(0, 20, 320, 50);
 			GUILayout.Window(140004, rectangle, OnTopToolbarGUI, "", style);
 
@@ -72,7 +73,7 @@ namespace Sabresaurus.SabreCSG
             
         }
 
-        private static void OnTopToolbarGUI(int windowID)
+        public static void OnTopToolbarGUI(int windowID)
         {
 			EditorGUILayout.BeginHorizontal();
             MainMode currentMode = CurrentSettings.CurrentMode;
@@ -364,6 +365,22 @@ namespace Sabresaurus.SabreCSG
 			}
 
             GUILayout.FlexibleSpace();
+
+            if(SabreCSGWindow.CurrentWindow == null)
+            {
+                if (SabreGUILayout.Button(">>>"))
+                {
+                    SabreCSGWindow.CreateAndShow();
+                }
+            }
+            else
+            {
+                if (SabreGUILayout.Button("<<<"))
+                {
+                    SabreCSGWindow.CurrentWindow.Close();
+                }
+            }
+
             GUILayout.EndHorizontal();
 
             // Line Two

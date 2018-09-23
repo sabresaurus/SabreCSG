@@ -8,9 +8,9 @@ using Array = System.Array;
 
 namespace Sabresaurus.SabreCSG
 {
-    public class SurfaceEditor : Tool
+    public class SurfaceEditor : Tool, IVertexColorEditable
     {
-		bool selectHelpersVisible = false;
+		bool selectionHelpersVisible = false;
 		enum Mode { None, Translate, Rotate };
 		enum AlignDirection { Top, Bottom, Left, Right, Center };
 
@@ -55,14 +55,12 @@ namespace Sabresaurus.SabreCSG
 		float unroundedDeltaAngle = 0;
 
 		// Main UI rectangle for this tool's UI
-		readonly Rect toolbarRect = new Rect(6, 40, 200, 226);
+		readonly Rect toolbarRect = new Rect(6, 40, 200, 246);
 
         // Used to track what polygons have been previously clicked on, so that the user can cycle click through objects
         // on the same (or similar) ray cast
         List<Polygon> previousHits = new List<Polygon>();
         List<Polygon> lastHitSet = new List<Polygon>();
-
-        Rect alignButtonRect = new Rect(118,110,80,45);
 
 		Material lastMaterial = null;
 		Color lastColor = Color.white;
@@ -71,14 +69,22 @@ namespace Sabresaurus.SabreCSG
 
 		VertexColorWindow vertexColorWindow = null;
 
-		Rect ToolbarRect
+        Rect AlignButtonRect
+        {
+            get
+            {
+                return new Rect(112, 110, 80, 45);
+            }
+        }
+
+		public override Rect ToolbarRect
 		{
 			get
 			{
 				Rect rect = new Rect(toolbarRect);
-				if(selectHelpersVisible)
+				if(selectionHelpersVisible)
 				{
-					rect.height += 116;
+					rect.height += 110;
 				}
 				return rect;
 			}
@@ -89,8 +95,6 @@ namespace Sabresaurus.SabreCSG
 			base.OnSceneGUI(sceneView, e); // Allow the base logic to calculate first
 
 			// GUI events
-			OnRepaintGUI(sceneView, e);
-
 			if (e.type == EventType.KeyDown || e.type == EventType.KeyUp)
 			{
 				OnKeyAction(sceneView, e);
@@ -939,26 +943,6 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-        void OnRepaintGUI(SceneView sceneView, Event e)
-        {
-            // Draw UI specific to this editor
-			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
-
-			// Set the background tint
-			if(EditorGUIUtility.isProSkin)
-			{
-				toolbar.normal.background = SabreCSGResources.HalfBlackTexture;
-			}
-			else
-			{
-				toolbar.normal.background = SabreCSGResources.HalfWhiteTexture;
-			}
-			// Set the style height to match the rectangle (so it stretches instead of tiling)
-			toolbar.fixedHeight = ToolbarRect.height;
-			// Draw the actual GUI via a Window
-			GUILayout.Window(140009, ToolbarRect, OnToolbarGUI, "", toolbar);
-        }
-
 		void OnKeyAction(SceneView sceneView, Event e)
 		{
 			if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.CopyMaterial)))
@@ -1093,7 +1077,7 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void DrawMaterialBox()
+        void DrawMaterialBox(Vector2 positionOffset)
 		{
 			bool materialConflict = false;
 			Material material = null;
@@ -1264,7 +1248,7 @@ namespace Sabresaurus.SabreCSG
 			}				
 		}
 
-		void DrawExcludeBox()
+        void DrawExcludeBox(Vector2 positionOffset)
 		{
 			bool excludeConflict = false;
 			bool excludeState = false;
@@ -1287,7 +1271,8 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			GUILayout.BeginHorizontal(GUILayout.Width(50));
-			Rect rect = new Rect(72, 48, 60, 15);
+			Rect rect = new Rect(66, 48, 60, 15);
+            rect.position += positionOffset;
 			bool newExcludeState = SabreGUILayout.ToggleMixed(rect, excludeState, excludeConflict, "Exclude");
 
 			EditorGUI.showMixedValue = false; // Reset mixed state
@@ -1317,7 +1302,7 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void DrawManualTextBoxes()
+        void DrawManualTextBoxes(Vector2 positionOffset)
 		{
 			float? northScale = 1;
 			float? eastScale = 1;
@@ -1359,7 +1344,8 @@ namespace Sabresaurus.SabreCSG
 
 
 			// East Scale (u scale)
-			Rect rect = new Rect(138, 2, 60, 16);
+			Rect rect = new Rect(132, 2, 60, 16);
+            rect.position += positionOffset;
 			if(SabreGUILayout.DrawUVField(rect, eastScale, ref uScaleString, "uScaleField", textFieldStyle1))
 			{
 				float newEastScale;
@@ -1377,7 +1363,8 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// North scale (v scale)
-			rect = new Rect(138, 17, 60, 16);
+			rect = new Rect(132, 17, 60, 16);
+            rect.position += positionOffset;
 			if(SabreGUILayout.DrawUVField(rect, northScale, ref vScaleString, "vScaleField", textFieldStyle1))
 			{
 				float newNorthScale;
@@ -1396,7 +1383,8 @@ namespace Sabresaurus.SabreCSG
 
 
 			// North scale (v scale)
-			rect = new Rect(138, 35, 60, 16);
+			rect = new Rect(132, 35, 60, 16);
+            rect.position += positionOffset;
 			if(SabreGUILayout.DrawUVField(rect, eastOffset, ref uOffsetString, "uOffsetField", textFieldStyle2))
 			{
 				float newEastOffset;
@@ -1413,7 +1401,8 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 
-			rect = new Rect(138, 50, 60, 16);
+			rect = new Rect(132, 50, 60, 16);
+            rect.position += positionOffset;
 			if(SabreGUILayout.DrawUVField(rect, northOffset, ref vOffsetString, "vOffsetField", textFieldStyle2))
 			{
 				float newNorthOffset;
@@ -1443,25 +1432,33 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 				
-        void OnToolbarGUI(int windowID)
+        public override void OnToolbarGUI(int windowID)
         {
+            Rect lastRect = GUILayoutUtility.GetRect(0,0);
+            //Debug.Log(lastRect.xMin + " " + lastRect.yMin);
 			// Allow the user to change the material on the selected polygons
-			DrawMaterialBox();
+            DrawMaterialBox(lastRect.position);
 
 			// Allow the user to change whether the selected polygons will be excluded from the final mesh
-			DrawExcludeBox();
+            DrawExcludeBox(lastRect.position);
+
+            DrawManualTextBoxes(lastRect.position);
+
 
 			GUISkin inspectorSkin = SabreGUILayout.GetInspectorSkin();
 
-			Rect rect = new Rect(138, 68, 60, 18);
-
-			if(GUI.Button(rect, "Color", inspectorSkin.button))
+			Rect rect = new Rect(132, 68, 60, 18);
+            rect.position += lastRect.position;
+            if(GUI.Button(rect, "Color", inspectorSkin.button))
 			{
 				vertexColorWindow = VertexColorWindow.CreateAndShow(csgModel, this);
 			}
 
 			GUIStyle newStyle = new GUIStyle(EditorStyles.miniButton);
 			newStyle.padding = new RectOffset(0,0,0,0);
+
+            Rect alignButtonRect = AlignButtonRect;
+            alignButtonRect.position += lastRect.position;
 
 			if(GUI.Button(new Rect(alignButtonRect.xMin,alignButtonRect.yMin,alignButtonRect.width,alignButtonRect.height/3), "▲", newStyle))
 			{
@@ -1594,6 +1591,37 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 //			GUILayout.Space(8);
 
+            GUILayout.BeginHorizontal(GUILayout.Width(180));
+
+            if(GUILayout.Button("Densify", EditorStyles.miniButton))
+            {
+                Polygon polygon = selectedSourcePolygons[0];
+                PrimitiveBrush brush = matchedBrushes[polygon] as PrimitiveBrush;
+                Undo.RecordObject(brush.transform, "Densify");
+                Undo.RecordObject(brush, "Densify");
+                Polygon[] newPolygons = SurfaceUtility.DensifyPolygon(polygon, brush.GetPolygons());
+
+                if(newPolygons != null)
+                {
+                    brush.SetPolygons(newPolygons);
+                }
+            }
+
+            if(GUILayout.Button("Simplify", EditorStyles.miniButton))
+            {
+                Polygon polygon = selectedSourcePolygons[0];
+                PrimitiveBrush brush = matchedBrushes[polygon] as PrimitiveBrush;
+                Undo.RecordObject(brush.transform, "Simplify");
+                Undo.RecordObject(brush, "Simplify");
+                Polygon[] newPolygons = SurfaceUtility.SimplifyPolygon(polygon, brush.GetPolygons());
+
+                if(newPolygons != null)
+                {
+                    brush.SetPolygons(newPolygons);
+                }
+            }
+            GUILayout.EndHorizontal();
+
 			GUILayout.BeginHorizontal(GUILayout.Width(180));
 
 			GUI.SetNextControlName("faceRotateField");
@@ -1655,12 +1683,9 @@ namespace Sabresaurus.SabreCSG
 			
 			GUILayout.EndHorizontal();
 
-			DrawManualTextBoxes();
+            selectionHelpersVisible = SabreGUILayout.Toggle(selectionHelpersVisible, "Selection Helpers");
 
-
-			selectHelpersVisible = EditorGUILayout.Foldout(selectHelpersVisible, "Selection Helpers");
-
-			if(selectHelpersVisible)
+			if(selectionHelpersVisible)
 			{
 				GUILayout.BeginHorizontal(GUILayout.Width(180));
 
@@ -2676,32 +2701,31 @@ namespace Sabresaurus.SabreCSG
 			for (int j = 0; j < polygon.Vertices.Length; j++) 
 			{
 				polygon.Vertices[j].Color = color;
-
-				PolygonEntry entry = csgModel.GetVisualPolygonEntry(polygon.UniqueIndex);
-				if(entry != null)
+            }
+			PolygonEntry entry = csgModel.GetVisualPolygonEntry(polygon.UniqueIndex);
+			if(entry != null)
+			{
+				if(entry.BuiltMesh != null)
 				{
-					if(entry.BuiltMesh != null)
+					Undo.RecordObject(entry.BuiltMesh, "Change Vertex Color");
+				
+					Color[] meshColors = entry.BuiltMesh.colors;
+					Color[] colors = entry.Colors;
+
+					for (int vertexIndex = 0; vertexIndex < entry.Positions.Length; vertexIndex++) 
 					{
-						Undo.RecordObject(entry.BuiltMesh, "Change Vertex Color");
-					
-						Color[] meshColors = entry.BuiltMesh.colors;
-						Color[] colors = entry.Colors;
-
-						for (int vertexIndex = 0; vertexIndex < entry.Positions.Length; vertexIndex++) 
-						{
-							colors[vertexIndex] = color;
-							meshColors[entry.BuiltVertexOffset + vertexIndex] = color;
-						}
-						entry.Colors = colors;
-						entry.BuiltMesh.colors = meshColors;
-
-						EditorHelper.SetDirty(entry.BuiltMesh);
+						colors[vertexIndex] = color;
+						meshColors[entry.BuiltVertexOffset + vertexIndex] = color;
 					}
-				}
+					entry.Colors = colors;
+					entry.BuiltMesh.colors = meshColors;
 
-				// Inform the brush cache that the polygons have changed, but that a rebuild isn't necessary
-				matchedBrushes[polygon].RecachePolygons(false);
+					EditorHelper.SetDirty(entry.BuiltMesh);
+				}
 			}
+
+			// Inform the brush cache that the polygons have changed, but that a rebuild isn't necessary
+			matchedBrushes[polygon].RecachePolygons(false);
 		}
 
 		public void SetSelectionColor(Color color)
@@ -2709,7 +2733,12 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < selectedSourcePolygons.Count; i++) 
 			{
 				Polygon polygon = selectedSourcePolygons[i];
-				ChangePolygonColor(polygon, color);
+
+                Brush brush = matchedBrushes[polygon];
+                Undo.RecordObject(brush, "Transform UVs");
+                csgModel.UndoRecordContext("Transform UVs");
+
+                ChangePolygonColor(polygon, color);
 			}
 		}
 
@@ -2718,7 +2747,12 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < selectedSourcePolygons.Count; i++) 
 			{
 				Polygon polygon = selectedSourcePolygons[i];
-				ChangePolygonMaterial(polygon, material);
+
+                Brush brush = matchedBrushes[polygon];
+                Undo.RecordObject(brush, "Transform UVs");
+                csgModel.UndoRecordContext("Transform UVs");
+
+                ChangePolygonMaterial(polygon, material);
 			}
 		}
     }

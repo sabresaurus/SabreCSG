@@ -523,17 +523,25 @@ namespace Sabresaurus.SabreCSG
 
             foreach (KeyValuePair<int, List<Polygon>> row in groupedPolygons)
             {
-                // Determine the polygon set that is optimal
-                List<Polygon> newPolygons = Optimizer.CalculateConvexHulls(row.Value);
-                // If the polygon set has actually changed
-                if (newPolygons != row.Value)
+                if(row.Value.Count == 1)
                 {
-                    // Replace the grouped polygons with the optimal set
-                    row.Value.Clear();
-                    row.Value.AddRange(newPolygons);
+                    // Unlikely to be able to reduce the polygon any more, don't try
+                    allPolygons.Add(row.Value[0]);
                 }
-                // Add the new polygons to the total list
-                allPolygons.AddRange(newPolygons);
+                else
+                {
+                    // Determine the polygon set that is optimal
+                    List<Polygon> newPolygons = Optimizer.CalculateConvexHulls(row.Value);
+                    // If the polygon set has actually changed
+                    if (newPolygons != row.Value)
+                    {
+                        // Replace the grouped polygons with the optimal set
+                        row.Value.Clear();
+                        row.Value.AddRange(newPolygons);
+                    }
+                    // Add the new polygons to the total list
+                    allPolygons.AddRange(newPolygons);
+                }
             }
 
             // Set the built polygons for this cache from the newly calculated optimal polygons

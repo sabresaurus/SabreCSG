@@ -29,6 +29,14 @@ namespace Sabresaurus.SabreCSG
 
         bool isDragValid = true; // Drags are only valid if they didn't start on the bottom toolbar or scene view alignment gizmo
 
+        public override Rect ToolbarRect
+        {
+            get
+            {
+                return new Rect(6, 40, 210, 40);
+            }
+        }
+
         public override void ResetTool()
         {
 			if(primaryTargetBrush != null)
@@ -460,18 +468,10 @@ namespace Sabresaurus.SabreCSG
 					GL.End();
 					GL.PopMatrix();
 				}
-			}
-
-            // Draw UI specific to this editor
-//			GUI.backgroundColor = Color.red;
-            Rect rectangle = new Rect(0, 50, 210, 130);
-			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
-			toolbar.normal.background = SabreCSGResources.ClearTexture;
-			toolbar.fixedHeight = rectangle.height;
-			GUILayout.Window(140006, rectangle, OnToolbarGUI, "",toolbar);
+			}               
         }
 
-        void OnToolbarGUI(int windowID)
+        public override void OnToolbarGUI(int windowID)
         {
 			GUI.enabled = (primaryTargetBrush != null);
             EditorGUILayout.BeginHorizontal();

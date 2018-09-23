@@ -157,7 +157,8 @@ namespace Sabresaurus.SabreCSG
         internal static bool SplitCoplanarPolygonsByPlane(List<Polygon> polygons, // Source polygons that will be split
                                                 Plane splitPlane,
                                                 out List<Polygon> polygonsFront,
-                                                out List<Polygon> polygonsBack)
+                                                out List<Polygon> polygonsBack,
+                                                bool alternateWinding = false)
         {
             polygonsFront = new List<Polygon>();
             polygonsBack = new List<Polygon>();
@@ -177,6 +178,16 @@ namespace Sabresaurus.SabreCSG
                     // Attempt to split the polygon
                     if (Polygon.SplitPolygon(polygons[polygonIndex], out frontPolygon, out backPolygon, out newVertex1, out newVertex2, splitPlane))
                     {
+                        if(alternateWinding)
+                        {
+                            // Move the vertices through the collection by one so triangulation order is different
+                            List<Vertex> vertexList = new List<Vertex>(backPolygon.Vertices);
+                            vertexList.Add(vertexList[0]);
+                            vertexList.RemoveAt(0);
+
+                            backPolygon.SetVertices(vertexList.ToArray());
+                        }
+
                         // If the split algorithm was successful (produced two valid polygons) then add each polygon to 
                         // their respective points and track the intersection points
                         polygonsFront.Add(frontPolygon);

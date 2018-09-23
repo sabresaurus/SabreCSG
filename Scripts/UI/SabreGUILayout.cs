@@ -14,6 +14,8 @@ namespace Sabresaurus.SabreCSG
 
 		static int cachedIndentLevel;
 
+        public const float NAME_TAG_HEIGHT = 12;
+
 		public static bool Button(string title, GUIStyle style = null)
 	    {
 			return GUILayout.Button(title, style ?? EditorStyles.miniButton);
@@ -29,15 +31,56 @@ namespace Sabresaurus.SabreCSG
 			bool buttonPressed = GUILayout.Button(new GUIContent());
 			if (Event.current.type == EventType.Repaint)
 			{
-				Rect rect = GUILayoutUtility.GetLastRect();
+                Rect colorRect = GUILayoutUtility.GetLastRect();
 				// Inset the color rect
-				rect = rect.ExpandFromCenter(new Vector2(-4,-4));
-				GUI.color = color;
-				GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+				colorRect = colorRect.ExpandFromCenter(new Vector2(-4,-4));
+                Color rgbColor = color;
+                rgbColor.a = 1;
+				GUI.color = rgbColor;
+
+				GUI.DrawTexture(colorRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+
+                // Draw alpha at bottom
+                colorRect.yMin = colorRect.yMax - 3;
+                GUI.color = Color.Lerp(Color.black, Color.white, color.a);
+
+                GUI.DrawTexture(colorRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
 				GUI.color = Color.white;
 			}
 			return buttonPressed;
 		}
+
+        public static bool ColorButtonLabel(Color color, string label, GUIStyle style)
+        {
+            bool buttonPressed = GUILayout.Button(label, style);
+            if (Event.current.type == EventType.Repaint)
+            {
+                Rect colorRect = GUILayoutUtility.GetLastRect();
+                // Inset the color rect
+                colorRect = colorRect.ExpandFromCenter(new Vector2(-6,-6));
+                colorRect.xMax = colorRect.xMin + colorRect.height;
+
+                Rect borderRect = colorRect.ExpandFromCenter(new Vector2(2,2));
+
+                GUI.color = Color.black;
+                GUI.DrawTexture(borderRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+
+
+                Color rgbColor = color;
+                rgbColor.a = 1;
+                GUI.color = rgbColor;
+
+                GUI.DrawTexture(colorRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+
+                // Draw alpha at bottom
+                colorRect.yMin = colorRect.yMax - 3;
+                GUI.color = Color.Lerp(Color.black, Color.white, color.a);
+
+                GUI.DrawTexture(colorRect, EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+                GUI.color = Color.white;
+            }
+            return buttonPressed;
+        }
 
 	    public static bool Toggle(bool value, string title, params GUILayoutOption[] options)
 	    {
@@ -364,6 +407,31 @@ namespace Sabresaurus.SabreCSG
             rect.center += new Vector2(1, 1);
             GUI.color = fillColor;
             GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
+        }
+
+        public static void DrawNameTag(Vector2 position, string name)
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.box);
+            style.fixedHeight = NAME_TAG_HEIGHT;
+            style.padding = new RectOffset(7, 18, 0, 0);
+            style.margin = new RectOffset(0, 0, 0, 0);
+            style.normal.background = SabreCSGResources.GroupHeaderTexture;
+#if UNITY_5_4_OR_NEWER
+            style.normal.scaledBackgrounds = new Texture2D[] { SabreCSGResources.GroupHeaderRetinaTexture };
+#endif
+            style.font = EditorStyles.miniFont;
+            style.fontSize = 9;
+
+            style.border = new RectOffset(10, 32, 1, 1);
+
+            //GUI.DrawTexture(lastRect, EditorGUIUtility.whiteTexture);
+
+            Rect rect = new Rect();
+            rect.x = position.x + 1;
+            rect.y = position.y + 1;
+            rect.width = style.CalcSize(new GUIContent(name)).x;
+            rect.height = style.fixedHeight;
+            GUI.Box(rect, name, style);
         }
     }
 }

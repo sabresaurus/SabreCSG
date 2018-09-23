@@ -10,6 +10,7 @@ using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Callbacks;
+using Sabresaurus.Radial;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -39,7 +40,7 @@ namespace Sabresaurus.SabreCSG
 		DateTime mouseReleaseTime = DateTime.MinValue;
 
 		// Tools
-		Tool activeTool = null;
+        Tool activeTool = null;
 
 		// Used to track what objects have been previously clicked on, so that the user can cycle click through objects
 		// on the same (or similar) ray cast
@@ -63,21 +64,31 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		Dictionary<MainMode, Tool> tools = new Dictionary<MainMode, Tool>()
-		{
-			{ MainMode.Resize, new ResizeEditor() },
-			{ MainMode.Vertex, new VertexEditor() },
-			{ MainMode.Face, new SurfaceEditor() },
-			{ MainMode.Clip, new ClipEditor() },
-			{ MainMode.Draw, new DrawEditor() },
-		};
+        List<Tool> tools = null;
+        List<Tool> overrideTools = null;
 
-        Dictionary<OverrideMode, Tool> overrideTools = new Dictionary<OverrideMode, Tool>()
+        Dictionary<MainMode, Type> toolsMappings = new Dictionary<MainMode, Type>()
         {
-            { OverrideMode.TransformModel, new TransformModelEditor() },
-            //{ OverrideMode.Clip, new ClipEditor() },
-            //{ OverrideMode.Draw, new DrawEditor() },
+            { MainMode.Resize, typeof(ResizeEditor) },
+            { MainMode.Vertex, typeof(VertexEditor) },
+            { MainMode.Face, typeof(SurfaceEditor) },
+            { MainMode.Clip, typeof(ClipEditor) },
+            { MainMode.Draw, typeof(DrawEditor) },
+            { MainMode.Paint, typeof(PaintEditor) },
         };
+
+        Dictionary<OverrideMode, Type> overrideToolsMappings = new Dictionary<OverrideMode, Type>()
+        {
+            { OverrideMode.TransformModel, typeof(TransformModelEditor) },
+        };
+
+        public Tool ActiveTool
+        {
+            get
+            {
+                return activeTool;
+            }
+        }
 
         public bool MouseIsDragging 
 		{
@@ -276,6 +287,27 @@ namespace Sabresaurus.SabreCSG
 
 		public void OnSceneGUI(SceneView sceneView)
 		{
+            if(tools == null)
+            {
+                tools = new List<Tool>()
+                {
+                    ScriptableObject.CreateInstance<ResizeEditor>(),
+                    ScriptableObject.CreateInstance<VertexEditor>(),
+                    ScriptableObject.CreateInstance<SurfaceEditor>(),
+                    ScriptableObject.CreateInstance<ClipEditor>(),
+                    ScriptableObject.CreateInstance<DrawEditor>(),
+                    ScriptableObject.CreateInstance<PaintEditor>(),
+                };
+            }
+
+            if(overrideTools == null)
+            {
+                overrideTools = new List<Tool>()
+                {
+                    ScriptableObject.CreateInstance<TransformModelEditor>(),
+                };
+            }
+
 			if(Event.current.type == EventType.ExecuteCommand)
 			{				
 				if(Event.current.commandName == "Duplicate")
@@ -292,8 +324,6 @@ namespace Sabresaurus.SabreCSG
 			{
 				return;
 			}
-
-			RadialMenu.OnEarlySceneGUI(sceneView);
 
 			// Frame rate tracking
 			if(e.type == EventType.Repaint)
@@ -504,6 +534,28 @@ namespace Sabresaurus.SabreCSG
 				activeTool.CSGModel = this;
 				activeTool.SetSelection(Selection.activeGameObject, Selection.gameObjects);
 				activeTool.OnSceneGUI(sceneView, e);
+                
+                if(SabreCSGWindow.CurrentWindow == null)
+                {
+                    // Draw the actual GUI via a Window
+                    Rect toolToolbarRect = activeTool.ToolbarRect;
+
+                    if(toolToolbarRect.width > 0)
+                    {
+                        GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
+                        if(EditorGUIUtility.isProSkin)
+                        {
+                            toolbar.normal.background = SabreCSGResources.HalfBlackTexture;
+                        }
+                        else
+                        {
+                            toolbar.normal.background = SabreCSGResources.HalfWhiteTexture;
+                        }
+                        toolbar.fixedHeight = toolToolbarRect.height;
+
+                        GUILayout.Window(140002, toolToolbarRect, activeTool.OnToolbarGUI, "", toolbar);
+                    }
+                }
 			}
 
 //			if(e.type == EventType.DragPerform)
@@ -537,8 +589,6 @@ namespace Sabresaurus.SabreCSG
 			{
 				LinearFPSCam.OnSceneGUI(sceneView);
 			}
-
-			RadialMenu.OnLateSceneGUI(sceneView);
 		}
 
 		void OnMouseUp(SceneView sceneView, Event e)
@@ -712,6 +762,17 @@ namespace Sabresaurus.SabreCSG
 				}
 				e.Use();
 			}
+            else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivatePaintMode)))
+            {
+                // Activate mode - immediately (key down)
+                if (e.type == EventType.KeyDown && !MouseIsHeldOrRecent)
+                {
+                    SetCurrentMode(MainMode.Paint);
+
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
 			else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivateFaceMode)))
 			{
 				// Activate mode - immediately (key down)
@@ -829,17 +890,7 @@ namespace Sabresaurus.SabreCSG
 					SceneView.RepaintAll();
 				}
 				e.Use();
-			}
-			else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.EnableRadialMenu))
-				&& !SabreGUIHelper.AnyControlFocussed)
-			{
-				if (e.type == EventType.KeyUp)
-				{
-					RadialMenu.IsActive = true;
-					SceneView.RepaintAll();
-				}
-				e.Use();
-			}
+			}			
 			else if(!MouseIsHeld && (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ChangeBrushToAdditive))
 				|| KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ChangeBrushToAdditive2)))
 			)
@@ -1230,10 +1281,10 @@ namespace Sabresaurus.SabreCSG
 
 			if (EditMode)
 			{
-				if(!EditorHelper.HasDelegate(EditorApplication.projectWindowItemOnGUI, (EditorApplication.ProjectWindowItemCallback)OnProjectItemGUI))
-				{
-					EditorApplication.projectWindowItemOnGUI += OnProjectItemGUI;
-				}
+//				if(!EditorHelper.HasDelegate(EditorApplication.projectWindowItemOnGUI, (EditorApplication.ProjectWindowItemCallback)OnProjectItemGUI))
+//				{
+//					EditorApplication.projectWindowItemOnGUI += OnProjectItemGUI;
+//				}
 
 
 				if(!EditorHelper.HasDelegate(EditorApplication.update, (EditorApplication.CallbackFunction)OnEditorUpdate))
@@ -1288,7 +1339,7 @@ namespace Sabresaurus.SabreCSG
 		{
 			EditorApplication.update -= OnEditorUpdate;
 			EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
-			EditorApplication.projectWindowItemOnGUI -= OnProjectItemGUI;
+//			EditorApplication.projectWindowItemOnGUI -= OnProjectItemGUI;
 			SceneView.onSceneGUIDelegate -= OnSceneGUI;
 			Undo.undoRedoPerformed -= OnUndoRedoPerformed;
 
@@ -1390,11 +1441,13 @@ namespace Sabresaurus.SabreCSG
         {
             if (CurrentSettings.OverrideMode != OverrideMode.None)
             {
-                return overrideTools[CurrentSettings.OverrideMode];
+                Type toolType = overrideToolsMappings[CurrentSettings.OverrideMode];
+                return overrideTools.FirstOrDefault(tool => tool.GetType() == toolType);
             }
             else
             {
-                return tools[CurrentSettings.CurrentMode];
+                Type toolType = toolsMappings[CurrentSettings.CurrentMode];
+                return tools.FirstOrDefault(tool => tool.GetType() == toolType);
             }
         }
 
@@ -1417,7 +1470,8 @@ namespace Sabresaurus.SabreCSG
 
 		public Tool GetTool(MainMode mode)
 		{
-			return tools[mode];
+            Type toolType = toolsMappings[mode];
+            return tools.FirstOrDefault(tool => tool.GetType() == toolType);
 		}
 
 		public void SetCurrentMode(MainMode newMode)
@@ -1443,6 +1497,11 @@ namespace Sabresaurus.SabreCSG
 			CurrentSettings.OverrideMode = OverrideMode.None;
 
 			CurrentSettings.CurrentMode = newMode;
+
+            if(SabreCSGWindow.CurrentWindow != null)
+            {
+                SabreCSGWindow.CurrentWindow.Repaint();
+            }
 
 			UpdateActiveTool();			
 		}
@@ -1546,30 +1605,30 @@ namespace Sabresaurus.SabreCSG
 
 
 
-		void OnProjectItemGUI (string guid, Rect selectionRect)
-		{
-			//										Debug.Log(Event.current.type.ToString());
-			/*
-			if (Event.current.type == EventType.MouseDrag)
-			{
-				if(selectionRect.Contains(Event.current.mousePosition))
-				{
-					//					Debug.Log(Event.current.type.ToString());
-					string path = AssetDatabase.GUIDToAssetPath (guid);
-					if(!string.IsNullOrEmpty(path))
-					{
-						DragAndDrop.PrepareStartDrag();
-						DragAndDrop.paths = new string[] { path };
-
-						DragAndDrop.StartDrag ("Dragging material");
-						
-						// Make sure no one else uses this event
-						Event.current.Use();
-					}
-				}
-			}
-			*/
-		}
+//		void OnProjectItemGUI (string guid, Rect selectionRect)
+//		{
+//			//										Debug.Log(Event.current.type.ToString());
+//			/*
+//			if (Event.current.type == EventType.MouseDrag)
+//			{
+//				if(selectionRect.Contains(Event.current.mousePosition))
+//				{
+//					//					Debug.Log(Event.current.type.ToString());
+//					string path = AssetDatabase.GUIDToAssetPath (guid);
+//					if(!string.IsNullOrEmpty(path))
+//					{
+//						DragAndDrop.PrepareStartDrag();
+//						DragAndDrop.paths = new string[] { path };
+//
+//						DragAndDrop.StartDrag ("Dragging material");
+//						
+//						// Make sure no one else uses this event
+//						Event.current.Use();
+//					}
+//				}
+//			}
+//			*/
+//		}
 
 		void OnDragDrop(GameObject gameObject)
 		{

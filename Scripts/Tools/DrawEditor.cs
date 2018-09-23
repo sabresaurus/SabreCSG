@@ -55,6 +55,14 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+        public override Rect ToolbarRect
+        {
+            get
+            {
+                return new Rect();
+            }
+        }
+
         public override void ResetTool()
         {
 			Selection.activeGameObject = null;
@@ -926,17 +934,16 @@ namespace Sabresaurus.SabreCSG
 				GL.End();
 			}
 
-//			Rect rectangle = new Rect(0, 50, 210, 130);
+
 //			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
 //			toolbar.normal.background = SabreCSGResources.ClearTexture;
 //			toolbar.fixedHeight = rectangle.height;
 //			GUILayout.Window(140010, rectangle, OnToolbarGUI, "",toolbar);
 		}
 
-//		void OnToolbarGUI(int windowID)
-//		{
-//			raycastBrushes = EditorGUILayout.Toggle("Raycast Brushes", raycastBrushes);
-//		}
+        public override void OnToolbarGUI(int windowID)
+		{
+		}
 
 
 		public override void Deactivated ()

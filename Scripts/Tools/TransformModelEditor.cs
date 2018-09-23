@@ -13,11 +13,22 @@ namespace Sabresaurus.SabreCSG
     /// </summary>
     public class TransformModelEditor : Tool
     {
+        public override Rect ToolbarRect
+        {
+            get
+            {
+                return new Rect();
+            }
+        }
         public override void ResetTool()
         {
         }
 
         public override void Deactivated()
+        {
+        }
+
+        public override void OnToolbarGUI(int windowID)
         {
         }
     }

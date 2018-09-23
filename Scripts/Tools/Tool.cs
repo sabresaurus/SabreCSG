@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Sabresaurus.SabreCSG
 {
-    public abstract class Tool
+    public abstract class Tool : ScriptableObject
     {
         protected CSGModel csgModel;
 
@@ -29,6 +29,11 @@ namespace Sabresaurus.SabreCSG
 				csgModel = value;
 			}
 		}
+
+        public abstract Rect ToolbarRect
+        {
+            get;
+        }
 
 		public void SetSelection(GameObject selectedGameObject, GameObject[] selectedGameObjects)
 		{
@@ -267,6 +272,8 @@ namespace Sabresaurus.SabreCSG
 				return true;
 			}
 		}
+
+        public abstract void OnToolbarGUI(int windowID);
     }
 }
 #endif

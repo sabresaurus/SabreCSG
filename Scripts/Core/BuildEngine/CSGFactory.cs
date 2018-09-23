@@ -309,7 +309,7 @@ namespace Sabresaurus.SabreCSG
 				{
 					if(shouldBuildCollision[brushIndex])
 					{
-						if(allBrushCaches[brushIndex].CollisionVisualEqual)
+                        if(allBrushCaches[brushIndex].CollisionVisualEqual && brushes[brushIndex].IsVisible)
 						{
 
 						}
@@ -348,7 +348,7 @@ namespace Sabresaurus.SabreCSG
 				{
 					if(shouldBuildCollision[brushIndex])
 					{
-						if(!allBrushCaches[brushIndex].CollisionVisualEqual)
+                        if(!allBrushCaches[brushIndex].CollisionVisualEqual || !brushes[brushIndex].IsVisible)
 						{
 							// Intersecting builders can probably be calculated at edit time
 							BrushCache.ReclaimStolenCollisionPolygons(allBrushCaches[brushIndex]);
@@ -407,7 +407,7 @@ namespace Sabresaurus.SabreCSG
 					{
 						if(shouldBuildCollision[brushIndex])
 						{
-							if(allBrushCaches[brushIndex].CollisionVisualEqual)
+                            if(allBrushCaches[brushIndex].CollisionVisualEqual && brushes[brushIndex].IsVisible)
 							{
 								// Intersection sets equal, so just copy visual triangulation
 								List<Polygon> builtVisualPolygons = allBrushCaches[brushIndex].BuiltVisualPolygons;

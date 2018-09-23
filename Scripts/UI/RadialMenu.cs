@@ -1,25 +1,104 @@
-﻿#if UNITY_EDITOR
+﻿// MIT License
+// 
+// Copyright (c) 2017 Sabresaurus
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+// 
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
+
+#if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using System.IO;
 
-namespace Sabresaurus.SabreCSG
+namespace Sabresaurus.Radial
 {
-	public static class RadialMenu
-	{
-		// Whether the radial is being displayed
-		static bool isActive = false;
+    [InitializeOnLoad]
+    public static class RadialMenu
+    {
+        // Change this to change they key to be pressed to activate the radial
+        // See http://unity3d.com/support/documentation/ScriptReference/MenuItem.html for shortcut format
+        private const string ACTIVATE_KEY = "j";
 
-		public static bool IsActive {
-			get {
+        // Used for offseting mouse position
+        private const int TOOLBAR_HEIGHT = 37;
+
+        // Screen position right at the front (note can't use 1, because even though OSX accepts it Windows doesn't)
+        private const float FRONT_Z_DEPTH = 0.99f;
+
+		// Whether the radial is being displayed
+		private static bool isActive = false;
+
+        private static Material circleMaterial = null;
+        private static Material circleOutlineMaterial = null;
+
+
+        static RadialMenu()
+        {
+            RefreshListeners();
+        }
+
+        [UnityEditor.Callbacks.DidReloadScripts]
+        static void OnReloadedScripts()
+        {
+            RefreshListeners();
+        }
+
+		public static bool IsActive 
+        {
+			get 
+            {
 				return isActive;
 			}
-			set {
-				isActive = value;
-			}
 		}
+
+        private static void RefreshListeners()
+        {
+            // Make sure our listeners are removed so we don't add them again out of order
+            SceneView.onSceneGUIDelegate -= OnEarlySceneGUI;
+            SceneView.onSceneGUIDelegate -= OnLateSceneGUI;
+
+            // Grab all the remaining listeners
+            Delegate[] subscribers = new Delegate[0];
+
+            if(SceneView.onSceneGUIDelegate != null)
+            {
+                subscribers = SceneView.onSceneGUIDelegate.GetInvocationList();
+            }
+
+            // Remove all the listeners - this should result in zero listeners
+            foreach (Delegate subscriber in subscribers)
+            {
+                SceneView.onSceneGUIDelegate -= (SceneView.OnSceneFunc)subscriber;
+            }
+
+            SceneView.onSceneGUIDelegate += OnEarlySceneGUI;
+
+            foreach (Delegate subscriber in subscribers)
+            {
+                SceneView.onSceneGUIDelegate += (SceneView.OnSceneFunc)subscriber;
+            }
+
+            SceneView.onSceneGUIDelegate += OnLateSceneGUI;
+        }
 
 		static readonly Color[] colors = new Color[]
 		{
@@ -48,26 +127,43 @@ namespace Sabresaurus.SabreCSG
 		// Points distance, if the user lets releases the mouse within this distance of the radial center it cancels
 		const float MIN_DISTANCE = 50;
 
-		/// <summary>
+        /// <summary>
 		/// Primarily input operations, called early in the OnSceneGUI call
 		/// </summary>
-		public static void OnEarlySceneGUI(SceneView sceneView)
+        private static void OnEarlySceneGUI(SceneView sceneView)
 		{
-			if(isActive)
-			{
-				Event e = Event.current;
+            Event e = Event.current;
+
+            if(isActive)
+            {
 
 				if (e.type == EventType.MouseDown || e.type == EventType.MouseUp || e.type == EventType.MouseDrag || e.type == EventType.MouseMove)
 				{
 					OnMouseAction(sceneView);
 				}
 			}
+
+            if (EventsMatch(e, Event.KeyboardEvent(ACTIVATE_KEY)))
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    isActive = !isActive;
+                    RefreshListeners();
+
+                    SceneView.RepaintAll();
+                    e.Use();
+                }
+                else if(e.type == EventType.KeyDown)
+                {
+                    e.Use();
+                }
+            }
 		}
 
 		/// <summary>
 		/// Primarily final drawing, called late in the OnSceneGUI call
 		/// </summary>
-		public static void OnLateSceneGUI(SceneView sceneView)
+        private static void OnLateSceneGUI(SceneView sceneView)
 		{
 			// Only draw if menu is active and this is the right scene view
 			if(isActive && SceneView.lastActiveSceneView == sceneView)
@@ -76,7 +172,7 @@ namespace Sabresaurus.SabreCSG
 
 				if (e.type == EventType.Repaint)
 				{
-					RadialMenu.OnRepaint(sceneView);
+					OnRepaint(sceneView);
 				}
 			}
 		}
@@ -86,44 +182,48 @@ namespace Sabresaurus.SabreCSG
 		{
 			Event e = Event.current;
 
-			if(e.type == EventType.MouseUp) // They have released the mouse
+            if(e.type == EventType.MouseDown) // They have pressed the mouse
 			{
-				Vector2 centerPosition = new Vector2(Screen.width/2, Screen.height/2);
+                if(e.button == 0)
+                {
+    				Vector2 centerPosition = new Vector2(Screen.width / 2, Screen.height / 2);
 
-				// Find which circle sector they released in (or -1 if in center)
-				int highlightIndex = GetIndex(centerPosition);
-				if(highlightIndex == 0)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.down);
-				}
-				else if(highlightIndex == 1) // Align to nearest axis
-				{
-					EditorHelper.IsoAlignSceneViewToNearest();
-				}
-				else if(highlightIndex == 2)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.left);
-				}
-				else if(highlightIndex == 3)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.back);
-				}
-				else if(highlightIndex == 4)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.up);
-				}
-				else if(highlightIndex == 5) // Iso/Perspective toggle
-				{
-					sceneView.orthographic = !sceneView.orthographic;
-				}
-				else if(highlightIndex == 6)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.right);
-				}
-				else if(highlightIndex == 7)
-				{
-					EditorHelper.IsoAlignSceneView(Vector3.forward);
-				}
+    				// Find which circle sector they released in (or -1 if in center)
+    				int highlightIndex = GetIndex(centerPosition);
+
+    				if(highlightIndex == 0)
+    				{
+    					IsoAlignSceneView(Vector3.down);
+    				}
+    				else if(highlightIndex == 1) // Align to nearest axis
+    				{
+    					IsoAlignSceneViewToNearest();
+    				}
+    				else if(highlightIndex == 2)
+    				{
+    					IsoAlignSceneView(Vector3.left);
+    				}
+    				else if(highlightIndex == 3)
+    				{
+    					IsoAlignSceneView(Vector3.back);
+    				}
+    				else if(highlightIndex == 4)
+    				{
+    					IsoAlignSceneView(Vector3.up);
+    				}
+    				else if(highlightIndex == 5) // Iso/Perspective toggle
+    				{
+    					sceneView.orthographic = !sceneView.orthographic;
+    				}
+    				else if(highlightIndex == 6)
+    				{
+    					IsoAlignSceneView(Vector3.right);
+    				}
+    				else if(highlightIndex == 7)
+    				{
+    					IsoAlignSceneView(Vector3.forward);
+    				}
+                }
 
 				// Operation is complete, hide the radial
 				isActive = false;
@@ -143,7 +243,7 @@ namespace Sabresaurus.SabreCSG
 			int angleCount = messages.Length;
 
 			// Convert the mouse position to scene view space
-			Vector2 mousePosition = EditorHelper.ConvertMousePointPosition(Event.current.mousePosition);
+			Vector2 mousePosition = ConvertMousePointPosition(Event.current.mousePosition);
 
 			int highlightIndex = -1; // Default to no sector matched (cancel)
 
@@ -181,10 +281,10 @@ namespace Sabresaurus.SabreCSG
 			// Number of sectors (or slices) the circle is cut into
 			int angleCount = messages.Length;
 			// Radians angle that each sector takes up
-			float angleDelta = (Mathf.PI*2f) / (float)angleCount;
+			float angleDelta = (Mathf.PI * 2f) / (float)angleCount;
 
 			// Radial center position
-			Vector2 centerPosition = new Vector2(Screen.width/2, Screen.height/2);
+			Vector2 centerPosition = new Vector2(Screen.width / 2, Screen.height / 2);
 
 			// Sector being highlighted
 			int highlightIndex = GetIndex(centerPosition);
@@ -193,7 +293,7 @@ namespace Sabresaurus.SabreCSG
 			labelStyle.alignment = TextAnchor.MiddleCenter;
 
 			// Draw normal circles
-			SabreCSGResources.GetCircleMaterial().SetPass(0);
+			GetCircleMaterial().SetPass(0);
 
 			GL.PushMatrix();
 			GL.LoadPixelMatrix();
@@ -217,7 +317,7 @@ namespace Sabresaurus.SabreCSG
 				GL.Color(color);
 
 				Vector3 position = centerPosition + distance * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-				SabreGraphics.DrawBillboardQuad(position, 64, 64);
+				DrawBillboardQuad(position, 64, 64);
 			}
 
 			// Draw white dots from the center towards the highlighted circle
@@ -228,13 +328,13 @@ namespace Sabresaurus.SabreCSG
 				GL.Color(Color.white);
 
 				Vector3 position = centerPosition;
-				SabreGraphics.DrawBillboardQuad(position, 8, 8);
+				DrawBillboardQuad(position, 8, 8);
 
 				position = centerPosition + 20 * distanceScaler * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-				SabreGraphics.DrawBillboardQuad(position, 16, 16);
+				DrawBillboardQuad(position, 16, 16);
 
 				position = centerPosition + 50 * distanceScaler * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-				SabreGraphics.DrawBillboardQuad(position, 32, 32);
+				DrawBillboardQuad(position, 32, 32);
 			}
 			else
 			{
@@ -242,7 +342,7 @@ namespace Sabresaurus.SabreCSG
 				GL.Color(Color.white);
 
 				Vector3 position = centerPosition;
-				SabreGraphics.DrawBillboardQuad(position, 16, 16);
+				DrawBillboardQuad(position, 16, 16);
 			}
 
 			GL.End();
@@ -251,7 +351,7 @@ namespace Sabresaurus.SabreCSG
 			// Draw a white circle around the edge of the higlighted circle
 			if(highlightIndex != -1)
 			{
-				SabreCSGResources.GetCircleOutlineMaterial().SetPass(0);
+				GetCircleOutlineMaterial().SetPass(0);
 
 				GL.PushMatrix();
 				GL.LoadPixelMatrix();
@@ -263,14 +363,13 @@ namespace Sabresaurus.SabreCSG
 				GL.Color(Color.white);
 
 				Vector3 position = centerPosition + distance * new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-				SabreGraphics.DrawBillboardQuad(position, 64, 64);
+				DrawBillboardQuad(position, 64, 64);
 
 				GL.End();
 				GL.PopMatrix();
 			}
 
 			// Draw the text
-
 			Vector3 screenOffset = new Vector3(0, 5, 0);
 
 			for (int i = 0; i < angleCount; i++) 
@@ -311,6 +410,177 @@ namespace Sabresaurus.SabreCSG
 				Handles.Label(world, message, labelStyle);
 			}
 		}
+
+        /// <summary>
+        /// Aligns the scene view to look in a certain direction in iso mode 
+        /// </summary>
+        public static void IsoAlignSceneView(Vector3 direction)
+        {
+            SceneView sceneView = SceneView.lastActiveSceneView;
+
+            SceneView.lastActiveSceneView.LookAt(sceneView.pivot, Quaternion.LookRotation(direction));
+
+            // Mark the camera as iso (orthographic)
+            sceneView.orthographic = true;
+        }
+
+        /// <summary>
+        /// Aligns the scene view to the nearest axis in iso mode
+        /// </summary>
+        public static void IsoAlignSceneViewToNearest()
+        {
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            Vector3 cameraForward = sceneView.camera.transform.forward;
+            Vector3 newForward = Vector3.up;
+            float bestDot = -1;
+
+            Vector3 testDirection;
+            float dot;
+            // Find out of the six axis directions the closest direction to the camera
+            for (int i = 0; i < 3; i++) 
+            {
+                testDirection = Vector3.zero;
+                testDirection[i] = 1;
+                dot = Vector3.Dot(testDirection, cameraForward);
+                if(dot > bestDot)
+                {
+                    bestDot = dot;
+                    newForward = testDirection;
+                }
+
+                testDirection[i] = -1;
+                dot = Vector3.Dot(testDirection, cameraForward);
+                if(dot > bestDot)
+                {
+                    bestDot = dot;
+                    newForward = testDirection;
+                }
+            }
+            IsoAlignSceneView(newForward);
+        }
+
+        /// <summary>
+        /// Converts the mouse position from event space to screen space, by default it assumes input in points and output in pixels
+        /// </summary>
+        /// <returns>The mouse position in points.</returns>
+        /// <param name="sourceMousePosition">Source mouse position.</param>
+        /// <param name="convertPointsToPixels">If set to <c>true</c> convert points to pixels.</param>
+        public static Vector2 ConvertMousePointPosition(Vector2 sourceMousePosition, bool convertPointsToPixels = true)
+        {
+#if UNITY_5_4_OR_NEWER
+            if(convertPointsToPixels)
+            {
+                sourceMousePosition = EditorGUIUtility.PointsToPixels(sourceMousePosition);
+                // Flip the direction of Y and remove the Scene View top toolbar's height
+                sourceMousePosition.y = Screen.height - sourceMousePosition.y - (TOOLBAR_HEIGHT * EditorGUIUtility.pixelsPerPoint);
+            }
+            else
+            {
+                // Flip the direction of Y and remove the Scene View top toolbar's height
+                float screenHeightPoints = (Screen.height / EditorGUIUtility.pixelsPerPoint);
+                sourceMousePosition.y = screenHeightPoints - sourceMousePosition.y - (TOOLBAR_HEIGHT);
+            }
+
+#else
+            // Flip the direction of Y and remove the Scene View top toolbar's height
+            sourceMousePosition.y = Screen.height - sourceMousePosition.y - TOOLBAR_HEIGHT;
+#endif
+            return sourceMousePosition;
+        }
+
+        public static void DrawBillboardQuad(Vector3 screenPosition, int width, int height, bool specifiedPoints = true)
+        {
+#if UNITY_5_4_OR_NEWER
+            if(specifiedPoints)
+            {
+                // Convert from points to pixels
+                float scale = EditorGUIUtility.pixelsPerPoint;
+                width = Mathf.RoundToInt(scale * width);
+                height = Mathf.RoundToInt(scale * height);
+            }
+#endif
+
+            screenPosition.z = FRONT_Z_DEPTH;
+
+            GL.TexCoord2(0, 0); // BL
+            GL.Vertex(screenPosition + new Vector3(-width / 2, height / 2, 0));
+            GL.TexCoord2(1, 0); // BR
+            GL.Vertex(screenPosition + new Vector3(width / 2, height / 2, 0));
+            GL.TexCoord2(1, 1); // TR
+            GL.Vertex(screenPosition + new Vector3(width / 2, -height / 2, 0));
+            GL.TexCoord2(0, 1); // TL
+            GL.Vertex(screenPosition + new Vector3(-width / 2, -height / 2, 0));
+        }
+
+        public static string GetBasePath()
+        {
+            // Find all the scripts with RadialMenu in their name
+            string[] guids = AssetDatabase.FindAssets("RadialMenu t:Script");
+
+            foreach (string guid in guids) 
+            {
+                // Find the path of the file
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+
+                string suffix = "RadialMenu.cs";
+                // If it is the target file, i.e. RadialMenu.cs not RadialMenuSomething
+                if(path.EndsWith(suffix))
+                {
+                    // Remove the suffix, to get for example Assets/RadialMenu
+                    path = path.Remove(path.Length - suffix.Length, suffix.Length);
+
+                    return path;
+                }
+            }
+
+            // None matched
+            return string.Empty;
+        }
+
+        private static Material GetCircleMaterial()
+        {
+            if (circleMaterial == null)
+            {
+                Shader shader = Shader.Find("Particles/Alpha Blended");
+                circleMaterial = new Material(shader);
+                circleMaterial.hideFlags = HideFlags.HideAndDontSave;
+                circleMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
+                circleMaterial.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(GetBasePath(), "Circle.png"));
+            }
+            return circleMaterial;
+        }
+
+        private static Material GetCircleOutlineMaterial()
+        {
+            if (circleOutlineMaterial == null)
+            {
+                Shader shader = Shader.Find("Particles/Alpha Blended");
+                circleOutlineMaterial = new Material(shader);
+                circleOutlineMaterial.hideFlags = HideFlags.HideAndDontSave;
+                circleOutlineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
+                circleOutlineMaterial.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Combine(GetBasePath(), "CircleOutline.png"));
+            }
+            return circleOutlineMaterial;
+        }
+
+        private static bool EventsMatch(Event event1, Event event2)
+        {
+            EventModifiers modifiers1 = event1.modifiers;
+            EventModifiers modifiers2 = event2.modifiers;
+
+            // Ignore capslock from either modifier
+            modifiers1 &= (~EventModifiers.CapsLock);
+            modifiers2 &= (~EventModifiers.CapsLock);
+
+            // If key code and modifier match
+            if(event1.keyCode == event2.keyCode
+                && (modifiers1 == modifiers2))
+            {
+                return true;
+            }
+
+            return false;
+        }
 	}
 }
 #endif

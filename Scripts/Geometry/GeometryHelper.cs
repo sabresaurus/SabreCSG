@@ -101,6 +101,11 @@ namespace Sabresaurus.SabreCSG
                         continue;
                     }
 
+                    if(polygons[i].Vertices.Length < 3)
+                    {
+                        continue;
+                    }
+
                     // Skip any polygons that are facing away from the ray
                     if (Vector3.Dot(polygons[i].Plane.normal, ray.direction) > 0)
                     {
@@ -155,6 +160,11 @@ namespace Sabresaurus.SabreCSG
 					{
 						continue;
 					}
+
+                    if(polygons[i].Vertices.Length < 3)
+                    {
+                        continue;
+                    }
 
 					// Skip any polygons that are facing away from the ray
 					if(Vector3.Dot(polygons[i].Plane.normal, ray.direction) > 0)

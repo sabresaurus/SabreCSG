@@ -167,9 +167,9 @@ namespace Sabresaurus.SabreCSG
 			// Flip the cached plane
 #if UNITY_2017_1_OR_NEWER
             // Unity 2017 introduces a built in Plane flipped property
-			cachedPlane = cachedPlane.Value.flipped;
+            cachedPlane = cachedPlane.Value.flipped;
 #else
-			cachedPlane = cachedPlane.Value.Flip();
+            cachedPlane = cachedPlane.Value.Flip();
 #endif
 	    }
 
@@ -268,6 +268,11 @@ namespace Sabresaurus.SabreCSG
 				vertices[i].Color = newColor;
 			}
 		}
+
+        public Vector3 GetTangent()
+        {
+            return (vertices[1].Position - vertices[0].Position).normalized;
+        }
 
 
 
