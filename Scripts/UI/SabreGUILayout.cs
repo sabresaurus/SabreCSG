@@ -429,7 +429,7 @@ namespace Sabresaurus.SabreCSG
             Rect rect = new Rect();
             rect.x = position.x + 1;
             rect.y = position.y + 1;
-            rect.width = style.CalcSize(new GUIContent(name)).x;
+            rect.width = style.CalcSize(new GUIContent(name)).x + 2;
             rect.height = style.fixedHeight;
             GUI.Box(rect, name, style);
         }
