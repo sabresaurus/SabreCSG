@@ -35,47 +35,65 @@ namespace Sabresaurus.SabreCSG
 		{
 			return GetMapping(TOOL_VIEW_KEY) ?? Event.KeyboardEvent(TOOL_VIEW_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of the Move Tool.
+		/// </summary>
 		public static Event GetToolMoveMapping()
 		{
 			return GetMapping(TOOL_MOVE_KEY) ?? Event.KeyboardEvent(TOOL_MOVE_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of the Rotate Tool.
+		/// </summary>
 		public static Event GetToolRotateMapping()
 		{
 			return GetMapping(TOOL_ROTATE_KEY) ?? Event.KeyboardEvent(TOOL_ROTATE_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of the View FORWARD.
+		/// </summary>
 		public static Event GetViewForwardMapping()
 		{
 			return GetMapping(VIEW_FORWARD_KEY) ?? Event.KeyboardEvent(VIEW_FORWARD_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of the View BACK.
+		/// </summary>
 		public static Event GetViewBackMapping()
 		{
 			return GetMapping(VIEW_BACK_KEY) ?? Event.KeyboardEvent(VIEW_BACK_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of Strafe Left
+		/// </summary>
 		public static Event GetViewStrafeLeftMapping()
 		{
 			return GetMapping(VIEW_STRAFE_LEFT_KEY) ?? Event.KeyboardEvent(VIEW_STRAFE_LEFT_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of Strafe Right
+		/// </summary>
 		public static Event GetViewStrafeRightMapping()
 		{
 			return GetMapping(VIEW_STRAFE_RIGHT_KEY) ?? Event.KeyboardEvent(VIEW_STRAFE_RIGHT_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of Strafe Up
+		/// </summary>
 		public static Event GetViewStrafeUpMapping()
 		{
 			return GetMapping(VIEW_STRAFE_UP_KEY) ?? Event.KeyboardEvent(VIEW_STRAFE_UP_DEFAULT);
 		}
-
+		/// <summary>
+		/// returns mapping of Strafe Down
+		/// </summary>
 		public static Event GetViewStrafeDownMapping()
 		{
 			return GetMapping(VIEW_STRAFE_DOWN_KEY) ?? Event.KeyboardEvent(VIEW_STRAFE_DOWN_DEFAULT);
 		}
-
+		/// <summary>
+		/// Get the Mapping of a certain Key
+		/// </summary>
 		private static Event GetMapping(string key)
 		{
 			string value = EditorPrefs.GetString(key);
