@@ -59,7 +59,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
 
                         // find the polygons associated with the clipping plane.
                         // the normal is unique and can never occur twice as that wouldn't allow the solid to be convex.
-                        var polygons = pr.GetPolygons().Where(p => p.Plane.normal == clip.normal);
+                        var polygons = pr.GetPolygons().Where(p => p.Plane.normal.EqualsWithEpsilonLower3(clip.normal));
                         foreach (var polygon in polygons)
                         {
                             // detect excluded polygons.
@@ -157,7 +157,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
 
                             // find the polygons associated with the clipping plane.
                             // the normal is unique and can never occur twice as that wouldn't allow the solid to be convex.
-                            var polygons = pr.GetPolygons().Where(p => p.Plane.normal == clip.normal);
+                            var polygons = pr.GetPolygons().Where(p => p.Plane.normal.EqualsWithEpsilonLower3(clip.normal));
                             foreach (var polygon in polygons)
                             {
                                 // detect excluded polygons.

@@ -226,7 +226,7 @@ namespace Sabresaurus.SabreCSG
                 EditorGUILayout.Space();
                 //
 
-                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterImporterValveMapFormat2006Texture, "Source Engine 2006 Importer", "Henry de Jongh");
+                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterValveMapFormat2006Texture, "Source Engine 2006 Importer", "Henry de Jongh");
 
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("Import Source Engine Map (*.vmf)"))
@@ -254,7 +254,40 @@ namespace Sabresaurus.SabreCSG
                     EditorUtility.DisplayDialog("Source Engine 2006 Importer", "This importer was created using Source SDK maps and Hammer 4.1.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. First it looks for the full name with forward slashes '/' replaced by periods '.' like 'BRICK.BRICKFLOOR001A' then the last word 'BRICKFLOOR001A'. The latter option could cause some false positives, try creating a material with the full name if this happens.", "Okay");
                 }
                 EditorGUILayout.EndHorizontal();
+                GuiLayoutEndImporterSection();
 
+                //
+                EditorGUILayout.Space();
+                //
+
+                GuiLayoutBeginImporterSection(SabreCSGResources.ImporterQuake1Texture, "Quake 1 Importer", "Jasmine Mickle");
+
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Import Quake 1 Map (*.map)"))
+                {
+                    try
+                    {
+                        string path = EditorUtility.OpenFilePanel("Import Quake 1 Map", "", "map");
+                        if (path.Length != 0)
+                        {
+                            EditorUtility.DisplayProgressBar("SabreCSG: Importing Quake 1 Map", "Parsing Quake 1 Map File (*.map)...", 0.0f);
+                            var importer = new Importers.Quake1.MapImporter();
+                            var map = importer.Import(path);
+                            Importers.Quake1.MapWorldConverter.Import(csgModel, map);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        EditorUtility.ClearProgressBar();
+                        EditorUtility.DisplayDialog("Quake 1 Map Import", "An exception occurred while importing the map:\r\n" + ex.Message, "Ohno!");
+                    }
+                }
+
+                if (GUILayout.Button("?", GUILayout.Width(16)))
+                {
+                    EditorUtility.DisplayDialog("Quake 1 Importer", "This importer (parser by Henry de Jongh) was created using Trenchbroom 2.0.6.\n\nImportant Notes:\n* It will try to find the materials in your project automatically. It will replace any leading '*' with '#' like '#teleport'.\n\nKnown Issues:\n* 45 degree angled walls may not have correct UV texture coordinates (are not correctly picking the dominant axis because there are two).\n* Negative vertex coordinates may not have correct UV texture coordinates (feel free to contribute improved UV mapping code if you know how it works, we had to guess most of the maths).", "Okay");
+                }
+                EditorGUILayout.EndHorizontal();
                 GuiLayoutEndImporterSection();
             }
 
