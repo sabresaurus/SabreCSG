@@ -599,7 +599,18 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		void SelectEdges(Brush brush, Polygon[] polygons, Edge newEdge)
+        void SelectEdges(Polygon polygon, IDictionary<Vertex, Brush> selectedVertices)
+        {
+            for (int j = 0; j < polygon.Vertices.Length; j++)
+            {
+                Vertex vertex1 = polygon.Vertices[j];
+                Vertex vertex2 = polygon.Vertices[(j + 1) % polygon.Vertices.Length];
+                if (selectedVertices.ContainsKey(vertex1) && selectedVertices.ContainsKey(vertex2))
+                    selectedEdges.Add(new Edge(vertex1, vertex2));
+            }
+        }
+
+        void SelectEdges(Brush brush, Polygon[] polygons, Edge newEdge)
 		{
 			// Can only select a valid edge, if it's not valid early out
 			if(newEdge == null || newEdge.Vertex1 == null || newEdge.Vertex2 == null)
@@ -1059,9 +1070,10 @@ namespace Sabresaurus.SabreCSG
 									{
 										selectedVertices.Remove(vertex);
 									}
-								}
-							}
-						}
+                                }
+                                SelectEdges(polygon, selectedVertices);
+                            }
+                        }
                         SceneView.RepaintAll();
 					}
 					else if (!EditorHelper.IsMousePositionInInvalidRects(e.mousePosition) && !marqueeCancelled) // Clicking style vertex selection
@@ -1142,7 +1154,8 @@ namespace Sabresaurus.SabreCSG
 										selectedVertices.Remove(vertex);
 									}
 								}
-							}
+                                SelectEdges(polygon, selectedVertices);
+                            }
 						}
 
 
