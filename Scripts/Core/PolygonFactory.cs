@@ -546,6 +546,7 @@ namespace Sabresaurus.SabreCSG
         {
             // list of clipping planes.
             List<Plane> clippingPlanes = new List<Plane>();
+            List<Material> clippingPlaneMaterials = new List<Material>();
 
             // iterate through all edges and calculate the clipping planes.
             for (int e = 0; e < edges.Count; e++)
@@ -577,6 +578,9 @@ namespace Sabresaurus.SabreCSG
                         p2,
                         p1 + (v1 - v2).normalized
                     ));
+                    // find the most likely material we should be using for this chamfer.
+                    // an attempt is made to ignore the default material.
+                    clippingPlaneMaterials.Add(matchingPolygons[0].Material != null ? matchingPolygons[0].Material : matchingPolygons[1].Material);
                 }
             }
 
@@ -590,6 +594,10 @@ namespace Sabresaurus.SabreCSG
                 List<Polygon> polygonsBack;
                 if (SplitPolygonsByPlane(resultPolygons, clippingPlanes[i], false, out polygonsFront, out polygonsBack))
                     resultPolygons = polygonsFront;
+                // assign the most likely material to the new polygons.
+                for (int j = 0; j < resultPolygons.Count; j++)
+                    if (resultPolygons[j].Plane.normal.EqualsWithEpsilonLower3(clippingPlanes[i].normal))
+                        resultPolygons[j].Material = clippingPlaneMaterials[i];
             }
 
             return true;
