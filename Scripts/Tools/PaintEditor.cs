@@ -146,7 +146,7 @@ namespace Sabresaurus.SabreCSG
         private Vector3 hoverPointWorld; // The 3D point the mouse is hovering over
 
         // Main UI rectangle for this tool's UI
-        private readonly Rect toolbarRect = new Rect(6, 40, 203, /*146*/ 197);
+        private readonly Rect toolbarRect = new Rect(6, 40, 203, 199);
 
         private float radius = 1f;
 
@@ -474,20 +474,7 @@ namespace Sabresaurus.SabreCSG
 
         public void OnToolbarGUI(int windowID)
         {
-            if (currentMode == Mode.PaintRGB)
-            {
-                rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, false, null, GUILayout.MaxWidth(183));
-            }
-            else if (currentMode == Mode.PaintAlpha)
-            {
-                // alpha color slider
-                EditorGUILayout.BeginHorizontal();
-                GUI.color = Color.black;
-                GUILayout.Label("Alpha");
-                GUI.color = Color.white;
-                alphaColor = EditorGUILayout.Slider("", alphaColor, 0f, 1f, GUILayout.MaxWidth(128));
-                EditorGUILayout.EndHorizontal();
-            }
+            EditorGUILayout.Space();
 
             restrictToPoly = SabreGUILayout.Toggle(restrictToPoly, "Restrict To Face");
             currentMode = SabreGUILayout.DrawEnumGrid(currentMode);
@@ -518,6 +505,21 @@ namespace Sabresaurus.SabreCSG
             }
             EditorGUILayout.EndHorizontal();
 
+            if (currentMode == Mode.PaintRGB)
+            {
+                rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, false, null, GUILayout.MaxWidth(183));
+            }
+            else if (currentMode == Mode.PaintAlpha)
+            {
+                // alpha color slider
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = Color.black;
+                GUILayout.Label("Alpha");
+                GUI.color = Color.white;
+                alphaColor = EditorGUILayout.Slider("", alphaColor, 0f, 1f, GUILayout.MaxWidth(128));
+                EditorGUILayout.EndHorizontal();
+            }
+
             OnToolbarColorGUI();
         }
 
@@ -534,7 +536,7 @@ namespace Sabresaurus.SabreCSG
                 x = x - ((i / amount) * (amount * 12));
 
                 x += 5;
-                y += 95;
+                y += 97;
 
                 GUI.color = borderColor;
                 if (Event.current.type == EventType.MouseDown && new Rect(x, y, 12, 12).Contains(Event.current.mousePosition))
