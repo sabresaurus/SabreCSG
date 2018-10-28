@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Sabresaurus.SabreCSG
 {
-	public class VertexColorWindow : EditorWindow
+    public class VertexColorWindow : EditorWindow
 	{
 		[System.NonSerialized]
 		static readonly Color[] PRESET_COLORS = new Color[]
@@ -23,18 +23,18 @@ namespace Sabresaurus.SabreCSG
 
 		static readonly Vector2 WINDOW_SIZE = new Vector2(180,60);
 
-		CSGModel csgModel;
-		SurfaceEditor surfaceEditor;
+        static Object defaultColorPresetLibrary = null;
 
-		public static VertexColorWindow CreateAndShow(CSGModel csgModel, SurfaceEditor surfaceEditor)
+		CSGModel csgModel;
+
+        public static VertexColorWindow CreateAndShow(CSGModel csgModel, IVertexColorEditable targetEditor)
 		{
 			VertexColorWindow window = EditorWindow.GetWindow<VertexColorWindow>(true, "Vertex Colors", true);
-			window.surfaceEditor = surfaceEditor;
 			window.csgModel = csgModel;
 
 			// By setting both sizes to the same, even the resize cursor hover is automatically disabled
 			window.minSize = WINDOW_SIZE;
-			window.maxSize = WINDOW_SIZE;
+			//window.maxSize = WINDOW_SIZE;
 
 			window.Show();
 
@@ -43,7 +43,7 @@ namespace Sabresaurus.SabreCSG
 
 		void OnGUI()
 		{
-			if(surfaceEditor == null || csgModel == null)
+			if(csgModel == null)
 			{
 				// Link to face tool has been lost, so attempt to reacquire
 				CSGModel[] csgModels = FindObjectsOfType<CSGModel>();
@@ -54,40 +54,75 @@ namespace Sabresaurus.SabreCSG
 					if(csgModels[i].EditMode)
 					{
 						csgModel = csgModels[i];
-						surfaceEditor = csgModels[i].GetTool(MainMode.Face) as SurfaceEditor;
+
 						break;
 					}
 				}
 
 				// If it's still null
-				if(surfaceEditor == null || csgModel == null)
+				if(csgModel == null)
 				{
 					GUILayout.Label("No active CSG Model");
 					return;
 				}
 			}
 
+            IVertexColorEditable targetEditor = csgModel.ActiveTool as IVertexColorEditable;
+
+            if(targetEditor == null)
+            {
+                GUIStyle style = GUI.skin.label;
+                style.wordWrap = true;
+                GUILayout.Label("Color window can't be used with active tool", style);
+                return;
+            }
+
 			GUILayout.Label("Set Vertex Colors", SabreGUILayout.GetTitleStyle());
 
-			Color sourceColor = surfaceEditor.GetColor();
+			Color sourceColor = targetEditor.GetColor();
 
 			Color newColor = EditorGUILayout.ColorField(sourceColor);
 
 			if(newColor != sourceColor)
 			{
-				surfaceEditor.SetSelectionColor(newColor);
+				targetEditor.SetSelectionColor(newColor);
 			}
 
+            Rect nameTagRect = GUILayoutUtility.GetRect(10, 12);
+            SabreGUILayout.DrawNameTag(nameTagRect.position, "Presets");
+
 			// Preset color buttons
-			GUILayout.BeginHorizontal();
-			for (int i = 0; i < PRESET_COLORS.Length; i++) 
-			{
-				if(SabreGUILayout.ColorButton(PRESET_COLORS[i]))
+            GUILayout.BeginHorizontal();
+            foreach (Color color in PRESET_COLORS)
+            {
+                if(SabreGUILayout.ColorButton(color))
 				{
-					surfaceEditor.SetSelectionColor(PRESET_COLORS[i]);
+                    targetEditor.SetSelectionColor(color);
 				}	
 			}
 			GUILayout.EndHorizontal();
+
+            nameTagRect = GUILayoutUtility.GetRect(10, 12);
+            SabreGUILayout.DrawNameTag(nameTagRect.position, "Library");
+            if(defaultColorPresetLibrary == null)
+            {
+                defaultColorPresetLibrary = AssetDatabase.LoadMainAssetAtPath(CSGModel.GetSabreCSGPath() + "DefaultColors.colors");
+            }
+
+            // Add in the color presets
+            if(defaultColorPresetLibrary != null)
+            {
+                Color[] palette = PaintUtility.ExtractPalette(defaultColorPresetLibrary);
+                GUILayout.BeginHorizontal();
+                foreach (Color color in palette)
+                {
+                    if(SabreGUILayout.ColorButton(color))
+                    {
+                        targetEditor.SetSelectionColor(color);
+                    }   
+                }
+                GUILayout.EndHorizontal();
+            }
 		}
 	}
 }

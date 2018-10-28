@@ -9,7 +9,7 @@ using Array = System.Array;
 
 namespace Sabresaurus.SabreCSG
 {
-    public class SurfaceEditor : Tool
+    public class SurfaceEditor : Tool, IVertexColorEditable
     {
         private bool selectHelpersVisible = false;
 
