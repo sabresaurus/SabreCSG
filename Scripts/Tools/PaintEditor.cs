@@ -507,7 +507,7 @@ namespace Sabresaurus.SabreCSG
 
             if (currentMode == Mode.PaintRGB)
             {
-                rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, false, null, GUILayout.MaxWidth(183));
+                rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, GUILayout.MaxWidth(183));
             }
             else if (currentMode == Mode.PaintAlpha)
             {

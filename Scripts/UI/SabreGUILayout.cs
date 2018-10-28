@@ -472,6 +472,7 @@ namespace Sabresaurus.SabreCSG
             return EditorGUILayout.MaskField(label, mask, layerNames.ToArray());
         }
 
+#if !UNITY_2018_1_OR_NEWER
         // things used by color field:
 
         private static Type colorField_ColorPickerWindowType;
@@ -519,6 +520,7 @@ namespace Sabresaurus.SabreCSG
 
             return value;
         }
+#endif
 
         /// <summary>
         /// Displays a color field and uses extensive reflection hacks to make sure it works inside GUILayout.Window callbacks.
@@ -528,7 +530,11 @@ namespace Sabresaurus.SabreCSG
         public static Color ColorField(Color value)
         {
             // display the broken color field widget and fetch the color manually:
+#if !UNITY_2018_1_OR_NEWER
             return ColorField_FetchCurrentColor(EditorGUILayout.ColorField(value));
+#else
+            return EditorGUILayout.ColorField(value);
+#endif
         }
 
         /// <summary>
@@ -536,10 +542,14 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="value">The currently selected color value.</param>
         /// <returns>The selected color.</returns>
-        public static Color ColorField(GUIContent label, Color value, bool showEyedropper, bool showAlpha, bool hdr, ColorPickerHDRConfig hdrConfig, params GUILayoutOption[] options)
+        public static Color ColorField(GUIContent label, Color value, bool showEyedropper, bool showAlpha, params GUILayoutOption[] options)
         {
             // display the broken color field widget and fetch the color manually:
-            return ColorField_FetchCurrentColor(EditorGUILayout.ColorField(label, value, showEyedropper, showAlpha, hdr, hdrConfig, options));
+#if !UNITY_2018_1_OR_NEWER
+            return ColorField_FetchCurrentColor(EditorGUILayout.ColorField(label, value, showEyedropper, showAlpha, false, null, options));
+#else
+            return EditorGUILayout.ColorField(label, value, showEyedropper, showAlpha, false, options);
+#endif
         }
     }
 }
