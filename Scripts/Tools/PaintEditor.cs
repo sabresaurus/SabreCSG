@@ -283,6 +283,10 @@ namespace Sabresaurus.SabreCSG
             initialPolygon = activePolygon;
 
             SceneView.RepaintAll();
+
+            // when left-clicked immediately paint instead of waiting until the user moves.
+            if (e.button == 0)
+                OnMouseDrag(sceneView, e);
         }
 
         public bool Coplanar(Transform brushTransform, Polygon localBrushPolygon, Polygon worldPolygon)
