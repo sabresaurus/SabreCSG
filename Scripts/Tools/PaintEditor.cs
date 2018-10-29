@@ -9,8 +9,9 @@ namespace Sabresaurus.SabreCSG
 {
     public class PaintEditor : Tool
     {
-        // Constants for the color palette.
-        // These colors were recreated from Adobe Photoshop CC 2018 swatches.
+        /// <summary>
+        /// Constants for the color palette. These colors were recreated from Adobe Photoshop CC 2018 swatches.
+        /// </summary>
         private readonly Color[] m_ColorPalette = new Color[]
         {
             new Color(1.000f, 0.000f, 0.000f),
@@ -137,6 +138,22 @@ namespace Sabresaurus.SabreCSG
             new Color(0.412f, 0.235f, 0.067f),
         };
 
+        /// <summary>
+        /// The blending modes for the brush. These modes were inspired by Adobe Photoshop CC 2018 blending modes.
+        /// </summary>
+        private enum BlendingMode
+        {
+            Replace,
+            Darken,
+            Multiply,
+            ColorBurn,
+            LinearBurn,
+            Lighten,
+            Screen,
+            ColorDodge,
+            LinearDodge
+        }
+
         private enum Mode
         { PaintRGB, PaintAlpha };
 
@@ -148,12 +165,16 @@ namespace Sabresaurus.SabreCSG
         // Main UI rectangle for this tool's UI
         private readonly Rect toolbarRect = new Rect(6, 40, 203, 199);
 
+        private int toolbarExtraHeight = 0;
+
         private float radius = 1f;
 
         // RGB Color Mode
         private Color rgbColor = Color.white;
 
         private float rgbStrength = 0.06f;
+
+        private BlendingMode blendingMode = BlendingMode.Replace;
 
         // Alpha Mode
         private float alphaStrength = 0.3f;
@@ -177,6 +198,17 @@ namespace Sabresaurus.SabreCSG
         public override void OnSceneGUI(SceneView sceneView, Event e)
         {
             base.OnSceneGUI(sceneView, e); // Allow the base logic to calculate first
+
+            switch (currentMode)
+            {
+                case Mode.PaintRGB:
+                    toolbarExtraHeight = 18;
+                    break;
+
+                case Mode.PaintAlpha:
+                    toolbarExtraHeight = 0;
+                    break;
+            }
 
             if (e.button == 0
                 && !EditorHelper.IsMousePositionInInvalidRects(e.mousePosition)
@@ -367,9 +399,65 @@ namespace Sabresaurus.SabreCSG
         {
             if (currentMode == Mode.PaintRGB)
             {
-                Color newColor = Color.Lerp(sourceColor, rgbColor, rgbStrength * paintAmount);
-                newColor.a = sourceColor.a;
-                return newColor;
+                switch (blendingMode)
+                {
+                    case BlendingMode.Replace:
+                        {
+                            Color color = Color.Lerp(sourceColor, rgbColor, rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.Darken:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.Darken(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.Multiply:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.Multiply(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.ColorBurn:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.ColorBurn(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.LinearBurn:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.LinearBurn(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.Lighten:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.Lighten(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.Screen:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.Screen(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.ColorDodge:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.ColorDodge(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                    case BlendingMode.LinearDodge:
+                        {
+                            Color color = Color.Lerp(sourceColor, sourceColor.LinearDodge(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            color.a = sourceColor.a;
+                            return color;
+                        }
+                }
+
+                return sourceColor;
             }
             else // Paint Alpha
             {
@@ -467,9 +555,9 @@ namespace Sabresaurus.SabreCSG
                 toolbar.normal.background = SabreCSGResources.HalfWhiteTexture;
             }
             // Set the style height to match the rectangle (so it stretches instead of tiling)
-            toolbar.fixedHeight = toolbarRect.height;
+            toolbar.fixedHeight = toolbarRect.height + toolbarExtraHeight;
             // Draw the actual GUI via a Window
-            GUILayout.Window(140010, toolbarRect, OnToolbarGUI, "", toolbar);
+            GUILayout.Window(140010, new Rect(toolbarRect.x, toolbarRect.y, toolbarRect.width, toolbarRect.height + toolbarExtraHeight), OnToolbarGUI, "", toolbar);
         }
 
         public void OnToolbarGUI(int windowID)
@@ -484,7 +572,7 @@ namespace Sabresaurus.SabreCSG
             GUI.color = Color.black;
             GUILayout.Label("Radius");
             GUI.color = Color.white;
-            radius = EditorGUILayout.Slider("", radius, 0.5f, 5f, GUILayout.MaxWidth(128));
+            radius = EditorGUILayout.Slider("", radius, 0.1f, 5f, GUILayout.MaxWidth(128));
             EditorGUILayout.EndHorizontal();
 
             // opacity slider
@@ -508,6 +596,13 @@ namespace Sabresaurus.SabreCSG
             if (currentMode == Mode.PaintRGB)
             {
                 rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, GUILayout.MaxWidth(183));
+
+                EditorGUILayout.BeginHorizontal();
+                GUI.color = Color.black;
+                GUILayout.Label("Blending");
+                GUI.color = Color.white;
+                blendingMode = (BlendingMode)EditorGUILayout.EnumPopup(blendingMode, GUILayout.MaxWidth(96));
+                EditorGUILayout.EndHorizontal();
             }
             else if (currentMode == Mode.PaintAlpha)
             {
@@ -536,7 +631,7 @@ namespace Sabresaurus.SabreCSG
                 x = x - ((i / amount) * (amount * 12));
 
                 x += 5;
-                y += 97;
+                y += 97 + toolbarExtraHeight;
 
                 GUI.color = borderColor;
                 if (Event.current.type == EventType.MouseDown && new Rect(x, y, 12, 12).Contains(Event.current.mousePosition))
