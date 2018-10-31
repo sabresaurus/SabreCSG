@@ -400,7 +400,7 @@ namespace Sabresaurus.SabreCSG
                 OnMouseDrag(sceneView, e);
         }
 
-        public bool Coplanar(Transform brushTransform, Polygon localBrushPolygon, Polygon worldPolygon)
+        private bool Coplanar(Transform brushTransform, Polygon localBrushPolygon, Polygon worldPolygon)
         {
             Plane worldPolygonPlane = worldPolygon.Plane;
 
@@ -675,7 +675,7 @@ namespace Sabresaurus.SabreCSG
             GUILayout.Window(140010, actualToolbarRect, OnToolbarGUI, "", toolbar);
         }
 
-        public void OnToolbarGUI(int windowID)
+        private void OnToolbarGUI(int windowID)
         {
             EditorGUILayout.Space();
 
@@ -804,15 +804,10 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public void SetSelectionColor(Color color)
+        private void SetSelectionColor(Color color)
         {
             this.colorBrushColor = color;
             SceneView.RepaintAll();
-        }
-
-        public Color GetColor()
-        {
-            return colorBrushColor;
         }
     }
 }
