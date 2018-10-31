@@ -12,7 +12,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>
         /// Constants for the color palette. These colors were recreated from Adobe Photoshop CC 2018 swatches.
         /// </summary>
-        private readonly Color[] m_ColorPalette = new Color[]
+        private static readonly Color[] colorPalette = new Color[]
         {
             new Color(1.000f, 0.000f, 0.000f),
             new Color(1.000f, 1.000f, 0.000f),
@@ -135,7 +135,46 @@ namespace Sabresaurus.SabreCSG
             new Color(0.686f, 0.525f, 0.333f),
             new Color(0.588f, 0.416f, 0.224f),
             new Color(0.498f, 0.318f, 0.133f),
-            new Color(0.412f, 0.235f, 0.067f),
+            new Color(0.412f, 0.235f, 0.067f)
+        };
+
+        /// <summary>
+        /// Constants for the alpha palette. These colors are a simple lerp from 1 to 0 over 32 steps.
+        /// </summary>
+        private static readonly Color[] alphaPalette = new Color[]
+        {
+            new Color(1.000f, 1.000f, 1.000f),
+            new Color(0.968f, 0.968f, 0.968f),
+            new Color(0.935f, 0.935f, 0.935f),
+            new Color(0.903f, 0.903f, 0.903f),
+            new Color(0.871f, 0.871f, 0.871f),
+            new Color(0.839f, 0.839f, 0.839f),
+            new Color(0.806f, 0.806f, 0.806f),
+            new Color(0.774f, 0.774f, 0.774f),
+            new Color(0.742f, 0.742f, 0.742f),
+            new Color(0.710f, 0.710f, 0.710f),
+            new Color(0.677f, 0.677f, 0.677f),
+            new Color(0.645f, 0.645f, 0.645f),
+            new Color(0.613f, 0.613f, 0.613f),
+            new Color(0.581f, 0.581f, 0.581f),
+            new Color(0.548f, 0.548f, 0.548f),
+            new Color(0.516f, 0.516f, 0.516f),
+            new Color(0.484f, 0.484f, 0.484f),
+            new Color(0.452f, 0.452f, 0.452f),
+            new Color(0.419f, 0.419f, 0.419f),
+            new Color(0.387f, 0.387f, 0.387f),
+            new Color(0.355f, 0.355f, 0.355f),
+            new Color(0.323f, 0.323f, 0.323f),
+            new Color(0.290f, 0.290f, 0.290f),
+            new Color(0.258f, 0.258f, 0.258f),
+            new Color(0.226f, 0.226f, 0.226f),
+            new Color(0.194f, 0.194f, 0.194f),
+            new Color(0.161f, 0.161f, 0.161f),
+            new Color(0.129f, 0.129f, 0.129f),
+            new Color(0.097f, 0.097f, 0.097f),
+            new Color(0.065f, 0.065f, 0.065f),
+            new Color(0.032f, 0.032f, 0.032f),
+            new Color(0.000f, 0.000f, 0.000f)
         };
 
         /// <summary>
@@ -154,64 +193,136 @@ namespace Sabresaurus.SabreCSG
             LinearDodge
         }
 
-        private enum Mode
-        { PaintRGB, PaintAlpha };
+        /// <summary>
+        /// The color drawing modes.
+        /// </summary>
+        private enum DrawingMode
+        {
+            /// <summary>
+            /// The color mode affects the Red, Green and Blue channels.
+            /// </summary>
+            Color,
 
-        private Mode currentMode = Mode.PaintRGB;
+            /// <summary>
+            /// The alpha mode affects only the Alpha channel.
+            /// </summary>
+            Alpha
+        };
 
-        //        Vector3 downPoint; // The 3D point the mouse was over at the start of the mouse click
-        private Vector3 hoverPointWorld; // The 3D point the mouse is hovering over
+        /// <summary>
+        /// The current color drawing mode.
+        /// </summary>
+        private DrawingMode drawingMode = DrawingMode.Color;
 
-        // Main UI rectangle for this tool's UI
-        private readonly Rect toolbarRect = new Rect(6, 40, 203, 199);
+        /// <summary>
+        /// The world position of the point the mouse is hovering over.
+        /// </summary>
+        private Vector3 mouseHoverPoint;
 
-        private int toolbarExtraHeight = 0;
+        /// <summary>
+        /// The toolbar rectangle for this tool's user interface.
+        /// </summary>
+        private readonly Rect toolbarRect = new Rect(6, 40, 203, 0);
 
-        private float radius = 1f;
+        /// <summary>
+        /// An additional height used when switching between color and alpha drawing modes.
+        /// </summary>
+        private int toolbarHeight = 0;
 
-        // RGB Color Mode
-        private Color rgbColor = Color.white;
+        /// <summary>
+        /// The brush drawing radius.
+        /// </summary>
+        private float brushRadius = 1f;
 
-        private float rgbStrength = 0.06f;
+        /// <summary>
+        /// The color brush's current color.
+        /// </summary>
+        private Color colorBrushColor = Color.white;
 
-        private BlendingMode blendingMode = BlendingMode.Replace;
+        /// <summary>
+        /// The color brush's current strength.
+        /// </summary>
+        private float colorBrushStrength = 0.06f;
 
-        // Alpha Mode
-        private float alphaStrength = 0.3f;
+        /// <summary>
+        /// The color brush's blending mode.
+        /// </summary>
+        private BlendingMode colorBrushBlendingMode = BlendingMode.Replace;
 
-        private float alphaColor = 1f;
+        /// <summary>
+        /// The alpha brush's current strength.
+        /// </summary>
+        private float alphaBrushStrength = 0.3f;
 
-        // Common
-        private bool restrictToPoly = false;
+        /// <summary>
+        /// The alpha brush's current color.
+        /// </summary>
+        private float alphaBrushColor = 1f;
 
+        /// <summary>
+        /// Whether to restrict the drawing to the initial face that was clicked upon.
+        /// </summary>
+        private bool restrictToFace = false;
+
+        /// <summary>
+        /// The initial polygon that the mouse down event occured on.
+        /// </summary>
         private Polygon initialPolygon = null; // The polygon that the mouse down event occurred on
-        private Polygon activePolygon = null; // The polygon currently overriding the grid plane
-        //PrimitiveBrush activeBrush = null; // The polygon currently overriding the grid plane
 
-        // Defer expensive operations from drag time to mouse up
-        private List<Brush> brushesBeingEdited = new List<Brush>();
+        /// <summary>
+        /// The active polygon that the mouse is currently hovering over.
+        /// </summary>
+        private Polygon activePolygon = null;
 
+        /// <summary>
+        /// The brushes that have been edited by the user.
+        /// </summary>
+        private List<Brush> editedBrushes = new List<Brush>();
+
+        /// <summary>
+        /// Gets the actual toolbar rectangle, this changes depending on the drawing modes.
+        /// </summary>
+        /// <value>The actual toolbar rectangle.</value>
+        private Rect actualToolbarRect
+        {
+            get
+            {
+                return new Rect(toolbarRect.x, toolbarRect.y, toolbarRect.width, toolbarRect.height + toolbarHeight);
+            }
+        }
+
+        /// <summary>
+        /// Called when the tool gets reset.
+        /// </summary>
         public override void ResetTool()
         {
         }
 
+        /// <summary>
+        /// Called whenever the editor updates and there was an event on the scene GUI.
+        /// </summary>
+        /// <param name="sceneView">The scene view.</param>
+        /// <param name="e">The event information.</param>
         public override void OnSceneGUI(SceneView sceneView, Event e)
         {
-            base.OnSceneGUI(sceneView, e); // Allow the base logic to calculate first
+            // allow the base logic to calculate first.
+            base.OnSceneGUI(sceneView, e);
 
-            switch (currentMode)
+            // we adjust the toolbar size depending on the drawing mode.
+            switch (drawingMode)
             {
-                case Mode.PaintRGB:
-                    toolbarExtraHeight = 18;
+                case DrawingMode.Color:
+                    toolbarHeight = 217;
                     break;
 
-                case Mode.PaintAlpha:
-                    toolbarExtraHeight = 0;
+                case DrawingMode.Alpha:
+                    toolbarHeight = 126;
                     break;
             }
 
             if (e.button == 0
                 && !EditorHelper.IsMousePositionInInvalidRects(e.mousePosition)
+                && !EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, actualToolbarRect)
                 && !CameraPanInProgress)
             {
                 if (e.type == EventType.MouseDown)
@@ -259,11 +370,11 @@ namespace Sabresaurus.SabreCSG
 
                 if (polygon.Plane.Raycast(ray, out rayDistance))
                 {
-                    hoverPointWorld = ray.GetPoint(rayDistance);
+                    mouseHoverPoint = ray.GetPoint(rayDistance);
 
                     PolygonRaycastHit hit = new PolygonRaycastHit()
                     {
-                        Point = hoverPointWorld,
+                        Point = mouseHoverPoint,
                         Normal = polygon.Plane.normal,
                         Distance = rayDistance,
                         GameObject = null,
@@ -271,7 +382,7 @@ namespace Sabresaurus.SabreCSG
                     };
 
                     activePolygon = hit.Polygon;
-                    hoverPointWorld = hit.Point;
+                    mouseHoverPoint = hit.Point;
                 }
             }
         }
@@ -325,7 +436,7 @@ namespace Sabresaurus.SabreCSG
                     bool anyChanged = false;
                     foreach (Polygon brushPolygon in brush.GetPolygons())
                     {
-                        if (restrictToPoly == false || Coplanar(brush.transform, brushPolygon, initialPolygon))
+                        if (restrictToFace == false || Coplanar(brush.transform, brushPolygon, initialPolygon))
                         {
                             anyChanged |= ChangePolygonColor(brush, brushPolygon);
                         }
@@ -333,8 +444,8 @@ namespace Sabresaurus.SabreCSG
 
                     if (anyChanged)
                     {
-                        if (!brushesBeingEdited.Contains(brush))
-                            brushesBeingEdited.Add(brush);
+                        if (!editedBrushes.Contains(brush))
+                            editedBrushes.Add(brush);
                     }
                 }
             }
@@ -345,7 +456,7 @@ namespace Sabresaurus.SabreCSG
         {
             bool anyChanged = false;
 
-            Vector3 hoverPointLocal = brush.transform.InverseTransformPoint(hoverPointWorld);
+            Vector3 hoverPointLocal = brush.transform.InverseTransformPoint(mouseHoverPoint);
 
             Undo.RecordObject(brush, "Paint");
             csgModel.UndoRecordContext("Paint");
@@ -354,10 +465,10 @@ namespace Sabresaurus.SabreCSG
             {
                 float squareDistance = (polygon.Vertices[j].Position - hoverPointLocal).sqrMagnitude;
 
-                if (squareDistance <= (radius * radius))
+                if (squareDistance <= (brushRadius * brushRadius))
                 {
                     float distance = Mathf.Sqrt(squareDistance);
-                    polygon.Vertices[j].Color = PaintColor(polygon.Vertices[j].Color, distance / radius);
+                    polygon.Vertices[j].Color = PaintColor(polygon.Vertices[j].Color, distance / brushRadius);
                     anyChanged = true;
                 }
             }
@@ -370,18 +481,18 @@ namespace Sabresaurus.SabreCSG
                     Undo.RecordObject(entry.BuiltMesh, "Change Vertex Color");
 
                     Vector3[] meshVertices = entry.BuiltMesh.vertices;
-                    Color[] meshColors = entry.BuiltMesh.colors;
+                    Color32[] meshColors = entry.BuiltMesh.colors32;
                     Color[] colors = entry.Colors;
 
                     for (int vertexIndex = 0; vertexIndex < entry.Positions.Length; vertexIndex++)
                     {
-                        float squareDistance = (meshVertices[entry.BuiltVertexOffset + vertexIndex] - hoverPointWorld).sqrMagnitude;
+                        float squareDistance = (meshVertices[entry.BuiltVertexOffset + vertexIndex] - mouseHoverPoint).sqrMagnitude;
 
-                        if (squareDistance <= (radius * radius))
+                        if (squareDistance <= (brushRadius * brushRadius))
                         {
                             float distance = Mathf.Sqrt(squareDistance);
-                            colors[vertexIndex] = PaintColor(colors[vertexIndex], distance / radius);
-                            meshColors[entry.BuiltVertexOffset + vertexIndex] = PaintColor(meshColors[entry.BuiltVertexOffset + vertexIndex], distance / radius);
+                            colors[vertexIndex] = PaintColor(colors[vertexIndex], distance / brushRadius);
+                            meshColors[entry.BuiltVertexOffset + vertexIndex] = PaintColor(meshColors[entry.BuiltVertexOffset + vertexIndex], distance / brushRadius);
                             anyChanged = true;
                         }
                     }
@@ -389,7 +500,7 @@ namespace Sabresaurus.SabreCSG
                     if (anyChanged)
                     {
                         entry.Colors = colors;
-                        entry.BuiltMesh.colors = meshColors;
+                        entry.BuiltMesh.colors32 = meshColors;
 
                         EditorHelper.SetDirty(entry.BuiltMesh);
                     }
@@ -401,61 +512,61 @@ namespace Sabresaurus.SabreCSG
 
         private Color PaintColor(Color sourceColor, float paintAmount)
         {
-            if (currentMode == Mode.PaintRGB)
+            if (drawingMode == DrawingMode.Color)
             {
-                switch (blendingMode)
+                switch (colorBrushBlendingMode)
                 {
                     case BlendingMode.Replace:
                         {
-                            Color color = Color.Lerp(sourceColor, rgbColor, rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, colorBrushColor, colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.Darken:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Darken(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.Darken(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.Multiply:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Multiply(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.Multiply(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.ColorBurn:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.ColorBurn(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.ColorBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.LinearBurn:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.LinearBurn(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.LinearBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.Lighten:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Lighten(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.Lighten(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.Screen:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Screen(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.Screen(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.ColorDodge:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.ColorDodge(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.ColorDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
                     case BlendingMode.LinearDodge:
                         {
-                            Color color = Color.Lerp(sourceColor, sourceColor.LinearDodge(rgbColor), rgbStrength * paintAmount).Clamp01();
+                            Color color = Color.Lerp(sourceColor, sourceColor.LinearDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
                             color.a = sourceColor.a;
                             return color;
                         }
@@ -466,7 +577,7 @@ namespace Sabresaurus.SabreCSG
             else // Paint Alpha
             {
                 Color newColor = sourceColor;
-                newColor.a = Mathf.Lerp(sourceColor.a, alphaColor, alphaStrength * paintAmount);
+                newColor.a = Mathf.Lerp(sourceColor.a, alphaBrushColor, alphaBrushStrength * paintAmount);
                 return newColor;
             }
         }
@@ -483,12 +594,12 @@ namespace Sabresaurus.SabreCSG
             SceneView.RepaintAll();
 
             // Deferred expensive operation
-            foreach (var brush in brushesBeingEdited)
+            foreach (var brush in editedBrushes)
             {
                 brush.RecachePolygons(false);
             }
 
-            brushesBeingEdited.Clear();
+            editedBrushes.Clear();
         }
 
         private void OnKeyAction(SceneView sceneView, Event e)
@@ -528,7 +639,7 @@ namespace Sabresaurus.SabreCSG
 
                 GL.Color(Color.white);
 
-                Vector3 target = sceneViewCamera.WorldToScreenPoint(hoverPointWorld);
+                Vector3 target = sceneViewCamera.WorldToScreenPoint(mouseHoverPoint);
 
                 if (target.z > 0)
                 {
@@ -540,7 +651,7 @@ namespace Sabresaurus.SabreCSG
                 GL.End();
                 GL.PopMatrix();
 
-                Handles.DrawWireArc(hoverPointWorld, activePolygon.Plane.normal, activePolygon.GetTangent(), 360f, radius);
+                Handles.DrawWireArc(mouseHoverPoint, activePolygon.Plane.normal, activePolygon.GetTangent(), 360f, brushRadius);
             }
         }
 
@@ -559,24 +670,24 @@ namespace Sabresaurus.SabreCSG
                 toolbar.normal.background = SabreCSGResources.HalfWhiteTexture;
             }
             // Set the style height to match the rectangle (so it stretches instead of tiling)
-            toolbar.fixedHeight = toolbarRect.height + toolbarExtraHeight;
+            toolbar.fixedHeight = toolbarRect.height + toolbarHeight;
             // Draw the actual GUI via a Window
-            GUILayout.Window(140010, new Rect(toolbarRect.x, toolbarRect.y, toolbarRect.width, toolbarRect.height + toolbarExtraHeight), OnToolbarGUI, "", toolbar);
+            GUILayout.Window(140010, actualToolbarRect, OnToolbarGUI, "", toolbar);
         }
 
         public void OnToolbarGUI(int windowID)
         {
             EditorGUILayout.Space();
 
-            restrictToPoly = SabreGUILayout.Toggle(restrictToPoly, "Restrict To Face");
-            currentMode = SabreGUILayout.DrawEnumGrid(currentMode);
+            restrictToFace = SabreGUILayout.Toggle(restrictToFace, "Restrict To Face");
+            drawingMode = SabreGUILayout.DrawEnumGrid(drawingMode);
 
             // radius slider
             EditorGUILayout.BeginHorizontal();
             GUI.color = Color.black;
             GUILayout.Label("Radius");
             GUI.color = Color.white;
-            radius = EditorGUILayout.Slider("", radius, 0.1f, 5f, GUILayout.MaxWidth(128));
+            brushRadius = EditorGUILayout.Slider("", brushRadius, 0.1f, 5f, GUILayout.MaxWidth(128));
             EditorGUILayout.EndHorizontal();
 
             // opacity slider
@@ -585,48 +696,64 @@ namespace Sabresaurus.SabreCSG
             GUILayout.Label("Opacity");
             GUI.color = Color.white;
 
-            switch (currentMode)
+            switch (drawingMode)
             {
-                case Mode.PaintRGB:
-                    rgbStrength = EditorGUILayout.Slider("", rgbStrength, 0f, 1f, GUILayout.MaxWidth(128));
+                case DrawingMode.Color:
+                    colorBrushStrength = EditorGUILayout.Slider("", colorBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
                     break;
 
-                case Mode.PaintAlpha:
-                    alphaStrength = EditorGUILayout.Slider("", alphaStrength, 0f, 1f, GUILayout.MaxWidth(128));
+                case DrawingMode.Alpha:
+                    alphaBrushStrength = EditorGUILayout.Slider("", alphaBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
                     break;
             }
             EditorGUILayout.EndHorizontal();
 
-            if (currentMode == Mode.PaintRGB)
+            if (drawingMode == DrawingMode.Color)
             {
-                rgbColor = SabreGUILayout.ColorField(new GUIContent("Color"), rgbColor, false, false, GUILayout.MaxWidth(183));
+                colorBrushColor = SabreGUILayout.ColorField(new GUIContent("Color"), colorBrushColor, false, false, GUILayout.MaxWidth(183));
 
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = Color.black;
                 GUILayout.Label("Blending");
                 GUI.color = Color.white;
-                blendingMode = (BlendingMode)EditorGUILayout.EnumPopup(blendingMode, GUILayout.MaxWidth(96));
+                colorBrushBlendingMode = (BlendingMode)EditorGUILayout.EnumPopup(colorBrushBlendingMode, GUILayout.MaxWidth(96));
                 EditorGUILayout.EndHorizontal();
             }
-            else if (currentMode == Mode.PaintAlpha)
+            else if (drawingMode == DrawingMode.Alpha)
             {
                 // alpha color slider
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = Color.black;
                 GUILayout.Label("Alpha");
                 GUI.color = Color.white;
-                alphaColor = EditorGUILayout.Slider("", alphaColor, 0f, 1f, GUILayout.MaxWidth(128));
+                alphaBrushColor = EditorGUILayout.Slider("", alphaBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
                 EditorGUILayout.EndHorizontal();
             }
 
-            OnToolbarColorGUI();
+            // draw color palette:
+            DrawToolbarPalette();
         }
 
-        public void OnToolbarColorGUI()
+        /// <summary>
+        /// Draws the toolbar palette.
+        /// </summary>
+        private void DrawToolbarPalette()
         {
-            Color borderColor = new Color(0.271f, 0.271f, 0.271f);
+            // load the appropriate palette colors:
+            Color[] palette = null;
+            switch (drawingMode)
+            {
+                case DrawingMode.Color: palette = colorPalette; break;
+                case DrawingMode.Alpha: palette = alphaPalette; break;
+            }
 
-            for (int i = 0; i < m_ColorPalette.Length; i++)
+            // create constants:
+            Color borderColor = new Color(0.271f, 0.271f, 0.271f);
+            Texture2D whiteTexture = EditorGUIUtility.whiteTexture;
+            int yoffset = (int)GUILayoutUtility.GetLastRect().yMax + 2;
+
+            // iterate through all palette colors:
+            for (int i = 0; i < palette.Length; i++)
             {
                 int amount = 16;
 
@@ -635,17 +762,22 @@ namespace Sabresaurus.SabreCSG
                 x = x - ((i / amount) * (amount * 12));
 
                 x += 5;
-                y += 97 + toolbarExtraHeight;
+                y += yoffset;
 
-                GUI.color = borderColor;
+                // handle the mouse down event (the user picks a color):
                 if (Event.current.type == EventType.MouseDown && new Rect(x, y, 12, 12).Contains(Event.current.mousePosition))
                 {
-                    SetSelectionColor(m_ColorPalette[i]);
+                    switch (drawingMode)
+                    {
+                        case DrawingMode.Color: SetSelectionColor(palette[i]); break;
+                        case DrawingMode.Alpha: alphaBrushColor = palette[i].r; break;
+                    }
                 }
 
-                GUI.DrawTexture(new Rect(x, y, 13, 13), EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
-                GUI.color = m_ColorPalette[i];
-                GUI.DrawTexture(new Rect(x + 1, y + 1, 11, 11), EditorGUIUtility.whiteTexture, ScaleMode.StretchToFill);
+                GUI.color = borderColor;
+                GUI.DrawTexture(new Rect(x, y, 13, 13), whiteTexture, ScaleMode.StretchToFill);
+                GUI.color = palette[i];
+                GUI.DrawTexture(new Rect(x + 1, y + 1, 11, 11), whiteTexture, ScaleMode.StretchToFill);
             }
 
             GUI.color = Color.white;
@@ -674,13 +806,13 @@ namespace Sabresaurus.SabreCSG
 
         public void SetSelectionColor(Color color)
         {
-            this.rgbColor = color;
+            this.colorBrushColor = color;
             SceneView.RepaintAll();
         }
 
         public Color GetColor()
         {
-            return rgbColor;
+            return colorBrushColor;
         }
     }
 }
