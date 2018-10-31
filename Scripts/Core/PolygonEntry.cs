@@ -18,7 +18,7 @@ namespace Sabresaurus.SabreCSG
 		public Vector2[] UV;
 
 		[SerializeField]
-		public Color[] Colors;
+		public Color32[] Colors;
 
 		[SerializeField]
 		public int[] Triangles;
@@ -42,7 +42,7 @@ namespace Sabresaurus.SabreCSG
 		public PolygonEntry (Vector3[] positions, 
 			Vector3[] normals, 
 			Vector2[] uv, 
-			Color[] colors,
+			Color32[] colors,
 			int[] triangles, 
 			Material material,
 			bool excludeFromBuild

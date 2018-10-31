@@ -428,6 +428,11 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < vertices.Length; i++)
                 vertices[i].Color = newColor;
         }
+		
+        public Vector3 GetTangent()
+        {
+            return (vertices[1].Position - vertices[0].Position).normalized;
+        }
 
         /// <summary>
         /// Loops through the vertices of the polygon and removes all vertices that share the same

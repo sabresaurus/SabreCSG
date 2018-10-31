@@ -13,9 +13,10 @@ namespace Sabresaurus.SabreCSG
         Vertex,
         Face,
 
-        Clip,
-        Draw,
-    };
+		Clip,
+		Draw,
+        Paint,
+	};
 
     public enum OverrideMode
     {

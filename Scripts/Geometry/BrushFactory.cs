@@ -764,7 +764,7 @@ namespace Sabresaurus.SabreCSG
             List<Vector3> vertices = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
             List<Vector2> uvs = new List<Vector2>();
-            List<Color> colors = new List<Color>();
+            List<Color32> colors = new List<Color32>();
             List<int> triangles = new List<int>();
 
             // Maps triangle index (input) to polygon index (output). i.e. int polyIndex = polygonIndices[triIndex];
@@ -813,7 +813,7 @@ namespace Sabresaurus.SabreCSG
             // Set the mesh buffers
             mesh.vertices = vertices.ToArray();
             mesh.normals = normals.ToArray();
-            mesh.colors = colors.ToArray();
+            mesh.colors32 = colors.ToArray();
             mesh.uv = uvs.ToArray();
             mesh.triangles = triangles.ToArray();
         }
