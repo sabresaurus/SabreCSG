@@ -385,7 +385,7 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        internal static void TriangulatePolygons(bool individualVertices, bool fixTJunctions, List<Polygon> polygons, out int[] triangesToAppend, out Vector3[] positions, out Vector3[] normals, out Vector2[] uv, out Color[] colors)
+        internal static void TriangulatePolygons(bool individualVertices, bool fixTJunctions, List<Polygon> polygons, out int[] triangesToAppend, out Vector3[] positions, out Vector3[] normals, out Vector2[] uv, out Color32[] colors)
         {
             // solve edges and vertices before triangulating.
             // use proper algorithm to triangulate.
@@ -458,7 +458,7 @@ namespace Sabresaurus.SabreCSG
                 List<Vector3> lPositions = new List<Vector3>();
                 List<Vector3> lNormals = new List<Vector3>();
                 List<Vector2> lUvs = new List<Vector2>();
-                List<Color> lColors = new List<Color>();
+                List<Color32> lColors = new List<Color32>();
                 List<int> lTriangesToAppend = new List<int>();
 
                 int j = 0;
@@ -519,10 +519,10 @@ namespace Sabresaurus.SabreCSG
                     }
                     int totalVertexCount = totalTriangleCount * 3;
 
-                positions = new Vector3[totalVertexCount];
-                normals = new Vector3[totalVertexCount];
-                uv = new Vector2[totalVertexCount];
-                colors = new Color32[totalVertexCount];
+                    positions = new Vector3[totalVertexCount];
+                    normals = new Vector3[totalVertexCount];
+                    uv = new Vector2[totalVertexCount];
+                    colors = new Color32[totalVertexCount];
 
                     triangesToAppend = new int[totalTriangleCount * 3];
 
@@ -581,10 +581,10 @@ namespace Sabresaurus.SabreCSG
 
                     int totalTriangleCount = totalVertexCount - 2 * polygons.Count;
 
-                positions = new Vector3[totalVertexCount];
-                normals = new Vector3[totalVertexCount];
-                uv = new Vector2[totalVertexCount];
-                colors = new Color32[totalVertexCount];
+                    positions = new Vector3[totalVertexCount];
+                    normals = new Vector3[totalVertexCount];
+                    uv = new Vector2[totalVertexCount];
+                    colors = new Color32[totalVertexCount];
 
                     triangesToAppend = new int[totalTriangleCount * 3];
 
