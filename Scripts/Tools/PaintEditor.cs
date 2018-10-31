@@ -139,6 +139,123 @@ namespace Sabresaurus.SabreCSG
         };
 
         /// <summary>
+        /// Constants for the red palette. These colors are a simple lerp from 1 to 0 over 32 steps.
+        /// </summary>
+        private static readonly Color[] redPalette = new Color[]
+        {
+            new Color(1.000f, 0.000f, 0.000f),
+            new Color(0.968f, 0.000f, 0.000f),
+            new Color(0.935f, 0.000f, 0.000f),
+            new Color(0.903f, 0.000f, 0.000f),
+            new Color(0.871f, 0.000f, 0.000f),
+            new Color(0.839f, 0.000f, 0.000f),
+            new Color(0.806f, 0.000f, 0.000f),
+            new Color(0.774f, 0.000f, 0.000f),
+            new Color(0.742f, 0.000f, 0.000f),
+            new Color(0.710f, 0.000f, 0.000f),
+            new Color(0.677f, 0.000f, 0.000f),
+            new Color(0.645f, 0.000f, 0.000f),
+            new Color(0.613f, 0.000f, 0.000f),
+            new Color(0.581f, 0.000f, 0.000f),
+            new Color(0.548f, 0.000f, 0.000f),
+            new Color(0.516f, 0.000f, 0.000f),
+            new Color(0.484f, 0.000f, 0.000f),
+            new Color(0.452f, 0.000f, 0.000f),
+            new Color(0.419f, 0.000f, 0.000f),
+            new Color(0.387f, 0.000f, 0.000f),
+            new Color(0.355f, 0.000f, 0.000f),
+            new Color(0.323f, 0.000f, 0.000f),
+            new Color(0.290f, 0.000f, 0.000f),
+            new Color(0.258f, 0.000f, 0.000f),
+            new Color(0.226f, 0.000f, 0.000f),
+            new Color(0.194f, 0.000f, 0.000f),
+            new Color(0.161f, 0.000f, 0.000f),
+            new Color(0.129f, 0.000f, 0.000f),
+            new Color(0.097f, 0.000f, 0.000f),
+            new Color(0.065f, 0.000f, 0.000f),
+            new Color(0.032f, 0.000f, 0.000f),
+            new Color(0.000f, 0.000f, 0.000f)
+        };
+
+        /// <summary>
+        /// Constants for the green palette. These colors are a simple lerp from 1 to 0 over 32 steps.
+        /// </summary>
+        private static readonly Color[] greenPalette = new Color[]
+        {
+            new Color(0.000f, 1.000f, 0.000f),
+            new Color(0.000f, 0.968f, 0.000f),
+            new Color(0.000f, 0.935f, 0.000f),
+            new Color(0.000f, 0.903f, 0.000f),
+            new Color(0.000f, 0.871f, 0.000f),
+            new Color(0.000f, 0.839f, 0.000f),
+            new Color(0.000f, 0.806f, 0.000f),
+            new Color(0.000f, 0.774f, 0.000f),
+            new Color(0.000f, 0.742f, 0.000f),
+            new Color(0.000f, 0.710f, 0.000f),
+            new Color(0.000f, 0.677f, 0.000f),
+            new Color(0.000f, 0.645f, 0.000f),
+            new Color(0.000f, 0.613f, 0.000f),
+            new Color(0.000f, 0.581f, 0.000f),
+            new Color(0.000f, 0.548f, 0.000f),
+            new Color(0.000f, 0.516f, 0.000f),
+            new Color(0.000f, 0.484f, 0.000f),
+            new Color(0.000f, 0.452f, 0.000f),
+            new Color(0.000f, 0.419f, 0.000f),
+            new Color(0.000f, 0.387f, 0.000f),
+            new Color(0.000f, 0.355f, 0.000f),
+            new Color(0.000f, 0.323f, 0.000f),
+            new Color(0.000f, 0.290f, 0.000f),
+            new Color(0.000f, 0.258f, 0.000f),
+            new Color(0.000f, 0.226f, 0.000f),
+            new Color(0.000f, 0.194f, 0.000f),
+            new Color(0.000f, 0.161f, 0.000f),
+            new Color(0.000f, 0.129f, 0.000f),
+            new Color(0.000f, 0.097f, 0.000f),
+            new Color(0.000f, 0.065f, 0.000f),
+            new Color(0.000f, 0.032f, 0.000f),
+            new Color(0.000f, 0.000f, 0.000f)
+        };
+
+        /// <summary>
+        /// Constants for the blue palette. These colors are a simple lerp from 1 to 0 over 32 steps.
+        /// </summary>
+        private static readonly Color[] bluePalette = new Color[]
+        {
+            new Color(0.000f, 0.000f, 1.000f),
+            new Color(0.000f, 0.000f, 0.968f),
+            new Color(0.000f, 0.000f, 0.935f),
+            new Color(0.000f, 0.000f, 0.903f),
+            new Color(0.000f, 0.000f, 0.871f),
+            new Color(0.000f, 0.000f, 0.839f),
+            new Color(0.000f, 0.000f, 0.806f),
+            new Color(0.000f, 0.000f, 0.774f),
+            new Color(0.000f, 0.000f, 0.742f),
+            new Color(0.000f, 0.000f, 0.710f),
+            new Color(0.000f, 0.000f, 0.677f),
+            new Color(0.000f, 0.000f, 0.645f),
+            new Color(0.000f, 0.000f, 0.613f),
+            new Color(0.000f, 0.000f, 0.581f),
+            new Color(0.000f, 0.000f, 0.548f),
+            new Color(0.000f, 0.000f, 0.516f),
+            new Color(0.000f, 0.000f, 0.484f),
+            new Color(0.000f, 0.000f, 0.452f),
+            new Color(0.000f, 0.000f, 0.419f),
+            new Color(0.000f, 0.000f, 0.387f),
+            new Color(0.000f, 0.000f, 0.355f),
+            new Color(0.000f, 0.000f, 0.323f),
+            new Color(0.000f, 0.000f, 0.290f),
+            new Color(0.000f, 0.000f, 0.258f),
+            new Color(0.000f, 0.000f, 0.226f),
+            new Color(0.000f, 0.000f, 0.194f),
+            new Color(0.000f, 0.000f, 0.161f),
+            new Color(0.000f, 0.000f, 0.129f),
+            new Color(0.000f, 0.000f, 0.097f),
+            new Color(0.000f, 0.000f, 0.065f),
+            new Color(0.000f, 0.000f, 0.032f),
+            new Color(0.000f, 0.000f, 0.000f)
+        };
+
+        /// <summary>
         /// Constants for the alpha palette. These colors are a simple lerp from 1 to 0 over 32 steps.
         /// </summary>
         private static readonly Color[] alphaPalette = new Color[]
@@ -204,6 +321,21 @@ namespace Sabresaurus.SabreCSG
             Color,
 
             /// <summary>
+            /// The red mode affects only the Red channel.
+            /// </summary>
+            R,
+
+            /// <summary>
+            /// The green mode affects only the Green channel.
+            /// </summary>
+            G,
+
+            /// <summary>
+            /// The blue mode affects only the Blue channel.
+            /// </summary>
+            B,
+
+            /// <summary>
             /// The alpha mode affects only the Alpha channel.
             /// </summary>
             Alpha
@@ -248,6 +380,36 @@ namespace Sabresaurus.SabreCSG
         /// The color brush's blending mode.
         /// </summary>
         private BlendingMode colorBrushBlendingMode = BlendingMode.Replace;
+
+        /// <summary>
+        /// The red brush's current strength.
+        /// </summary>
+        private float redBrushStrength = 0.3f;
+
+        /// <summary>
+        /// The red brush's current color.
+        /// </summary>
+        private float redBrushColor = 1f;
+
+        /// <summary>
+        /// The green brush's current strength.
+        /// </summary>
+        private float greenBrushStrength = 0.3f;
+
+        /// <summary>
+        /// The green brush's current color.
+        /// </summary>
+        private float greenBrushColor = 1f;
+
+        /// <summary>
+        /// The blue brush's current strength.
+        /// </summary>
+        private float blueBrushStrength = 0.3f;
+
+        /// <summary>
+        /// The blue brush's current color.
+        /// </summary>
+        private float blueBrushColor = 1f;
 
         /// <summary>
         /// The alpha brush's current strength.
@@ -315,6 +477,9 @@ namespace Sabresaurus.SabreCSG
                     toolbarHeight = 217;
                     break;
 
+                case DrawingMode.R:
+                case DrawingMode.G:
+                case DrawingMode.B:
                 case DrawingMode.Alpha:
                     toolbarHeight = 126;
                     break;
@@ -512,74 +677,98 @@ namespace Sabresaurus.SabreCSG
 
         private Color PaintColor(Color sourceColor, float paintAmount)
         {
-            if (drawingMode == DrawingMode.Color)
+            switch (drawingMode)
             {
-                switch (colorBrushBlendingMode)
-                {
-                    case BlendingMode.Replace:
-                        {
-                            Color color = Color.Lerp(sourceColor, colorBrushColor, colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.Darken:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Darken(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.Multiply:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Multiply(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.ColorBurn:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.ColorBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.LinearBurn:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.LinearBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.Lighten:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Lighten(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.Screen:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.Screen(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.ColorDodge:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.ColorDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                    case BlendingMode.LinearDodge:
-                        {
-                            Color color = Color.Lerp(sourceColor, sourceColor.LinearDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
-                            color.a = sourceColor.a;
-                            return color;
-                        }
-                }
+                case DrawingMode.Color:
+                    switch (colorBrushBlendingMode)
+                    {
+                        case BlendingMode.Replace:
+                            {
+                                Color color = Color.Lerp(sourceColor, colorBrushColor, colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.Darken:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.Darken(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.Multiply:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.Multiply(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.ColorBurn:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.ColorBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.LinearBurn:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.LinearBurn(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.Lighten:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.Lighten(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.Screen:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.Screen(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.ColorDodge:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.ColorDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                        case BlendingMode.LinearDodge:
+                            {
+                                Color color = Color.Lerp(sourceColor, sourceColor.LinearDodge(colorBrushColor), colorBrushStrength * paintAmount).Clamp01();
+                                color.a = sourceColor.a;
+                                return color;
+                            }
+                    }
 
-                return sourceColor;
+                    return sourceColor;
+
+                case DrawingMode.R:
+                    {
+                        Color newColor = sourceColor;
+                        newColor.r = Mathf.Lerp(sourceColor.r, redBrushColor, redBrushStrength * paintAmount);
+                        return newColor;
+                    }
+
+                case DrawingMode.G:
+                    {
+                        Color newColor = sourceColor;
+                        newColor.g = Mathf.Lerp(sourceColor.g, greenBrushColor, greenBrushStrength * paintAmount);
+                        return newColor;
+                    }
+
+                case DrawingMode.B:
+                    {
+                        Color newColor = sourceColor;
+                        newColor.b = Mathf.Lerp(sourceColor.b, blueBrushColor, blueBrushStrength * paintAmount);
+                        return newColor;
+                    }
+
+                case DrawingMode.Alpha:
+                    {
+                        Color newColor = sourceColor;
+                        newColor.a = Mathf.Lerp(sourceColor.a, alphaBrushColor, alphaBrushStrength * paintAmount);
+                        return newColor;
+                    }
             }
-            else // Paint Alpha
-            {
-                Color newColor = sourceColor;
-                newColor.a = Mathf.Lerp(sourceColor.a, alphaBrushColor, alphaBrushStrength * paintAmount);
-                return newColor;
-            }
+            return sourceColor;
         }
 
         private void OnMouseMove(SceneView sceneView, Event e)
@@ -702,32 +891,78 @@ namespace Sabresaurus.SabreCSG
                     colorBrushStrength = EditorGUILayout.Slider("", colorBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
                     break;
 
+                case DrawingMode.R:
+                    redBrushStrength = EditorGUILayout.Slider("", redBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
+                    break;
+
+                case DrawingMode.G:
+                    greenBrushStrength = EditorGUILayout.Slider("", greenBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
+                    break;
+
+                case DrawingMode.B:
+                    blueBrushStrength = EditorGUILayout.Slider("", blueBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
+                    break;
+
                 case DrawingMode.Alpha:
                     alphaBrushStrength = EditorGUILayout.Slider("", alphaBrushStrength, 0f, 1f, GUILayout.MaxWidth(128));
                     break;
             }
             EditorGUILayout.EndHorizontal();
 
-            if (drawingMode == DrawingMode.Color)
+            switch (drawingMode)
             {
-                colorBrushColor = SabreGUILayout.ColorField(new GUIContent("Color"), colorBrushColor, false, false, GUILayout.MaxWidth(183));
+                case DrawingMode.Color:
+                    // color picker field
+                    colorBrushColor = SabreGUILayout.ColorField(new GUIContent("Color"), colorBrushColor, false, false, GUILayout.MaxWidth(183));
 
-                EditorGUILayout.BeginHorizontal();
-                GUI.color = Color.black;
-                GUILayout.Label("Blending");
-                GUI.color = Color.white;
-                colorBrushBlendingMode = (BlendingMode)EditorGUILayout.EnumPopup(colorBrushBlendingMode, GUILayout.MaxWidth(96));
-                EditorGUILayout.EndHorizontal();
-            }
-            else if (drawingMode == DrawingMode.Alpha)
-            {
-                // alpha color slider
-                EditorGUILayout.BeginHorizontal();
-                GUI.color = Color.black;
-                GUILayout.Label("Alpha");
-                GUI.color = Color.white;
-                alphaBrushColor = EditorGUILayout.Slider("", alphaBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
-                EditorGUILayout.EndHorizontal();
+                    // color blending mode
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.black;
+                    GUILayout.Label("Blending");
+                    GUI.color = Color.white;
+                    colorBrushBlendingMode = (BlendingMode)EditorGUILayout.EnumPopup(colorBrushBlendingMode, GUILayout.MaxWidth(96));
+                    EditorGUILayout.EndHorizontal();
+                    break;
+
+                case DrawingMode.R:
+                    // red color slider
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.black;
+                    GUILayout.Label("Red");
+                    GUI.color = Color.white;
+                    redBrushColor = EditorGUILayout.Slider("", redBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
+                    EditorGUILayout.EndHorizontal();
+                    break;
+
+                case DrawingMode.G:
+                    // green color slider
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.black;
+                    GUILayout.Label("Green");
+                    GUI.color = Color.white;
+                    greenBrushColor = EditorGUILayout.Slider("", greenBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
+                    EditorGUILayout.EndHorizontal();
+                    break;
+
+                case DrawingMode.B:
+                    // blue color slider
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.black;
+                    GUILayout.Label("Blue");
+                    GUI.color = Color.white;
+                    blueBrushColor = EditorGUILayout.Slider("", blueBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
+                    EditorGUILayout.EndHorizontal();
+                    break;
+
+                case DrawingMode.Alpha:
+                    // alpha color slider
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.black;
+                    GUILayout.Label("Alpha");
+                    GUI.color = Color.white;
+                    alphaBrushColor = EditorGUILayout.Slider("", alphaBrushColor, 0f, 1f, GUILayout.MaxWidth(128));
+                    EditorGUILayout.EndHorizontal();
+                    break;
             }
 
             // draw color palette:
@@ -744,6 +979,9 @@ namespace Sabresaurus.SabreCSG
             switch (drawingMode)
             {
                 case DrawingMode.Color: palette = colorPalette; break;
+                case DrawingMode.R: palette = redPalette; break;
+                case DrawingMode.G: palette = greenPalette; break;
+                case DrawingMode.B: palette = bluePalette; break;
                 case DrawingMode.Alpha: palette = alphaPalette; break;
             }
 
@@ -770,6 +1008,9 @@ namespace Sabresaurus.SabreCSG
                     switch (drawingMode)
                     {
                         case DrawingMode.Color: SetSelectionColor(palette[i]); break;
+                        case DrawingMode.R: redBrushColor = palette[i].r; break;
+                        case DrawingMode.G: greenBrushColor = palette[i].g; break;
+                        case DrawingMode.B: blueBrushColor = palette[i].b; break;
                         case DrawingMode.Alpha: alphaBrushColor = palette[i].r; break;
                     }
                 }
