@@ -315,6 +315,11 @@ namespace Sabresaurus.SabreCSG
                 vertices[i].Color = newColor;
             }
         }
+		
+        public Vector3 GetTangent()
+        {
+            return (vertices[1].Position - vertices[0].Position).normalized;
+		}
 
         /// <summary>
         /// Maps all 3D vertices (x, y, z) of the polygon to 2D (x, z). Useful for 2D polygon algorithms.
