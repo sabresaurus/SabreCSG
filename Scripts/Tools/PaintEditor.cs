@@ -482,7 +482,7 @@ namespace Sabresaurus.SabreCSG
 
                     Vector3[] meshVertices = entry.BuiltMesh.vertices;
                     Color32[] meshColors = entry.BuiltMesh.colors32;
-                    Color[] colors = entry.Colors;
+                    Color32[] colors = entry.Colors;
 
                     for (int vertexIndex = 0; vertexIndex < entry.Positions.Length; vertexIndex++)
                     {
