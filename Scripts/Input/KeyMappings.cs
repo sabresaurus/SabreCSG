@@ -39,6 +39,7 @@ namespace Sabresaurus.SabreCSG
         public string ActivateResizeMode = "#r";
         public string ActivateFaceMode = "#f";
         public string ActivateVertexMode = "#v";
+        public string ActivatePaintMode = "#p";
 
 		[Header("Main Toolbar")]
 		public string TogglePosSnapping = "/";

@@ -316,6 +316,11 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public Vector3 GetTangent()
+        {
+            return (vertices[1].Position - vertices[0].Position).normalized;
+        }
+
         public class Vector3ComparerEpsilon : IEqualityComparer<Vector3>
         {
             public bool Equals(Vector3 a, Vector3 b)
