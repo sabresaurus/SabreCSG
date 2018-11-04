@@ -29,6 +29,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>
         /// The first <see cref="Vertex"/> of the <see cref="Edge"/>.
         /// </summary>
+        /// <value>The first vertex of the edge.</value>
         public Vertex Vertex1
         {
             get
@@ -40,6 +41,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>
         /// The last <see cref="Vertex"/> of the <see cref="Edge"/>.
         /// </summary>
+        /// <value>The last vertex of the edge.</value>
         public Vertex Vertex2
         {
             get
@@ -65,7 +67,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="vertex1">The first vertex of the edge.</param>
         /// <param name="vertex2">The last vertex of the edge.</param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="vertex1"/> or <paramref name="vertex2"/> is null.
         /// </exception>
         public Edge(Vertex vertex1, Vertex vertex2)
@@ -86,7 +88,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to compare this edge to.</param>
         /// <returns><c>true</c> if this edge matches the other edge; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="other"/> is null.
         /// </exception>
         public bool Matches(Edge other)
@@ -114,7 +116,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to check for parallelity.</param>
         /// <returns><c>true</c> if both edges are parallel; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="other"/> is null.
         /// </exception>
         public bool Parallel(Edge other)
@@ -138,7 +140,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">The other edge to check for intersection.</param>
         /// <returns><c>true</c> if both edges intersect; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="other"/> is null.
         /// </exception>
         public bool Intersects(Edge other)
@@ -188,7 +190,7 @@ namespace Sabresaurus.SabreCSG
             if (!matchedPoint)
                 return false;
 
-            // if the two edges actually share a portion then the vectors on the edges 
+            // if the two edges actually share a portion then the vectors on the edges
             // from the matched points will be in opposite directions.
             bool actuallySharePortion = (Vector3.Dot(delta1, delta2) > 0);
 
@@ -201,7 +203,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         /// <param name="other">Other edge that may be collinear.</param>
         /// <returns><c>true</c> if both edges are collinear; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="other"/> is null.
         /// </exception>
         public bool Collinear(Edge other)
