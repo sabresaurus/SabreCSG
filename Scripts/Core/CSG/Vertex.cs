@@ -1,13 +1,8 @@
-// disable warnings for missing == and != operators
-#pragma warning disable 0660
-#pragma warning disable 0661
-
 #if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -53,9 +48,9 @@ namespace Sabresaurus.SabreCSG
         /// <param name="uv">The uv coordinates.</param>
         public Vertex(Vector3 position, Vector3 normal, Vector2 uv)
         {
-            this.Position = position;
-            this.UV = uv;
-            this.Normal = normal;
+            Position = position;
+            UV = uv;
+            Normal = normal;
         }
 
         /// <summary>
@@ -67,10 +62,10 @@ namespace Sabresaurus.SabreCSG
         /// <param name="color">The tinting color.</param>
         public Vertex(Vector3 position, Vector3 normal, Vector2 uv, Color32 color)
         {
-            this.Position = position;
-            this.UV = uv;
-            this.Normal = normal;
-            this.Color = color;
+            Position = position;
+            UV = uv;
+            Normal = normal;
+            Color = color;
         }
 
         /// <summary>
@@ -96,7 +91,7 @@ namespace Sabresaurus.SabreCSG
         /// midway between <paramref name="a"/> and <paramref name="b"/>.
         /// </param>
         /// <returns>The new interpolated <see cref="Vertex"/>.</returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="a"/> or <paramref name="b"/> is null.
         /// </exception>
         public static Vertex Lerp(Vertex a, Vertex b, float t)
@@ -173,6 +168,12 @@ namespace Sabresaurus.SabreCSG
             return base.GetHashCode();
         }
 
+        /// <summary>
+        /// True if the specified vertices are equal; otherwise, false.
+        /// </summary>
+        /// <param name="lhs">The left hand side operator.</param>
+        /// <param name="rhs">The right hand side operator.</param>
+        /// <returns><c>true</c> if the specified vertices are equal; otherwise, <c>false</c>.</returns>
         public static bool operator ==(Vertex lhs, Vertex rhs)
         {
             if (ReferenceEquals(lhs, rhs))
@@ -187,6 +188,12 @@ namespace Sabresaurus.SabreCSG
             return lhs.Position == rhs.Position && lhs.UV == rhs.UV && lhs.Normal == rhs.Normal && lhs.Color.Equals(rhs.Color);
         }
 
+        /// <summary>
+        /// True if the specified vertices not are equal; otherwise, false.
+        /// </summary>
+        /// <param name="lhs">The left hand side operator.</param>
+        /// <param name="rhs">The right hand side operator.</param>
+        /// <returns><c>true</c> if the specified vertices are not equal; otherwise, <c>false</c>.</returns>
         public static bool operator !=(Vertex lhs, Vertex rhs)
         {
             return !(lhs == rhs);
@@ -195,7 +202,3 @@ namespace Sabresaurus.SabreCSG
 }
 
 #endif
-
-// enable warnings for missing == and != operators
-#pragma warning restore 0660
-#pragma warning restore 0661
