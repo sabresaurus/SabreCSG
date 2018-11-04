@@ -498,7 +498,7 @@ namespace Sabresaurus.SabreCSG
                 }
                 else if (previousRelation == PointPlaneRelation.Behind && currentRelation == PointPlaneRelation.InFront)
                 {
-                    float interpolant = Edge.IntersectsPlane(clipPlane, previousVertex.Position, currentVertex.Position);
+                    float interpolant = Edge.GetPlaneIntersectionInterpolant(clipPlane, previousVertex.Position, currentVertex.Position);
                     Vertex intersection = Vertex.Lerp(previousVertex, currentVertex, interpolant);
 
                     // Front add intersection, add current
@@ -513,7 +513,7 @@ namespace Sabresaurus.SabreCSG
                 else if (previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.Behind)
                 {
                     // Reverse order here so that clipping remains consistent for either CW or CCW testing
-                    float interpolant = Edge.IntersectsPlane(clipPlane, currentVertex.Position, previousVertex.Position);
+                    float interpolant = Edge.GetPlaneIntersectionInterpolant(clipPlane, currentVertex.Position, previousVertex.Position);
                     Vertex intersection = Vertex.Lerp(currentVertex, previousVertex, interpolant);
 
                     // Front add intersection
@@ -618,14 +618,14 @@ namespace Sabresaurus.SabreCSG
                 }
                 else if (previousRelation == PointPlaneRelation.Behind && currentRelation == PointPlaneRelation.InFront)
                 {
-                    float interpolant = Edge.IntersectsPlane(testPlane, previousVertex.Position, currentVertex.Position);
+                    float interpolant = Edge.GetPlaneIntersectionInterpolant(testPlane, previousVertex.Position, currentVertex.Position);
                     position2 = Vector3.Lerp(previousVertex.Position, currentVertex.Position, interpolant);
                     position2Set = true;
                 }
                 else if (previousRelation == PointPlaneRelation.InFront && currentRelation == PointPlaneRelation.Behind)
                 {
                     // Reverse order here so that clipping remains consistent for either CW or CCW testing
-                    float interpolant = Edge.IntersectsPlane(testPlane, currentVertex.Position, previousVertex.Position);
+                    float interpolant = Edge.GetPlaneIntersectionInterpolant(testPlane, currentVertex.Position, previousVertex.Position);
                     position1 = Vector3.Lerp(currentVertex.Position, previousVertex.Position, interpolant);
                     position1Set = true;
                 }
