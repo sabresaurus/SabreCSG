@@ -9,12 +9,11 @@ using System.Reflection;
 
 namespace Sabresaurus.SabreCSG
 {
-	public class SabreCSGPreferences : EditorWindow
-	{
-		const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
-        const string SABRE_CSG_DEBUG_DEFINE = "SABRE_CSG_DEBUG";
-
-        static readonly Vector2 WINDOW_SIZE = new Vector2(370,360);
+    public class SabreCSGPreferences : EditorWindow
+    {
+        private const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
+        private const string SABRE_CSG_DEBUG_DEFINE = "SABRE_CSG_DEBUG";
+        private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 400);
 
         //private static Event cachedEvent;
 
@@ -153,16 +152,12 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
-
-
             GUILayout.Space(20);
-
             GUILayout.Label("Debug mode executes additional code for verbose error checking. Used by SabreCSG developers.", style);
             buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
             defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
             definesSplit = defines.Split(';').ToList();
             enabled = definesSplit.Contains(SABRE_CSG_DEBUG_DEFINE);
-
             if (enabled)
             {
                 if (GUILayout.Button("Disable Debug Mode (Recommended)"))
@@ -184,7 +179,6 @@ namespace Sabresaurus.SabreCSG
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
                 }
             }
-
 
             GUILayout.FlexibleSpace();
 

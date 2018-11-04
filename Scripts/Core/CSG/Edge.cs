@@ -72,9 +72,10 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public Edge(Vertex vertex1, Vertex vertex2)
         {
+#if SABRE_CSG_DEBUG
             if (vertex1 == null) throw new ArgumentNullException("vertex1");
             if (vertex2 == null) throw new ArgumentNullException("vertex2");
-
+#endif
             this.vertex1 = vertex1;
             this.vertex2 = vertex2;
         }
@@ -93,8 +94,9 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public bool Matches(Edge other)
         {
+#if SABRE_CSG_DEBUG
             if (other == null) throw new ArgumentNullException("other");
-
+#endif
             // check whether we approximately match the other edge:
             if (vertex1.Position.EqualsWithEpsilon(other.vertex1.Position)
                 && vertex2.Position.EqualsWithEpsilon(other.Vertex2.Position))
@@ -121,8 +123,9 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public bool Parallel(Edge other)
         {
+#if SABRE_CSG_DEBUG
             if (other == null) throw new ArgumentNullException("other");
-
+#endif
             Vector3 direction1 = vertex2.Position - vertex1.Position;
             Vector3 direction2 = other.Vertex2.Position - other.Vertex1.Position;
 
@@ -145,8 +148,9 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public bool Intersects(Edge other)
         {
+#if SABRE_CSG_DEBUG
             if (other == null) throw new ArgumentNullException("other");
-
+#endif
             // early out: if the edges aren't parallel to each other, they can't be collinear.
             if (!Parallel(other))
                 return false;
@@ -208,8 +212,9 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public bool Collinear(Edge other)
         {
+#if SABRE_CSG_DEBUG
             if (other == null) throw new ArgumentNullException("other");
-
+#endif
             return EdgeUtility.EdgeMatches(this, other);
         }
 
