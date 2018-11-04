@@ -12,7 +12,8 @@ namespace Sabresaurus.SabreCSG
     public class SabreCSGPreferences : EditorWindow
     {
         private const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
-        private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 360);
+        private const string SABRE_CSG_DEBUG_DEFINE = "SABRE_CSG_DEBUG";
+        private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 400);
 
         //private static Event cachedEvent;
 
@@ -145,6 +146,34 @@ namespace Sabresaurus.SabreCSG
                     if (!definesSplit.Contains(RUNTIME_CSG_DEFINE))
                     {
                         definesSplit.Add(RUNTIME_CSG_DEFINE);
+                    }
+                    defines = string.Join(";", definesSplit.ToArray());
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
+                }
+            }
+
+            GUILayout.Space(20);
+            GUILayout.Label("Debug mode executes additional code for verbose error checking. Used by SabreCSG developers.", style);
+            buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+            defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+            definesSplit = defines.Split(';').ToList();
+            enabled = definesSplit.Contains(SABRE_CSG_DEBUG_DEFINE);
+            if (enabled)
+            {
+                if (GUILayout.Button("Disable Debug Mode (Recommended)"))
+                {
+                    definesSplit.Remove(SABRE_CSG_DEBUG_DEFINE);
+                    defines = string.Join(";", definesSplit.ToArray());
+                    PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Enable Debug Mode (Not Recommended)"))
+                {
+                    if (!definesSplit.Contains(SABRE_CSG_DEBUG_DEFINE))
+                    {
+                        definesSplit.Add(SABRE_CSG_DEBUG_DEFINE);
                     }
                     defines = string.Join(";", definesSplit.ToArray());
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, defines);
