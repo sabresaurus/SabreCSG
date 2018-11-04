@@ -96,9 +96,10 @@ namespace Sabresaurus.SabreCSG
         /// </exception>
         public static Vertex Lerp(Vertex a, Vertex b, float t)
         {
+#if SABRE_CSG_DEBUG
             if (a == null) throw new ArgumentNullException("a");
             if (b == null) throw new ArgumentNullException("b");
-
+#endif
             return new Vertex()
             {
                 Position = Vector3.Lerp(a.Position, b.Position, t),
