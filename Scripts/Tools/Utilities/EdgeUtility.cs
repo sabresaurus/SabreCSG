@@ -98,8 +98,8 @@ namespace Sabresaurus.SabreCSG
 					Edge edge2 = edgesOnPolygon[1];
 
 					// First split the shared polygon
-					Vector3 edge1Center = edge1.GetCenterPoint();
-					Vector3 edge2Center = edge2.GetCenterPoint();
+					Vector3 edge1Center = edge1.CenterPoint;
+					Vector3 edge2Center = edge2.CenterPoint;
 
 					Vector3 thirdPoint = edge1Center + polygon.Plane.normal;
 
