@@ -154,7 +154,7 @@ namespace Sabresaurus.SabreCSG
 				return false;
 			}
 
-			polygon.SetVertices(vertices.ToArray());
+			polygon.Vertices = vertices.ToArray();
 
 			return true;
 		}
