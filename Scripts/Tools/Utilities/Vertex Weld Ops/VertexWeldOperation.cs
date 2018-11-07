@@ -56,7 +56,7 @@ namespace Sabresaurus.SabreCSG
 			for (int i = 0; i < polygons.Count; i++) 
 			{
 				// Remove any duplicate vertices
-				polygons[i].RemoveExtraneousVertices();
+				polygons[i].TryRemoveExtraneousVertices();
 
 				// Update the vertex normals
 				if(polygons[i].Vertices.Length >= 3)
