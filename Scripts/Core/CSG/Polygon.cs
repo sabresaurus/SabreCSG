@@ -513,15 +513,36 @@ namespace Sabresaurus.SabreCSG
         }
 
         #region Comparator Classes
+
+        /// <summary>
+        /// An implementation of <see cref="IEqualityComparer{T}"/> that checks whether two <see
+        /// cref="Vector3"/> can be considered equal.
+        /// <para>Floating point inaccuracies are taken into account (see <see cref="MathHelper.EPSILON_3"/>).</para>
+        /// </summary>
+        /// <seealso cref="System.Collections.Generic.IEqualityComparer{UnityEngine.Vector3}"/>
         public class Vector3ComparerEpsilon : IEqualityComparer<Vector3>
         {
+            /// <summary>
+            /// Checks whether two <see cref="Vector3"/> can be considered equal.
+            /// </summary>
+            /// <param name="a">The first <see cref="Vector3"/>.</param>
+            /// <param name="b">The second <see cref="Vector3"/>.</param>
+            /// <returns><c>true</c> if the two <see cref="Vector3"/> can be considered equal; otherwise, <c>false</c>.</returns>
             public bool Equals(Vector3 a, Vector3 b)
             {
-                return Mathf.Abs(a.x - b.x) < EPSILON_LOWER
-                    && Mathf.Abs(a.y - b.y) < EPSILON_LOWER
-                        && Mathf.Abs(a.z - b.z) < EPSILON_LOWER;
+                return Mathf.Abs(a.x - b.x) < MathHelper.EPSILON_3
+                    && Mathf.Abs(a.y - b.y) < MathHelper.EPSILON_3
+                    && Mathf.Abs(a.z - b.z) < MathHelper.EPSILON_3;
             }
 
+            /// <summary>
+            /// Returns a hash code for this instance.
+            /// </summary>
+            /// <param name="obj">The object to hash.</param>
+            /// <returns>
+            /// A hash code for this instance, suitable for use in hashing algorithms and data structures
+            /// like a hash table.
+            /// </returns>
             public int GetHashCode(Vector3 obj)
             {
                 // The similarity or difference between two positions can only be calculated if both are supplied
@@ -532,13 +553,36 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public class VertexComparerEpsilon : IEqualityComparer<Vertex>
+        /// <summary>
+        /// An implementation of <see cref="IEqualityComparer{T}"/> that checks whether two <see
+        /// cref="Vertex"/> can be considered equal by their position alone.
+        /// <para>
+        /// Floating point inaccuracies are taken into account (see <see
+        /// cref="Extensions.EqualsWithEpsilon(UnityEngine.Vector3, UnityEngine.Vector3)"/>).
+        /// </para>
+        /// </summary>
+        /// <seealso cref="System.Collections.Generic.IEqualityComparer{Sabresaurus.SabreCSG.Vertex}"/>
+        public class VertexComparerEpsilon : IEqualityComparer<Vertex> // should be renamed to VertexPositionComparerEpsilon
         {
-            public bool Equals(Vertex x, Vertex y)
+            /// <summary>
+            /// Checks whether two <see cref="Vertex"/> can be considered equal by their position.
+            /// </summary>
+            /// <param name="a">The first <see cref="Vertex"/>.</param>
+            /// <param name="b">The second <see cref="Vertex"/>.</param>
+            /// <returns><c>true</c> if the two <see cref="Vertex"/> can be considered equal; otherwise, <c>false</c>.</returns>
+            public bool Equals(Vertex a, Vertex b)
             {
-                return x.Position.EqualsWithEpsilon(y.Position);
+                return a.Position.EqualsWithEpsilon(b.Position);
             }
 
+            /// <summary>
+            /// Returns a hash code for this instance.
+            /// </summary>
+            /// <param name="obj">The object to hash.</param>
+            /// <returns>
+            /// A hash code for this instance, suitable for use in hashing algorithms and data structures
+            /// like a hash table.
+            /// </returns>
             public int GetHashCode(Vertex obj)
             {
                 // The similarity or difference between two positions can only be calculated if both are supplied
@@ -549,27 +593,41 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        /// <summary>
+        /// An implementation of <see cref="IEqualityComparer{T}"/> that checks whether two <see
+        /// cref="Polygon"/> can be considered equal by their unique index.
+        /// </summary>
+        /// <seealso cref="System.Collections.Generic.IEqualityComparer{Sabresaurus.SabreCSG.Polygon}"/>
         public class PolygonUIDComparer : IEqualityComparer<Polygon>
         {
-            public bool Equals(Polygon x, Polygon y)
+            /// <summary>
+            /// Checks whether two <see cref="Polygon"/> have the same unique index.
+            /// </summary>
+            /// <param name="a">The first <see cref="Polygon"/>.</param>
+            /// <param name="b">The second <see cref="Polygon"/>.</param>
+            /// <returns><c>true</c> if the two <see cref="Polygon"/> have the same unique index; otherwise, <c>false</c>.</returns>
+            public bool Equals(Polygon a, Polygon b)
             {
-                return x.UniqueIndex == y.UniqueIndex;
+                return a.UniqueIndex == b.UniqueIndex;
             }
 
+            /// <summary>
+            /// Returns a hash code for this instance.
+            /// </summary>
+            /// <param name="obj">The object to hash.</param>
+            /// <returns>
+            /// A hash code for this instance, suitable for use in hashing algorithms and data structures
+            /// like a hash table.
+            /// </returns>
             public int GetHashCode(Polygon obj)
             {
                 return base.GetHashCode();
             }
         }
 
-        #endregion
+        #endregion Comparator Classes
 
         #region Static Methods
-
-        private const float EPSILON = 0.00001f;
-        private const float EPSILON_LOWER = 0.001f;
-
-        //		const float EPSILON_LOWER = 0.003f;
 
         public enum PolygonPlaneRelation { InFront, Behind, Spanning, Coplanar };
 
@@ -587,11 +645,11 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
                 float distance = testPlane.GetDistanceToPoint(polygon.Vertices[i].Position);
-                if (distance < -EPSILON_LOWER) // Is the point in front of the plane (with thickness)
+                if (distance < -MathHelper.EPSILON_3) // Is the point in front of the plane (with thickness)
                 {
                     verticesInFront++;
                 }
-                else if (distance > EPSILON_LOWER) // Is the point behind the plane (with thickness)
+                else if (distance > MathHelper.EPSILON_3) // Is the point behind the plane (with thickness)
                 {
                     verticesBehind++;
                 }
@@ -814,11 +872,11 @@ namespace Sabresaurus.SabreCSG
         public static PointPlaneRelation ComparePointToPlane2(Vector3 point, Plane plane)
         {
             float distance = plane.GetDistanceToPoint(point);
-            if (distance < -EPSILON)
+            if (distance < -MathHelper.EPSILON_5)
             {
                 return PointPlaneRelation.InFront;
             }
-            else if (distance > EPSILON)
+            else if (distance > MathHelper.EPSILON_5)
             {
                 return PointPlaneRelation.Behind;
             }
@@ -831,11 +889,11 @@ namespace Sabresaurus.SabreCSG
         public static PointPlaneRelation ComparePointToPlane(Vector3 point, Plane plane)
         {
             float distance = plane.GetDistanceToPoint(point);
-            if (distance < -EPSILON_LOWER)
+            if (distance < -MathHelper.EPSILON_3)
             {
                 return PointPlaneRelation.InFront;
             }
-            else if (distance > EPSILON_LOWER)
+            else if (distance > MathHelper.EPSILON_3)
             {
                 return PointPlaneRelation.Behind;
             }
