@@ -934,7 +934,7 @@ namespace Sabresaurus.SabreCSG
             {
                 if (e.type == EventType.KeyUp)
                 {
-                    CurrentSettings.BrushFacesHidden = !CurrentSettings.BrushFacesHidden;
+                    CurrentSettings.ProjectedGridEnabled = !CurrentSettings.ProjectedGridEnabled;
 
                     SceneView.RepaintAll();
                 }

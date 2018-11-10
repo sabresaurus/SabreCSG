@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Volume
   m_Shader: {fileID: 4800000, guid: b36682a2a82e54bb28920dd1a712dc4d, type: 3}
@@ -19,6 +19,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Floats:
+    - _FaceToggle: 1
     - _GridSize: 0.5
     - _GridStrength: 0.2
     - _GridThickness: 0.03

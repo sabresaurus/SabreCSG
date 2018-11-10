@@ -41,7 +41,6 @@ namespace Sabresaurus.SabreCSG
         private Material foregroundMaterial;
 
         public static GridMode lastGridMode = GridMode.SabreCSG;
-        private static bool brushFacesHidden = false;
 
         private static CurrentSettings instance = null;
 
@@ -151,6 +150,12 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushesAsWireframes", value ? 1 : 0);
+                float faceToggle = value ? 0.0f : 1.0f;
+                SabreCSGResources.GetAddMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_FaceToggle", faceToggle);
             }
         }
 
@@ -217,6 +222,24 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static bool ProjectedGridEnabled
+        {
+            get
+            {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ProjectedGridEnabled", 1) != 0;
+            }
+            set
+            {
+                PlayerPrefs.SetInt(KEY_PREFIX + "ProjectedGridEnabled", value ? 1 : 0);
+                float gridToggle = value ? 1.0f : 0.0f;
+                SabreCSGResources.GetAddMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_GridToggle", gridToggle);
+            }
+        }
+
         public static GridMode GridMode
         {
             get
@@ -234,15 +257,7 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 PlayerPrefs.SetString(KEY_PREFIX + "gridMode", value.ToString());
-
                 if (value != GridMode.None) lastGridMode = value;
-
-                float gridToggle = (value != GridMode.None)?1.0f:0;
-                SabreCSGResources.GetAddMaterial().SetFloat("_GridToggle", gridToggle);
-                SabreCSGResources.GetSubtractMaterial().SetFloat("_GridToggle", gridToggle);
-                SabreCSGResources.GetVolumeMaterial().SetFloat("_GridToggle", gridToggle);
-                SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridToggle", gridToggle);
-                SabreCSGResources.GetCollisionMaterial().SetFloat("_GridToggle", gridToggle);
             }
         }
 
@@ -254,23 +269,6 @@ namespace Sabresaurus.SabreCSG
             SabreCSGResources.GetVolumeMaterial().SetFloat("_GridSize", PositionSnapDistance);
             SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridSize", PositionSnapDistance);
             SabreCSGResources.GetCollisionMaterial().SetFloat("_GridSize", PositionSnapDistance);
-        }
-
-        public static bool BrushFacesHidden
-        {
-            get
-            {
-                return brushFacesHidden;
-            }
-            set
-            {
-                brushFacesHidden = value;
-                SabreCSGResources.GetAddMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetSubtractMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetVolumeMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetNoCSGMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetCollisionMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-            }
         }
 
         public static void ChangeAngSnapDistance(float multiplier)

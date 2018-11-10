@@ -308,9 +308,12 @@ namespace Sabresaurus.SabreCSG
 				GUI.color = Color.green;
 			}
 			csgModel.AutoRebuild = SabreGUILayout.Toggle(csgModel.AutoRebuild, "Auto Rebuild");
-			GUI.color = Color.white;
 
-			GUILayout.Label(csgModel.BuildMetrics.BuildMetaData.ToString(), SabreGUILayout.GetForeStyle(), GUILayout.Width(140));
+			GUI.color = Color.white;
+#if SABRE_CSG_DEBUG
+            GUILayout.Label(csgModel.BuildMetrics.BuildMetaData.ToString(), SabreGUILayout.GetForeStyle(), GUILayout.Width(140));
+#endif
+            EditorGUILayout.Space();
 
             bool lastBrushesHidden = CurrentSettings.BrushesHidden;
 			if(lastBrushesHidden)
@@ -363,7 +366,19 @@ namespace Sabresaurus.SabreCSG
 				menu.DropDown(gridRect);
 			}
 
-			if (Event.current.type == EventType.Repaint)
+            GUIStyle toggleProjectedGridStyle = new GUIStyle(EditorStyles.toolbarButton);
+            toggleProjectedGridStyle.fixedHeight = 18;
+
+            bool lastProjectedGridEnabled = CurrentSettings.ProjectedGridEnabled;
+            CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, SabreCSGResources.ButtonProjectedGridTexture, toggleProjectedGridStyle);
+            if (CurrentSettings.ProjectedGridEnabled != lastProjectedGridEnabled)
+            {
+                // Has changed
+                CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
+
+            if (Event.current.type == EventType.Repaint)
 			{
 				gridRect = GUILayoutUtility.GetLastRect();
 				gridRect.width = 100;
