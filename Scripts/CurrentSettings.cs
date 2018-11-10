@@ -13,9 +13,10 @@ namespace Sabresaurus.SabreCSG
         Vertex,
         Face,
 
-        Clip,
-        Draw,
-    };
+		Clip,
+		Draw,
+        Paint,
+	};
 
     public enum OverrideMode
     {
@@ -38,6 +39,8 @@ namespace Sabresaurus.SabreCSG
         private bool brushesHidden = false;
         private bool meshHidden = false;
         private Material foregroundMaterial;
+
+        public static GridMode lastGridMode = GridMode.SabreCSG;
 
         private static CurrentSettings instance = null;
 
@@ -230,12 +233,26 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 PlayerPrefs.SetString(KEY_PREFIX + "gridMode", value.ToString());
+
+                if (value != GridMode.None) lastGridMode = value;
+
+                float gridToggle = (value != GridMode.None)?1.0f:0;
+                SabreCSGResources.GetAddMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_GridToggle", gridToggle);
             }
         }
 
         public static void ChangePosSnapDistance(float multiplier)
         {
             PositionSnapDistance *= multiplier;
+            SabreCSGResources.GetAddMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetSubtractMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetVolumeMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetCollisionMaterial().SetFloat("_GridSize", PositionSnapDistance);
         }
 
         public static void ChangeAngSnapDistance(float multiplier)

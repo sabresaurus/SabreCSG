@@ -321,6 +321,22 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D GroupHeaderButtonCloseTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/GroupHeaderButtonClose.png");
+            }
+        }
+
+        public static Texture2D GroupHeaderButtonHelpTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/GroupHeaderButtonHelp.png");
+            }
+        }
+
         public static Texture2D ShapeEditorCreatePolygonTexture
         {
             get
@@ -521,11 +537,19 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        public static Texture2D ImporterImporterValveMapFormat2006Texture
+        public static Texture2D ImporterValveMapFormat2006Texture
         {
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ImporterValveMapFormat2006.png");
+            }
+        }
+
+        public static Texture2D ImporterQuake1Texture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ImporterQuake1.png");
             }
         }
 
@@ -534,6 +558,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ImporterBackground.png");
+            }
+        }
+
+        public static Texture2D MouseRightClickHintTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/MouseRightClickHint.png");
             }
         }
 

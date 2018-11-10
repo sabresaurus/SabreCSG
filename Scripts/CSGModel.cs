@@ -10,7 +10,6 @@ using UnityEditor;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Callbacks;
-
 namespace Sabresaurus.SabreCSG
 {
     [ExecuteInEditMode]
@@ -70,14 +69,15 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-        private Dictionary<MainMode, Tool> tools = new Dictionary<MainMode, Tool>()
-        {
-            { MainMode.Resize, new ResizeEditor() },
-            { MainMode.Vertex, new VertexEditor() },
-            { MainMode.Face, new SurfaceEditor() },
-            { MainMode.Clip, new ClipEditor() },
-            { MainMode.Draw, new DrawEditor() },
-        };
+		Dictionary<MainMode, Tool> tools = new Dictionary<MainMode, Tool>()
+		{
+			{ MainMode.Resize, new ResizeEditor() },
+			{ MainMode.Vertex, new VertexEditor() },
+			{ MainMode.Face, new SurfaceEditor() },
+			{ MainMode.Clip, new ClipEditor() },
+			{ MainMode.Draw, new DrawEditor() },
+            { MainMode.Paint, new PaintEditor() },
+		};
 
         private Dictionary<OverrideMode, Tool> overrideTools = new Dictionary<OverrideMode, Tool>()
         {
@@ -85,6 +85,14 @@ namespace Sabresaurus.SabreCSG
             //{ OverrideMode.Clip, new ClipEditor() },
             //{ OverrideMode.Draw, new DrawEditor() },
         };
+
+        public Tool ActiveTool
+        {
+            get
+            {
+                return activeTool;
+            }
+        }
 
         public bool MouseIsDragging
         {
@@ -812,6 +820,15 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
+            else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivatePaintMode)))
+            {
+                if (e.type == EventType.KeyDown && !MouseIsHeldOrRecent)
+                {
+                    SetCurrentMode(MainMode.Paint);
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
             else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.IncreasePosSnapping))
                 && !SabreGUIHelper.AnyControlFocussed)
             {
@@ -893,6 +910,21 @@ namespace Sabresaurus.SabreCSG
                 {
                     CurrentSettings.BrushesHidden = !CurrentSettings.BrushesHidden;
                     UpdateAllBrushesVisibility();
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleGridHidden))
+                && !SabreGUIHelper.AnyControlFocussed)
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    if (CurrentSettings.GridMode == GridMode.None) {
+                        CurrentSettings.GridMode = CurrentSettings.lastGridMode;
+                    } else {
+                        CurrentSettings.GridMode = GridMode.None;
+                    }
+
                     SceneView.RepaintAll();
                 }
                 e.Use();

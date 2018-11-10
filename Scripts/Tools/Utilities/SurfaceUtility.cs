@@ -110,7 +110,7 @@ namespace Sabresaurus.SabreCSG
 				vertices[i].Normal = cancellingRotation * vertices[i].Normal;
 			}
 
-			basePolygon.SetVertices(vertices);
+			basePolygon.Vertices = vertices;
 
 			// Create the opposite polygon by duplicating the base polygon, offsetting and flipping
 			Vector3 normal = basePolygon.Plane.normal;
@@ -125,7 +125,7 @@ namespace Sabresaurus.SabreCSG
 				vertices[i].Position += normal * extrusionDistance;
 //				vertices[i].UV.x *= -1; // Flip UVs
 			}
-			oppositePolygon.SetVertices(vertices);
+			oppositePolygon.Vertices = vertices;
 
 			// Now create each of the brush side polygons
 			Polygon[] brushSides = new Polygon[sourcePolygon.Vertices.Length];

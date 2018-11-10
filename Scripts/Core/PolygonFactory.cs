@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -540,11 +541,80 @@ namespace Sabresaurus.SabreCSG
             }
             return vertices;
         }
-#endregion
 
-#region PRIVATE
-		// Used to sort a collection of Vectors in a clockwise direction
-		internal class SortVectorsClockwise : IComparer<Vector3>
+        internal static bool ChamferPolygons(List<Polygon> polygons, List<Edge> edges, float distance, int iterations, out List<Polygon> resultPolygons)
+        {
+            // list of clipping planes.
+            List<Plane> clippingPlanes = new List<Plane>();
+            List<Material> clippingPlaneMaterials = new List<Material>();
+
+            // iterate through all edges and calculate the clipping planes.
+            for (int e = 0; e < edges.Count; e++)
+            {
+                Edge edge = edges[e];
+
+                // find the two polygons connected to the edge.
+                Polygon[] matchingPolygons = polygons.Where(p => Polygon.ContainsEdge(p, edge)).ToArray();
+                if (matchingPolygons.Length != 2) { resultPolygons = null; return false; };
+
+                // find the actual edges on the polygons (which helps determine their direction for the chamfer).
+                Edge realEdge1;
+                Polygon.FindEdge(matchingPolygons[0], edge, out realEdge1);
+                Edge realEdge2;
+                Polygon.FindEdge(matchingPolygons[1], edge, out realEdge2);
+
+                // calculate clipping plane position:
+                Vector3 v1 = realEdge1.Vertex1.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v2 = realEdge1.Vertex2.Position - ChamferPolygons_GetNormal(realEdge1.Vertex1.Position, realEdge1.Vertex2.Position, matchingPolygons[0].GetCenterPoint()).normalized * distance;
+                Vector3 v3 = realEdge2.Vertex2.Position - ChamferPolygons_GetNormal(realEdge2.Vertex1.Position, realEdge2.Vertex2.Position, matchingPolygons[1].GetCenterPoint()).normalized * distance;
+
+                for (int i = 0; i < iterations; i++)
+                {
+                    float t = (1.0f / iterations);
+                    Vector3 p1 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * i);
+                    Vector3 p2 = ShapeEditor.Bezier.GetPoint(v1, realEdge1.Vertex1.Position, v3, t * (i + 1));
+                    clippingPlanes.Add(new Plane(
+                        p1,
+                        p2,
+                        p1 + (v1 - v2).normalized
+                    ));
+                    // find the most likely material we should be using for this chamfer.
+                    // an attempt is made to ignore the default material.
+                    clippingPlaneMaterials.Add(matchingPolygons[0].Material != null ? matchingPolygons[0].Material : matchingPolygons[1].Material);
+                }
+            }
+
+            // copy the input polygons.
+            resultPolygons = polygons.DeepCopy();
+
+            // clip the polygons.
+            for (int i = 0; i < clippingPlanes.Count; i++)
+            {
+                List<Polygon> polygonsFront;
+                List<Polygon> polygonsBack;
+                if (SplitPolygonsByPlane(resultPolygons, clippingPlanes[i], false, out polygonsFront, out polygonsBack))
+                    resultPolygons = polygonsFront;
+                // assign the most likely material to the new polygons.
+                for (int j = 0; j < resultPolygons.Count; j++)
+                    if (resultPolygons[j].Plane.normal.EqualsWithEpsilonLower3(clippingPlanes[i].normal))
+                        resultPolygons[j].Material = clippingPlaneMaterials[i];
+            }
+
+            return true;
+        }
+
+        // todo: this should probably be moved somewhere else...
+        private static Vector3 ChamferPolygons_GetNormal(Vector3 a, Vector3 b, Vector3 c)
+        {
+            Vector3 side1 = b - a;
+            Vector3 side2 = c - a;
+            return Vector3.Cross(side1, side2).normalized;
+        }
+        #endregion
+
+        #region PRIVATE
+        // Used to sort a collection of Vectors in a clockwise direction
+        internal class SortVectorsClockwise : IComparer<Vector3>
 		{
 			Quaternion cancellingRotation; // Used to transform the positions from an arbitrary plane to the XY plane
 			Vector3 rotatedCenter; // Transformed center point, used as the center point to find the angles around
@@ -614,203 +684,6 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-
-        /*
-	     * Coplanar Optimisation:
-	     * Group polygons into coplanar groups
-	     * For each group:
-	     *  For each quad polygon, find edges 
-	     * 	 For each other quad polygon
-	     * 	  If any edge matches (within tolerance)
-	     *     If there are two other edges in each polygon which are collinear, [and the remaining fourth edge of each is on either side of the matched edge :: not sure if this test is needed]
-	     *      Collapse the edge - Create a new polygon which replaces the two other polygons
-	     *      Restart optimisation for this group - Exhaustively guarantees all possible edges are collapsed
-	     * 
-	     */
-        internal static void OptimizeCoplanarPolygons(List<Polygon> polygons)
-		{
-			extraEdges = new List<Edge>();
-//			collinearEdges = new List<Edge>();
-			
-			// Group polygons into coplanar groups
-			Dictionary<Plane, List<Polygon>> coplanarGroups = GenerateCoplanarGroups(polygons);
-			
-			foreach (KeyValuePair<Plane, List<Polygon>> coplanarGroup in coplanarGroups)
-			{
-				bool requiresAnotherPass = OptimizeCoplanarGroup(coplanarGroup.Value);
-				while (requiresAnotherPass)
-				{
-					requiresAnotherPass = OptimizeCoplanarGroup(coplanarGroup.Value);
-				}
-			}
-			polygons.Clear();
-			foreach (KeyValuePair<Plane, List<Polygon>> coplanarGroup in coplanarGroups)
-			{
-				polygons.AddRange(coplanarGroup.Value);
-			}
-		}
-		
-		static List<Edge> extraEdges = new List<Edge>();
-//		static List<Edge> collinearEdges = new List<Edge>();
-		
-		/// <summary>
-		/// Optimizes the coplanar group of polygons.
-		/// </summary>
-		/// <returns>
-		/// Whether any changes were made
-		/// </returns>
-		private static bool OptimizeCoplanarGroup(List<Polygon> polygons)
-		{
-			foreach (Polygon polygon1 in polygons)
-			{
-				foreach (Polygon polygon2 in polygons)
-				{
-					// Must be checking against a different polygon, and both must be quads
-					if (polygon1 != polygon2 && polygon1.Vertices.Length == 4 && polygon2.Vertices.Length == 4)
-					{
-						Edge[] edges1 = polygon1.GetEdges();
-						Edge[] edges2 = polygon1.GetEdges();
-						foreach (Edge edge1 in edges1)
-						{
-							foreach (Edge edge2 in edges2)
-							{
-								// Edge matches
-								if (edge1.Matches(edge2))
-								{
-									extraEdges.Add(edge1);
-									//Debug.Log("Edge matched");
-									List<Edge> collinearEdgePairs = FindCollinearEdges(edges1,edges2, edge1, edge2);
-									
-									//TODO: [ and other test ]
-									// Collinear test 
-									//Debug.Log("Collinears " + collinearEdgePairs.Count);
-									if (collinearEdgePairs.Count == 4) // Should be two pairs of collinear edges
-									{
-										//									if(extraEdges.Count == 0)
-										//									{
-										//										
-										//										collinearEdges.AddRange(collinearEdgePairs);
-										//									}
-										//Debug.Log("Collinears found");
-										// Collapse the edge and create a new merged polygon from the original two
-										Polygon mergedPolygon = CollapseEdge(polygon1, polygon2, edge1, edge2, collinearEdgePairs);
-										
-										// Add the new merged polygon
-										polygons.Add(mergedPolygon);
-										// Remove the old two original polygons
-										polygons.Remove(polygon1);
-										polygons.Remove(polygon2);
-										// Restart optimisation for this group - Exhaustively guarantees all possible edges are collapsed
-										return true;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			return false;
-		}
-		
-		private static List<Edge> FindCollinearEdges(Edge[] edges1, Edge[] edges2, Edge matchedEdge1, Edge matchedEdge2)
-		{
-			List<Edge> collinearEdgePairs = new List<Edge>();
-			foreach (Edge edge1 in edges1)
-			{
-				foreach (Edge edge2 in edges2)
-				{
-					if (edge1 != matchedEdge1 && edge2 != matchedEdge2)
-					{
-						if (edge1.Collinear(edge2))
-						{
-							collinearEdgePairs.Add(edge1);
-							collinearEdgePairs.Add(edge2);
-						}
-					}
-				}
-			}
-			return collinearEdgePairs;
-		}
-		
-		private static Polygon CollapseEdge(Polygon polygon1, Polygon polygon2, Edge matchedEdge1, Edge matchedEdge2, List<Edge> collinearEdgePairs)
-		{
-			// Find the non-duplicate vertices in the two polygons (two vertices from each polygon are duplicated in the other polygon)
-			Vertex[] vertices = new Vertex[]
-			{
-				FindUniqueVertex(matchedEdge1, matchedEdge2, collinearEdgePairs[0]),
-				FindUniqueVertex(matchedEdge1, matchedEdge2, collinearEdgePairs[1]),
-				FindUniqueVertex(matchedEdge1, matchedEdge2, collinearEdgePairs[2]),
-				FindUniqueVertex(matchedEdge1, matchedEdge2, collinearEdgePairs[3])
-			};
-			
-			
-			int index1 = 1;
-			int index2 = 2;
-			int index3 = 4;
-			int index4 = 3;
-			
-			Vector3 originalNormal = vertices[index1 - 1].Normal;
-			Vector3 newNormal = Vector3.Cross(vertices[index1 - 1].Position - vertices[index2 - 1].Position, vertices[index1 - 1].Position - vertices[index4 - 1].Position).normalized;
-			
-			// Flip if necessary - unsure if the requirement of this step is a result of a mistake earlier in the process (TODO: Investigate)
-			if (newNormal != originalNormal)
-			{
-				index1 = 3;
-				index2 = 4;
-				index3 = 2;
-				index4 = 1;
-			}
-			
-			// Construct the polygon with the correct order of vertices
-			return new Polygon(new Vertex[] { vertices[index1 - 1], vertices[index2 - 1], vertices[index3 - 1], vertices[index4 - 1] }, polygon1.Material, polygon1.ExcludeFromFinal, polygon1.UserExcludeFromFinal, polygon1.UniqueIndex);
-		}
-
-		
-		private static Vertex FindUniqueVertex(Edge matchedEdge1, Edge matchedEdge2, Edge testEdge)
-		{
-			Vertex[] unacceptableVertices = new Vertex[] { matchedEdge1.Vertex1, matchedEdge1.Vertex2, matchedEdge2.Vertex1, matchedEdge2.Vertex2 };
-			if(Array.IndexOf(unacceptableVertices, testEdge.Vertex1) != -1)
-				return testEdge.Vertex1;
-			else //if (!unacceptableVertices.Contains(testEdge.Vertex2))
-				return testEdge.Vertex2;
-			//        else
-			//            return null;
-		}
-		
-		private static Dictionary<Plane, List<Polygon>> GenerateCoplanarGroups(List<Polygon> polygons)
-		{
-			Dictionary<Plane, List<Polygon>> coplanarGroups = new Dictionary<Plane, List<Polygon>>();
-			
-			for (int i = 0; i < polygons.Count; i++)
-			{
-				bool planeAlreadyExists = false;
-				foreach (KeyValuePair<Plane, List<Polygon>> item in coplanarGroups)
-				{
-					if (item.Key.normal == polygons[i].Plane.normal && item.Key.distance == polygons[i].Plane.distance)
-					{
-						planeAlreadyExists = true;
-						item.Value.Add(polygons[i]);
-						break;
-					}
-				}
-				if (!planeAlreadyExists)
-				{
-					coplanarGroups.Add(polygons[i].Plane, new List<Polygon>() { polygons[i] });
-				}
-			}
-			// For debug purposes, set coplanar polygons to a random color so that it's easy to see which coplanar group they belong to
-			//        foreach (KeyValuePair<Plane, List<Polygon>> item in coplanarGroups)
-			//        {
-			//            Color color = new Color(UnityEngine.Random.Range(0, 1.0f), UnityEngine.Random.Range(0, 1.0f), UnityEngine.Random.Range(0, 1.0f), 1.0f);
-			//            foreach (Polygon polygon in item.Value)
-			//            {
-			//                polygon.SharedBrushData = polygon.SharedBrushData;//.Clone();
-			//                polygon.SharedBrushData.BrushTintColor = color;
-			//            }
-			//        }
-			return coplanarGroups;
-		}
-
 		internal static void GenerateMeshFromPolygons(Polygon[] polygons, ref Mesh mesh)
 		{
 			if(mesh == null)
@@ -822,7 +695,7 @@ namespace Sabresaurus.SabreCSG
 			List<Vector3> vertices = new List<Vector3>();
 			List<Vector3> normals = new List<Vector3>();
 			List<Vector2> uvs = new List<Vector2>();
-			List<Color> colors = new List<Color>();
+			List<Color32> colors = new List<Color32>();
 			List<int> triangles = new List<int>();
 
 			// Set up an indexer that tracks unique vertices, so that we reuse vertex data appropiately
@@ -865,7 +738,7 @@ namespace Sabresaurus.SabreCSG
 			// Set the mesh buffers
 			mesh.vertices = vertices.ToArray();
 			mesh.normals = normals.ToArray();
-			mesh.colors = colors.ToArray();
+			mesh.colors32 = colors.ToArray();
 			mesh.uv = uvs.ToArray();
 			mesh.triangles = triangles.ToArray();
 		}
