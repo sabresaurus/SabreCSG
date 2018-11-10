@@ -929,6 +929,17 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleFacesHidden))
+                && !SabreGUIHelper.AnyControlFocussed)
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    CurrentSettings.BrushFacesHidden = !CurrentSettings.BrushFacesHidden;
+
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
             else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.EnableRadialMenu))
                 && !SabreGUIHelper.AnyControlFocussed)
             {

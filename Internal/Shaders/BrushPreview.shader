@@ -8,6 +8,7 @@ Shader "SabreCSG/BrushPreview"
 		_GridStrength("Grid Strength", Range(0,1)) = 0.25
 		_GridThickness("Grid Thickness", Range(0.01,0.1)) = 0.05
 		[HideInInspector] _GridToggle("Grid Toggle", float) = 1.0
+		[HideInInspector] _FaceToggle("Face Toggle", float) = 1.0
 	}
 
 	SubShader
@@ -24,6 +25,7 @@ Shader "SabreCSG/BrushPreview"
 			float _GridSize;
 			float _GridThickness;
 			half _GridToggle;
+			half _FaceToggle;
 
 			struct Input
 			{
@@ -37,12 +39,13 @@ Shader "SabreCSG/BrushPreview"
 					val += mod*100;
 				}
 
-				return val % mod;
+				return fmod(val, mod);
 			}
 
 			void surf (Input IN, inout SurfaceOutput o)
 			{
 				fixed4 c = _Color;
+				c.a *= _FaceToggle;
 
 				float3 worldNormal = abs(IN.worldNormal);
 			
