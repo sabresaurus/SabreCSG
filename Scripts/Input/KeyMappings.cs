@@ -52,6 +52,7 @@ namespace Sabresaurus.SabreCSG
 
 		public string ToggleBrushesHidden = "h";
 		public string ToggleGridHidden = "0";
+		public string ToggleFacesHidden = "9";
 
 		[Header("General")]
 		public string ChangeBrushToAdditive = "a";
