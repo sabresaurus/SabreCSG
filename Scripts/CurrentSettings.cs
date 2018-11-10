@@ -146,11 +146,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-                return PlayerPrefs.GetInt(KEY_PREFIX + "ShowBrushesAsWireframes", 0) != 0;
-            }
-            set
-            {
-                PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushesAsWireframes", value ? 1 : 0);
+                return brushFacesHidden && GridMode == GridMode.None;
             }
         }
 
@@ -265,11 +261,11 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 brushFacesHidden = value;
-                SabreCSGResources.GetAddMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetSubtractMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetVolumeMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetNoCSGMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
-                SabreCSGResources.GetCollisionMaterial().SetFloat("_FaceToggle", brushFacesHidden?1:0);
+                SabreCSGResources.GetAddMaterial().SetFloat("_FaceToggle", brushFacesHidden?0:1);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_FaceToggle", brushFacesHidden?0:1);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_FaceToggle", brushFacesHidden?0:1);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_FaceToggle", brushFacesHidden?0:1);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_FaceToggle", brushFacesHidden?0:1);
             }
         }
 
