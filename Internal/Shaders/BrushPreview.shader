@@ -54,7 +54,7 @@ Shader "SabreCSG/BrushPreview"
 				worldNormal.z = (worldNormal.z > worldNormal.y && worldNormal.z > worldNormal.x)?1:0;
 
 				float3 worldspace = IN.worldPos;
-				worldspace -= _GridThickness * 0.5;
+				worldspace -= (_GridThickness * _GridSize) * 0.5;
 
 				float2 grid = float2(
 					(worldspace.z * worldNormal.x) + (worldspace.x * worldNormal.z) + (worldspace.x * worldNormal.y),
