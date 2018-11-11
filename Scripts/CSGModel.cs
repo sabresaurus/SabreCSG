@@ -1345,6 +1345,12 @@ namespace Sabresaurus.SabreCSG
                 // When we come out of play mode we lose this event handler and are no longer in edit mode.
                 // We call OnSelectionChanged() manually to make sure we go back into edit mode, if a brush is still selected.
                 OnSelectionChanged();
+                // Make sure all brushes are visible again after a C# recompilation.
+                if (anyCSGModelsInEditMode)
+                {
+                    editModeModel = GetActiveCSGModel();
+                    UpdateAllBrushesVisibility(); 
+                }
             }
 #endif
 
