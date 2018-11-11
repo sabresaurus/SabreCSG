@@ -43,10 +43,12 @@ Shader "SabreCSG/BrushPreview"
 			void surf (Input IN, inout SurfaceOutput o)
 			{
 				float dist = distance(_WorldSpaceCameraPos, IN.worldPos);
-				float gridThickness = max(0.08, smoothstep(0.0, 1.0, dist / 80.0));
+				float len = lerp(20, 140, min(1.0, _GridSize));
+				float m = smoothstep(0.0, 1.0, dist / len);
+				float gridThickness = max(0.03, m);
 
 				// counteract subpixel grid lines on small grid sizes.
-				gridThickness += lerp(log2(1/_GridSize)*0.25, 0.0, min(1.0, _GridSize));
+				gridThickness += lerp(0.0, lerp(log2(1/_GridSize)*0.25, 0.0, min(1.0, _GridSize)), m);
 
 				fixed4 c = _Color;
 				c.a *= _FaceToggle;
@@ -70,8 +72,8 @@ Shader "SabreCSG/BrushPreview"
 				grid.x = mod(grid.x,_GridSize);
 				grid.y = mod(grid.y,_GridSize);
 
-				grid.x = saturate(1.0 - sin(grid.x * ((3.14/_GridSize)+gridThickness/_GridSize)) * 30);
-				grid.y = saturate(1.0 - sin(grid.y * ((3.14/_GridSize)+gridThickness/_GridSize)) * 30);
+				grid.x = saturate(1.0 - sin(grid.x * ((3.14/_GridSize)+gridThickness/_GridSize)) * (30 * _GridSize));
+				grid.y = saturate(1.0 - sin(grid.y * ((3.14/_GridSize)+gridThickness/_GridSize)) * (30 * _GridSize));
 
 				float g = saturate(grid.x + grid.y);
 
