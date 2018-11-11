@@ -67,10 +67,8 @@ Shader "SabreCSG/BrushPreview"
 				grid.y = step((1.0 - _GridThickness)*_GridSize, mod(grid.y, _GridSize));
 
 				float g = saturate(grid.x + grid.y);
-
-				//o.Alpha = g;
-
-				o.Albedo = c.rgb + (g * _GridStrength * _GridToggle);
+                
+				o.Emission = c.rgb + (g * _GridStrength * _GridToggle);
 				o.Alpha = c.a + (g * _GridStrength * _GridToggle);
 			}
 		ENDCG
