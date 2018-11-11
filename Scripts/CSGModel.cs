@@ -914,6 +914,28 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleProjectedGrid))
+                && !SabreGUIHelper.AnyControlFocussed)
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    CurrentSettings.ProjectedGridEnabled = !CurrentSettings.ProjectedGridEnabled;
+
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleBrushesAsWireframes))
+                && !SabreGUIHelper.AnyControlFocussed)
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    CurrentSettings.ShowBrushesAsWireframes = !CurrentSettings.ShowBrushesAsWireframes;
+
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
             else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.EnableRadialMenu))
                 && !SabreGUIHelper.AnyControlFocussed)
             {
@@ -1601,6 +1623,9 @@ namespace Sabresaurus.SabreCSG
 
                         // Force the scene views to repaint (shows our own UI)
                         SceneView.RepaintAll();
+
+                        // Update the projected grid material to match the scale of this CSG Model
+                        CurrentSettings.ChangePosSnapDistance(1.0f);
 
                         //						if(Event.current != null)
                         //						{

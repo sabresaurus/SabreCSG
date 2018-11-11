@@ -51,6 +51,8 @@ namespace Sabresaurus.SabreCSG
 		public string IncreaseAngSnapping = "#.";
 
 		public string ToggleBrushesHidden = "h";
+		public string ToggleProjectedGrid = "0";
+		public string ToggleBrushesAsWireframes = "9";
 
 		[Header("General")]
 		public string ChangeBrushToAdditive = "a";
