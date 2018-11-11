@@ -914,27 +914,23 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
-            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleGridHidden))
-                && !SabreGUIHelper.AnyControlFocussed)
-            {
-                if (e.type == EventType.KeyUp)
-                {
-                    if (CurrentSettings.GridMode == GridMode.None) {
-                        CurrentSettings.GridMode = CurrentSettings.lastGridMode;
-                    } else {
-                        CurrentSettings.GridMode = GridMode.None;
-                    }
-
-                    SceneView.RepaintAll();
-                }
-                e.Use();
-            }
-            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleFacesHidden))
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleProjectedGrid))
                 && !SabreGUIHelper.AnyControlFocussed)
             {
                 if (e.type == EventType.KeyUp)
                 {
                     CurrentSettings.ProjectedGridEnabled = !CurrentSettings.ProjectedGridEnabled;
+
+                    SceneView.RepaintAll();
+                }
+                e.Use();
+            }
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleBrushesAsWireframes))
+                && !SabreGUIHelper.AnyControlFocussed)
+            {
+                if (e.type == EventType.KeyUp)
+                {
+                    CurrentSettings.ShowBrushesAsWireframes = !CurrentSettings.ShowBrushesAsWireframes;
 
                     SceneView.RepaintAll();
                 }

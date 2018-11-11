@@ -40,8 +40,6 @@ namespace Sabresaurus.SabreCSG
         private bool meshHidden = false;
         private Material foregroundMaterial;
 
-        public static GridMode lastGridMode = GridMode.SabreCSG;
-
         private static CurrentSettings instance = null;
 
         private static CurrentSettings Instance
@@ -257,7 +255,6 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 PlayerPrefs.SetString(KEY_PREFIX + "gridMode", value.ToString());
-                if (value != GridMode.None) lastGridMode = value;
             }
         }
 
