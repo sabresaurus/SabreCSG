@@ -11,12 +11,6 @@ namespace Sabresaurus.SabreCSG
     public class Edge
     {
         /// <summary>
-        /// Since floating-point math is imprecise we use a smaller value of 0.00001 (1e-5f) to check
-        /// for equality of two floats instead of absolute zero.
-        /// </summary>
-        public const float EPSILON = 1e-5f;
-
-        /// <summary>
         /// The first <see cref="Vertex"/> of the <see cref="Edge"/>.
         /// </summary>
         private Vertex vertex1;
@@ -131,7 +125,7 @@ namespace Sabresaurus.SabreCSG
 
             float dot = Vector3.Dot(direction1.normalized, direction2.normalized);
 
-            return Mathf.Abs(dot) > 1 - EPSILON;
+            return Mathf.Abs(dot) > 1 - MathHelper.EPSILON_5;
         }
 
         /// <summary>
