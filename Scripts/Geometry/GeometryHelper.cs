@@ -23,14 +23,6 @@ namespace Sabresaurus.SabreCSG
 	/// </summary>
 	public static class GeometryHelper
 	{
-        const float TEST_EPSILON = 0.003f;
-        private const float CONVEX_EPSILON = 0.01f;
-
-        const float EPSILON = 1e-5f; // Used to avoid floating point test issues, e.g. -0.000001 may be considered 0
-        const float EPSILON_LOWER = 1e-4f;
-        const float EPSILON_LOWER_2 = 1e-3f;
-
-
         /// <summary>
         /// Determines if a set of polygons represent a convex brush with planar polygons
         /// </summary>
@@ -55,7 +47,7 @@ namespace Sabresaurus.SabreCSG
 
 							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].Position) + polygonPlane.distance;
 
-							if(dot > CONVEX_EPSILON)
+							if(dot > MathHelper.EPSILON_2)
 							{
 								return false;
 							}
@@ -70,7 +62,7 @@ namespace Sabresaurus.SabreCSG
 
 							float dot = Vector3.Dot(polygonPlane.normal, polygons[n].Vertices[k].Position) + polygonPlane.distance;
 
-							if(dot > CONVEX_EPSILON)
+							if(dot > MathHelper.EPSILON_2)
 							{
 								return false;
 							}
@@ -273,13 +265,13 @@ namespace Sabresaurus.SabreCSG
 
 					float distance = testPlane.GetDistanceToPoint(point);
 
-					if (distance < -TEST_EPSILON)
+					if (distance < -MathHelper.EPSILON_3_3)
 					{
 						numberInFront++;
 
 						distanceInFront = Mathf.Min(distanceInFront, distance);
 					}
-					else if (distance > TEST_EPSILON)
+					else if (distance > MathHelper.EPSILON_3_3)
 					{
 						numberBehind++;
 
@@ -436,7 +428,7 @@ namespace Sabresaurus.SabreCSG
                 Plane plane = polygons[i].Plane;
                 // Use positive epsilon
                 float distance = Vector3.Dot(plane.normal, point) + plane.distance;
-                if (distance > EPSILON_LOWER)
+                if (distance > MathHelper.EPSILON_4)
                 {
                     return false;
                 }
@@ -451,7 +443,7 @@ namespace Sabresaurus.SabreCSG
                 Plane plane = polygons[i].Plane;
                 // Use positive epsilon
                 float distance = Vector3.Dot(plane.normal, point) + plane.distance;
-                if (distance > EPSILON_LOWER_2)
+                if (distance > MathHelper.EPSILON_3)
                 {
                     return false;
                 }
@@ -530,7 +522,7 @@ namespace Sabresaurus.SabreCSG
                 // No epsilon here
                 //				if(Vector3.Dot (plane.normal, point) + plane.distance >= 0f)
                 float dist = Vector3.Dot(plane.normal, point) + plane.distance;
-                if (dist > EPSILON)
+                if (dist > MathHelper.EPSILON_5)
                 {
                     return false;
                 }
@@ -551,7 +543,7 @@ namespace Sabresaurus.SabreCSG
                 {
                     bestDistance = distance;
                 }
-                if (bestDistance < -EPSILON)
+                if (bestDistance < -MathHelper.EPSILON_5)
                 {
                     return -1;
                 }
@@ -565,7 +557,7 @@ namespace Sabresaurus.SabreCSG
             {
                 Plane plane = polygons[i].Plane;
                 // Use negative epsilon
-                if (Vector3.Dot(plane.normal, point) + plane.distance >= -EPSILON)
+                if (Vector3.Dot(plane.normal, point) + plane.distance >= -MathHelper.EPSILON_5)
                 {
                     return false;
                 }
@@ -579,7 +571,7 @@ namespace Sabresaurus.SabreCSG
             {
                 Plane plane = polygons[i].Plane;
                 // Use negative epsilon
-                if (Vector3.Dot(plane.normal, point) + plane.distance >= -EPSILON)
+                if (Vector3.Dot(plane.normal, point) + plane.distance >= -MathHelper.EPSILON_5)
                 {
                     return false;
                 }
