@@ -312,9 +312,9 @@ namespace Sabresaurus.SabreCSG
 			GUI.color = Color.white;
 #if SABRE_CSG_DEBUG
             GUILayout.Label(csgModel.BuildMetrics.BuildMetaData.ToString(), SabreGUILayout.GetForeStyle(), GUILayout.Width(140));
-#endif
+#else
             EditorGUILayout.Space();
-
+#endif
             bool lastBrushesHidden = CurrentSettings.BrushesHidden;
 			if(lastBrushesHidden)
 			{
@@ -373,8 +373,6 @@ namespace Sabresaurus.SabreCSG
             CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, SabreCSGResources.ButtonProjectedGridTexture, toggleProjectedGridStyle);
             if (CurrentSettings.ProjectedGridEnabled != lastProjectedGridEnabled)
             {
-                // Has changed
-                CSGModel.UpdateAllBrushesVisibility();
                 SceneView.RepaintAll();
             }
 

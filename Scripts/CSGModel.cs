@@ -1624,6 +1624,9 @@ namespace Sabresaurus.SabreCSG
                         // Force the scene views to repaint (shows our own UI)
                         SceneView.RepaintAll();
 
+                        // Update the projected grid material to match the scale of this CSG Model
+                        CurrentSettings.ChangePosSnapDistance(1.0f);
+
                         //						if(Event.current != null)
                         //						{
                         //							Event.current.Use();
