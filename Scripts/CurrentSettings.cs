@@ -224,7 +224,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-                return PlayerPrefs.GetInt(KEY_PREFIX + "ProjectedGridEnabled", 1) != 0;
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ProjectedGridEnabled", 0) != 0;
             }
             set
             {
