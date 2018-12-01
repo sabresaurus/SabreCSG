@@ -65,6 +65,7 @@ namespace Sabresaurus.SabreCSG
 		public string Ungroup = "#g";
 
 		public string EnableRadialMenu = "j";
+		public string SnapSelectionToCurrentGrid = "y";
 
 		[Header("Clip Tool")]
 		public string ApplyClip = "Return";

@@ -763,6 +763,16 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
+            else if ((KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.SnapSelectionToCurrentGrid)))) {
+                if (e.type == EventType.KeyDown)
+                {
+                    CurrentSettings.SnapSelectionToCurrentGrid = true;
+                }
+                else {
+                    CurrentSettings.SnapSelectionToCurrentGrid = false;
+                }
+                e.Use();
+            }
             else if (!MouseIsHeld && KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ActivateClipMode)))
             {
                 // Activate mode - immediately (key down)

@@ -336,6 +336,10 @@ namespace Sabresaurus.SabreCSG
 					brush.BreakTypeRelation();
 				}
 			}
+
+			if (CurrentSettings.PositionSnappingEnabled && CurrentSettings.SnapSelectionToCurrentGrid) {
+				SnapSelectedVertices(true);
+			}
 		}
 
 		public void SnapSelectedVertices(bool isAbsoluteGrid)

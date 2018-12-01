@@ -38,6 +38,8 @@ namespace Sabresaurus.SabreCSG
     {
         private bool brushesHidden = false;
         private bool meshHidden = false;
+        private bool snapSelectionToCurrentGrid;
+        private bool alwaysSnapToCurrentGrid;
         private Material foregroundMaterial;
 
         private static CurrentSettings instance = null;
@@ -359,6 +361,24 @@ namespace Sabresaurus.SabreCSG
                 // Occassionally have experienced issues where camera locks up, resetting the Tools class seems to fix it
                 Tools.viewTool = ViewTool.None;
                 Tools.current = UnityEditor.Tool.None;
+            }
+        }
+
+        public static bool AlwaysSnapToCurrentGrid {
+            get {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid") == 1;
+            }
+            set {
+                PlayerPrefs.SetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid", value ? 1 : 0);
+            }
+        }
+
+        public static bool SnapSelectionToCurrentGrid {
+            get {
+                return Instance.snapSelectionToCurrentGrid || AlwaysSnapToCurrentGrid;
+            }
+            set {
+                Instance.snapSelectionToCurrentGrid = value;
             }
         }
     }
