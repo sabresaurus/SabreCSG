@@ -1,5 +1,9 @@
 Content updated by Daniel Cornelius (Kerfuffles) 
 Wood, soil, and grass diffuse textures provided by Textures.com (formerly CGTextures.com)
+[12.02.2018]
++ Added green utility texture
+* Moved additional textures and materials into an archive to reduce import time
+* Changed compression settings on all textures off of crunch, to help with import time
 
 [06.09.2018]
 + added materials and their content:
