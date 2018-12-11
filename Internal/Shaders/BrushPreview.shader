@@ -42,7 +42,9 @@ Shader "SabreCSG/BrushPreview"
 
 			void surf (Input IN, inout SurfaceOutput o)
 			{
-				float dist = distance(_WorldSpaceCameraPos, IN.worldPos);
+				_GridSize = max(0.01, _GridSize);
+
+				float dist = max(0.01, distance(_WorldSpaceCameraPos, IN.worldPos));
 				float len = lerp(20, 140, min(1.0, _GridSize));
 				float m = smoothstep(0.0, 1.0, dist / len);
 				float gridThickness = max(0.03, m);
@@ -66,8 +68,6 @@ Shader "SabreCSG/BrushPreview"
 					(worldspace.z * worldNormal.x) + (worldspace.x * worldNormal.z) + (worldspace.x * worldNormal.y),
 					(worldspace.y * worldNormal.x) + (worldspace.y * worldNormal.z) + (worldspace.z * worldNormal.y)
 				);
-
-				_GridSize = max(0.01, _GridSize);
 
 				grid.x = mod(grid.x,_GridSize);
 				grid.y = mod(grid.y,_GridSize);
