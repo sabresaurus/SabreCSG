@@ -860,7 +860,7 @@ namespace Sabresaurus.SabreCSG
                 Vector3 snapDistanceOffset = Vector3.zero;
                 if (CurrentSettings.SnapSelectionToCurrentGrid) {
                     // find the point we're dragging - that's the bounding box side or corner, if you will.
-                    Vector3 offsetReferencePoint = offset + direction.Multiply(bounds.size / 2f);
+                    Vector3 offsetReferencePoint = offset + direction.Multiply(bounds.extents);
                     // snap it to the global grid
                     Vector3 snappedOffsetReferencePoint = MathHelper.RoundVector3(offsetReferencePoint, snapDistance);
                     // get the delta between real and snap position. We gonna apply apply that to the snapped translation delta
@@ -873,8 +873,9 @@ namespace Sabresaurus.SabreCSG
                 // Snapping's dot uses an offset to track deltas that would be lost otherwise due to snapping
                 translationDelta += translationDeltaSnappingOffset;
 
-                Vector3 snappedTranslationDelta = MathHelper.RoundVector3(translationDelta, snapDistance) - MathHelper.VectorAbs(snapDistanceOffset);
+                Vector3 snappedTranslationDelta = MathHelper.RoundVector3(translationDelta, snapDistance);
                 translationDeltaSnappingOffset = translationDelta - snappedTranslationDelta;
+                snappedTranslationDelta -= snapDistanceOffset;
                 translationDelta = snappedTranslationDelta;
             }
 
