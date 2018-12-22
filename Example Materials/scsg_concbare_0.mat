@@ -19,14 +19,14 @@ Material:
         first:
           name: _MainTex
         second:
-          m_Texture: {fileID: 2800000, guid: cdf6c03eb728a144f936548a854efafd, type: 3}
+          m_Texture: {fileID: 2800000, guid: 1d7ae0626deba5945a88f1796eb24963, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _BumpMap
         second:
-          m_Texture: {fileID: 2800000, guid: 966cb224bc730514292e4cff278a71e7, type: 3}
+          m_Texture: {fileID: 2800000, guid: 6f57a000040ccfd4388d89d37900c153, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -75,7 +75,7 @@ Material:
         first:
           name: _SpecGlossMap
         second:
-          m_Texture: {fileID: 2800000, guid: ec29e4e9e567f37468184f7a0de020f0, type: 3}
+          m_Texture: {fileID: 2800000, guid: 7198126d93a7d244d977365082808db1, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:
@@ -93,20 +93,20 @@ Material:
         second: 0.5
       data:
         first:
-          name: _Glossiness
-        second: 0.5
+          name: _Parallax
+        second: 0.02
       data:
         first:
           name: _ZWrite
         second: 1
       data:
         first:
-          name: _BumpScale
-        second: 0.2
+          name: _Glossiness
+        second: 0.5
       data:
         first:
-          name: _Parallax
-        second: 0.02
+          name: _BumpScale
+        second: 0.2
       data:
         first:
           name: _OcclusionStrength
