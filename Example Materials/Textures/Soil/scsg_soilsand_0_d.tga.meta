@@ -24,7 +24,7 @@ TextureImporter:
   cubemapConvolutionSteps: 7
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
-  textureFormat: -5
+  textureFormat: -1
   maxTextureSize: 1024
   textureSettings:
     filterMode: -1
@@ -34,7 +34,7 @@ TextureImporter:
   nPOTScale: 1
   lightmap: 0
   rGBM: 0
-  compressionQuality: 100
+  compressionQuality: -1
   allowsAlphaSplitting: 0
   spriteMode: 0
   spriteExtrude: 1

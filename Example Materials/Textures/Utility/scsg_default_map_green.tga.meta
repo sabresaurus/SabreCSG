@@ -1,5 +1,9 @@
 fileFormatVersion: 2
-guid: bf58e192f8ec9e14795f5a1c8911a589
+guid: c177f5ebe17a7564ba1d5fd9b81e6ca2
+labels:
+- SabreCSG
+timeCreated: 1522286802
+licenseType: Free
 TextureImporter:
   fileIDToRecycleName: {}
   serializedVersion: 2
@@ -25,7 +29,7 @@ TextureImporter:
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
   textureFormat: -1
-  maxTextureSize: 1024
+  maxTextureSize: 2048
   textureSettings:
     filterMode: -1
     aniso: -1
