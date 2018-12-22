@@ -13,7 +13,7 @@ namespace Sabresaurus.SabreCSG
     {
         private const string RUNTIME_CSG_DEFINE = "RUNTIME_CSG";
         private const string SABRE_CSG_DEBUG_DEFINE = "SABRE_CSG_DEBUG";
-        private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 400);
+        private static readonly Vector2 WINDOW_SIZE = new Vector2(370, 430);
 
         //private static Event cachedEvent;
 
@@ -66,6 +66,8 @@ namespace Sabresaurus.SabreCSG
                 SceneView.RepaintAll();
                 CurrentSettings.HideGridInPerspective = newHideGridInPerspective;
             }
+            
+            CurrentSettings.AlwaysSnapToCurrentGrid = GUILayout.Toggle(CurrentSettings.AlwaysSnapToCurrentGrid, new GUIContent("Always snap to current grid size", "When position snapping is enabled, you can press " + KeyMappings.Instance.SnapSelectionToCurrentGrid + " to snap movement to the current grid size or tick this option to have it always on."));
 
             CurrentSettings.OverrideFlyCamera = GUILayout.Toggle(CurrentSettings.OverrideFlyCamera, "Linear fly camera");
 
