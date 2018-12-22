@@ -8,11 +8,6 @@ namespace Sabresaurus.SabreCSG
 {
     public static class Extensions
     {
-        private const float EPSILON = 1e-5f;
-        private const float EPSILON_LOWER = 1e-4f;
-        private const float EPSILON_LOWER_2 = 1e-3f;
-        private const float EPSILON_LOWER_3 = 1e-2f;
-
         public static Vector3 Abs(this Vector3 a)
         {
             return new Vector3(Mathf.Abs(a.x), Mathf.Abs(a.y), Mathf.Abs(a.z));
@@ -343,7 +338,7 @@ namespace Sabresaurus.SabreCSG
 
         public static bool EqualsWithEpsilon(this float a, float b)
         {
-            return Mathf.Abs(a - b) < EPSILON;
+            return Mathf.Abs(a - b) < MathHelper.EPSILON_5;
         }
 
         /// <summary>
@@ -351,17 +346,17 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public static bool EqualsWithEpsilon(this Vector3 a, Vector3 b)
         {
-            return Mathf.Abs(a.x - b.x) < EPSILON && Mathf.Abs(a.y - b.y) < EPSILON && Mathf.Abs(a.z - b.z) < EPSILON;
+            return Mathf.Abs(a.x - b.x) < MathHelper.EPSILON_5 && Mathf.Abs(a.y - b.y) < MathHelper.EPSILON_5 && Mathf.Abs(a.z - b.z) < MathHelper.EPSILON_5;
         }
 
         public static bool EqualsWithEpsilonLower(this Vector3 a, Vector3 b)
         {
-            return Mathf.Abs(a.x - b.x) < EPSILON_LOWER && Mathf.Abs(a.y - b.y) < EPSILON_LOWER && Mathf.Abs(a.z - b.z) < EPSILON_LOWER;
+            return Mathf.Abs(a.x - b.x) < MathHelper.EPSILON_4 && Mathf.Abs(a.y - b.y) < MathHelper.EPSILON_4 && Mathf.Abs(a.z - b.z) < MathHelper.EPSILON_4;
         }
 
         public static bool EqualsWithEpsilonLower3(this Vector3 a, Vector3 b)
         {
-            return Mathf.Abs(a.x - b.x) < EPSILON_LOWER_3 && Mathf.Abs(a.y - b.y) < EPSILON_LOWER_3 && Mathf.Abs(a.z - b.z) < EPSILON_LOWER_3;
+            return Mathf.Abs(a.x - b.x) < MathHelper.EPSILON_2 && Mathf.Abs(a.y - b.y) < MathHelper.EPSILON_2 && Mathf.Abs(a.z - b.z) < MathHelper.EPSILON_2;
         }
 
         public static Rect ExpandFromCenter(this Rect rect, Vector2 expansion)
@@ -386,12 +381,12 @@ namespace Sabresaurus.SabreCSG
         internal static bool IntersectsApproximate(this Bounds bounds1, Bounds bounds2)
         {
             //		return bounds1.min.x-EPSILON <= bounds2.max.x && bounds1.max.x+EPSILON >= bounds2.min.x && bounds1.min.y-EPSILON <= bounds2.max.y && bounds1.max.y+EPSILON >= bounds2.min.y && bounds1.min.z-EPSILON <= bounds2.max.z && bounds1.max.z+EPSILON >= bounds2.min.z;
-            return bounds1.min.x - EPSILON_LOWER_2 <= bounds2.max.x
-                && bounds1.max.x + EPSILON_LOWER_2 >= bounds2.min.x
-                && bounds1.min.y - EPSILON_LOWER_2 <= bounds2.max.y
-                && bounds1.max.y + EPSILON_LOWER_2 >= bounds2.min.y
-                && bounds1.min.z - EPSILON_LOWER_2 <= bounds2.max.z
-                && bounds1.max.z + EPSILON_LOWER_2 >= bounds2.min.z;
+            return bounds1.min.x - MathHelper.EPSILON_3 <= bounds2.max.x
+                && bounds1.max.x + MathHelper.EPSILON_3 >= bounds2.min.x
+                && bounds1.min.y - MathHelper.EPSILON_3 <= bounds2.max.y
+                && bounds1.max.y + MathHelper.EPSILON_3 >= bounds2.min.y
+                && bounds1.min.z - MathHelper.EPSILON_3 <= bounds2.max.z
+                && bounds1.max.z + MathHelper.EPSILON_3 >= bounds2.min.z;
         }
 
         // If the second bounds has a coplanar side then it is considered not contained
@@ -407,12 +402,12 @@ namespace Sabresaurus.SabreCSG
 
         internal static bool ContainsApproximate(this Bounds bounds1, Vector3 point)
         {
-            return (point.x > bounds1.min.x - EPSILON_LOWER_2
-                && point.y > bounds1.min.y - EPSILON_LOWER_2
-                && point.z > bounds1.min.z - EPSILON_LOWER_2
-                && point.x < bounds1.max.x + EPSILON_LOWER_2
-                && point.y < bounds1.max.y + EPSILON_LOWER_2
-                && point.z < bounds1.max.z + EPSILON_LOWER_2);
+            return (point.x > bounds1.min.x - MathHelper.EPSILON_3
+                && point.y > bounds1.min.y - MathHelper.EPSILON_3
+                && point.z > bounds1.min.z - MathHelper.EPSILON_3
+                && point.x < bounds1.max.x + MathHelper.EPSILON_3
+                && point.y < bounds1.max.y + MathHelper.EPSILON_3
+                && point.z < bounds1.max.z + MathHelper.EPSILON_3);
         }
 
         /// <summary>

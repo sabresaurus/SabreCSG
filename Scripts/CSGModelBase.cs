@@ -246,19 +246,23 @@ namespace Sabresaurus.SabreCSG
                 Debug.LogError("Default fallback material file is missing, try reimporting SabreCSG");
             }
 
-			BuildStatus buildStatus = CSGFactory.Build(brushes, 
-				buildSettings, 
-				buildContext, 
-				this.transform, 
-				materialMeshDictionary, 
-				collisionMeshDictionary,
-				polygonsRemoved,
-				forceRebuild,
-				OnBuildProgressChanged,
-				OnFinalizeVisualMesh,
-				OnFinalizeCollisionMesh,
-				buildInBackground,
-                finalRebuild);
+            // Make sure the build context has been initialized.
+            if (buildContext == null)
+                buildContext = BuildContext;
+
+            BuildStatus buildStatus = CSGFactory.Build(brushes,
+                buildSettings,
+                buildContext,
+                this.transform,
+                materialMeshDictionary,
+                collisionMeshDictionary,
+                polygonsRemoved,
+                forceRebuild,
+                OnBuildProgressChanged,
+                OnFinalizeVisualMesh,
+                OnFinalizeCollisionMesh,
+                buildInBackground,
+				finalRebuild);
 
             if (buildStatus == BuildStatus.Complete)
             {

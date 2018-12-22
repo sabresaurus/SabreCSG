@@ -18,6 +18,9 @@ namespace Sabresaurus.SabreCSG
             // get all selected textures in the asset browser.
             Texture2D[] textures = Array.ConvertAll(Selection.GetFiltered(typeof(Texture2D), SelectionMode.Assets), item => (Texture2D)item);
 
+            // begin asset editing, this prevents unity from importing the materials immediately once they are created (that's slow).
+            AssetDatabase.StartAssetEditing();
+
             // iterate through each selected texture:
             for (int i = 0; i < textures.Length; i++)
             {
@@ -36,6 +39,9 @@ namespace Sabresaurus.SabreCSG
 
                 AssetDatabase.CreateAsset(material, path + file);
             }
+
+            // stop asset editing, this allows unity to import all the materials we created in one go.
+            AssetDatabase.StopAssetEditing();
 
             EditorUtility.ClearProgressBar();
         }
