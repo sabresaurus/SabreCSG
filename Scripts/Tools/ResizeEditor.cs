@@ -72,6 +72,8 @@ namespace Sabresaurus.SabreCSG
         private Vector2 marqueeStart;
         private Vector2 marqueeEnd;
 
+        private bool inverseSnapSelectionToCurrentGridLogic = false;
+
         private ResizeHandlePair[] resizeHandlePairs = new ResizeHandlePair[]
         {
 			// Edge Mid Points
@@ -368,6 +370,18 @@ namespace Sabresaurus.SabreCSG
                         CancelMove();
                     }
                     e.Use();
+                }
+            }
+
+            if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.SnapSelectionToCurrentGrid)))
+            {
+                if (e.type == EventType.KeyDown)
+                {
+                    inverseSnapSelectionToCurrentGridLogic = true;
+                }
+                else
+                {
+                    inverseSnapSelectionToCurrentGridLogic = false;
                 }
             }
 
@@ -858,7 +872,8 @@ namespace Sabresaurus.SabreCSG
                 float snapDistance = CurrentSettings.PositionSnapDistance;
 
                 Vector3 snapDistanceOffset = Vector3.zero;
-                if (CurrentSettings.SnapSelectionToCurrentGrid) {
+
+                if (CurrentSettings.AlwaysSnapToCurrentGrid != inverseSnapSelectionToCurrentGridLogic) {
                     // find the point we're dragging - that's the bounding box side or corner, if you will.
                     Vector3 offsetReferencePoint = offset + direction.Multiply(bounds.extents);
                     // snap it to the global grid
@@ -868,7 +883,6 @@ namespace Sabresaurus.SabreCSG
                     // with this extra offset we will "re-snap" the face to the current grid
                     snapDistanceOffset = offsetReferencePoint - snappedOffsetReferencePoint;
                 }
-                
                 
                 // Snapping's dot uses an offset to track deltas that would be lost otherwise due to snapping
                 translationDelta += translationDeltaSnappingOffset;

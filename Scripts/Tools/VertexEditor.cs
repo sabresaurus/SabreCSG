@@ -34,7 +34,9 @@ namespace Sabresaurus.SabreCSG
 
         Vertex movingVertex;
 
-		void ClearSelection()
+        private bool inverseSnapSelectionToCurrentGridLogic = false;
+
+        void ClearSelection()
 		{
 			selectedEdges.Clear();
 			selectedVertices.Clear();
@@ -337,7 +339,7 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 
-			if (CurrentSettings.PositionSnappingEnabled && CurrentSettings.SnapSelectionToCurrentGrid) {
+			if (CurrentSettings.PositionSnappingEnabled && (CurrentSettings.AlwaysSnapToCurrentGrid != inverseSnapSelectionToCurrentGridLogic)) {
 				SnapSelectedVertices(true);
 			}
 		}
@@ -476,6 +478,11 @@ namespace Sabresaurus.SabreCSG
             if (e.type == EventType.MouseUp || e.rawType == EventType.MouseUp)
             {
                 moveInProgress = false;
+            }
+
+            if (e.type == EventType.KeyDown || e.type == EventType.KeyUp)
+            {
+                OnKeyAction(sceneView, e);
             }
 
             if (primaryTargetBrush != null && AnySelected)
@@ -963,7 +970,22 @@ namespace Sabresaurus.SabreCSG
 			return refinedSelection;
 		}
 
-		public void OnRepaint (SceneView sceneView, Event e)
+        private void OnKeyAction(SceneView sceneView, Event e)
+        {
+            if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.SnapSelectionToCurrentGrid)))
+            {
+                if (e.type == EventType.KeyDown)
+                {
+                    inverseSnapSelectionToCurrentGridLogic = true;
+                }
+                else
+                {
+                    inverseSnapSelectionToCurrentGridLogic = false;
+                }
+            }
+        }
+
+        public void OnRepaint (SceneView sceneView, Event e)
 		{
 			if(isMarqueeSelection && sceneView == SceneView.lastActiveSceneView)
 			{

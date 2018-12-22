@@ -372,15 +372,6 @@ namespace Sabresaurus.SabreCSG
                 PlayerPrefs.SetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid", value ? 1 : 0);
             }
         }
-
-        public static bool SnapSelectionToCurrentGrid {
-            get {
-                return Instance.snapSelectionToCurrentGrid || AlwaysSnapToCurrentGrid;
-            }
-            set {
-                Instance.snapSelectionToCurrentGrid = value;
-            }
-        }
     }
 }
 
