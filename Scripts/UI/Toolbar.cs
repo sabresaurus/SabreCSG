@@ -370,7 +370,7 @@ namespace Sabresaurus.SabreCSG
             toggleProjectedGridStyle.fixedHeight = 18;
 
             bool lastProjectedGridEnabled = CurrentSettings.ProjectedGridEnabled;
-            CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, SabreCSGResources.ButtonProjectedGridTexture, toggleProjectedGridStyle);
+            CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, new GUIContent(SabreCSGResources.ButtonProjectedGridTexture, "Toggle Projected Grid"), toggleProjectedGridStyle);
             if (CurrentSettings.ProjectedGridEnabled != lastProjectedGridEnabled)
             {
                 SceneView.RepaintAll();

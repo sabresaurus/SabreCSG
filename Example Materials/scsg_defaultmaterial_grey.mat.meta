@@ -1,9 +1,10 @@
 fileFormatVersion: 2
 guid: a3612dfc395be5b4bb7ebd52848dfaae
+labels:
+- SabreCSG
 timeCreated: 1522131907
 licenseType: Free
 NativeFormatImporter:
-  externalObjects: {}
   mainObjectFileID: 0
   userData: 
   assetBundleName: 
