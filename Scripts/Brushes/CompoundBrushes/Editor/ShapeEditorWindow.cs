@@ -886,6 +886,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 toolsMenu.AddItem(new GUIContent("Background/Clear Background"), false, OnToolsBackgroundClearBackground);
                 toolsMenu.AddItem(new GUIContent("Global Pivot/Set Position..."), false, OnToolsPivotSetPosition);
                 toolsMenu.AddItem(new GUIContent("Global Pivot/Reset Position"), false, OnToolsPivotResetPosition);
+                toolsMenu.AddItem(new GUIContent("Generate/Add Circle..."), false, OnToolsGenerateAddCircle);
 #if UNITY_5_4_OR_NEWER
                 toolsMenu.DropDown(new Rect((Screen.width - 50) / EditorGUIUtility.pixelsPerPoint, 0, 0, 16));
 #else
@@ -1522,6 +1523,55 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnToolsPivotResetPosition()
         {
             project.globalPivot.position = Vector2Int.zero;
+        }
+
+        /// <summary>
+        /// Called when the tools 'menu/generate/add circle' item is pressed.
+        /// </summary>
+        private void OnToolsGenerateAddCircle()
+        {
+            // let the user choose the circle settings.
+            ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GenerateCircle, project, (self) =>
+            {
+                // create a new shape.
+                Shape shape = new Shape();
+
+                // first make a diamond shape.
+                List<Segment> segments = new List<Segment>() {
+                    new Segment(0, -self.GenerateCircle_Radius),
+                    new Segment(self.GenerateCircle_Radius, 0),
+                    new Segment( 0,  self.GenerateCircle_Radius),
+                    new Segment(-self.GenerateCircle_Radius, 0),
+                };
+
+                // now create the bezier segments.
+                segments[0].type = SegmentType.Bezier; // top right
+                segments[0].bezierPivot1.position = new Vector2Int(self.GenerateCircle_Radius / 2, -self.GenerateCircle_Radius);
+                segments[0].bezierPivot2.position = new Vector2Int(self.GenerateCircle_Radius, -self.GenerateCircle_Radius / 2);
+                segments[0].bezierDetail = self.bezierDetailLevel_Detail;
+
+                segments[1].type = SegmentType.Bezier; // bottom right
+                segments[1].bezierPivot1.position = new Vector2Int(self.GenerateCircle_Radius, self.GenerateCircle_Radius / 2);
+                segments[1].bezierPivot2.position = new Vector2Int(self.GenerateCircle_Radius / 2, self.GenerateCircle_Radius);
+                segments[1].bezierDetail = self.bezierDetailLevel_Detail;
+
+                segments[2].type = SegmentType.Bezier; // bottom left
+                segments[2].bezierPivot1.position = new Vector2Int(-self.GenerateCircle_Radius / 2, self.GenerateCircle_Radius);
+                segments[2].bezierPivot2.position = new Vector2Int(-self.GenerateCircle_Radius, self.GenerateCircle_Radius / 2);
+                segments[2].bezierDetail = self.bezierDetailLevel_Detail;
+
+                segments[3].type = SegmentType.Bezier; // top left
+                segments[3].bezierPivot1.position = new Vector2Int(-self.GenerateCircle_Radius, -self.GenerateCircle_Radius / 2);
+                segments[3].bezierPivot2.position = new Vector2Int(-self.GenerateCircle_Radius / 2, -self.GenerateCircle_Radius);
+                segments[3].bezierDetail = self.bezierDetailLevel_Detail;
+
+                // add the circle shape to the project.
+                shape.segments = segments;
+                project.shapes.Add(shape);
+
+                // show the changes.
+                Repaint();
+            }));
         }
 
         private Rect GetViewportRect()

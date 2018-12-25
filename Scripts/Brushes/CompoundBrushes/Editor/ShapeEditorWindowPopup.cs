@@ -24,6 +24,7 @@ namespace Sabresaurus.SabreCSG
             ExtrudeShape,
             ExtrudePoint,
             ExtrudeBevel,
+            GenerateCircle,
         }
 
         private PopupMode popupMode;
@@ -35,8 +36,9 @@ namespace Sabresaurus.SabreCSG
         public int revolve360 = 8;
         public int revolveSteps = 4;
         public bool revolveSpiralSloped = false;
-        public Vector2Int GlobalPivotPosition_Position;
         public bool convexBrushes = true;
+        public Vector2Int GlobalPivotPosition_Position;
+        public int GenerateCircle_Radius = 2;
 
         private Action<ShapeEditorWindowPopup> onApply;
 
@@ -108,6 +110,9 @@ namespace Sabresaurus.SabreCSG
 
                 case PopupMode.GlobalPivotPosition:
                     return new Vector2(300, 68);
+
+                case PopupMode.GenerateCircle:
+                    return new Vector2(300, 86);
 
                 case PopupMode.CreatePolygon:
                     return new Vector2(300, 50 + 36);
@@ -206,6 +211,19 @@ namespace Sabresaurus.SabreCSG
                     GlobalPivotPosition_Position = EditorGUILayout.Vector2IntField("Position", GlobalPivotPosition_Position);
                     EditorGUIUtility.wideMode = false;
 #endif
+                    break;
+
+                case PopupMode.GenerateCircle:
+                    GUILayout.Label("Generate Circle", EditorStyles.boldLabel);
+                    hasScale = false;
+                    hasConvexBrushes = false;
+                    accept = "Add Shape";
+
+                    GenerateCircle_Radius = SabreGUILayout.EvenIntField(new GUIContent("Radius"), GenerateCircle_Radius);
+
+                    bezierDetailLevel_Detail = EditorGUILayout.IntField("Detail", bezierDetailLevel_Detail);
+                    if (bezierDetailLevel_Detail < 1) bezierDetailLevel_Detail = 1;
+                    if (bezierDetailLevel_Detail > 999) bezierDetailLevel_Detail = 999;
                     break;
 
                 case PopupMode.CreatePolygon:
