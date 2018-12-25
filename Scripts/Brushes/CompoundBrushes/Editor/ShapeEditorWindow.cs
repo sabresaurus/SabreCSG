@@ -19,14 +19,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
     /// <seealso cref="UnityEditor.EditorWindow"/>
     public class ShapeEditorWindow : EditorWindow
     {
-        //private class FakeUndoObject : UnityEngine.Object
-        //{
-        //    // todo
-        //}
-
         /// <summary>
         /// The currently loaded project.
         /// </summary>
+        [SerializeField]
         private Project project = new Project();
 
         /// <summary>
@@ -330,6 +326,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         // move the global pivot.
                         if (isGlobalPivotSelected)
                         {
+                            Undo.RecordObject(this, "2DSE: Move Pivot");
                             project.globalPivot.position += mouseGridDelta;
                             this.Repaint();
                         }
@@ -339,6 +336,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             bool isShapeSelected = IsObjectSelected(shape.pivot);
                             if (isShapeSelected)
                             {
+                                Undo.RecordObject(this, "2DSE: Move Pivot");
                                 shape.pivot.position += mouseGridDelta;
                                 foreach (Segment segment in shape.segments)
                                 {
@@ -366,9 +364,15 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             {
                                 if (segment.type != SegmentType.Bezier) continue;
                                 if (IsObjectSelected(segment.bezierPivot1))
+                                {
+                                    Undo.RecordObject(this, "2DSE: Move Pivot");
                                     segment.bezierPivot1.position += mouseGridDelta;
+                                }
                                 if (IsObjectSelected(segment.bezierPivot2))
+                                {
+                                    Undo.RecordObject(this, "2DSE: Move Pivot");
                                     segment.bezierPivot2.position += mouseGridDelta;
+                                }
                                 this.Repaint();
                             }
                         }
@@ -377,6 +381,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         {
                             // we don't move segments while the shape is dragged (they already moved).
                             if (IsObjectSelected(GetShapeOfSegment(segment).pivot)) continue;
+                            Undo.RecordObject(this, "2DSE: Move Pivot");
                             segment.position += mouseGridDelta;
                             this.Repaint();
                         }
@@ -593,12 +598,11 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 }
             }
 
-            //if(Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed")
-            //{
-            //    // we don't want to use the unity editor undo function.
-            //    Debug.Log(Event.current.commandName);
-            //    Event.current.Use();
-            //}
+            if (Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed")
+            {
+                // redraw to make sure any changes to the project are visible.
+                this.Repaint();
+            }
 
             if (Event.current.type == EventType.Repaint)
             {
@@ -946,6 +950,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnNew()
         {
+            Undo.RecordObject(this, "2DSE: New Project");
+
             if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to create a new project?", "Yes", "No"))
             {
                 // create a new project.
@@ -958,6 +964,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnOpen()
         {
+            Undo.RecordObject(this, "2DSE: Open Project");
+
             try
             {
                 string path = EditorUtility.OpenFilePanel("Load 2D Shape Editor Project", "", "sabre2d");
@@ -1009,6 +1017,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Left()
         {
+            Undo.RecordObject(this, "2DSE: Rotate 90 Left");
+
             // find any selected shapes:
             List<Shape> selectedShapes = new List<Shape>();
             foreach (Shape shape in project.shapes)
@@ -1027,6 +1037,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Right()
         {
+            Undo.RecordObject(this, "2DSE: Rotate 90 Right");
+
             // find any selected shapes:
             List<Shape> selectedShapes = new List<Shape>();
             foreach (Shape shape in project.shapes)
@@ -1045,6 +1057,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnFlipVertically()
         {
+            Undo.RecordObject(this, "2DSE: Flip Vertically");
+
             // store this flip inside of the project.
             project.flipVertically = !project.flipVertically;
 
@@ -1069,6 +1083,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnFlipHorizontally()
         {
+            Undo.RecordObject(this, "2DSE: Flip Horizontally");
+
             // store this flip inside of the project.
             project.flipHorizontally = !project.flipHorizontally;
 
@@ -1140,6 +1156,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnShapeDuplicate()
         {
+            Undo.RecordObject(this, "2DSE: Duplicate Shape");
+
             // duplicate all selected shapes.
             foreach (Shape shape in project.shapes.ToArray()) // use .ToArray() to iterate a clone.
             {
@@ -1166,6 +1184,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnShapeCreate()
         {
+            Undo.RecordObject(this, "2DSE: Create Shape");
+
             project.shapes.Add(new Shape());
         }
 
@@ -1174,6 +1194,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnSegmentInsert()
         {
+            Undo.RecordObject(this, "2DSE: Insert Segment");
+
             foreach (Segment segment in selectedSegments)
             {
                 Segment next = GetNextSegment(segment);
@@ -1195,6 +1217,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnSegmentExtrude()
         {
+            Undo.RecordObject(this, "2DSE: Extrude Segment");
+
             foreach (Segment segment in selectedSegments.ToArray()) // use .ToArray() to iterate a clone.
             {
                 bool inverted = project.flipHorizontally ^ project.flipVertically;
@@ -1220,6 +1244,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnDelete()
         {
+            Undo.RecordObject(this, "2DSE: Delete");
+
             // prevent the user from deleting too much.
             foreach (Shape shape in project.shapes.Where(shape => shape.segments.Exists(segment => selectedSegments.Contains(segment))))
             {
@@ -1255,6 +1281,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnSegmentLinear()
         {
+            Undo.RecordObject(this, "2DSE: Linear Segment");
+
             foreach (Shape shape in project.shapes)
             {
                 foreach (Segment segment in shape.segments)
@@ -1275,6 +1303,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnSegmentBezier()
         {
+            Undo.RecordObject(this, "2DSE: Bezier Segment");
+
             foreach (Segment segment in selectedSegments)
             {
                 // don't affect existing bezier segments.
@@ -1300,6 +1330,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // let the user choose the amount of bezier curve detail.
             ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.BezierDetailLevel, project, (self) =>
             {
+                Undo.RecordObject(this, "2DSE: Bezier Detail");
+
                 foreach (Shape shape in project.shapes)
                 {
                     foreach (Segment segment in shape.segments)
@@ -1509,6 +1541,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // let the user choose the global pivot position.
             ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) =>
             {
+                Undo.RecordObject(this, "2DSE: Move Pivot");
+
                 // set the new global pivot position.
                 project.globalPivot.position = self.GlobalPivotPosition_Position;
 
@@ -1522,6 +1556,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnToolsPivotResetPosition()
         {
+            Undo.RecordObject(this, "2DSE: Move Pivot");
+
             project.globalPivot.position = Vector2Int.zero;
         }
 
@@ -1533,6 +1569,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             // let the user choose the circle settings.
             ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GenerateCircle, project, (self) =>
             {
+                Undo.RecordObject(this, "2DSE: Create Shape");
+
                 // create a new shape.
                 Shape shape = new Shape();
 
@@ -1752,6 +1790,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <param name="project">The project to make a copy of and load into the 2D Shape Editor.</param>
         public void LoadProject(Project project)
         {
+            Undo.RecordObject(this, "2DSE: Load Project");
+
             // load the project into the editor.
             this.project = project.Clone();
             // update the viewport so that the user can see the changes.
