@@ -39,18 +39,6 @@ namespace Sabresaurus.SabreCSG
         private UndoRedoDetector undoRedoDetector;
 
         /// <summary>
-        /// The undo/redo detector is a simple scriptable object that can be serialized and stored on
-        /// the undo/redo stack. We use it to detect whether an undo or a redo operation occured in
-        /// the editor.
-        /// </summary>
-        /// <seealso cref="UnityEngine.ScriptableObject" />
-        private class UndoRedoDetector : ScriptableObject
-        {
-            [SerializeField]
-            public int CurrentValue;
-        }
-
-        /// <summary>
         /// The editor window that this class is actively monitoring.
         /// </summary>
         private EditorWindow editorWindow;
