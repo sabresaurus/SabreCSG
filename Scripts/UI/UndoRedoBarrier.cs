@@ -39,6 +39,7 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         private UndoRedoDetector undoRedoDetector;
 #endif
+
         /// <summary>
         /// The editor window that this class is actively monitoring.
         /// </summary>
@@ -81,14 +82,14 @@ namespace Sabresaurus.SabreCSG
         {
 #if UNITY_2018_1_OR_NEWER
             // unity editor 2018 (tested with 2018.3.0f2) allows us to simply intercept and cancel CTRL+Z.
-            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Z && SabreInput.IsModifier(Event.current, EventModifiers.Control))
+            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Z && SabreInput.IsCommandModifier(Event.current))
             {
                 if (OnUndo != null) OnUndo(this, null);
                 Event.current.Use(); // cancel the real unity editor undo.
             }
 
             // unity editor 2018 (tested with 2018.3.0f2) allows us to simply intercept and cancel CTRL+Y.
-            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Y && SabreInput.IsModifier(Event.current, EventModifiers.Control))
+            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Y && SabreInput.IsCommandModifier(Event.current))
             {
                 if (OnRedo != null) OnRedo(this, null);
                 Event.current.Use(); // cancel the real unity editor redo.
