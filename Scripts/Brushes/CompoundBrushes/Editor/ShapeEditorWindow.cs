@@ -109,12 +109,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// The custom undo stack used by the 2D Shape Editor while it has window focus.
         /// </summary>
-        private Stack<Project> undoStack = new Stack<Project>();
+        private List<Project> undoStack = new List<Project>();
 
         /// <summary>
         /// The custom redo stack used by the 2D Shape Editor while it has window focus.
         /// </summary>
-        private Stack<Project> redoStack = new Stack<Project>();
+        private List<Project> redoStack = new List<Project>();
 
         /// <summary>
         /// If true it will store the project on the undo stack on certain events (like mouse up).
