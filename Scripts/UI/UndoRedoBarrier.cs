@@ -12,6 +12,7 @@ namespace Sabresaurus.SabreCSG
     /// </summary>
     public class UndoRedoBarrier
     {
+#if !UNITY_2018_1_OR_NEWER
         /// <summary>
         /// The unity editor undo/redo group index. This value is used to reset unity editor's
         /// history once the editor window loses focus or is closed.
@@ -37,7 +38,7 @@ namespace Sabresaurus.SabreCSG
         /// the editor.
         /// </summary>
         private UndoRedoDetector undoRedoDetector;
-
+#endif
         /// <summary>
         /// The editor window that this class is actively monitoring.
         /// </summary>
@@ -78,14 +79,29 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void OnGUI()
         {
+#if UNITY_2018_1_OR_NEWER
+            // unity editor 2018 (tested with 2018.3.0f2) allows us to simply intercept and cancel CTRL+Z.
+            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Z && SabreInput.IsModifier(Event.current, EventModifiers.Control))
+            {
+                if (OnUndo != null) OnUndo(this, null);
+                Event.current.Use(); // cancel the real unity editor undo.
+            }
+
+            // unity editor 2018 (tested with 2018.3.0f2) allows us to simply intercept and cancel CTRL+Y.
+            if (EditorWindow.focusedWindow == editorWindow && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Y && SabreInput.IsModifier(Event.current, EventModifiers.Control))
+            {
+                if (OnRedo != null) OnRedo(this, null);
+                Event.current.Use(); // cancel the real unity editor redo.
+            }
+#else
             // subscribe to editor undo/redo events.
             if (!EditorHelper.HasDelegate(Undo.undoRedoPerformed, (Action)OnUndoRedoPerformed))
                 Undo.undoRedoPerformed += OnUndoRedoPerformed;
 
+            // recreate the fake undo operation if it's not active.
             if (singletonFocus && Undo.GetCurrentGroupName() != undoGroupName)
-            {
                 ForceCreateUndoEntry();
-            }
+#endif
         }
 
         /// <summary>
@@ -93,16 +109,14 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void OnFocus()
         {
+#if !UNITY_2018_1_OR_NEWER
             if (!singletonFocus && EditorWindow.focusedWindow == editorWindow)
             {
                 undoRedoGroupIndex = Undo.GetCurrentGroup();
-                //Debug.Log("OnFocus: Group Index: " + undoRedoGroupIndex);
-
                 ForceCreateUndoEntry();
-                //Debug.Log("Added 2DSE Undo Entry");
-
                 singletonFocus = true;
             }
+#endif
         }
 
         /// <summary>
@@ -110,11 +124,11 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void OnLostFocus()
         {
+#if !UNITY_2018_1_OR_NEWER
             singletonFocus = false;
-
             ignoreOnUndoRedoPerformed = true;
             Undo.RevertAllDownToGroup(undoRedoGroupIndex + 1);
-            //Debug.Log("OnLostFocus: Reverted To Group Index: " + (undoRedoGroupIndex + 1));
+#endif
         }
 
         /// <summary>
@@ -122,9 +136,12 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public void OnDestroy()
         {
+#if !UNITY_2018_1_OR_NEWER
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+#endif
         }
 
+#if !UNITY_2018_1_OR_NEWER
         /// <summary>
         /// Forces an undo-able operation onto unity editor's undo/redo stack.
         /// </summary>
@@ -147,15 +164,11 @@ namespace Sabresaurus.SabreCSG
 
             if (Undo.GetCurrentGroupName() == undoGroupName)
             {
-                //Debug.Log("Redo!!");
-                if (OnRedo != null)
-                    OnRedo(this, null);
+                if (OnRedo != null) OnRedo(this, null);
             }
             else
             {
-                //Debug.Log("Undo!! " + Undo.GetCurrentGroup() + " " + undoRedoGroupIndex);
-                if (OnUndo != null)
-                    OnUndo(this, null);
+                if (OnUndo != null) OnUndo(this, null);
 
                 // this sleep is required!
                 // without it holding CTRL+Z will be so fast that it starts to bypass
@@ -165,6 +178,7 @@ namespace Sabresaurus.SabreCSG
 
             editorWindow.Repaint();
         }
+#endif
     }
 }
 
