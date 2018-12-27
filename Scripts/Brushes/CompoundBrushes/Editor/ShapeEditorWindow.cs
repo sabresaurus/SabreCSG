@@ -85,31 +85,36 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private Texture2D backgroundImage;
 
         /// <summary>
-        /// The custom undo stack helper that overrides the default unity editor undo/redo.
+        /// The undo/redo barrier that overrides the default unity editor undo/redo.
         /// </summary>
-        private CustomUndoStackHelper customUndoStackHelperHandle;
+        private UndoRedoBarrier undoRedoBarrierHandle;
 
         /// <summary>
-        /// Gets the custom undo stack helper that overrides the default unity editor undo/redo.
+        /// Gets the undo/redo barrier that overrides the default unity editor undo/redo.
         /// </summary>
-        private CustomUndoStackHelper customUndoStackHelper
+        private UndoRedoBarrier undoRedoBarrier
         {
             get
             {
-                if (customUndoStackHelperHandle == null)
+                if (undoRedoBarrierHandle == null)
                 {
-                    customUndoStackHelperHandle = new CustomUndoStackHelper(this, "SabreCSG: 2DSE (0133bffe-1187-407a-81c6-b15623ad7b60)");
-                    customUndoStackHelper.OnUndo += OnUndo;
-                    customUndoStackHelper.OnRedo += OnRedo;
+                    undoRedoBarrierHandle = new UndoRedoBarrier(this, "SabreCSG: 2DSE (0133bffe-1187-407a-81c6-b15623ad7b60)");
+                    undoRedoBarrier.OnUndo += OnUndo;
+                    undoRedoBarrier.OnRedo += OnRedo;
                 }
-                return customUndoStackHelperHandle;
+                return undoRedoBarrierHandle;
             }
         }
 
         /// <summary>
-        /// The custom undo/redo stack used by the 2D Shape Editor while it has window focus.
+        /// The custom undo stack used by the 2D Shape Editor while it has window focus.
         /// </summary>
-        private List<Project> undoStack = new List<Project>();
+        private Stack<Project> undoStack = new Stack<Project>();
+
+        /// <summary>
+        /// The custom redo stack used by the 2D Shape Editor while it has window focus.
+        /// </summary>
+        private Stack<Project> redoStack = new Stack<Project>();
 
         /// <summary>
         /// If true it will store the project on the undo stack on certain events (like mouse up).
@@ -117,12 +122,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private bool undoStackIsDirty;
 
         /// <summary>
-        /// The undo stack index used to navigate around with CTRL+Z and CTRL+Y.
-        /// </summary>
-        private int undoStackOffset;
-
-        /// <summary>
-        /// The last project state before new changes were made, used by the undo stack.
+        /// The last project state before new changes were made, used by the undo and redo stacks.
         /// </summary>
         private Project undoStackLastProject;
 
@@ -345,7 +345,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnGUI()
         {
             // forward event to custom undo stack.
-            customUndoStackHelper.OnGUI();
+            undoRedoBarrier.OnGUI();
 
             if (Event.current.type == EventType.MouseDrag)
             {
@@ -1001,19 +1001,19 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnFocus()
         {
             // forward event to custom undo stack.
-            customUndoStackHelper.OnFocus();
+            undoRedoBarrier.OnFocus();
         }
 
         private void OnLostFocus()
         {
             // forward event to custom undo stack.
-            customUndoStackHelper.OnLostFocus();
+            undoRedoBarrier.OnLostFocus();
         }
 
         private void OnDestroy()
         {
             // forward event to custom undo stack.
-            customUndoStackHelper.OnDestroy();
+            undoRedoBarrier.OnDestroy();
         }
 
         /// <summary>
@@ -1026,13 +1026,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             {
                 undoStackIsDirty = false;
 
-                // remove all undo entries before the current stack index.
-                undoStack.RemoveRange(0, undoStackOffset);
-
-                // store a copy of the project in the undo stack.
-                undoStack.Insert(0, undoStackLastProject);
+                // push a copy of the last project state onto the undo stack.
+                undoStack.Push(undoStackLastProject.Clone());
                 undoStackLastProject = project.Clone();
-                undoStackOffset = 0;
+
+                // clear all redo operations.
+                redoStack.Clear();
             }
         }
 
@@ -1070,27 +1069,39 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         }
 
         /// <summary>
-        /// Handles the OnUndo event of the <see cref="customUndoStackHelper"/>.
+        /// Handles the OnUndo event of the <see cref="undoRedoBarrier"/>.
         /// </summary>
         private void OnUndo(object sender, EventArgs e)
         {
-            if (undoStackOffset < undoStack.Count)
+            // if we can still undo:
+            if (undoStack.Count > 0)
             {
-                project = undoStack[undoStackOffset];
-                undoStackOffset++;
+                // add the current project state to the redo stack.
+                redoStack.Push(project.Clone());
+
+                // pop a project state from the undo stack.
+                project = undoStack.Pop();
+
+                // the last state is the current state:
                 undoStackLastProject = project.Clone();
             }
         }
 
         /// <summary>
-        /// Handles the OnRedo event of the <see cref="customUndoStackHelper"/>.
+        /// Handles the OnRedo event of the <see cref="undoRedoBarrier"/>.
         /// </summary>
         private void OnRedo(object sender, EventArgs e)
         {
-            if (undoStackOffset > 0)
+            // if we can still redo:
+            if (redoStack.Count > 0)
             {
-                undoStackOffset--;
-                project = undoStack[undoStackOffset];
+                // add the current project state to the undo stack.
+                undoStack.Push(project.Clone());
+
+                // pop a project state from the redo stack.
+                project = redoStack.Pop();
+
+                // the last state is the current state:
                 undoStackLastProject = project.Clone();
             }
         }

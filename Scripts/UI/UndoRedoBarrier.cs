@@ -10,7 +10,7 @@ namespace Sabresaurus.SabreCSG
     /// Helper class for <see cref="EditorWindow"/> to implement a custom undo/redo stack that does
     /// not interfere with the default unity editor undo/redo stack.
     /// </summary>
-    public class CustomUndoStackHelper
+    public class UndoRedoBarrier
     {
         /// <summary>
         /// The unity editor undo/redo group index. This value is used to reset unity editor's
@@ -71,15 +71,15 @@ namespace Sabresaurus.SabreCSG
         public event EventHandler OnRedo;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomUndoStackHelper"/> class.
+        /// Initializes a new instance of the <see cref="UndoRedoBarrier"/> class.
         /// <para>
         /// You must call <see cref="OnGUI"/>, <see cref="OnFocus"/>, <see cref="OnLostFocus"/> and
-        /// <see cref="OnDestroy"/> from the editor window in order to use this custom history stack.
+        /// <see cref="OnDestroy"/> from the editor window in order to use this undo/redo barrier.
         /// </para>
         /// </summary>
         /// <param name="editorWindow">The editor window to monitor.</param>
         /// <param name="undoGroupName">Name of the undo group (should be unique).</param>
-        public CustomUndoStackHelper(EditorWindow editorWindow, string undoGroupName)
+        public UndoRedoBarrier(EditorWindow editorWindow, string undoGroupName)
         {
             this.editorWindow = editorWindow;
             this.undoGroupName = undoGroupName;
