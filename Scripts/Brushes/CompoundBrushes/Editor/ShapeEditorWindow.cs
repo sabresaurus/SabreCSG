@@ -124,7 +124,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// <summary>
         /// The last project state before new changes were made, used by the undo and redo stacks.
         /// </summary>
-        private Project undoStackLastProject;
+        private Project undoStackLastProject = new Project();
 
         /// <summary>
         /// The currently selected segments.
@@ -331,9 +331,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             window.Show();
             window.titleContent = new GUIContent("Shape Editor", SabreCSGResources.ButtonShapeEditorTexture);
             window.minSize = new Vector2(128, 128);
-
-            // push a default undo state.
-            window.undoStackLastProject = window.project.Clone();
         }
 
         public static ShapeEditorWindow InitAndGetHandle()
