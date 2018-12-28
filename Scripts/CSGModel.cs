@@ -1262,6 +1262,14 @@ namespace Sabresaurus.SabreCSG
                         Graphics.DrawTexture(drawRect, SabreCSGResources.SubtractIconTexture, iconMaterial);
                     }
                 }
+                else if(gameObject.HasComponent<CSGModel>())
+                {
+                    drawRect.xMax -= 2;
+                    drawRect.xMin = drawRect.xMax - 16;
+                    drawRect.height = 16;
+
+                    Graphics.DrawTexture(drawRect, SabreCSGResources.SabreCSG16IconTexture);
+                }
 
                 if (EditMode)
                 {
