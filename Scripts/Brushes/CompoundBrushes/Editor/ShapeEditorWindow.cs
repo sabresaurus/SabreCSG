@@ -1081,6 +1081,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // the last state is the current state:
                 undoStackLastProject = project.Clone();
+
+                // reset the current selection as those objects no longer exist.
+                selectedObjects.Clear();
             }
         }
 
@@ -1100,6 +1103,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // the last state is the current state:
                 undoStackLastProject = project.Clone();
+
+                // reset the current selection as those objects no longer exist.
+                selectedObjects.Clear();
             }
         }
 
