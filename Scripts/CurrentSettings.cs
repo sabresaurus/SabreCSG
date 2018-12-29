@@ -38,6 +38,8 @@ namespace Sabresaurus.SabreCSG
     {
         private bool brushesHidden = false;
         private bool meshHidden = false;
+        private bool snapSelectionToCurrentGrid;
+        private bool alwaysSnapToCurrentGrid;
         private Material foregroundMaterial;
 
         private static CurrentSettings instance = null;
@@ -148,6 +150,12 @@ namespace Sabresaurus.SabreCSG
             set
             {
                 PlayerPrefs.SetInt(KEY_PREFIX + "ShowBrushesAsWireframes", value ? 1 : 0);
+                float faceToggle = value ? 0.0f : 1.0f;
+                SabreCSGResources.GetAddMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_FaceToggle", faceToggle);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_FaceToggle", faceToggle);
             }
         }
 
@@ -214,6 +222,24 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static bool ProjectedGridEnabled
+        {
+            get
+            {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "ProjectedGridEnabled", 0) != 0;
+            }
+            set
+            {
+                PlayerPrefs.SetInt(KEY_PREFIX + "ProjectedGridEnabled", value ? 1 : 0);
+                float gridToggle = value ? 1.0f : 0.0f;
+                SabreCSGResources.GetAddMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetSubtractMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetVolumeMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridToggle", gridToggle);
+                SabreCSGResources.GetCollisionMaterial().SetFloat("_GridToggle", gridToggle);
+            }
+        }
+
         public static GridMode GridMode
         {
             get
@@ -237,6 +263,11 @@ namespace Sabresaurus.SabreCSG
         public static void ChangePosSnapDistance(float multiplier)
         {
             PositionSnapDistance *= multiplier;
+            SabreCSGResources.GetAddMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetSubtractMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetVolumeMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetNoCSGMaterial().SetFloat("_GridSize", PositionSnapDistance);
+            SabreCSGResources.GetCollisionMaterial().SetFloat("_GridSize", PositionSnapDistance);
         }
 
         public static void ChangeAngSnapDistance(float multiplier)
@@ -330,6 +361,15 @@ namespace Sabresaurus.SabreCSG
                 // Occassionally have experienced issues where camera locks up, resetting the Tools class seems to fix it
                 Tools.viewTool = ViewTool.None;
                 Tools.current = UnityEditor.Tool.None;
+            }
+        }
+
+        public static bool AlwaysSnapToCurrentGrid {
+            get {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid") == 1;
+            }
+            set {
+                PlayerPrefs.SetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid", value ? 1 : 0);
             }
         }
     }

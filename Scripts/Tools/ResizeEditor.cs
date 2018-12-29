@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 
 using UnityEngine;
-using System.Collections;
 using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
@@ -28,7 +27,11 @@ namespace Sabresaurus.SabreCSG
         private ResizeHandlePair? hoveredResizeHandlePair = null;
         private int hoveredResizePointIndex = -1; // -1 is unset, 0 is Point1, 1 is Point2
 
-        private Vector3 dotOffset3;
+        /// <summary>
+        /// The delta of the translation delta (damn right, delta delta!) when moving the brush selection
+        /// between the raw position and the position snapped to the current grid
+        /// </summary>
+        private Vector3 translationDeltaSnappingOffset;
 
         private float fullDeltaAngle = 0;
         private float unroundedDeltaAngle = 0;
@@ -68,6 +71,8 @@ namespace Sabresaurus.SabreCSG
 
         private Vector2 marqueeStart;
         private Vector2 marqueeEnd;
+
+        private bool inverseSnapSelectionToCurrentGridLogic = false;
 
         private ResizeHandlePair[] resizeHandlePairs = new ResizeHandlePair[]
         {
@@ -368,6 +373,18 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
+            if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.SnapSelectionToCurrentGrid)))
+            {
+                if (e.type == EventType.KeyDown)
+                {
+                    inverseSnapSelectionToCurrentGridLogic = true;
+                }
+                else
+                {
+                    inverseSnapSelectionToCurrentGridLogic = false;
+                }
+            }
+
             if (!CameraPanInProgress)
             {
                 // check for vertex snapping in translate mode.
@@ -599,7 +616,7 @@ namespace Sabresaurus.SabreCSG
                 else
                 {
                     // Resize
-                    dotOffset3 = Vector3.zero;
+                    translationDeltaSnappingOffset = Vector3.zero;
 
                     Vector2 mousePosition = e.mousePosition;
 
@@ -803,14 +820,10 @@ namespace Sabresaurus.SabreCSG
             Ray lastRay = Camera.current.ScreenPointToRay(EditorHelper.ConvertMousePointPosition(lastPosition));
 
             Ray currentRay = Camera.current.ScreenPointToRay(EditorHelper.ConvertMousePointPosition(currentPosition));
-
-            //			Bounds bounds = GetBounds();
-
-            Vector3 offset = primaryTargetBrushTransform.position;
-            //			if(Tools.pivotMode == PivotMode.Center && Tools.pivotRotation == PivotRotation.Global)
-            //			{
-            //				offset = GetBounds().center;
-            //			}
+            Bounds bounds = GetBounds();
+            // we use the current AABBs center as offset. it's more correct than the primary brushes transform.
+            // especially when dealing with selections of multiple brushes
+            Vector3 offset = TransformPoint(bounds.center);
 
             Vector3 lineStart = offset + TransformDirection(selectedResizeHandlePair.Value.point1);
             Vector3 lineEnd = offset + TransformDirection(selectedResizeHandlePair.Value.point2);
@@ -833,53 +846,69 @@ namespace Sabresaurus.SabreCSG
             {
                 direction = -direction;
             }
-
+            
             Vector3 deltaWorld = (currentPositionWorld - lastPositionWorld);
             // Rescaling logic deals with local space changes, convert to that space
             Vector3 deltaLocal = InverseTransformDirection(deltaWorld);
 
-            Vector3 dot3 = Vector3.zero;
+            Vector3 translationDelta = Vector3.zero;
             if (direction.x != 0)
             {
-                dot3.x = Vector3.Dot(deltaLocal, new Vector3(Mathf.Sign(direction.x), 0, 0));
+                translationDelta.x = Vector3.Dot(deltaLocal, new Vector3(Mathf.Sign(direction.x), 0, 0));
             }
             if (direction.y != 0)
             {
-                dot3.y = Vector3.Dot(deltaLocal, new Vector3(0, Mathf.Sign(direction.y), 0));
+                translationDelta.y = Vector3.Dot(deltaLocal, new Vector3(0, Mathf.Sign(direction.y), 0));
             }
             if (direction.z != 0)
             {
-                dot3.z = Vector3.Dot(deltaLocal, new Vector3(0, 0, Mathf.Sign(direction.z)));
+                translationDelta.z = Vector3.Dot(deltaLocal, new Vector3(0, 0, Mathf.Sign(direction.z)));
             }
 
-            float snapDistance = CurrentSettings.PositionSnapDistance;
+//            float snapDistance = CurrentSettings.PositionSnapDistance;
 
             if (CurrentSettings.PositionSnappingEnabled)
             {
-                // Snapping's dot uses an offset to track deltas that would be lost otherwise due to snapping
-                dot3 += dotOffset3;
+                float snapDistance = CurrentSettings.PositionSnapDistance;
 
-                Vector3 roundedDot3 = MathHelper.RoundVector3(dot3, snapDistance);
-                dotOffset3 = dot3 - roundedDot3;
-                dot3 = roundedDot3;
+                Vector3 snapDistanceOffset = Vector3.zero;
+
+                if (CurrentSettings.AlwaysSnapToCurrentGrid != inverseSnapSelectionToCurrentGridLogic) {
+                    // find the point we're dragging - that's the bounding box side or corner, if you will.
+                    Vector3 offsetReferencePoint = offset + direction.Multiply(bounds.extents);
+                    // snap it to the global grid
+                    Vector3 snappedOffsetReferencePoint = MathHelper.RoundVector3(offsetReferencePoint, snapDistance);
+                    // get the delta between real and snap position. We gonna apply apply that to the snapped translation delta
+                    // to account for the fact that the face might be snapped to a smaller grid currently.
+                    // with this extra offset we will "re-snap" the face to the current grid
+                    snapDistanceOffset = offsetReferencePoint - snappedOffsetReferencePoint;
+                }
+                
+                // Snapping's dot uses an offset to track deltas that would be lost otherwise due to snapping
+                translationDelta += translationDeltaSnappingOffset;
+
+                Vector3 snappedTranslationDelta = MathHelper.RoundVector3(translationDelta, snapDistance);
+                translationDeltaSnappingOffset = translationDelta - snappedTranslationDelta;
+                snappedTranslationDelta -= snapDistanceOffset;
+                translationDelta = snappedTranslationDelta;
             }
 
             if (EnumHelper.IsFlagSet(e.modifiers, EventModifiers.Control))
             {
                 Undo.RecordObjects(targetBrushTransforms, "Move brush(es)");
-                dot3 = TransformDirection(dot3);
+                translationDelta = TransformDirection(translationDelta);
                 if (selectedResizePointIndex == 1)
                 {
-                    dot3 = -dot3;
+                    translationDelta = -translationDelta;
                 }
 
-                TranslateBrushes(dot3);
+                TranslateBrushes(translationDelta);
             }
             else
             {
                 if (GetIsValidToResize())
                 {
-                    RescaleBrush(direction, dot3);
+                    RescaleBrush(direction, translationDelta);
                 }
             }
         }

@@ -144,7 +144,7 @@ namespace Sabresaurus.SabreCSG
 							continue;
 						}
 
-						Plane polygonPlane = polygon.CachedPlaneTest;
+						Plane polygonPlane = polygon.Plane;
 
 						// Determine if any of the split planes this chunk has been split against match any of those
 						// subtraction polygons
@@ -160,7 +160,7 @@ namespace Sabresaurus.SabreCSG
 								continue;
 							}
 
-							splitPlane = polygons[i].CachedPlaneTest;
+							splitPlane = polygons[i].Plane;
 
 							if(MathHelper.PlaneEqualsLooserWithFlip(polygonPlane,splitPlane))
 							{
