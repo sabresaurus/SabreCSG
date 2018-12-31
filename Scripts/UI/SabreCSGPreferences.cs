@@ -35,7 +35,26 @@ namespace Sabresaurus.SabreCSG
             PreferencesGUI();
         }
 
+#if UNITY_2018_3_OR_NEWER
+        [SettingsProvider]
+        public static SettingsProvider PreferencesGUI_SP()
+        {
+            SettingsProvider provider = new SettingsProvider( "SabreCSG", SettingsScope.User )
+            {
+                label = "SabreCSG",
+                guiHandler = ( searchContext ) =>
+                {
+                    PreferencesGUI();
+                },
+
+                keywords = new HashSet<string>( new[] { "CSG", "SabreCSG", "Sabre" } )
+            };
+
+            return provider;
+        }
+#else
         [PreferenceItem("SabreCSG")]
+#endif
         public static void PreferencesGUI()
         {
             //			Event.current.GetTypeForControl
