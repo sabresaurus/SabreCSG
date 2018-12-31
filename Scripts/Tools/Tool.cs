@@ -65,7 +65,7 @@ namespace Sabresaurus.SabreCSG
 
 			// Make sure it's not null and that it isn't a prefab in the project
 			if(selectedGameObject != null
-#if UNITY_2018_2_OR_NEWER || UNITY_2018_3
+#if UNITY_2018_2_OR_NEWER
 				&& !(PrefabUtility.GetCorrespondingObjectFromSource(selectedGameObject) == null
 #else
                 && !(PrefabUtility.GetPrefabParent(selectedGameObject) == null
