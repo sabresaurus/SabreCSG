@@ -1036,7 +1036,7 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < Selection.gameObjects.Length; i++)
             {
                 // Skip any selected prefabs in the project window
-#if UNITY_2018_2 || UNITY_2018_3
+#if UNITY_2018_2_OR_NEWER
 				if(PrefabUtility.GetCorrespondingObjectFromSource(Selection.gameObjects[i]) == null
 #else
                 if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
