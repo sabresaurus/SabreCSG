@@ -415,6 +415,7 @@ namespace Sabresaurus.SabreCSG
 		static void OnViewMenuGUI(int windowID) {
 
 			float left_pad = 90f;
+			EditorGUIUtility.labelWidth = 118f;
 
 			GUILayout.Space(4);
 
@@ -424,10 +425,11 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Hide Brushes", "Hotkey: "+KeyMappings.Instance.ToggleBrushesHidden), EditorStyles.label);
-			GUILayout.FlexibleSpace();
 			bool lastBrushesHidden = CurrentSettings.BrushesHidden;
-            CurrentSettings.BrushesHidden = GUILayout.Toggle(CurrentSettings.BrushesHidden, "", GUILayout.Width(left_pad));
+            CurrentSettings.BrushesHidden = EditorGUILayout.Toggle(
+				new GUIContent("Hide Brushes", "Hotkey: "+KeyMappings.Instance.ToggleBrushesHidden),
+				CurrentSettings.BrushesHidden
+			);
             if (CurrentSettings.BrushesHidden != lastBrushesHidden)
             {
                 // Has changed
@@ -436,19 +438,14 @@ namespace Sabresaurus.SabreCSG
             }
 			GUILayout.EndHorizontal();
 
-
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Hide Meshes", EditorStyles.label);
-			GUILayout.FlexibleSpace();
 			bool lastMeshHidden = CurrentSettings.MeshHidden;
-			CurrentSettings.MeshHidden = GUILayout.Toggle(CurrentSettings.MeshHidden, "", GUILayout.Width(left_pad));
+			CurrentSettings.MeshHidden = EditorGUILayout.Toggle("Hide Meshes", CurrentSettings.MeshHidden);
 			if (CurrentSettings.MeshHidden != lastMeshHidden)
 			{
 				// Has changed
                 CSGModel.UpdateAllBrushesVisibility();
 				SceneView.RepaintAll();
 			}
-			GUILayout.EndHorizontal();
 
 			GUILayout.Space(10);
 
@@ -469,11 +466,11 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 
 			// Projected grid
-			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Projected Grid", "Hotkey: "+KeyMappings.Instance.ToggleProjectedGrid.Replace("#", "Shift+")), EditorStyles.label);
-			GUILayout.FlexibleSpace();
             bool lastProjectedGridEnabled = CurrentSettings.ProjectedGridEnabled;
-            CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, "", GUILayout.Width(left_pad));
+            CurrentSettings.ProjectedGridEnabled = EditorGUILayout.Toggle(
+				new GUIContent("Projected Grid", "Hotkey: "+KeyMappings.Instance.ToggleProjectedGrid.Replace("#", "Shift+")),
+				CurrentSettings.ProjectedGridEnabled
+			);
             if (CurrentSettings.ProjectedGridEnabled != lastProjectedGridEnabled)
             {
                 SceneView.RepaintAll();
@@ -483,21 +480,18 @@ namespace Sabresaurus.SabreCSG
 				gridRect = GUILayoutUtility.GetLastRect();
 				gridRect.width = 100;
 			}
-			GUILayout.EndHorizontal();
 
 			// Position snapping UI
-			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Grid snapping", "Hotkey: "+KeyMappings.Instance.TogglePosSnapping.Replace("#", "Shift+")), EditorStyles.label);
-			GUILayout.FlexibleSpace();
-			CurrentSettings.PositionSnappingEnabled = GUILayout.Toggle(CurrentSettings.PositionSnappingEnabled, "", GUILayout.Width(left_pad));
-			GUILayout.EndHorizontal();
+			CurrentSettings.PositionSnappingEnabled = EditorGUILayout.Toggle(
+				new GUIContent("Grid snapping", "Hotkey: "+KeyMappings.Instance.TogglePosSnapping.Replace("#", "Shift+")),
+				CurrentSettings.PositionSnappingEnabled
+			);
 
 			// Position snapping UI
-			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Rotation snapping", "Hotkey: "+KeyMappings.Instance.ToggleAngSnapping.Replace("#", "Shift+")), EditorStyles.label);
-			GUILayout.FlexibleSpace();
-			CurrentSettings.AngleSnappingEnabled = GUILayout.Toggle(CurrentSettings.AngleSnappingEnabled, "", GUILayout.Width(left_pad));
-			GUILayout.EndHorizontal();
+			CurrentSettings.AngleSnappingEnabled = EditorGUILayout.Toggle(
+				new GUIContent("Rotation snapping", "Hotkey: "+KeyMappings.Instance.ToggleAngSnapping.Replace("#", "Shift+")),
+				CurrentSettings.AngleSnappingEnabled
+			);
 
 			// Rotation snapping UI
 			GUILayout.BeginHorizontal();
@@ -541,6 +535,8 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 			GUILayout.BeginHorizontal();
+
+			EditorGUIUtility.labelWidth = 58f;
 
 			GUILayout.Label ("Mode", EditorStyles.label);
 
@@ -614,12 +610,7 @@ namespace Sabresaurus.SabreCSG
 			// 		allVolumes = false;
 			// 	}
 			// }
-
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Collision", EditorStyles.label);
-			GUILayout.FlexibleSpace();
-			bool newHasCollision = GUILayout.Toggle(hasCollision, "", GUILayout.Width(60));
-			GUILayout.EndHorizontal();
+			bool newHasCollision = EditorGUILayout.Toggle("Collision", hasCollision);
 
 			if(newHasCollision != hasCollision)
 			{
@@ -638,11 +629,7 @@ namespace Sabresaurus.SabreCSG
 			bool[] visibleStates = selectedBrushes.Select(item => item.IsVisible).Distinct().ToArray();
 			bool isVisible = (visibleStates.Length == 1) ? visibleStates[0] : false;
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Visible", EditorStyles.label);
-			GUILayout.FlexibleSpace();
-			bool newIsVisible = GUILayout.Toggle(isVisible, "", GUILayout.Width(60));
-			GUILayout.EndHorizontal();
+			bool newIsVisible = EditorGUILayout.Toggle("Visible", isVisible);
 
 			if(newIsVisible != isVisible)
 			{
@@ -668,8 +655,20 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.FlexibleSpace();
 
 			string[] flipToolbarStrings = {"X","Y","Z"};
-			int flipIndex = GUILayout.Toolbar(-1, flipToolbarStrings, EditorStyles.miniButton, GUILayout.Width(60));
-
+			int flipIndex = -1;
+            if(GUILayout.Button("X", EditorStyles.miniButtonLeft, GUILayout.Width(20)))
+            {
+                flipIndex = 0;
+            }
+            if (GUILayout.Button("Y", EditorStyles.miniButtonMid, GUILayout.Width(20)))
+            {
+                flipIndex = 1;
+            }
+            if (GUILayout.Button("Z", EditorStyles.miniButtonRight, GUILayout.Width(20)))
+            {
+                flipIndex = 2;
+            }
+			
 			if (flipIndex != -1)
             {	
                 Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
