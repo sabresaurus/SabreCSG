@@ -669,28 +669,15 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.Label("Flip");
 			GUILayout.FlexibleSpace();
 
-			if (GUILayout.Button("X", EditorStyles.miniButton))
+			string[] flipToolbarStrings = {"X","Y","Z"};
+			int flipIndex = GUILayout.Toolbar(-1, flipToolbarStrings, EditorStyles.miniButton, GUILayout.Width(60));
+
+			if (flipIndex != -1)
             {	
                 Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
 
                 bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 0, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
-            }
-
-			if (GUILayout.Button("Y", EditorStyles.miniButton))
-            {	
-                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 1, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
-            }
-
-			if (GUILayout.Button("Z", EditorStyles.miniButton))
-            {	
-                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 2, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
+                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), flipIndex, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
             }
 
 			GUILayout.EndHorizontal();
