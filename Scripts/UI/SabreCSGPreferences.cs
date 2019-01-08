@@ -99,7 +99,7 @@ namespace Sabresaurus.SabreCSG
             }
 
             EditorGUI.BeginChangeCheck();
-            CurrentSettings.BrushFacesHidden = GUILayout.Toggle(CurrentSettings.BrushFacesHidden, "Show brushes faces");
+            CurrentSettings.ShowBrushesAsWireframes = GUILayout.Toggle(CurrentSettings.ShowBrushesAsWireframes, "Show brushes as wireframes");
             if (EditorGUI.EndChangeCheck())
             {
                 // What's shown in the SceneView has potentially changed, so force it to repaint
