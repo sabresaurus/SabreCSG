@@ -417,7 +417,7 @@ namespace Sabresaurus.SabreCSG
 			float left_pad = 90f;
 
 			GUILayout.Space(4);
-			GUIStyle labelStyle = SabreGUILayout.GetLabelStyle();
+			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
 
 			GUILayout.BeginHorizontal();
 			labelStyle.fontStyle = FontStyle.Bold;
@@ -535,7 +535,7 @@ namespace Sabresaurus.SabreCSG
 		}
 
 		static void OnBrushSettingsGUI(int windowID) {
-			GUIStyle labelStyle = SabreGUILayout.GetLabelStyle();
+			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
 
 			GUILayout.BeginHorizontal();
 			labelStyle.fontStyle = FontStyle.Bold;
@@ -724,9 +724,11 @@ namespace Sabresaurus.SabreCSG
 			GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
 			createBrushStyle.fixedHeight = 20;
 
+			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
+			labelStyle.fontStyle = FontStyle.Bold;
+
 			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label("Create primitive");
+			GUILayout.Label("Create primitive", labelStyle);
 			GUILayout.FlexibleSpace();
 
 			GUILayout.EndHorizontal();
