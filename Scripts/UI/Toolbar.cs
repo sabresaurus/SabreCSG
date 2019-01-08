@@ -441,6 +441,8 @@ namespace Sabresaurus.SabreCSG
 				}
                 if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
                 {
+					GUILayout.Space(10);
+
 					CSGMode brushMode = (CSGMode)EditorGUILayout.EnumPopup(primaryBrush.Mode, EditorStyles.toolbarPopup, GUILayout.Width(80));
 					if(brushMode != primaryBrush.Mode)
 					{
@@ -568,17 +570,6 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			GUILayout.FlexibleSpace();
-
-			if (SabreGUILayout.Button("Prefs"))
-			{
-				SabreCSGPreferences.CreateAndShow();
-			}
-
-			if (SabreGUILayout.Button("Disable"))
-			{
-				Selection.activeGameObject = null;
-				csgModel.EditMode = false;
-			}
 
             GUILayout.EndHorizontal();
         }
