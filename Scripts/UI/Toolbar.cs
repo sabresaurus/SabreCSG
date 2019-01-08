@@ -13,6 +13,17 @@ namespace Sabresaurus.SabreCSG
         public const int BOTTOM_TOOLBAR_HEIGHT = 40;
 		public const int PRIMITIVE_MENU_WIDTH = 200;
 		public const int PRIMITIVE_MENU_HEIGHT = 70;
+		public const int BRUSH_MENU_WIDTH = 120;
+		public const int BRUSH_MENU_HEIGHT = 91;
+
+		static BrushBase primaryBrush;
+		static List<BrushBase> selectedBrushes;
+		static string[] brushModeSettings = new string[] {
+			"Add",
+			"Subtract",
+			"Volume",
+			"NoCSG"
+		};
 
         static CSGModel csgModel;
 
@@ -59,16 +70,48 @@ namespace Sabresaurus.SabreCSG
             GUIStyle style = new GUIStyle(EditorStyles.toolbar);
 
             style.fixedHeight = BOTTOM_TOOLBAR_HEIGHT;
-			GUILayout.Window(140003, rectangle, OnBottomToolbarGUI, "", style);//, EditorStyles.textField);
+			GUILayout.Window(140003, rectangle, OnBottomToolbarGUI, "", style);
 
-			Rect primitiveMenuRect = new Rect(
-				0, 
-				(sceneView.position.height - BOTTOM_TOOLBAR_HEIGHT) - PRIMITIVE_MENU_HEIGHT, 
-				PRIMITIVE_MENU_WIDTH,
-				PRIMITIVE_MENU_HEIGHT
-			);
+			// Brush menu
+			if (Selection.activeGameObject != null)
+            {
+				style = new GUIStyle(EditorStyles.toolbar);
+				primaryBrush = Selection.activeGameObject.GetComponent<BrushBase>();
+				selectedBrushes = new List<BrushBase>();
+				for (int i = 0; i < Selection.gameObjects.Length; i++) 
+				{
+					BrushBase brush = Selection.gameObjects[i].GetComponent<BrushBase>();
+					if (brush != null)
+					{
+						selectedBrushes.Add(brush);
+					}
+				}
+                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
+                {
+					Rect brushMenuRect = new Rect(
+						0, 
+						(sceneView.position.height - BOTTOM_TOOLBAR_HEIGHT) - BRUSH_MENU_HEIGHT, 
+						BRUSH_MENU_WIDTH,
+						BRUSH_MENU_HEIGHT
+					);
+					style.fixedWidth = BRUSH_MENU_WIDTH;
+					style.fixedHeight = BRUSH_MENU_HEIGHT;
+					GUILayout.Window(140008, brushMenuRect, OnBrushSettingsGUI, "", style);
+
+					// Don't show the primitive menu at the same time as brush menu, since they will overlap
+					primitiveMenuShowing = false;
+				}
+			}
 
 			if (primitiveMenuShowing) {
+				style = new GUIStyle(EditorStyles.toolbar);
+				Rect primitiveMenuRect = new Rect(
+					0, 
+					(sceneView.position.height - BOTTOM_TOOLBAR_HEIGHT) - PRIMITIVE_MENU_HEIGHT, 
+					PRIMITIVE_MENU_WIDTH,
+					PRIMITIVE_MENU_HEIGHT
+				);
+
 				style.fixedHeight = PRIMITIVE_MENU_HEIGHT;
 				GUILayout.Window(140006, primitiveMenuRect, OnPrimitiveMenuGUI, "", style);
 			}
@@ -268,6 +311,145 @@ namespace Sabresaurus.SabreCSG
 				CurrentSettings.GridMode = (GridMode)userData;
 				GridManager.UpdateGrid();
 			}
+		}
+
+		static void OnBrushSettingsGUI(int windowID) {
+			GUIStyle labelStyle = SabreGUILayout.GetLabelStyle();
+
+			GUILayout.BeginHorizontal();
+			labelStyle.fontStyle = FontStyle.Bold;
+			GUILayout.Label("Brush Settings", labelStyle);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+			GUILayout.BeginHorizontal();
+
+			GUILayout.Label ("Mode");
+
+			GUILayout.FlexibleSpace();
+
+			string currentBrushMode = "";
+			if (primaryBrush.IsNoCSG) {
+				currentBrushMode = "NoCSG";
+			} else {
+				currentBrushMode = primaryBrush.Mode.ToString();
+			}
+			int currentModeIndex = Array.IndexOf(brushModeSettings, currentBrushMode);
+
+			string brushMode = brushModeSettings[EditorGUILayout.Popup("", currentModeIndex, brushModeSettings, GUILayout.Width(60))]; 
+			if(brushMode != currentBrushMode)
+			{
+				bool anyChanged = false;
+
+				foreach (BrushBase brush in selectedBrushes) 
+				{
+					Undo.RecordObject(brush, "Change Brush To " + brushMode);
+
+					switch (brushMode) {
+						case "Add":
+							brush.Mode = CSGMode.Add;
+							brush.IsNoCSG = false;
+							break;
+						case "Subtract":
+							brush.Mode = CSGMode.Subtract;
+							brush.IsNoCSG = false;
+							break;
+						case "Volume":
+							brush.Mode = CSGMode.Volume;
+							brush.IsNoCSG = false;
+							break;
+						case "NoCSG":
+							// Volume overrides NoCSG, so it must be changed if you select NoCSG
+							if (brush.Mode == CSGMode.Volume) { 
+								brush.Mode = CSGMode.Add;
+							}
+							brush.IsNoCSG = true;
+							break;
+					}
+					anyChanged = true;
+				}
+				if(anyChanged)
+				{
+					// Need to update the icon for the csg mode in the hierarchy
+					EditorApplication.RepaintHierarchyWindow();
+
+					foreach (BrushBase b in selectedBrushes) 
+					{
+						b.Invalidate(true);
+					}
+				}
+			}
+
+			GUILayout.EndHorizontal();
+
+			bool[] collisionStates = selectedBrushes.Select(item => item.HasCollision).Distinct().ToArray();
+			bool hasCollision = (collisionStates.Length == 1) ? collisionStates[0] : false;
+
+			GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
+
+			// TODO: If the brushes are all volumes, the collision and visible checkboxes should be disabled
+
+			// bool allVolumes = true;
+			// foreach (BrushBase brush in selectedBrushes) 
+			// {
+			// 	if (brush.Mode != CSGMode.Volume) {
+			// 		allVolumes = false;
+			// 	}
+			// }
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Collision");
+			GUILayout.FlexibleSpace();
+			bool newHasCollision = GUILayout.Toggle(hasCollision, "");
+			GUILayout.EndHorizontal();
+
+			if(newHasCollision != hasCollision)
+			{
+				foreach (BrushBase brush in selectedBrushes) 
+				{
+					Undo.RecordObject(brush, "Change Brush Collision Mode");
+					brush.HasCollision = newHasCollision;
+				}
+				// Tell the brushes that they have changed and need to recalc intersections
+				foreach (BrushBase brush in selectedBrushes) 
+				{
+					brush.Invalidate(true);
+				}
+			}
+
+			bool[] visibleStates = selectedBrushes.Select(item => item.IsVisible).Distinct().ToArray();
+			bool isVisible = (visibleStates.Length == 1) ? visibleStates[0] : false;
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Visible");
+			GUILayout.FlexibleSpace();
+			bool newIsVisible = GUILayout.Toggle(isVisible, "");
+			GUILayout.EndHorizontal();
+
+			if(newIsVisible != isVisible)
+			{
+				foreach (BrushBase brush in selectedBrushes) 
+				{
+					Undo.RecordObject(brush, "Change Brush Visible Mode");
+					brush.IsVisible = newIsVisible;
+				}
+				// Tell the brushes that they have changed and need to recalc intersections
+				foreach (BrushBase brush in selectedBrushes) 
+				{
+					brush.Invalidate(true);
+				}
+				if(newIsVisible == false)
+				{
+					csgModel.NotifyPolygonsRemoved();
+				}
+			}
+
+			GUILayout.BeginHorizontal();
+			labelStyle.fontStyle = FontStyle.Normal;
+			labelStyle.fontSize = 9;
+			GUILayout.FlexibleSpace();
+			GUILayout.Label(selectedBrushes.Count + " selected", labelStyle);
+			GUILayout.EndHorizontal();
+
 		}
 
 		static void OnPrimitiveMenuGUI(int windowID) {
@@ -484,105 +666,6 @@ namespace Sabresaurus.SabreCSG
 
             // Line Two
             GUILayout.BeginHorizontal();
-
-            if (Selection.activeGameObject != null)
-            {
-				BrushBase primaryBrush = Selection.activeGameObject.GetComponent<BrushBase>();
-				List<BrushBase> brushes = new List<BrushBase>();
-				for (int i = 0; i < Selection.gameObjects.Length; i++) 
-				{
-					BrushBase brush = Selection.gameObjects[i].GetComponent<BrushBase>();
-					if (brush != null)
-					{
-						brushes.Add(brush);
-					}
-				}
-                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
-                {
-
-					CSGMode brushMode = (CSGMode)EditorGUILayout.EnumPopup(primaryBrush.Mode, EditorStyles.toolbarPopup, GUILayout.Width(80));
-					if(brushMode != primaryBrush.Mode)
-					{
-						bool anyChanged = false;
-
-						foreach (BrushBase brush in brushes) 
-						{
-							Undo.RecordObject(brush, "Change Brush To " + brushMode);
-							brush.Mode = brushMode;
-							anyChanged = true;
-						}
-						if(anyChanged)
-						{
-							// Need to update the icon for the csg mode in the hierarchy
-							EditorApplication.RepaintHierarchyWindow();
-						}
-					}
-
-
-					bool[] noCSGStates = brushes.Select(brush => brush.IsNoCSG).Distinct().ToArray();
-					bool isNoCSG = (noCSGStates.Length == 1) ? noCSGStates[0] : false;
-
-					bool newIsNoCSG = SabreGUILayout.ToggleMixed(noCSGStates, "NoCSG", GUILayout.Width(53));
-
-
-					bool[] collisionStates = brushes.Select(item => item.HasCollision).Distinct().ToArray();
-					bool hasCollision = (collisionStates.Length == 1) ? collisionStates[0] : false;
-
-					bool newHasCollision = SabreGUILayout.ToggleMixed(collisionStates, "Collision", GUILayout.Width(53));
-
-
-					bool[] visibleStates = brushes.Select(item => item.IsVisible).Distinct().ToArray();
-					bool isVisible = (visibleStates.Length == 1) ? visibleStates[0] : false;
-
-					bool newIsVisible = SabreGUILayout.ToggleMixed(visibleStates, "Visible", GUILayout.Width(53));
-
-					if(newIsNoCSG != isNoCSG)
-					{
-						foreach (BrushBase brush in brushes) 
-						{
-							Undo.RecordObject(brush, "Change Brush NoCSG Mode");
-							brush.IsNoCSG = newIsNoCSG;						
-						}
-						// Tell the brushes that they have changed and need to recalc intersections
-						foreach (BrushBase brush in brushes) 
-						{
-							brush.Invalidate(true);
-						}
-
-						EditorApplication.RepaintHierarchyWindow();
-					}
-					if(newHasCollision != hasCollision)
-					{
-						foreach (BrushBase brush in brushes) 
-						{
-							Undo.RecordObject(brush, "Change Brush Collision Mode");
-							brush.HasCollision = newHasCollision;
-						}
-						// Tell the brushes that they have changed and need to recalc intersections
-						foreach (BrushBase brush in brushes) 
-						{
-							brush.Invalidate(true);
-						}
-					}
-					if(newIsVisible != isVisible)
-					{
-						foreach (BrushBase brush in brushes) 
-						{
-							Undo.RecordObject(brush, "Change Brush Visible Mode");
-							brush.IsVisible = newIsVisible;
-						}
-						// Tell the brushes that they have changed and need to recalc intersections
-						foreach (BrushBase brush in brushes) 
-						{
-							brush.Invalidate(true);
-						}
-						if(newIsVisible == false)
-						{
-							csgModel.NotifyPolygonsRemoved();
-						}
-					}
-                }
-            }
 
 			// Position snapping UI
 			CurrentSettings.PositionSnappingEnabled = SabreGUILayout.Toggle(CurrentSettings.PositionSnappingEnabled, "Pos Snapping");
