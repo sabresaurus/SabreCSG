@@ -95,7 +95,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.Window(140003, rectangle, OnBottomToolbarGUI, "", style);
 
 			// Brush menu
-			if (Selection.activeGameObject != null)
+			if (CurrentSettings.CurrentMode == MainMode.Resize && Selection.activeGameObject != null)
             {
 				style = new GUIStyle(EditorStyles.toolbar);
 				primaryBrush = Selection.activeGameObject.GetComponent<BrushBase>();
