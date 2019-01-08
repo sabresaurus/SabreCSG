@@ -426,7 +426,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Hide Brushes");
+			GUILayout.Label(new GUIContent("Hide Brushes", "Hotkey: "+KeyMappings.Instance.ToggleBrushesHidden));
 			GUILayout.FlexibleSpace();
 			bool lastBrushesHidden = CurrentSettings.BrushesHidden;
             CurrentSettings.BrushesHidden = GUILayout.Toggle(CurrentSettings.BrushesHidden, "", GUILayout.Width(left_pad));
@@ -472,7 +472,7 @@ namespace Sabresaurus.SabreCSG
 
 			// Projected grid
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Projected Grid");
+			GUILayout.Label(new GUIContent("Projected Grid", "Hotkey: "+KeyMappings.Instance.ToggleProjectedGrid.Replace("#", "Shift+")));
 			GUILayout.FlexibleSpace();
             bool lastProjectedGridEnabled = CurrentSettings.ProjectedGridEnabled;
             CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, "", GUILayout.Width(left_pad));
@@ -489,21 +489,24 @@ namespace Sabresaurus.SabreCSG
 
 			// Position snapping UI
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Grid snapping");
+			GUILayout.Label(new GUIContent("Grid snapping", "Hotkey: "+KeyMappings.Instance.TogglePosSnapping.Replace("#", "Shift+")));
 			GUILayout.FlexibleSpace();
 			CurrentSettings.PositionSnappingEnabled = GUILayout.Toggle(CurrentSettings.PositionSnappingEnabled, "", GUILayout.Width(left_pad));
 			GUILayout.EndHorizontal();
 
 			// Position snapping UI
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Rotation snapping");
+			GUILayout.Label(new GUIContent("Rotation snapping", "Hotkey: "+KeyMappings.Instance.ToggleAngSnapping.Replace("#", "Shift+")));
 			GUILayout.FlexibleSpace();
 			CurrentSettings.AngleSnappingEnabled = GUILayout.Toggle(CurrentSettings.AngleSnappingEnabled, "", GUILayout.Width(left_pad));
 			GUILayout.EndHorizontal();
 
 			// Rotation snapping UI
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Snap angle");
+			GUILayout.Label(new GUIContent(
+				"Rotation size",
+				"Hotkeys: " + KeyMappings.Instance.DecreaseAngSnapping.Replace("#", "Shift+") + "  " + KeyMappings.Instance.IncreaseAngSnapping.Replace("#", "Shift+")
+			));
 			GUILayout.FlexibleSpace();
 
 			// CurrentSettings.AngleSnappingEnabled = SabreGUILayout.Toggle(CurrentSettings.AngleSnappingEnabled, "Ang Snapping");
