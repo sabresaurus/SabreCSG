@@ -425,11 +425,7 @@ namespace Sabresaurus.SabreCSG
 				menu.DropDown(new Rect(60,createBrushStyle.fixedHeight, 100, createBrushStyle.fixedHeight));
 			}
 
-			GUILayout.Space(122 + 30);
-
-			// Display brush count
-			GUILayout.Label(csgModel.BrushCount.ToStringWithSuffix(" brush", " brushes"), SabreGUILayout.GetLabelStyle());
-//			CurrentSettings.GridMode = (GridMode)EditorGUILayout.EnumPopup(CurrentSettings.GridMode, EditorStyles.toolbarPopup, GUILayout.Width(80));
+			GUILayout.Space(122 + 20);
 
             if (Selection.activeGameObject != null)
             {

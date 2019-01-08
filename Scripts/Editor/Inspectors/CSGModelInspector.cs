@@ -295,6 +295,7 @@ namespace Sabresaurus.SabreCSG
             {
                 BuildMetrics buildMetrics = csgModel.BuildMetrics;
 
+                GUILayout.Label("Brushes: " + csgModel.BrushCount);
                 GUILayout.Label("Vertices: " + buildMetrics.TotalVertices);
                 GUILayout.Label("Triangles: " + buildMetrics.TotalTriangles);
                 GUILayout.Label("Meshes: " + buildMetrics.TotalMeshes);
