@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG
 		public const int PRIMITIVE_MENU_WIDTH = 200;
 		public const int PRIMITIVE_MENU_HEIGHT = 70;
 		public const int BRUSH_MENU_WIDTH = 130;
-		public const int BRUSH_MENU_HEIGHT = 122;
+		public const int BRUSH_MENU_HEIGHT = 132;
 		public const int VIEW_MENU_WIDTH = 220;
 		public const int VIEW_MENU_HEIGHT = 180;
 
@@ -417,11 +417,9 @@ namespace Sabresaurus.SabreCSG
 			float left_pad = 90f;
 
 			GUILayout.Space(4);
-			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
 
 			GUILayout.BeginHorizontal();
-			labelStyle.fontStyle = FontStyle.Bold;
-			GUILayout.Label("Viewport Settings", labelStyle);
+			GUILayout.Label("Viewport Settings", EditorStyles.boldLabel);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
@@ -455,7 +453,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.Space(10);
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Grid Settings", labelStyle);
+			GUILayout.Label("Grid Settings", EditorStyles.boldLabel);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 
@@ -538,11 +536,8 @@ namespace Sabresaurus.SabreCSG
 		}
 
 		static void OnBrushSettingsGUI(int windowID) {
-			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
-
 			GUILayout.BeginHorizontal();
-			labelStyle.fontStyle = FontStyle.Bold;
-			GUILayout.Label("Brush Settings", labelStyle);
+			GUILayout.Label("Brush Settings", EditorStyles.boldLabel);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 			GUILayout.BeginHorizontal();
@@ -702,10 +697,8 @@ namespace Sabresaurus.SabreCSG
             }
 
 			GUILayout.BeginHorizontal();
-			labelStyle.fontStyle = FontStyle.Normal;
-			labelStyle.fontSize = 9;
 			GUILayout.FlexibleSpace();
-			GUILayout.Label(selectedBrushes.Count + " selected", labelStyle);
+			GUILayout.Label(selectedBrushes.Count + " selected", EditorStyles.miniLabel);
 			GUILayout.EndHorizontal();
 
 		}
@@ -714,11 +707,8 @@ namespace Sabresaurus.SabreCSG
 			GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
 			createBrushStyle.fixedHeight = 20;
 
-			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
-			labelStyle.fontStyle = FontStyle.Bold;
-
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Create primitive", labelStyle);
+			GUILayout.Label("Create primitive", EditorStyles.boldLabel);
 			GUILayout.FlexibleSpace();
 
 			GUILayout.EndHorizontal();
