@@ -13,8 +13,8 @@ namespace Sabresaurus.SabreCSG
         public const int BOTTOM_TOOLBAR_HEIGHT = 40;
 		public const int PRIMITIVE_MENU_WIDTH = 200;
 		public const int PRIMITIVE_MENU_HEIGHT = 70;
-		public const int BRUSH_MENU_WIDTH = 120;
-		public const int BRUSH_MENU_HEIGHT = 91;
+		public const int BRUSH_MENU_WIDTH = 130;
+		public const int BRUSH_MENU_HEIGHT = 122;
 
 		static BrushBase primaryBrush;
 		static List<BrushBase> selectedBrushes;
@@ -188,6 +188,68 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
+
+		// Calculate the bounds for all selected brushes, respecting the current pivotRotation mode to produce 
+		// bounds aligned to the first selected brush in Local mode, or bounds aligned to the absolute grid in Global
+		// mode.
+		static Bounds GetBounds()
+		{
+			Bounds bounds;
+
+			if(Tools.pivotRotation == PivotRotation.Local)
+			{
+				bounds = primaryBrush.GetBounds();
+
+				for (int i = 0; i < selectedBrushes.Count; i++) 
+				{
+					if(selectedBrushes[i] != primaryBrush)
+					{
+                        bounds.Encapsulate(selectedBrushes[i].GetBoundsLocalTo(primaryBrush.transform));
+                    }
+				}
+			}
+			else // Absolute/Global
+			{
+				bounds = primaryBrush.GetBoundsTransformed();
+				for (int i = 0; i < selectedBrushes.Count; i++) 
+				{
+					if(selectedBrushes[i] != primaryBrush)
+					{
+						bounds.Encapsulate(selectedBrushes[i].GetBoundsTransformed());
+					}
+				}
+			}
+
+			return bounds;
+		}
+
+		private static Vector3 GetSelectedBrushesPivotPoint()
+        {
+            if (primaryBrush != null)
+            {
+                if (Tools.pivotMode == PivotMode.Center)
+                {
+                    Bounds bounds = GetBounds();
+                    if (Tools.pivotRotation == PivotRotation.Global)
+                    {
+                        return bounds.center;
+                    }
+                    else
+                    {
+                        return primaryBrush.transform.TransformPoint(bounds.center);
+                    }
+                }
+                else // Local mode
+                {
+                    // Just return the position of the primary selected brush
+                    return primaryBrush.transform.position;
+                }
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
 
 		static Vector3 GetPositionForNewBrush()
 		{
@@ -442,6 +504,50 @@ namespace Sabresaurus.SabreCSG
 					csgModel.NotifyPolygonsRemoved();
 				}
 			}
+
+			GUILayout.BeginHorizontal();
+
+			if (GUILayout.Button("Flip X", EditorStyles.miniButton))
+            {	
+                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
+
+                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
+                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 0, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
+            }
+
+			if (GUILayout.Button("Flip Y", EditorStyles.miniButton))
+            {	
+                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
+
+                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
+                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 1, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
+            }
+
+			if (GUILayout.Button("Flip Z", EditorStyles.miniButton))
+            {	
+                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
+
+                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
+                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 2, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
+            }
+
+			GUILayout.EndHorizontal();
+
+			if (GUILayout.Button("Snap Center", EditorStyles.miniButton))
+            {
+                for (int i = 0; i < selectedBrushes.Count; i++)
+                {
+                    Undo.RecordObject(selectedBrushes[i].transform, "Snap Center");
+                    Undo.RecordObject(selectedBrushes[i], "Snap Center");
+
+                    Vector3 newPosition = selectedBrushes[i].transform.position;
+
+                    float snapDistance = CurrentSettings.PositionSnapDistance;
+                    newPosition = MathHelper.RoundVector3(newPosition, snapDistance);
+                    selectedBrushes[i].transform.position = newPosition;
+                    selectedBrushes[i].Invalidate(true);
+                }
+            }
 
 			GUILayout.BeginHorizontal();
 			labelStyle.fontStyle = FontStyle.Normal;

@@ -1282,50 +1282,6 @@ namespace Sabresaurus.SabreCSG
         private void OnTopToolbarGUI(int windowID)
         {
             widgetMode = SabreGUILayout.DrawEnumGrid(widgetMode, GUILayout.Width(67));
-
-            GUILayout.BeginHorizontal(GUILayout.Width(200));
-
-            if (GUILayout.Button("Snap Center", EditorStyles.miniButton))
-            {
-                for (int i = 0; i < targetBrushBases.Length; i++)
-                {
-                    Undo.RecordObject(targetBrushBases[i].transform, "Snap Center");
-                    Undo.RecordObject(targetBrushBases[i], "Snap Center");
-
-                    Vector3 newPosition = targetBrushBases[i].transform.position;
-
-                    float snapDistance = CurrentSettings.PositionSnapDistance;
-                    newPosition = MathHelper.RoundVector3(newPosition, snapDistance);
-                    targetBrushBases[i].transform.position = newPosition;
-                    targetBrushBases[i].Invalidate(true);
-                }
-            }
-
-            if (GUILayout.Button("Flip X", EditorStyles.miniButton))
-            {
-                Undo.RecordObjects(targetBrushes, "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryTargetBrush, targetBrushes, 0, localToPrimaryBrush, GetBrushesPivotPoint());
-            }
-
-            if (GUILayout.Button("Flip Y", EditorStyles.miniButton))
-            {
-                Undo.RecordObjects(targetBrushes, "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryTargetBrush, targetBrushes, 1, localToPrimaryBrush, GetBrushesPivotPoint());
-            }
-
-            if (GUILayout.Button("Flip Z", EditorStyles.miniButton))
-            {
-                Undo.RecordObjects(targetBrushes, "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryTargetBrush, targetBrushes, 2, localToPrimaryBrush, GetBrushesPivotPoint());
-            }
-
-            GUILayout.EndHorizontal();
         }
 
         public void RescaleBrush(Vector3 direction, Vector3 translation)

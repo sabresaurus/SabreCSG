@@ -104,9 +104,9 @@ namespace Sabresaurus.SabreCSG
         /// <param name="axisIndex">Index of the axis component to flip along, 0 = X, 1 = Y, 2 = Z</param>
         /// <param name="localToPrimaryBrush">Whether the axis to flip in is local to the primary brush's rotation, if false global orientation is used</param>
         /// <param name="flipCenter">The point in world space at which to flip the geometry around</param>
-        public static void Flip(PrimitiveBrush primaryTargetBrush, PrimitiveBrush[] targetBrushes, int axisIndex, bool localToPrimaryBrush, Vector3 flipCenter)
+        public static void Flip(BrushBase primaryTargetBrush, BrushBase[] targetBrushes, int axisIndex, bool localToPrimaryBrush, Vector3 flipCenter)
         {
-            foreach (PrimitiveBrush brush in targetBrushes)
+            foreach (Brush brush in targetBrushes)
             {
                 Polygon[] polygons = brush.GetPolygons();
 
