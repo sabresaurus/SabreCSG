@@ -1,6 +1,17 @@
 Content updated by Daniel Cornelius (Kerfuffles) 
 Wood, soil, and grass diffuse textures provided by Textures.com (formerly CGTextures.com)
 
+[12.22.2018]
+* Moved textures and materials out of zip
+* Converted all textures to .png using SuperPNG http://www.fnordware.com/superpng/
+	this should fix file size issues.
+* Converted images to grayscale that needed to be grayscale.
+
+[12.02.2018]
++ Added green utility texture
+* Moved additional textures and materials into an archive to reduce import time
+* Changed compression settings on all textures off of crunch, to help with import time
+
 [06.09.2018]
 + added materials and their content:
  scsg_soilsand_0

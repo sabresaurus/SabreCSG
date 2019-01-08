@@ -227,6 +227,10 @@ namespace Sabresaurus.SabreCSG
                 Debug.LogError("Default fallback material file is missing, try reimporting SabreCSG");
             }
 
+            // Make sure the build context has been initialized.
+            if (buildContext == null)
+                buildContext = BuildContext;
+
             BuildStatus buildStatus = CSGFactory.Build(brushes,
                 buildSettings,
                 buildContext,
