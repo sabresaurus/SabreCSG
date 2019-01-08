@@ -16,7 +16,7 @@ namespace Sabresaurus.SabreCSG
 		public const int BRUSH_MENU_WIDTH = 130;
 		public const int BRUSH_MENU_HEIGHT = 132;
 		public const int VIEW_MENU_WIDTH = 220;
-		public const int VIEW_MENU_HEIGHT = 180;
+		public const int VIEW_MENU_HEIGHT = 190;
 
 		public static int bottomToolbarHeight;
 
@@ -424,7 +424,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Hide Brushes", "Hotkey: "+KeyMappings.Instance.ToggleBrushesHidden));
+			GUILayout.Label(new GUIContent("Hide Brushes", "Hotkey: "+KeyMappings.Instance.ToggleBrushesHidden), EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			bool lastBrushesHidden = CurrentSettings.BrushesHidden;
             CurrentSettings.BrushesHidden = GUILayout.Toggle(CurrentSettings.BrushesHidden, "", GUILayout.Width(left_pad));
@@ -438,7 +438,7 @@ namespace Sabresaurus.SabreCSG
 
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Hide Meshes");
+			GUILayout.Label("Hide Meshes", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			bool lastMeshHidden = CurrentSettings.MeshHidden;
 			CurrentSettings.MeshHidden = GUILayout.Toggle(CurrentSettings.MeshHidden, "", GUILayout.Width(left_pad));
@@ -458,7 +458,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Grid type");
+			GUILayout.Label("Grid type", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 
 			GridMode lastMode = CurrentSettings.GridMode;
@@ -470,7 +470,7 @@ namespace Sabresaurus.SabreCSG
 
 			// Projected grid
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Projected Grid", "Hotkey: "+KeyMappings.Instance.ToggleProjectedGrid.Replace("#", "Shift+")));
+			GUILayout.Label(new GUIContent("Projected Grid", "Hotkey: "+KeyMappings.Instance.ToggleProjectedGrid.Replace("#", "Shift+")), EditorStyles.label);
 			GUILayout.FlexibleSpace();
             bool lastProjectedGridEnabled = CurrentSettings.ProjectedGridEnabled;
             CurrentSettings.ProjectedGridEnabled = GUILayout.Toggle(CurrentSettings.ProjectedGridEnabled, "", GUILayout.Width(left_pad));
@@ -487,14 +487,14 @@ namespace Sabresaurus.SabreCSG
 
 			// Position snapping UI
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Grid snapping", "Hotkey: "+KeyMappings.Instance.TogglePosSnapping.Replace("#", "Shift+")));
+			GUILayout.Label(new GUIContent("Grid snapping", "Hotkey: "+KeyMappings.Instance.TogglePosSnapping.Replace("#", "Shift+")), EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			CurrentSettings.PositionSnappingEnabled = GUILayout.Toggle(CurrentSettings.PositionSnappingEnabled, "", GUILayout.Width(left_pad));
 			GUILayout.EndHorizontal();
 
 			// Position snapping UI
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(new GUIContent("Rotation snapping", "Hotkey: "+KeyMappings.Instance.ToggleAngSnapping.Replace("#", "Shift+")));
+			GUILayout.Label(new GUIContent("Rotation snapping", "Hotkey: "+KeyMappings.Instance.ToggleAngSnapping.Replace("#", "Shift+")), EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			CurrentSettings.AngleSnappingEnabled = GUILayout.Toggle(CurrentSettings.AngleSnappingEnabled, "", GUILayout.Width(left_pad));
 			GUILayout.EndHorizontal();
@@ -504,7 +504,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.Label(new GUIContent(
 				"Rotation size",
 				"Hotkeys: " + KeyMappings.Instance.DecreaseAngSnapping.Replace("#", "Shift+") + "  " + KeyMappings.Instance.IncreaseAngSnapping.Replace("#", "Shift+")
-			));
+			), EditorStyles.label);
 			GUILayout.FlexibleSpace();
 
 			// CurrentSettings.AngleSnappingEnabled = SabreGUILayout.Toggle(CurrentSettings.AngleSnappingEnabled, "Ang Snapping");
@@ -542,7 +542,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 			GUILayout.BeginHorizontal();
 
-			GUILayout.Label ("Mode");
+			GUILayout.Label ("Mode", EditorStyles.label);
 
 			GUILayout.FlexibleSpace();
 
@@ -616,7 +616,7 @@ namespace Sabresaurus.SabreCSG
 			// }
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Collision");
+			GUILayout.Label("Collision", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			bool newHasCollision = GUILayout.Toggle(hasCollision, "", GUILayout.Width(60));
 			GUILayout.EndHorizontal();
@@ -639,7 +639,7 @@ namespace Sabresaurus.SabreCSG
 			bool isVisible = (visibleStates.Length == 1) ? visibleStates[0] : false;
 
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Visible");
+			GUILayout.Label("Visible", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 			bool newIsVisible = GUILayout.Toggle(isVisible, "", GUILayout.Width(60));
 			GUILayout.EndHorizontal();
@@ -664,7 +664,7 @@ namespace Sabresaurus.SabreCSG
 
 			GUILayout.BeginHorizontal();
 
-			GUILayout.Label("Flip");
+			GUILayout.Label("Flip", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 
 			string[] flipToolbarStrings = {"X","Y","Z"};
@@ -842,7 +842,7 @@ namespace Sabresaurus.SabreCSG
 
 			GUILayout.FlexibleSpace();
 
-			GUIStyle labelStyle = SabreGUILayout.GetLabelStyle();
+			GUIStyle labelStyle = new GUIStyle(EditorStyles.label);
 			labelStyle.fontSize = 9;
 			labelStyle.fixedHeight = 16;
 			labelStyle.alignment = TextAnchor.MiddleCenter;
