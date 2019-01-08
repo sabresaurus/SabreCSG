@@ -551,6 +551,31 @@ namespace Sabresaurus.SabreCSG
             return EditorGUILayout.ColorField(label, value, showEyedropper, showAlpha, false, options);
 #endif
         }
+
+        /// <summary>
+        /// Make a text field for entering even integers (e.g. when scrolled around it goes 2 4 6 8 10 or 16 14 12 10).
+        /// </summary>
+        /// <param name="label">Label to display in front of the int field.</param>
+        /// <param name="value">The value to edit.</param>
+        /// <param name="options">Optional GUIStyle.</param>
+        /// <returns>The value entered by the user.</returns>
+        public static int EvenIntField(GUIContent label, int value, params GUILayoutOption[] options)
+        {
+            int previousValue = value;
+            value = EditorGUILayout.IntField("Radius", value);
+            if (value < 2)
+            {
+                value = 2;
+            }
+            else
+            {
+                if (previousValue < value && (value % 2) != 0)
+                    value += 1;
+                else if (previousValue > value && (value % 2) != 0)
+                    value -= 1;
+            }
+            return value;
+        }
     }
 }
 

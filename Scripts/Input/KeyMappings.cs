@@ -51,8 +51,8 @@ namespace Sabresaurus.SabreCSG
 		public string IncreaseAngSnapping = "#.";
 
 		public string ToggleBrushesHidden = "h";
-		public string ToggleGridHidden = "0";
-		public string ToggleFacesHidden = "9";
+		public string ToggleProjectedGrid = "0";
+		public string ToggleBrushesAsWireframes = "9";
 
 		[Header("General")]
 		public string ChangeBrushToAdditive = "a";
@@ -65,6 +65,7 @@ namespace Sabresaurus.SabreCSG
 		public string Ungroup = "#g";
 
 		public string EnableRadialMenu = "j";
+		public string SnapSelectionToCurrentGrid = "y";
 
 		[Header("Clip Tool")]
 		public string ApplyClip = "Return";

@@ -914,27 +914,23 @@ namespace Sabresaurus.SabreCSG
                 }
                 e.Use();
             }
-            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleGridHidden))
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleProjectedGrid))
                 && !SabreGUIHelper.AnyControlFocussed)
             {
                 if (e.type == EventType.KeyUp)
                 {
-                    if (CurrentSettings.GridMode == GridMode.None) {
-                        CurrentSettings.GridMode = CurrentSettings.lastGridMode;
-                    } else {
-                        CurrentSettings.GridMode = GridMode.None;
-                    }
+                    CurrentSettings.ProjectedGridEnabled = !CurrentSettings.ProjectedGridEnabled;
 
                     SceneView.RepaintAll();
                 }
                 e.Use();
             }
-            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleFacesHidden))
+            else if (KeyMappings.EventsMatch(e, Event.KeyboardEvent(KeyMappings.Instance.ToggleBrushesAsWireframes))
                 && !SabreGUIHelper.AnyControlFocussed)
             {
                 if (e.type == EventType.KeyUp)
                 {
-                    CurrentSettings.BrushFacesHidden = !CurrentSettings.BrushFacesHidden;
+                    CurrentSettings.ShowBrushesAsWireframes = !CurrentSettings.ShowBrushesAsWireframes;
 
                     SceneView.RepaintAll();
                 }
@@ -1040,13 +1036,16 @@ namespace Sabresaurus.SabreCSG
             for (int i = 0; i < Selection.gameObjects.Length; i++)
             {
                 // Skip any selected prefabs in the project window
-#if UNITY_2018_2
+#if UNITY_2018_2_OR_NEWER
 				if(PrefabUtility.GetCorrespondingObjectFromSource(Selection.gameObjects[i]) == null
 #else
                 if (PrefabUtility.GetPrefabParent(Selection.gameObjects[i]) == null
 #endif
+#if !UNITY_2018_3
 					&& PrefabUtility.GetPrefabObject(Selection.gameObjects[i].transform) != null)
-
+#else
+					&& PrefabUtility.GetPrefabInstanceHandle(Selection.gameObjects[i].transform) != null)
+#endif
 				{
 					continue;
 				}
@@ -1266,6 +1265,14 @@ namespace Sabresaurus.SabreCSG
                         Graphics.DrawTexture(drawRect, SabreCSGResources.SubtractIconTexture, iconMaterial);
                     }
                 }
+                else if(gameObject.HasComponent<CSGModel>())
+                {
+                    drawRect.xMax -= 2;
+                    drawRect.xMin = drawRect.xMax - 16;
+                    drawRect.height = 16;
+
+                    Graphics.DrawTexture(drawRect, SabreCSGResources.SabreCSG16IconTexture);
+                }
 
                 if (EditMode)
                 {
@@ -1349,6 +1356,12 @@ namespace Sabresaurus.SabreCSG
                 // When we come out of play mode we lose this event handler and are no longer in edit mode.
                 // We call OnSelectionChanged() manually to make sure we go back into edit mode, if a brush is still selected.
                 OnSelectionChanged();
+                // Make sure all brushes are visible again after a C# recompilation.
+                if (anyCSGModelsInEditMode)
+                {
+                    editModeModel = GetActiveCSGModel();
+                    UpdateAllBrushesVisibility(); 
+                }
             }
 #endif
 
@@ -1627,6 +1640,9 @@ namespace Sabresaurus.SabreCSG
 
                         // Force the scene views to repaint (shows our own UI)
                         SceneView.RepaintAll();
+
+                        // Update the projected grid material to match the scale of this CSG Model
+                        CurrentSettings.ChangePosSnapDistance(1.0f);
 
                         //						if(Event.current != null)
                         //						{

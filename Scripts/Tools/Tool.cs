@@ -40,14 +40,17 @@ namespace Sabresaurus.SabreCSG
 				BrushBase matchedBrushBase = Selection.gameObjects[i].GetComponent<BrushBase>();
 
 				// If we've selected a brush base that isn't a prefab in the project
-
 				if(matchedBrushBase != null
-#if UNITY_2018_2
+#if UNITY_2018_2_OR_NEWER
 						&& !(PrefabUtility.GetCorrespondingObjectFromSource(matchedBrushBase.gameObject) == null
 #else
 						&& !(PrefabUtility.GetPrefabParent(matchedBrushBase.gameObject) == null 
 #endif
+#if !UNITY_2018_3_OR_NEWER
 							&& PrefabUtility.GetPrefabObject(matchedBrushBase.transform) != null))
+#else
+						&& PrefabUtility.GetPrefabInstanceHandle(selectedGameObject.transform) != null))
+#endif
 				{
 					brushBases.Add(matchedBrushBase);
 				}
@@ -62,12 +65,16 @@ namespace Sabresaurus.SabreCSG
 
 			// Make sure it's not null and that it isn't a prefab in the project
 			if(selectedGameObject != null
-#if UNITY_2018_2
+#if UNITY_2018_2_OR_NEWER
 				&& !(PrefabUtility.GetCorrespondingObjectFromSource(selectedGameObject) == null
 #else
                 && !(PrefabUtility.GetPrefabParent(selectedGameObject) == null
 #endif
+#if !UNITY_2018_3_OR_NEWER
 						&& PrefabUtility.GetPrefabObject(selectedGameObject.transform) != null))
+#else
+						&& PrefabUtility.GetPrefabInstanceHandle(selectedGameObject.transform) != null))
+#endif
 			{
 				newPrimaryBrushBase = selectedGameObject.GetComponent<BrushBase>();// brushBases.FirstOrDefault();
 				newPrimaryBrush = selectedGameObject.GetComponent<PrimitiveBrush>();// primitiveBrushes.Where(item => item != null).FirstOrDefault();

@@ -209,6 +209,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D SabreCSG16IconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/SabreCSG16.png");
+            }
+        }
+
         public static Texture2D DialogOverlayTexture
         {
             get
@@ -302,6 +310,14 @@ namespace Sabresaurus.SabreCSG
             get
             {
                 return (Texture2D)LoadObject("Gizmos/ButtonShapeEditor.png");
+            }
+        }
+
+        public static Texture2D ButtonProjectedGridTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonProjectedGrid.png");
             }
         }
 
