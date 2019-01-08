@@ -620,7 +620,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Collision");
 			GUILayout.FlexibleSpace();
-			bool newHasCollision = GUILayout.Toggle(hasCollision, "");
+			bool newHasCollision = GUILayout.Toggle(hasCollision, "", GUILayout.Width(60));
 			GUILayout.EndHorizontal();
 
 			if(newHasCollision != hasCollision)
@@ -643,7 +643,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Visible");
 			GUILayout.FlexibleSpace();
-			bool newIsVisible = GUILayout.Toggle(isVisible, "");
+			bool newIsVisible = GUILayout.Toggle(isVisible, "", GUILayout.Width(60));
 			GUILayout.EndHorizontal();
 
 			if(newIsVisible != isVisible)
@@ -666,7 +666,10 @@ namespace Sabresaurus.SabreCSG
 
 			GUILayout.BeginHorizontal();
 
-			if (GUILayout.Button("Flip X", EditorStyles.miniButton))
+			GUILayout.Label("Flip");
+			GUILayout.FlexibleSpace();
+
+			if (GUILayout.Button("X", EditorStyles.miniButton))
             {	
                 Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
 
@@ -674,7 +677,7 @@ namespace Sabresaurus.SabreCSG
                 BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 0, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
             }
 
-			if (GUILayout.Button("Flip Y", EditorStyles.miniButton))
+			if (GUILayout.Button("Y", EditorStyles.miniButton))
             {	
                 Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
 
@@ -682,7 +685,7 @@ namespace Sabresaurus.SabreCSG
                 BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), 1, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
             }
 
-			if (GUILayout.Button("Flip Z", EditorStyles.miniButton))
+			if (GUILayout.Button("Z", EditorStyles.miniButton))
             {	
                 Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
 
