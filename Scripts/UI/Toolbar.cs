@@ -13,21 +13,10 @@ namespace Sabresaurus.SabreCSG
         public const int BOTTOM_TOOLBAR_HEIGHT = 20;
 		public const int PRIMITIVE_MENU_WIDTH = 200;
 		public const int PRIMITIVE_MENU_HEIGHT = 70;
-		public const int BRUSH_MENU_WIDTH = 130;
-		public const int BRUSH_MENU_HEIGHT = 132;
 		public const int VIEW_MENU_WIDTH = 220;
 		public const int VIEW_MENU_HEIGHT = 190;
 
 		public static int bottomToolbarHeight;
-
-		static BrushBase primaryBrush;
-		static List<BrushBase> selectedBrushes;
-		static string[] brushModeSettings = new string[] {
-			"Add",
-			"Subtract",
-			"Volume",
-			"NoCSG"
-		};
 
 		static string[] gridTypeSettings = new string[] {
 			"Unity",
@@ -39,7 +28,7 @@ namespace Sabresaurus.SabreCSG
 
 		static string warningMessage = "Concave brushes detected";
 
-		static bool primitiveMenuShowing = false;
+		public static bool primitiveMenuShowing = false;
 		static bool viewMenuShowing = false;
 
 		// If the viewport is too squashed to show everything on one line
@@ -93,39 +82,6 @@ namespace Sabresaurus.SabreCSG
 
             style.fixedHeight = bottomToolbarHeight;
 			GUILayout.Window(140003, rectangle, OnBottomToolbarGUI, "", style);
-
-			// Brush menu
-			if (CurrentSettings.CurrentMode == MainMode.Resize && Selection.activeGameObject != null)
-            {
-				style = new GUIStyle(EditorStyles.toolbar);
-				primaryBrush = Selection.activeGameObject.GetComponent<BrushBase>();
-				selectedBrushes = new List<BrushBase>();
-				for (int i = 0; i < Selection.gameObjects.Length; i++) 
-				{
-					BrushBase brush = Selection.gameObjects[i].GetComponent<BrushBase>();
-					if (brush != null)
-					{
-						selectedBrushes.Add(brush);
-					}
-				}
-                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
-                {
-					Rect brushMenuRect = new Rect(
-						0, 
-						(sceneView.position.height - bottomToolbarHeight) - BRUSH_MENU_HEIGHT, 
-						BRUSH_MENU_WIDTH,
-						BRUSH_MENU_HEIGHT
-					);
-
-					if (primitiveMenuShowing) {
-						brushMenuRect.y -= PRIMITIVE_MENU_HEIGHT;
-					}
-
-					style.fixedWidth = BRUSH_MENU_WIDTH;
-					style.fixedHeight = BRUSH_MENU_HEIGHT;
-					GUILayout.Window(140008, brushMenuRect, OnBrushSettingsGUI, "", style);
-				}
-			}
 
 			if (primitiveMenuShowing) {
 				style = new GUIStyle(EditorStyles.toolbar);
@@ -225,68 +181,6 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
 		}
-
-		// Calculate the bounds for all selected brushes, respecting the current pivotRotation mode to produce 
-		// bounds aligned to the first selected brush in Local mode, or bounds aligned to the absolute grid in Global
-		// mode.
-		static Bounds GetBounds()
-		{
-			Bounds bounds;
-
-			if(Tools.pivotRotation == PivotRotation.Local)
-			{
-				bounds = primaryBrush.GetBounds();
-
-				for (int i = 0; i < selectedBrushes.Count; i++) 
-				{
-					if(selectedBrushes[i] != primaryBrush)
-					{
-                        bounds.Encapsulate(selectedBrushes[i].GetBoundsLocalTo(primaryBrush.transform));
-                    }
-				}
-			}
-			else // Absolute/Global
-			{
-				bounds = primaryBrush.GetBoundsTransformed();
-				for (int i = 0; i < selectedBrushes.Count; i++) 
-				{
-					if(selectedBrushes[i] != primaryBrush)
-					{
-						bounds.Encapsulate(selectedBrushes[i].GetBoundsTransformed());
-					}
-				}
-			}
-
-			return bounds;
-		}
-
-		private static Vector3 GetSelectedBrushesPivotPoint()
-        {
-            if (primaryBrush != null)
-            {
-                if (Tools.pivotMode == PivotMode.Center)
-                {
-                    Bounds bounds = GetBounds();
-                    if (Tools.pivotRotation == PivotRotation.Global)
-                    {
-                        return bounds.center;
-                    }
-                    else
-                    {
-                        return primaryBrush.transform.TransformPoint(bounds.center);
-                    }
-                }
-                else // Local mode
-                {
-                    // Just return the position of the primary selected brush
-                    return primaryBrush.transform.position;
-                }
-            }
-            else
-            {
-                return Vector3.zero;
-            }
-        }
 
 		static Vector3 GetPositionForNewBrush()
 		{
@@ -527,179 +421,6 @@ namespace Sabresaurus.SabreCSG
 				}
 			}
 			GUILayout.EndHorizontal();
-		}
-
-		static void OnBrushSettingsGUI(int windowID) {
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Brush Settings", EditorStyles.boldLabel);
-			GUILayout.FlexibleSpace();
-			GUILayout.EndHorizontal();
-			GUILayout.BeginHorizontal();
-
-			EditorGUIUtility.labelWidth = 58f;
-
-			GUILayout.Label ("Mode", EditorStyles.label);
-
-			GUILayout.FlexibleSpace();
-
-			string currentBrushMode = "";
-			if (primaryBrush.IsNoCSG) {
-				currentBrushMode = "NoCSG";
-			} else {
-				currentBrushMode = primaryBrush.Mode.ToString();
-			}
-			int currentModeIndex = Array.IndexOf(brushModeSettings, currentBrushMode);
-
-			string brushMode = brushModeSettings[EditorGUILayout.Popup("", currentModeIndex, brushModeSettings, GUILayout.Width(60))]; 
-			if(brushMode != currentBrushMode)
-			{
-				bool anyChanged = false;
-
-				foreach (BrushBase brush in selectedBrushes) 
-				{
-					Undo.RecordObject(brush, "Change Brush To " + brushMode);
-
-					switch (brushMode) {
-						case "Add":
-							brush.Mode = CSGMode.Add;
-							brush.IsNoCSG = false;
-							break;
-						case "Subtract":
-							brush.Mode = CSGMode.Subtract;
-							brush.IsNoCSG = false;
-							break;
-						case "Volume":
-							brush.Mode = CSGMode.Volume;
-							brush.IsNoCSG = false;
-							break;
-						case "NoCSG":
-							// Volume overrides NoCSG, so it must be changed if you select NoCSG
-							if (brush.Mode == CSGMode.Volume) { 
-								brush.Mode = CSGMode.Add;
-							}
-							brush.IsNoCSG = true;
-							break;
-					}
-					anyChanged = true;
-				}
-				if(anyChanged)
-				{
-					// Need to update the icon for the csg mode in the hierarchy
-					EditorApplication.RepaintHierarchyWindow();
-
-					foreach (BrushBase b in selectedBrushes) 
-					{
-						b.Invalidate(true);
-					}
-				}
-			}
-
-			GUILayout.EndHorizontal();
-
-			bool[] collisionStates = selectedBrushes.Select(item => item.HasCollision).Distinct().ToArray();
-			bool hasCollision = (collisionStates.Length == 1) ? collisionStates[0] : false;
-
-			GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
-
-			// TODO: If the brushes are all volumes, the collision and visible checkboxes should be disabled
-
-			// bool allVolumes = true;
-			// foreach (BrushBase brush in selectedBrushes) 
-			// {
-			// 	if (brush.Mode != CSGMode.Volume) {
-			// 		allVolumes = false;
-			// 	}
-			// }
-			bool newHasCollision = EditorGUILayout.Toggle("Collision", hasCollision);
-
-			if(newHasCollision != hasCollision)
-			{
-				foreach (BrushBase brush in selectedBrushes) 
-				{
-					Undo.RecordObject(brush, "Change Brush Collision Mode");
-					brush.HasCollision = newHasCollision;
-				}
-				// Tell the brushes that they have changed and need to recalc intersections
-				foreach (BrushBase brush in selectedBrushes) 
-				{
-					brush.Invalidate(true);
-				}
-			}
-
-			bool[] visibleStates = selectedBrushes.Select(item => item.IsVisible).Distinct().ToArray();
-			bool isVisible = (visibleStates.Length == 1) ? visibleStates[0] : false;
-
-			bool newIsVisible = EditorGUILayout.Toggle("Visible", isVisible);
-
-			if(newIsVisible != isVisible)
-			{
-				foreach (BrushBase brush in selectedBrushes) 
-				{
-					Undo.RecordObject(brush, "Change Brush Visible Mode");
-					brush.IsVisible = newIsVisible;
-				}
-				// Tell the brushes that they have changed and need to recalc intersections
-				foreach (BrushBase brush in selectedBrushes) 
-				{
-					brush.Invalidate(true);
-				}
-				if(newIsVisible == false)
-				{
-					csgModel.NotifyPolygonsRemoved();
-				}
-			}
-
-			GUILayout.BeginHorizontal();
-
-			GUILayout.Label("Flip", EditorStyles.label);
-			GUILayout.FlexibleSpace();
-
-			string[] flipToolbarStrings = {"X","Y","Z"};
-			int flipIndex = -1;
-            if(GUILayout.Button("X", EditorStyles.miniButtonLeft, GUILayout.Width(20)))
-            {
-                flipIndex = 0;
-            }
-            if (GUILayout.Button("Y", EditorStyles.miniButtonMid, GUILayout.Width(20)))
-            {
-                flipIndex = 1;
-            }
-            if (GUILayout.Button("Z", EditorStyles.miniButtonRight, GUILayout.Width(20)))
-            {
-                flipIndex = 2;
-            }
-			
-			if (flipIndex != -1)
-            {	
-                Undo.RecordObjects(selectedBrushes.ToArray(), "Flip Polygons");
-
-                bool localToPrimaryBrush = (Tools.pivotRotation == PivotRotation.Local);
-                BrushUtility.Flip(primaryBrush, selectedBrushes.ToArray(), flipIndex, localToPrimaryBrush, GetSelectedBrushesPivotPoint());
-            }
-
-			GUILayout.EndHorizontal();
-
-			if (GUILayout.Button("Snap Center", EditorStyles.miniButton))
-            {
-                for (int i = 0; i < selectedBrushes.Count; i++)
-                {
-                    Undo.RecordObject(selectedBrushes[i].transform, "Snap Center");
-                    Undo.RecordObject(selectedBrushes[i], "Snap Center");
-
-                    Vector3 newPosition = selectedBrushes[i].transform.position;
-
-                    float snapDistance = CurrentSettings.PositionSnapDistance;
-                    newPosition = MathHelper.RoundVector3(newPosition, snapDistance);
-                    selectedBrushes[i].transform.position = newPosition;
-                    selectedBrushes[i].Invalidate(true);
-                }
-            }
-
-			GUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayout.Label(selectedBrushes.Count + " selected", EditorStyles.miniLabel);
-			GUILayout.EndHorizontal();
-
 		}
 
 		static void OnPrimitiveMenuGUI(int windowID) {
