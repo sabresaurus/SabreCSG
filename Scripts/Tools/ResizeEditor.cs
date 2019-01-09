@@ -1298,7 +1298,7 @@ namespace Sabresaurus.SabreCSG
 
             GUILayout.Window(140007, rectangle, OnTopToolbarGUI, "", style);
 
-            if (primaryTargetBrushBase != null)
+            if (primaryTargetBrush != null)
             {
                 if (Toolbar.primitiveMenuShowing) {
                     brushMenuRect.y -= Toolbar.PRIMITIVE_MENU_HEIGHT;
