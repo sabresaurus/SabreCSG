@@ -207,7 +207,7 @@ namespace Sabresaurus.SabreCSG
         static void CreatePrimitiveBrush(PrimitiveBrushType brushType)
 		{
 			Vector3 position = GetPositionForNewBrush();
-			GameObject newBrushObject = csgModel.CreateBrush(brushType, position);
+			GameObject newBrushObject = csgModel.CreateBrush(brushType, position, Vector3.one * 2, Quaternion.identity, csgModel.GetDefaultMaterial(), csgModel.GetBrushes()[0].IsWorldVolume ? CSGMode.Subtract : CSGMode.Add );
 
 			// Set the selection to the new object
 			Selection.activeGameObject = newBrushObject;
@@ -443,7 +443,8 @@ namespace Sabresaurus.SabreCSG
 						brushes.Add(brush);
 					}
 				}
-                if (primaryBrush != null && primaryBrush.SupportsCsgOperations)
+
+                if (primaryBrush != null && primaryBrush.SupportsCsgOperations && !primaryBrush.IsWorldVolume)
                 {
 					CSGMode brushMode = (CSGMode)EditorGUILayout.EnumPopup(primaryBrush.Mode, EditorStyles.toolbarPopup, GUILayout.Width(80));
 					if(brushMode != primaryBrush.Mode)
@@ -529,7 +530,7 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
-			GUILayout.Space(10);
+            GUILayout.Space(10);
 
 			// Position snapping UI
 			CurrentSettings.PositionSnappingEnabled = SabreGUILayout.Toggle(CurrentSettings.PositionSnappingEnabled, "Pos Snapping");

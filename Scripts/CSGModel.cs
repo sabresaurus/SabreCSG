@@ -54,6 +54,8 @@ namespace Sabresaurus.SabreCSG
         [SerializeField, HideInInspector]
         private Brush lastSelectedBrush = null;
 
+        private GameObject subtractiveWorldVolume;
+
         private float currentFrameTimestamp = 0;
         private float currentFrameDelta = 0;
 
@@ -69,15 +71,15 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
-		Dictionary<MainMode, Tool> tools = new Dictionary<MainMode, Tool>()
-		{
-			{ MainMode.Resize, new ResizeEditor() },
-			{ MainMode.Vertex, new VertexEditor() },
-			{ MainMode.Face, new SurfaceEditor() },
-			{ MainMode.Clip, new ClipEditor() },
-			{ MainMode.Draw, new DrawEditor() },
+        Dictionary<MainMode, Tool> tools = new Dictionary<MainMode, Tool>()
+        {
+            { MainMode.Resize, new ResizeEditor() },
+            { MainMode.Vertex, new VertexEditor() },
+            { MainMode.Face, new SurfaceEditor() },
+            { MainMode.Clip, new ClipEditor() },
+            { MainMode.Draw, new DrawEditor() },
             { MainMode.Paint, new PaintEditor() },
-		};
+        };
 
         private Dictionary<OverrideMode, Tool> overrideTools = new Dictionary<OverrideMode, Tool>()
         {
@@ -114,7 +116,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-                return mouseIsHeld || (MouseReleaseDuration < 0.22f);
+                return mouseIsHeld || ( MouseReleaseDuration < 0.22f );
             }
         }
 
@@ -122,7 +124,7 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
-                return (DateTime.UtcNow - mouseReleaseTime).TotalSeconds;
+                return ( DateTime.UtcNow - mouseReleaseTime ).TotalSeconds;
             }
         }
 
@@ -155,24 +157,24 @@ namespace Sabresaurus.SabreCSG
 
             base.Start();
 
-            if (firstRun)
+            if( firstRun )
             {
                 // Make sure editing is turned on
                 EditMode = true;
 
-                brushes = new List<Brush>(transform.GetComponentsInChildren<Brush>(false));
+                brushes = new List<Brush>( transform.GetComponentsInChildren<Brush>( false ) );
 
                 // Only create a brush if the model doesn't already contain one
-                if (brushes.Count == 0)
+                if( brushes.Count == 0 )
                 {
                     // Create the default brush
-                    GameObject newBrushObject = CreateBrush(PrimitiveBrushType.Cube, new Vector3(0, 1, 0));
+                    GameObject newBrushObject = CreateBrush( PrimitiveBrushType.Cube, new Vector3( 0, 1, 0 ) );
                     // Set the selection to the new object
                     Selection.activeGameObject = newBrushObject;
                 }
 
                 firstRun = false;
-                EditorHelper.SetDirty(this);
+                EditorHelper.SetDirty( this );
             }
 
             // Make sure we are correctly tracking whether any CSG Models are actually in edit mode
@@ -181,10 +183,10 @@ namespace Sabresaurus.SabreCSG
             CSGModel[] csgModels = FindObjectsOfType<CSGModel>();
 
             // Loop through all the CSG Models in the scene and check if any are in edit mode
-            for (int i = 0; i < csgModels.Length; i++)
+            for( int i = 0; i < csgModels.Length; i++ )
             {
-                if (csgModels[i] != this
-                    && csgModels[i].EditMode)
+                if( csgModels[i] != this
+                    && csgModels[i].EditMode )
                 {
                     anyCSGModelsInEditMode = true;
                 }
@@ -193,31 +195,31 @@ namespace Sabresaurus.SabreCSG
             // If the status of whether any Models are in edit mode has changed, make sure all the brushes update their
             // visibility. For example we moved from editing a CSG Model to opening another scene where no CSG Model is
             // in edit mode. wereAnyInEditMode would be true and anyCSGModelsInEditMode would now be false
-            if (anyCSGModelsInEditMode != wereAnyInEditMode)
+            if( anyCSGModelsInEditMode != wereAnyInEditMode )
             {
                 UpdateAllBrushesVisibility();
             }
 
-            if (modelVersion < MODEL_VERSION)
+            if( modelVersion < MODEL_VERSION )
             {
                 // Upgrading or a new model, so grab all the brushes in case it's an upgrade
-                brushes = new List<Brush>(transform.GetComponentsInChildren<Brush>(false));
+                brushes = new List<Brush>( transform.GetComponentsInChildren<Brush>( false ) );
 
                 // Make sure all brushes have a valid brush cache and need rebuilding
-                for (int i = 0; i < brushes.Count; i++)
+                for( int i = 0; i < brushes.Count; i++ )
                 {
-                    if (brushes[i] != null)
+                    if( brushes[i] != null )
                     {
-                        brushes[i].RecachePolygons(true);
+                        brushes[i].RecachePolygons( true );
                     }
                 }
 
                 // Force all brushes to recalculate intersections
-                for (int i = 0; i < brushes.Count; i++)
+                for( int i = 0; i < brushes.Count; i++ )
                 {
-                    if (brushes[i] != null)
+                    if( brushes[i] != null )
                     {
-                        brushes[i].RecalculateIntersections(brushes, false);
+                        brushes[i].RecalculateIntersections( brushes, false );
                     }
                 }
 
@@ -225,6 +227,8 @@ namespace Sabresaurus.SabreCSG
                 modelVersion = MODEL_VERSION;
             }
         }
+
+
 
         public override void Build(bool forceRebuild, bool buildInBackground)
         {
@@ -409,7 +413,7 @@ namespace Sabresaurus.SabreCSG
                     for (int brushIndex = 0; brushIndex < brushes.Count; brushIndex++)
                     {
                         Brush brush = brushes[brushIndex];
-                        if (brush == null)
+                        if (brush == null || !brush.IsWorldVolume ) // if the brush is null, or it is used as the global volume in the subtractive workflow, then skip drawing it
                         {
                             continue;
                         }
@@ -1403,7 +1407,7 @@ namespace Sabresaurus.SabreCSG
                 }
 
                 Toolbar.WarningMessage = "";
-                Brush firstBrush = GetComponentInChildren<Brush>();
+                Brush firstBrush = brushes[0];//transform.GetChild( 0 ).GetComponent<Brush>();//GetComponentInChildren<Brush>();
                 if (firstBrush != null)
                 {
                     if (firstBrush.Mode == CSGMode.Subtract)
@@ -1420,6 +1424,45 @@ namespace Sabresaurus.SabreCSG
                     //GameObject newBrushObject = CreateBrush(PrimitiveBrushType.Cube, new Vector3(0,1,0));
                     //// Set the selection to the new object
                     //Selection.activeGameObject = newBrushObject;
+                }
+            }
+
+            if( !Application.isPlaying )
+            {
+                if( subtractiveWorldVolume != null && subtractiveWorldVolume.transform.GetSiblingIndex() > 0 )
+                    subtractiveWorldVolume.transform.SetAsFirstSibling(); // ensure its the first object in the hierarchy
+
+                if( subtractiveWorldVolume != null && !buildSettings.IsSubtractiveWorkflow ) // ensure we delete the old one when undoing
+                {
+                    DestroyImmediate( subtractiveWorldVolume );
+                    subtractiveWorldVolume = null;
+                }
+
+                // grab the first brush if it already exists
+                if( subtractiveWorldVolume == null && buildSettings.IsSubtractiveWorkflow && brushes[0].IsWorldVolume )
+                    subtractiveWorldVolume = brushes[0].gameObject;
+                
+                if( subtractiveWorldVolume == null && buildSettings.IsSubtractiveWorkflow && !brushes[0].IsWorldVolume )
+                {
+                    // ensure we have a 'world' entity (very large additive brush)
+                    subtractiveWorldVolume = CreateBrush( PrimitiveBrushType.Cube, Vector3.zero, Vector3.one * buildSettings.WorldSize, Quaternion.identity, GetDefaultMaterial(), CSGMode.Add, "World" );
+
+                    subtractiveWorldVolume.transform.parent = CSGModel.GetActiveCSGModel().transform;
+                    subtractiveWorldVolume.transform.SetAsFirstSibling();
+                    
+                    Brush worldVolumeBrush = subtractiveWorldVolume.GetComponent<Brush>();
+
+                    // do not need collision for this brush
+                    worldVolumeBrush.HasCollision = false;
+                    worldVolumeBrush.IsWorldVolume = true;
+
+                    Polygon[] polys = worldVolumeBrush.GetPolygons();
+
+                    foreach( Polygon p in polys )
+                    {
+                        p.UserExcludeFromFinal = true;
+                    }
+                    worldVolumeBrush.Invalidate( true );
                 }
             }
         }

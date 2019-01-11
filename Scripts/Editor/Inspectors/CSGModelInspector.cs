@@ -11,6 +11,8 @@ namespace Sabresaurus.SabreCSG
     {
         // Build settings for the next build
 
+        private SerializedProperty worldSizeProperty;
+        private SerializedProperty subtractiveWorldProperty;
         private SerializedProperty generateCollisionMeshesProperty;
         private SerializedProperty generateTangentsProperty;
         private SerializedProperty optimizeGeometryProperty;
@@ -41,6 +43,8 @@ namespace Sabresaurus.SabreCSG
         public void OnEnable()
         {
             // Build settings for the next build
+            subtractiveWorldProperty = serializedObject.FindProperty( "buildSettings.IsSubtractiveWorkflow" );
+            worldSizeProperty = serializedObject.FindProperty( "buildSettings.WorldSize" );
             generateCollisionMeshesProperty = serializedObject.FindProperty("buildSettings.GenerateCollisionMeshes");
             generateTangentsProperty = serializedObject.FindProperty("buildSettings.GenerateTangents");
             optimizeGeometryProperty = serializedObject.FindProperty("buildSettings.OptimizeGeometry");
@@ -67,19 +71,34 @@ namespace Sabresaurus.SabreCSG
         public override void OnInspectorGUI()
         {
             CSGModel csgModel = (CSGModel)target;
-
+            
             // Ensure the default material is set
             csgModel.EnsureDefaultMaterialSet();
 
             DrawDefaultInspector();
 
             this.serializedObject.Update();
+            using( NamedVerticalScope scope = new NamedVerticalScope( "General Settings" ) )
+            {
+                EditorGUIUtility.fieldWidth = 0;
+                EditorGUIUtility.labelWidth = 160;
+
+                EditorGUILayout.PropertyField( subtractiveWorldProperty, new GUIContent( "Subtractive Workflow" ) );
+
+                if(subtractiveWorldProperty.boolValue)
+                    EditorGUILayout.PropertyField( worldSizeProperty, new GUIContent( "World Size" ) );
+
+
+                EditorGUIUtility.labelWidth = 0;
+            }
+
             using (NamedVerticalScope scope = new NamedVerticalScope("Build Settings"))
             {
                 scope.WikiLink = "Build-Settings";
 
                 EditorGUIUtility.fieldWidth = 0;
                 EditorGUIUtility.labelWidth = 160;
+
 
                 EditorGUILayout.PropertyField(generateCollisionMeshesProperty, new GUIContent("Generate Collision Meshes"));
                 EditorGUILayout.PropertyField(generateTangentsProperty, new GUIContent("Generate Tangents"));

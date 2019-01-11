@@ -25,7 +25,26 @@ namespace Sabresaurus.SabreCSG
 		[SerializeField,FormerlySerializedAs("isDetailBrush")]
 		protected bool isNoCSG;
 
-		[SerializeField]
+        // used for setting up subtractive mode
+        protected bool isWorldVolume = false;
+
+        /// <summary>
+        /// Is this brush used in the subtractive workflow?
+        /// <para>There should only ever be one of these flagged true, it should always be additive, and it should always be the first brush in the hierarchy.</para>
+        /// </summary>
+        public bool IsWorldVolume
+        {
+            get
+            {
+                return isWorldVolume;
+            }
+            set
+            {
+                isWorldVolume = value;
+            }
+        }
+
+        [SerializeField]
 		protected bool hasCollision = true;
 
 		[SerializeField]

@@ -45,6 +45,10 @@ namespace Sabresaurus.SabreCSG
 
         public sealed override void OnInspectorGUI()
 		{
+            // skip drawing the inspector for the first brush in subtractive workflow
+            if( BrushTarget.IsWorldVolume )
+                return;
+
             // group editing:
             if (ShowGroupInspector)
             {

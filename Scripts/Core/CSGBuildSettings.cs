@@ -9,6 +9,9 @@ namespace Sabresaurus.SabreCSG
     [System.Serializable]
     public class CSGBuildSettings
     {
+        public bool IsSubtractiveWorkflow = false;
+        public int WorldSize = 8192;
+
         // Whether to also do a collision pass
         public bool GenerateCollisionMeshes = true;
 
@@ -99,6 +102,14 @@ namespace Sabresaurus.SabreCSG
         /// </summary>
         public static bool AreDifferent(CSGBuildSettings settings1, CSGBuildSettings settings2)
         {
+            if( settings1.WorldSize != settings2.WorldSize )
+            {
+                return true;
+            }
+            if( settings1.IsSubtractiveWorkflow != settings2.IsSubtractiveWorkflow )
+            {
+                return true;
+            }
             if (settings1.GenerateCollisionMeshes != settings2.GenerateCollisionMeshes)
             {
                 return true;
