@@ -413,7 +413,7 @@ namespace Sabresaurus.SabreCSG
                     for (int brushIndex = 0; brushIndex < brushes.Count; brushIndex++)
                     {
                         Brush brush = brushes[brushIndex];
-                        if (brush == null || !brush.IsWorldVolume ) // if the brush is null, or it is used as the global volume in the subtractive workflow, then skip drawing it
+                        if (brush == null || brush.IsWorldVolume ) // if the brush is null, or it is used as the global volume in the subtractive workflow, then skip drawing it
                         {
                             continue;
                         }
