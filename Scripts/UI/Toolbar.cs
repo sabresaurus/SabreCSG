@@ -569,7 +569,7 @@ namespace Sabresaurus.SabreCSG
 
 			GUILayout.Label("Grid size", labelStyle);
 
-			CurrentSettings.PositionSnapDistance = EditorGUILayout.FloatField(CurrentSettings.PositionSnapDistance, GUILayout.Width(30));
+			CurrentSettings.PositionSnapDistance = EditorGUILayout.FloatField(CurrentSettings.PositionSnapDistance, GUILayout.MaxWidth(70f),GUILayout.MinWidth(30f));
 			
 			if (SabreGUILayout.Button("-", EditorStyles.miniButtonLeft))
 			{
