@@ -106,7 +106,7 @@ namespace Sabresaurus.SabreCSG
 				);
 
 				style.fixedHeight = VIEW_MENU_HEIGHT;
-				GUILayout.Window(140009, viewMenuRect, OnViewMenuGUI, "", style);
+				GUILayout.Window(140012, viewMenuRect, OnViewMenuGUI, "", style);
 			}
 
 			style = new GUIStyle(EditorStyles.toolbar);

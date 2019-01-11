@@ -1306,7 +1306,7 @@ namespace Sabresaurus.SabreCSG
                 style = new GUIStyle(EditorStyles.toolbar);
                 style.fixedWidth = BRUSH_MENU_WIDTH;
                 style.fixedHeight = BRUSH_MENU_HEIGHT;
-                GUILayout.Window(140008, brushMenuRect, OnBrushSettingsGUI, "", style);
+                GUILayout.Window(140011, brushMenuRect, OnBrushSettingsGUI, "", style);
             }
         }
 
