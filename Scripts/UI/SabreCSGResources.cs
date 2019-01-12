@@ -177,19 +177,35 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D NoCSGIconTexture 
+		{
+			get 
+			{
+				return (Texture2D)LoadObject("Gizmos/NoCSG.png");
+			}
+		}
+
+        public static Texture2D PreviewBuildIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/PreviewBuild.png");
+            }
+        }
+
+        public static Texture2D FinalBuildIconTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/FinalBuild.png");
+            }
+        }
+
         public static Texture2D VolumeIconTexture
         {
             get
             {
                 return (Texture2D)LoadObject("Gizmos/Volume.png");
-            }
-        }
-
-        public static Texture2D NoCSGIconTexture
-        {
-            get
-            {
-                return (Texture2D)LoadObject("Gizmos/NoCSG.png");
             }
         }
 

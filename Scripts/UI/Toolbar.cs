@@ -297,15 +297,25 @@ namespace Sabresaurus.SabreCSG
 
             if (SabreGUILayout.Button("Rebuild"))
             {
-				csgModel.Build(false, false);
+				csgModel.Build(false, false, false);
             }
 
 			if (SabreGUILayout.Button("Force Rebuild"))
 			{
-				csgModel.Build(true, false);
+				csgModel.Build(true, false, false);
 			}
 
-			GUI.color = Color.white;
+            if (SabreGUILayout.Button("Final Rebuild"))
+            {
+                if (EditorUtility.DisplayDialog("SabreCSG", "Warning: This may take a VERY long time!\n\nIt will repair all of the flickering pixel artifacts.\n\nAny further changes will require another final rebuild. Are you sure you wish to continue?", "Yes", "No"))
+                {
+                    // disable auto rebuild to prevent any accidential changes after this is done.
+                    csgModel.AutoRebuild = false;
+                    csgModel.Build(true, false, true);
+                }
+            }
+
+            GUI.color = Color.white;
 
 			if(csgModel.AutoRebuild)
 			{
