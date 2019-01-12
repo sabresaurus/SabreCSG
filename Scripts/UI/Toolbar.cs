@@ -144,7 +144,7 @@ namespace Sabresaurus.SabreCSG
 				{
 					newPosition = hits[0].Point;
 					// Back a unit, since the brush is around 2 units in each dimensions
-					newPosition += hits[0].Normal;
+					newPosition += hits[0].Normal * CurrentSettings.PositionSnapDistance;
 					newPosition -= csgModel.GetComponent<Transform>().position;
 
 					if(CurrentSettings.PositionSnappingEnabled)
@@ -207,7 +207,11 @@ namespace Sabresaurus.SabreCSG
         static void CreatePrimitiveBrush(PrimitiveBrushType brushType)
 		{
 			Vector3 position = GetPositionForNewBrush();
-			GameObject newBrushObject = csgModel.CreateBrush(brushType, position);
+			GameObject newBrushObject = csgModel.CreateBrush(
+				brushType, 
+				position,
+				Vector3.one * CurrentSettings.PositionSnapDistance * 2f
+			);
 
 			// Set the selection to the new object
 			Selection.activeGameObject = newBrushObject;
