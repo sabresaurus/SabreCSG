@@ -132,13 +132,24 @@ namespace Sabresaurus.SabreCSG
 		/// <param name="polygons">Coplanar set of polygons.</param>
 		internal static List<Polygon> CalculateConvexHulls(List<Polygon> polygons)
         {
-			// Convex hull of 1 polygon is guaranteed to be itself, so early out. Note that care must be taken as the reference is the same as the input
+            // Convex hull of 1 polygon is guaranteed to be itself, so early out. Note that care must be taken as the reference is the same as the input
             //if(polygons.Count == 1)
             //{
             //    return polygons;
             //}
 
-			// Cache the polygon's normal so that we don't have to calculate it for the new polygons
+            //Coplanar test. If failed, abort optimization;
+            for (int i = 0; i < polygons.Count; i++)
+            {
+                for (int j = i + 1; j < polygons.Count; j++)
+                {
+                    if (!MathHelper.PlaneEqualsLooser(polygons[i].Plane, polygons[j].Plane))
+                    {
+                        return polygons;
+                    }
+                }
+            }
+            // Cache the polygon's normal so that we don't have to calculate it for the new polygons
             Vector3 normal = polygons[0].Plane.normal;
 
             // TODO: Generate islands
