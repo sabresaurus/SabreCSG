@@ -29,7 +29,10 @@ namespace Sabresaurus.SabreCSG
 		static string warningMessage = "Concave brushes detected";
 
 		public static bool primitiveMenuShowing = false;
-		static bool viewMenuShowing = false;
+		public static bool viewMenuShowing = false;
+
+		public static Rect viewMenuRect;
+		public static Rect primitiveMenuRect;
 
 		// If the viewport is too squashed to show everything on one line
 		static bool showToolbarOnTwoLines = false;
@@ -85,7 +88,7 @@ namespace Sabresaurus.SabreCSG
 
 			if (primitiveMenuShowing) {
 				style = new GUIStyle(EditorStyles.toolbar);
-				Rect primitiveMenuRect = new Rect(
+				primitiveMenuRect = new Rect(
 					0, 
 					(sceneView.position.height - bottomToolbarHeight) - PRIMITIVE_MENU_HEIGHT, 
 					PRIMITIVE_MENU_WIDTH,
@@ -98,7 +101,7 @@ namespace Sabresaurus.SabreCSG
 
 			if (viewMenuShowing) {
 				style = new GUIStyle(EditorStyles.toolbar);
-				Rect viewMenuRect = new Rect(
+				viewMenuRect = new Rect(
 					sceneView.position.width - VIEW_MENU_WIDTH, 
 					(sceneView.position.height - bottomToolbarHeight) - VIEW_MENU_HEIGHT, 
 					VIEW_MENU_WIDTH,

@@ -74,6 +74,14 @@ namespace Sabresaurus.SabreCSG
 
         private bool inverseSnapSelectionToCurrentGridLogic = false;
 
+        private bool preventBrushSelection = false;
+        public override bool PreventBrushSelection 
+        {
+            get {
+                return preventBrushSelection;
+            }
+        }
+
         private ResizeHandlePair[] resizeHandlePairs = new ResizeHandlePair[]
         {
 			// Edge Mid Points
@@ -440,6 +448,8 @@ namespace Sabresaurus.SabreCSG
 
         private void OnMouseMove(SceneView sceneView, Event e)
         {
+            preventBrushSelection = (primaryTargetBrush != null && EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, brushMenuRect));
+
             if (CameraPanInProgress || primaryTargetBrushBase == null || widgetMode != WidgetMode.Bounds)
             {
                 return;
@@ -773,7 +783,8 @@ namespace Sabresaurus.SabreCSG
 
             marqueeStart = e.mousePosition;
 
-            if (EditorHelper.IsMousePositionInInvalidRects(e.mousePosition))
+            if (EditorHelper.IsMousePositionInInvalidRects(e.mousePosition) || 
+                (primaryTargetBrush != null && EditorHelper.IsMousePositionInIMGUIRect(e.mousePosition, brushMenuRect)))
             {
                 marqueeCancelled = true;
             }
