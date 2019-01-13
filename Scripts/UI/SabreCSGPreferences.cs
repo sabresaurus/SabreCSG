@@ -118,6 +118,14 @@ namespace Sabresaurus.SabreCSG
 
             EditorGUILayout.Space();
             EditorGUI.indentLevel = 1;
+            EditorGUILayout.LabelField("Experimental Options", EditorStyles.boldLabel);
+            EditorGUI.indentLevel = 0;
+            EditorGUILayout.Space();
+
+            CurrentSettings.VertexPaintToolEnabled = GUILayout.Toggle(CurrentSettings.VertexPaintToolEnabled, "Vertex paint tool");
+
+            EditorGUILayout.Space();
+            EditorGUI.indentLevel = 1;
             EditorGUILayout.LabelField("Developer Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel = 0;
             EditorGUILayout.Space();

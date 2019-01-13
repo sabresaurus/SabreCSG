@@ -135,7 +135,7 @@ namespace Sabresaurus.SabreCSG
             {
                 currentMode = (MainMode)(-1);
             }
-            MainMode newMainMode = SabreGUILayout.DrawEnumGrid(currentMode, GUILayout.Width(50));
+            MainMode newMainMode = SabreGUILayout.DrawPartialEnumGrid(currentMode, CurrentSettings.enabledModes, GUILayout.Width(50));
             if(newMainMode != currentMode)
             {
                 csgModel.SetCurrentMode(newMainMode);
