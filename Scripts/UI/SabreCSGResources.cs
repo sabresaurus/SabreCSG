@@ -313,6 +313,14 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        public static Texture2D ButtonMoreTexture
+        {
+            get
+            {
+                return (Texture2D)LoadObject("Gizmos/ButtonMore.png");
+            }
+        }
+
         public static Texture2D ButtonProjectedGridTexture
         {
             get

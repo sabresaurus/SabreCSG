@@ -111,7 +111,15 @@ namespace Sabresaurus.SabreCSG
                 // Mouse is over the bottom toolbar
                 return true;
             }
-            else
+            else if (Toolbar.viewMenuShowing && IsMousePositionInIMGUIRect(mousePosition, Toolbar.viewMenuRect))
+			{
+				return true;
+			} 
+            else if (Toolbar.primitiveMenuShowing && IsMousePositionInIMGUIRect(mousePosition, Toolbar.primitiveMenuRect))
+			{
+				return true;
+			}
+			else
 	        {
 	            return false;
 	        }
