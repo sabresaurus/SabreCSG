@@ -14,7 +14,7 @@ namespace Sabresaurus.SabreCSG
 		public const int PRIMITIVE_MENU_WIDTH = 200;
 		public const int PRIMITIVE_MENU_HEIGHT = 70;
 		public const int VIEW_MENU_WIDTH = 220;
-		public const int VIEW_MENU_HEIGHT = 190;
+		public const int VIEW_MENU_HEIGHT = 244;
 
 		public static int bottomToolbarHeight;
 
@@ -347,6 +347,32 @@ namespace Sabresaurus.SabreCSG
                 CSGModel.UpdateAllBrushesVisibility();
 				SceneView.RepaintAll();
 			}
+
+			EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowExcludedPolygons = EditorGUILayout.Toggle("Show excluded faces", CurrentSettings.ShowExcludedPolygons);
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                SceneView.RepaintAll();
+            }
+
+			EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowBrushBoundsGuideLines = EditorGUILayout.Toggle("Show brush guides", CurrentSettings.ShowBrushBoundsGuideLines);
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
+
+			EditorGUI.BeginChangeCheck();
+            CurrentSettings.ShowBrushesAsWireframes = EditorGUILayout.Toggle("Wireframe", CurrentSettings.ShowBrushesAsWireframes);
+            if (EditorGUI.EndChangeCheck())
+            {
+                // What's shown in the SceneView has potentially changed, so force it to repaint
+                CSGModel.UpdateAllBrushesVisibility();
+                SceneView.RepaintAll();
+            }
 
 			GUILayout.Space(10);
 
