@@ -305,6 +305,11 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        /// <summary>
+        /// Displays a list of enum buttons.
+        /// </summary>
+        /// <param name="value">The active value enum.</param>
+        /// <returns>The enum selected when the user clicks one of the buttons.</returns>
         public static T DrawEnumGrid<T>(T value, params GUILayoutOption[] options) where T : struct, IConvertible
         {
             if (!typeof(T).IsEnum)
@@ -347,6 +352,12 @@ namespace Sabresaurus.SabreCSG
             return value;
         }
 
+        /// <summary>
+        /// Displays a list of enum buttons, using only the provided enums.
+        /// </summary>
+        /// <param name="value">The active value enum.</param>
+        /// <param name="enabled">The visible enum values.</param>
+        /// <returns>The enum selected when the user clicks one of the buttons.</returns>
         public static T DrawPartialEnumGrid<T>(T value, T[] enabled, params GUILayoutOption[] options) where T : struct, IConvertible
         {
             if (!typeof(T).IsEnum)
