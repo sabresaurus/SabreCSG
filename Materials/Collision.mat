@@ -15,7 +15,23 @@ Material:
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs: {}
-    m_Floats: {}
+    m_Floats:
+      data:
+        first:
+          name: _GridSize
+        second: 1
+      data:
+        first:
+          name: _GridToggle
+        second: 0
+      data:
+        first:
+          name: _FaceToggle
+        second: 0
+      data:
+        first:
+          name: _GridAlpha
+        second: 0.3
     m_Colors:
       data:
         first:
