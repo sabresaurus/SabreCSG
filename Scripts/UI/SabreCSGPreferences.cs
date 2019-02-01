@@ -91,9 +91,17 @@ namespace Sabresaurus.SabreCSG
             CurrentSettings.OverrideFlyCamera = GUILayout.Toggle(CurrentSettings.OverrideFlyCamera, "Linear fly camera");
 
             EditorGUILayout.Space();
-            EditorGUI.indentLevel = 1;
-            EditorGUILayout.LabelField("Developer Options", EditorStyles.boldLabel);
-            EditorGUI.indentLevel = 0;
+            using (new EditorGUI.IndentLevelScope()) {
+                EditorGUILayout.LabelField("Experimental Options", EditorStyles.boldLabel);
+            }
+            EditorGUILayout.Space();
+
+            CurrentSettings.VertexPaintToolEnabled = GUILayout.Toggle(CurrentSettings.VertexPaintToolEnabled, "Vertex paint tool");
+
+            EditorGUILayout.Space();
+            using (new EditorGUI.IndentLevelScope()) {
+                EditorGUILayout.LabelField("Developer Options", EditorStyles.boldLabel);
+            }
             EditorGUILayout.Space();
 
             EditorGUI.BeginChangeCheck();

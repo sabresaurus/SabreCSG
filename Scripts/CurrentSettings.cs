@@ -372,6 +372,29 @@ namespace Sabresaurus.SabreCSG
                 PlayerPrefs.SetInt(KEY_PREFIX + "alwaysSnapToCurrentGrid", value ? 1 : 0);
             }
         }
+
+        // Experimental options
+
+        public static MainMode[] enabledModes {
+            get {
+                MainMode[] output = (MainMode[]) Enum.GetValues(typeof(MainMode));
+
+                if (!VertexPaintToolEnabled) {
+                    output = Array.FindAll(output, e => { return e != MainMode.Paint; });
+                }
+
+                return output;
+            }
+        }
+
+        public static bool VertexPaintToolEnabled {
+            get {
+                return PlayerPrefs.GetInt(KEY_PREFIX + "VertexPaintToolEnabled") == 1;
+            }
+            set {
+                PlayerPrefs.SetInt(KEY_PREFIX + "VertexPaintToolEnabled", value ? 1 : 0);
+            }
+        }
     }
 }
 
