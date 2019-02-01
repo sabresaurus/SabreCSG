@@ -29,7 +29,18 @@ namespace Sabresaurus.SabreCSG
 #if UNITY_EDITOR
                 if (filters[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(filters[i].sharedMesh))
 #endif
-                    GameObject.DestroyImmediate(filters[i].sharedMesh);
+                {
+#if UNITY_EDITOR && UNITY_2018_3_OR_NEWER
+                    if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(filters[i].sharedMesh))
+                    {
+                        GameObject.DestroyImmediate(UnityEditor.PrefabUtility.GetCorrespondingObjectFromOriginalSource(filters[i].sharedMesh));
+                    }
+                    else
+#endif
+                    {
+                        GameObject.DestroyImmediate(filters[i].sharedMesh);
+                    }
+                }
             }
 
             for (int i = 0; i < colliders.Length; i++)
@@ -37,7 +48,18 @@ namespace Sabresaurus.SabreCSG
 #if UNITY_EDITOR
                 if (colliders[i].sharedMesh != null && !UnityEditor.AssetDatabase.Contains(colliders[i].sharedMesh))
 #endif
-                    GameObject.DestroyImmediate(colliders[i].sharedMesh);
+                {
+#if UNITY_EDITOR && UNITY_2018_3_OR_NEWER
+                    if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(colliders[i].sharedMesh))
+                    {
+                        GameObject.DestroyImmediate(UnityEditor.PrefabUtility.GetCorrespondingObjectFromOriginalSource(colliders[i].sharedMesh));
+                    }
+                    else
+#endif
+                    {
+                        GameObject.DestroyImmediate(colliders[i].sharedMesh);
+                    }
+                }
             }
 
             // Finally destroy the game objects and components
