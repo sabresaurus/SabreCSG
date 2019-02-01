@@ -18,12 +18,6 @@ namespace Sabresaurus.SabreCSG
 
 		public static int bottomToolbarHeight;
 
-		static string[] gridTypeSettings = new string[] {
-			"Unity",
-			"SabreCSG",
-			"None"
-		};
-
         static CSGModel csgModel;
 
 		static string warningMessage = "Concave brushes detected";
