@@ -1397,8 +1397,6 @@ namespace Sabresaurus.SabreCSG
 			bool[] collisionStates = targetBrushBases.Select(item => item.HasCollision).Distinct().ToArray();
 			bool hasCollision = (collisionStates.Length == 1) ? collisionStates[0] : false;
 
-			GUIStyle toggleStyle = new GUIStyle(GUI.skin.toggle);
-
 			// TODO: If the brushes are all volumes, the collision and visible checkboxes should be disabled
 
 			// bool allVolumes = true;
@@ -1453,7 +1451,6 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.Label("Flip", EditorStyles.label);
 			GUILayout.FlexibleSpace();
 
-			string[] flipToolbarStrings = {"X","Y","Z"};
 			int flipIndex = -1;
             if(GUILayout.Button("X", EditorStyles.miniButtonLeft, GUILayout.Width(20)))
             {
