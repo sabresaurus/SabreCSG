@@ -494,7 +494,7 @@ namespace Sabresaurus.SabreCSG
 				List<Type> compoundBrushTypes = CompoundBrush.FindAllInAssembly();
 				for (int i = 0; i < compoundBrushTypes.Count; i++) 
 				{
-                    int j = i; // Unity IL bug causes "i" to be "2" in the lambda expression unless we assign it to a scoped variable.
+                    int j = i; // Closure causes "i" to be "2" in the lambda expression unless we assign it to a scoped variable.
 					menu.AddItem (
 						new GUIContent (compoundBrushTypes[i].Name), 
 						false, 
