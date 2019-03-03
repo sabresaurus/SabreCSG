@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -254,9 +255,9 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             if (rawvalue[0] == '(')
             {
                 string[] values = rawvalue.Replace("(", "").Replace(")", "").Split(' ');
-                VmfVector3 p1 = new VmfVector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
-                VmfVector3 p2 = new VmfVector3(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]));
-                VmfVector3 p3 = new VmfVector3(float.Parse(values[6]), float.Parse(values[7]), float.Parse(values[8]));
+                VmfVector3 p1 = new VmfVector3(float.Parse(values[0], CultureInfo.InvariantCulture), float.Parse(values[1], CultureInfo.InvariantCulture), float.Parse(values[2], CultureInfo.InvariantCulture));
+                VmfVector3 p2 = new VmfVector3(float.Parse(values[3], CultureInfo.InvariantCulture), float.Parse(values[4], CultureInfo.InvariantCulture), float.Parse(values[5], CultureInfo.InvariantCulture));
+                VmfVector3 p3 = new VmfVector3(float.Parse(values[6], CultureInfo.InvariantCulture), float.Parse(values[7], CultureInfo.InvariantCulture), float.Parse(values[8], CultureInfo.InvariantCulture));
                 value = new VmfPlane(p1, p2, p3);
                 return true;
             }
@@ -264,7 +265,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
             else if (rawvalue[0] == '[')
             {
                 string[] values = rawvalue.Replace("[", "").Replace("]", "").Split(' ');
-                value = new VmfAxis(new VmfVector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2])), float.Parse(values[3]), float.Parse(values[4]));
+                value = new VmfAxis(new VmfVector3(float.Parse(values[0], CultureInfo.InvariantCulture), float.Parse(values[1], CultureInfo.InvariantCulture), float.Parse(values[2], CultureInfo.InvariantCulture)), float.Parse(values[3], CultureInfo.InvariantCulture), float.Parse(values[4], CultureInfo.InvariantCulture));
                 return true;
             }
             // detect floating point value.

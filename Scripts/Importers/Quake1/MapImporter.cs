@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR || RUNTIME_CSG
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -151,14 +152,14 @@ namespace Sabresaurus.SabreCSG.Importers.Quake1
 
                 try
                 {
-                    MapVector3 p1 = new MapVector3(float.Parse(values[0]), float.Parse(values[1]), float.Parse(values[2]));
-                    MapVector3 p2 = new MapVector3(float.Parse(values[3]), float.Parse(values[4]), float.Parse(values[5]));
-                    MapVector3 p3 = new MapVector3(float.Parse(values[6]), float.Parse(values[7]), float.Parse(values[8]));
+                    MapVector3 p1 = new MapVector3(float.Parse(values[0], CultureInfo.InvariantCulture), float.Parse(values[1], CultureInfo.InvariantCulture), float.Parse(values[2], CultureInfo.InvariantCulture));
+                    MapVector3 p2 = new MapVector3(float.Parse(values[3], CultureInfo.InvariantCulture), float.Parse(values[4], CultureInfo.InvariantCulture), float.Parse(values[5], CultureInfo.InvariantCulture));
+                    MapVector3 p3 = new MapVector3(float.Parse(values[6], CultureInfo.InvariantCulture), float.Parse(values[7], CultureInfo.InvariantCulture), float.Parse(values[8], CultureInfo.InvariantCulture));
                     mapBrushSide.Plane = new MapPlane(p1, p2, p3);
                     mapBrushSide.Material = values[9];
-                    mapBrushSide.Offset = new MapVector2(float.Parse(values[10]), float.Parse(values[11]));
-                    mapBrushSide.Rotation = float.Parse(values[12]);
-                    mapBrushSide.Scale = new MapVector2(float.Parse(values[13]), float.Parse(values[14]));
+                    mapBrushSide.Offset = new MapVector2(float.Parse(values[10], CultureInfo.InvariantCulture), float.Parse(values[11], CultureInfo.InvariantCulture));
+                    mapBrushSide.Rotation = float.Parse(values[12], CultureInfo.InvariantCulture);
+                    mapBrushSide.Scale = new MapVector2(float.Parse(values[13], CultureInfo.InvariantCulture), float.Parse(values[14], CultureInfo.InvariantCulture));
                 }
                 catch (Exception)
                 {
