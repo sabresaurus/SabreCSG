@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -166,7 +167,7 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
         {
             // remove the first word, any +123 values and trim spaces.
             string[] parts = line.Substring(line.IndexOf(' ')).Replace("+", "").Trim().Split(',');
-            return new T3dVector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
+            return new T3dVector3(float.Parse(parts[0], CultureInfo.InvariantCulture), float.Parse(parts[1], CultureInfo.InvariantCulture), float.Parse(parts[2], CultureInfo.InvariantCulture));
         }
 
         /// <summary>
