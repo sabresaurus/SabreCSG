@@ -184,7 +184,17 @@ namespace Sabresaurus.SabreCSG
             int childCount = parentTransform.childCount;
             for (int i = 0; i < childCount; i++)
             {
-                GameObject.DestroyImmediate(parentTransform.GetChild(0).gameObject);
+                var go = parentTransform.GetChild(0).gameObject;
+#if UNITY_EDITOR && UNITY_2018_3_OR_NEWER
+                if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(go))
+                {
+                    GameObject.DestroyImmediate(UnityEditor.PrefabUtility.GetCorrespondingObjectFromOriginalSource(go), true);
+                }
+                else
+#endif
+                {
+                    GameObject.DestroyImmediate(go);
+                }
 
                 //			GameObject.DestroyImmediate(parentTransform.GetChild(i).gameObject);
             }
