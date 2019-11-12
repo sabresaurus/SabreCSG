@@ -418,7 +418,7 @@ namespace UnityEditorInternal
         static UnityEventBase GetDummyEvent(SerializedProperty prop)
         {
             // Create dummy instance of this type... we need it for function validation ect
-            var typeName = prop.FindPropertyRelative("m_TypeName").stringValue;
+            var typeName = prop.type;
             Type type = Type.GetType(typeName, false);
             if (type == null)
                 return new UnityEvent();
