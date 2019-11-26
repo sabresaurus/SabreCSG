@@ -1334,6 +1334,7 @@ namespace Sabresaurus.SabreCSG
         /// Used to determined whether we are subscribed to the "During scene GUI" event.
         /// Recompilations will reset this variable to false and we can rebind.
         /// </summary>
+        [NonSerialized]
         private bool isSubscribedToDuringSceneGui = false;
 
         protected override void Update()
