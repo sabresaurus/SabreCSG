@@ -1429,7 +1429,11 @@ namespace Sabresaurus.SabreCSG
             EditorApplication.update -= OnEditorUpdate;
             EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyItemGUI;
             EditorApplication.projectWindowItemOnGUI -= OnProjectItemGUI;
+#if UNITY_2019_1_OR_NEWER
+            SceneView.duringSceneGui -= OnSceneGUI;
+#else
             SceneView.onSceneGUIDelegate -= OnSceneGUI;
+#endif
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
 
             GridManager.UpdateGrid();
@@ -1438,8 +1442,13 @@ namespace Sabresaurus.SabreCSG
         public void RebindToOnSceneGUI()
         {
             // Unbind the delegate, then rebind to ensure our method gets called last
+#if UNITY_2019_1_OR_NEWER
+            SceneView.duringSceneGui -= OnSceneGUI;
+            SceneView.duringSceneGui += OnSceneGUI;
+#else
             SceneView.onSceneGUIDelegate -= OnSceneGUI;
             SceneView.onSceneGUIDelegate += OnSceneGUI;
+#endif
         }
 
         public void ExportOBJ(bool limitToSelection)
@@ -2045,7 +2054,11 @@ namespace Sabresaurus.SabreCSG
             if (buildSettings.GenerateLightmapUVs)
             {
                 UnityEditor.StaticEditorFlags staticFlags = UnityEditor.GameObjectUtility.GetStaticEditorFlags(newGameObject);
+#if UNITY_2019_1_OR_NEWER
+                staticFlags |= UnityEditor.StaticEditorFlags.ContributeGI;
+#else
                 staticFlags |= UnityEditor.StaticEditorFlags.LightmapStatic;
+#endif
                 UnityEditor.GameObjectUtility.SetStaticEditorFlags(newGameObject, staticFlags);
             }
         }
@@ -2117,7 +2130,7 @@ namespace Sabresaurus.SabreCSG
 		}
 #endif
 #endif
+            }
     }
-}
 
 #endif
