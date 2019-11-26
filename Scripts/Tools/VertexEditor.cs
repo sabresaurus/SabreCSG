@@ -998,7 +998,7 @@ namespace Sabresaurus.SabreCSG
 			}
 
 			// Draw UI specific to this editor
-			Rect rectangle = new Rect(0, 50, 140, 180);
+			Rect rectangle = new Rect(0, 50, 175, 180);
 			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
 			toolbar.normal.background = SabreCSGResources.ClearTexture;
 			toolbar.fixedHeight = rectangle.height;
