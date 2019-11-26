@@ -41,12 +41,15 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-	    public static bool SceneViewHasDelegate(SceneView.OnSceneFunc targetDelegate)
-	    {
-			return HasDelegate(SceneView.onSceneGUIDelegate, targetDelegate);
-	    }
+        /// <summary>
+        /// DO NOT USE - only here for compatibility with old third party plugins!
+        /// </summary>
+        public static bool SceneViewHasDelegate(SceneView.OnSceneFunc targetDelegate)
+        {
+            return HasDelegate(SceneView.onSceneGUIDelegate, targetDelegate);
+        }
 
-	    public enum SceneViewCamera { Top, Bottom, Left, Right, Front, Back, Other };
+        public enum SceneViewCamera { Top, Bottom, Left, Right, Front, Back, Other };
 
 		public static SceneViewCamera GetSceneViewCamera(SceneView sceneView)
 		{

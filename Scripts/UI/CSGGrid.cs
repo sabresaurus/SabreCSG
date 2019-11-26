@@ -16,15 +16,18 @@ namespace Sabresaurus.SabreCSG
 		const float MAJOR_LINE_DISTANCE = 200;
 		const float MINOR_LINE_DISTANCE = 50;
 
-		public static void Activate()
+        public static void Activate()
 		{
-			if(!EditorHelper.SceneViewHasDelegate(OnSceneGUI))
-			{
-				// Then resubscribe and repaint
-				SceneView.onSceneGUIDelegate += OnSceneGUI;
-			}
+            // resubscribe to the scene GUI updates.
+#if UNITY_2019_1_OR_NEWER
+            SceneView.duringSceneGui -= OnSceneGUI;
+            SceneView.duringSceneGui += OnSceneGUI;
+#else
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
+#endif
 
-			CSGModel[] csgModels = Object.FindObjectsOfType<CSGModel>();
+            CSGModel[] csgModels = Object.FindObjectsOfType<CSGModel>();
 
 			// Make sure the grid draws behind the CSG Model drawing. This requires us to ask the CSG Model to reregister
 			for (int i = 0; i < csgModels.Length; i++) 
@@ -39,10 +42,14 @@ namespace Sabresaurus.SabreCSG
 
 		public static void Deactivate()
 		{
-			SceneView.onSceneGUIDelegate -= OnSceneGUI;
-		}
+#if UNITY_2019_1_OR_NEWER
+            SceneView.duringSceneGui -= OnSceneGUI;
+#else
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+#endif
+        }
 
-		static void OnSceneGUI(SceneView sceneView)
+        static void OnSceneGUI(SceneView sceneView)
 		{
 			Event e = Event.current;
 
