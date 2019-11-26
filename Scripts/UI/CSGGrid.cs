@@ -20,11 +20,15 @@ namespace Sabresaurus.SabreCSG
 		{
 			if(!EditorHelper.SceneViewHasDelegate(OnSceneGUI))
 			{
-				// Then resubscribe and repaint
-				SceneView.onSceneGUIDelegate += OnSceneGUI;
-			}
+                // Then resubscribe and repaint
+#if UNITY_2019_1_OR_NEWER
+                SceneView.duringSceneGui += OnSceneGUI;
+#else
+                SceneView.onSceneGUIDelegate += OnSceneGUI;
+#endif
+            }
 
-			CSGModel[] csgModels = Object.FindObjectsOfType<CSGModel>();
+            CSGModel[] csgModels = Object.FindObjectsOfType<CSGModel>();
 
 			// Make sure the grid draws behind the CSG Model drawing. This requires us to ask the CSG Model to reregister
 			for (int i = 0; i < csgModels.Length; i++) 
@@ -39,10 +43,14 @@ namespace Sabresaurus.SabreCSG
 
 		public static void Deactivate()
 		{
-			SceneView.onSceneGUIDelegate -= OnSceneGUI;
-		}
+#if UNITY_2019_1_OR_NEWER
+            SceneView.duringSceneGui -= OnSceneGUI;
+#else
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+#endif
+        }
 
-		static void OnSceneGUI(SceneView sceneView)
+        static void OnSceneGUI(SceneView sceneView)
 		{
 			Event e = Event.current;
 

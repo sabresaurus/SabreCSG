@@ -1345,7 +1345,11 @@ namespace Sabresaurus.SabreCSG
             if (!EditorHelper.SceneViewHasDelegate(OnSceneGUI))
             {
                 // Then resubscribe and repaint
+#if UNITY_2019_1_OR_NEWER
+                SceneView.duringSceneGui += OnSceneGUI;
+#else
                 SceneView.onSceneGUIDelegate += OnSceneGUI;
+#endif
                 SceneView.RepaintAll();
             }
 
