@@ -16,17 +16,16 @@ namespace Sabresaurus.SabreCSG
 		const float MAJOR_LINE_DISTANCE = 200;
 		const float MINOR_LINE_DISTANCE = 50;
 
-		public static void Activate()
+        public static void Activate()
 		{
-			if(!EditorHelper.SceneViewHasDelegate(OnSceneGUI))
-			{
-                // Then resubscribe and repaint
+            // resubscribe to the scene GUI updates.
 #if UNITY_2019_1_OR_NEWER
-                SceneView.duringSceneGui += OnSceneGUI;
+            SceneView.duringSceneGui -= OnSceneGUI;
+            SceneView.duringSceneGui += OnSceneGUI;
 #else
-                SceneView.onSceneGUIDelegate += OnSceneGUI;
+            SceneView.onSceneGUIDelegate -= OnSceneGUI;
+            SceneView.onSceneGUIDelegate += OnSceneGUI;
 #endif
-            }
 
             CSGModel[] csgModels = Object.FindObjectsOfType<CSGModel>();
 

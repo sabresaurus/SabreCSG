@@ -1330,6 +1330,12 @@ namespace Sabresaurus.SabreCSG
             }
         }
 
+        /// <summary>
+        /// Used to determined whether we are subscribed to the "During scene GUI" event.
+        /// Recompilations will reset this variable to false and we can rebind.
+        /// </summary>
+        private bool isSubscribedToDuringSceneGui = false;
+
         protected override void Update()
         {
             if (editMode && !anyCSGModelsInEditMode)
@@ -1342,9 +1348,10 @@ namespace Sabresaurus.SabreCSG
 
             // Make sure the events we need to listen for are all bound (recompilation removes listeners, so it is
             // necessary to rebind dynamically)
-            if (!EditorHelper.SceneViewHasDelegate(OnSceneGUI))
+            if (!isSubscribedToDuringSceneGui)
             {
                 // Then resubscribe and repaint
+                isSubscribedToDuringSceneGui = true;
 #if UNITY_2019_1_OR_NEWER
                 SceneView.duringSceneGui += OnSceneGUI;
 #else
