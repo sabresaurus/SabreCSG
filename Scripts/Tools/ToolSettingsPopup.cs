@@ -46,7 +46,7 @@ namespace Sabresaurus.SabreCSG
         /// <summary>
         /// The height of the popup window.
         /// </summary>
-        private float m_Height = 0.0f;
+        private float m_Height = 1.0f;
 
         /// <summary>
         /// The OnGUI action.
