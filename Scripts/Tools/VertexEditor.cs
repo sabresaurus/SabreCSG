@@ -997,9 +997,13 @@ namespace Sabresaurus.SabreCSG
 				DrawVertices(sceneView, e);
 			}
 
-			// Draw UI specific to this editor
-			Rect rectangle = new Rect(0, 50, 175, 180);
-			GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
+            // Draw UI specific to this editor
+#if UNITY_2019_3_OR_NEWER
+            Rect rectangle = new Rect(0, 50, 185, 195);
+#else
+            Rect rectangle = new Rect(0, 50, 175, 180);
+#endif
+            GUIStyle toolbar = new GUIStyle(EditorStyles.toolbar);
 			toolbar.normal.background = SabreCSGResources.ClearTexture;
 			toolbar.fixedHeight = rectangle.height;
 			GUILayout.Window(140002, rectangle, OnToolbarGUI, "", toolbar);
