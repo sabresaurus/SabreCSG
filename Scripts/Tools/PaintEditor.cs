@@ -474,14 +474,22 @@ namespace Sabresaurus.SabreCSG
             switch (drawingMode)
             {
                 case DrawingMode.Color:
+#if UNITY_2019_3_OR_NEWER
+                    toolbarHeight = 230;
+#else
                     toolbarHeight = 217;
+#endif
                     break;
 
                 case DrawingMode.R:
                 case DrawingMode.G:
                 case DrawingMode.B:
                 case DrawingMode.Alpha:
+#if UNITY_2019_3_OR_NEWER
+                    toolbarHeight = 138;
+#else
                     toolbarHeight = 126;
+#endif
                     break;
             }
 

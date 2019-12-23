@@ -64,7 +64,11 @@ namespace Sabresaurus.SabreCSG
         private float unroundedDeltaAngle = 0;
 
         // Main UI rectangle for this tool's UI
+#if UNITY_2019_3_OR_NEWER
+        private readonly Rect toolbarRect = new Rect(6, 40, 215, 245);
+#else
         private readonly Rect toolbarRect = new Rect(6, 40, 200, 226);
+#endif
 
         // Used to track what polygons have been previously clicked on, so that the user can cycle click through objects
         // on the same (or similar) ray cast
