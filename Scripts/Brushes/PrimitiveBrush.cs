@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
@@ -174,6 +175,12 @@ namespace Sabresaurus.SabreCSG
         {
             get
             {
+                if (volume)
+                {
+                    // give volumes a nice name, where "MyTriggerVolume" becomes "My Trigger Volume"
+                    return Regex.Replace(volume.GetType().Name, "([a-z])([A-Z])", "$1 $2");
+                }
+
                 switch (brushType)
                 {
                     case PrimitiveBrushType.Cube:
