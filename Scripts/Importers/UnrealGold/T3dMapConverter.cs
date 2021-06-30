@@ -46,21 +46,24 @@ namespace Sabresaurus.SabreCSG.Importers.UnrealGold
                         T3dPolygon tpolygon = tbrush.Polygons[i];
 
                         // find the material in the unity project automatically.
-                        Material material;
-                        if (tpolygon.Texture.Contains('.'))
+                        Material material = null;
+                        if (!string.IsNullOrEmpty(tpolygon.Texture))
                         {
-                            // try finding both 'PlayrShp.Ceiling.Hullwk' and 'Hullwk'.
-                            string tiny = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
-                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture, tiny });
-                            if (material == null)
-                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' and also as '" + tiny + "' but it couldn't be found in the project.");
-                        }
-                        else
-                        {
-                            // only try finding 'Hullwk'.
-                            material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture });
-                            if (material == null)
-                                Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' but it couldn't be found in the project.");
+                            if (tpolygon.Texture.Contains('.'))
+                            {
+                                // try finding both 'PlayrShp.Ceiling.Hullwk' and 'Hullwk'.
+                                string tiny = tpolygon.Texture.Substring(tpolygon.Texture.LastIndexOf('.') + 1);
+                                material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture, tiny });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' and also as '" + tiny + "' but it couldn't be found in the project.");
+                            }
+                            else
+                            {
+                                // only try finding 'Hullwk'.
+                                material = materialSearcher.FindMaterial(new string[] { tpolygon.Texture });
+                                if (material == null)
+                                    Debug.Log("SabreCSG: Tried to find material '" + tpolygon.Texture + "' but it couldn't be found in the project.");
+                            }
                         }
 
                         Vertex[] vertices = new Vertex[tpolygon.Vertices.Count];
