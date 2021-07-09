@@ -1,12 +1,12 @@
 # SabreCSG
 
-SabreCSG is a set of level design tools for building complex levels quickly inside Unity.
+**SabreCSG** is a set of level design tools for building complex levels quickly inside Unity.
 
 Using Constructive Solid Geometry techniques SabreCSG allows you to add and subtract brushes to create great levels without needing to understand 3D art packages.
 
 | | |
 | --- | --- |
-| [![Introduction Image 1](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-1.png)](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-1.png) | **ADD AND SUBTRACT BRUSHES TOGETHER TO MAKE GREAT PLAY SPACES** <p>Boolean brushes allow you to add and subtract arbitrary shapes together to rapidly create walls, rooms or carve out doors and windows. The brushes are used as a template for building the final geometry allowing you unprecedented flexibility for making minor tweaks or big changes simply by modifying the brushes.</p> |
+| [![Introduction Image 1](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-1.png)](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-1.png) | **ADD AND SUBTRACT BRUSHES TOGETHER TO MAKE GREAT PLAY SPACES** <p>Boolean brushes allow you to add and subtract arbitrary shapes together to rapidly create walls, rooms or carve outdoors and windows. The brushes are used as a template for building the final geometry allowing you unprecedented flexibility for making minor tweaks or big changes simply by modifying the brushes.</p> |
 | **POWERFUL BRUSH AND GEOMETRY TOOLS** <p>SabreCSG comes equipped with a whole range of tools for editing brushes and geometry, from intuitive resize tools which let you quickly block out spaces to vertex and edge editing modes which let you go in and tweak in more detail, to advanced clipping tools allowing you to bevel or cut entire brushes in two.</p> | [![Introduction Image 2](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-2.png)](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-2.png) |
 | [![Introduction Image 3](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-3.png)](https://github.com/sabresaurus/SabreCSG/wiki/images/home-introduction-3.png) | **APPLY MATERIALS AND EDIT UVs** <p>With its surface tools, SabreCSG allows you to translate, rotate and scale surfaces, apply new materials, exclude faces from the final geometry for speed. And with newly upgraded features there’s a whole set of new helper functions to speed up your workflow.</p> |
 
@@ -40,6 +40,6 @@ Documentation and videos on how to use SabreCSG are available at the [SabreCSG L
 
 ## Donations:
 
-If you love SabreCSG and wish to say thanks then please feel free to make a donation. Your donations are a huge motivator to continue the development of SabreCSG.
+If you love SabreCSG and wish to say thanks, then please feel free to make a donation. Your donations are a huge motivator to continue the development of SabreCSG.
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/henrydejongh)
