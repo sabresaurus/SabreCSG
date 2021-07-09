@@ -19,11 +19,6 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
     /// <seealso cref="UnityEditor.EditorWindow"/>
     public class ShapeEditorWindow : EditorWindow
     {
-        //private class FakeUndoObject : UnityEngine.Object
-        //{
-        //    // todo
-        //}
-
         /// <summary>
         /// The currently loaded project.
         /// </summary>
@@ -88,6 +83,48 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// The background image shown in the editor (loaded by the user).
         /// </summary>
         private Texture2D backgroundImage;
+
+        /// <summary>
+        /// The undo/redo barrier that overrides the default unity editor undo/redo.
+        /// </summary>
+        private UndoRedoBarrier undoRedoBarrierHandle;
+
+        /// <summary>
+        /// Gets the undo/redo barrier that overrides the default unity editor undo/redo.
+        /// </summary>
+        private UndoRedoBarrier undoRedoBarrier
+        {
+            get
+            {
+                if (undoRedoBarrierHandle == null)
+                {
+                    undoRedoBarrierHandle = new UndoRedoBarrier(this, "SabreCSG: 2DSE (0133bffe-1187-407a-81c6-b15623ad7b60)");
+                    undoRedoBarrier.OnUndo += OnUndo;
+                    undoRedoBarrier.OnRedo += OnRedo;
+                }
+                return undoRedoBarrierHandle;
+            }
+        }
+
+        /// <summary>
+        /// The custom undo stack used by the 2D Shape Editor while it has window focus.
+        /// </summary>
+        private List<Project> undoStack = new List<Project>();
+
+        /// <summary>
+        /// The custom redo stack used by the 2D Shape Editor while it has window focus.
+        /// </summary>
+        private List<Project> redoStack = new List<Project>();
+
+        /// <summary>
+        /// If true it will store the project on the undo stack on certain events (like mouse up).
+        /// </summary>
+        private bool undoStackIsDirty;
+
+        /// <summary>
+        /// The last project state before new changes were made, used by the undo and redo stacks.
+        /// </summary>
+        private Project undoStackLastProject = new Project();
 
         /// <summary>
         /// The currently selected segments.
@@ -304,6 +341,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
         private void OnGUI()
         {
+            // forward event to custom undo stack.
+            undoRedoBarrier.OnGUI();
+
             if (Event.current.type == EventType.MouseDrag)
             {
                 // move object around with the left mouse button.
@@ -330,7 +370,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         // move the global pivot.
                         if (isGlobalPivotSelected)
                         {
-                            project.globalPivot.position += mouseGridDelta;
+                            MaybeUndo(project.globalPivot.position, project.globalPivot.position += mouseGridDelta);
                             this.Repaint();
                         }
                         // move an entire shape by its pivot.
@@ -339,14 +379,14 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             bool isShapeSelected = IsObjectSelected(shape.pivot);
                             if (isShapeSelected)
                             {
-                                shape.pivot.position += mouseGridDelta;
+                                MaybeUndo(shape.pivot.position, shape.pivot.position += mouseGridDelta);
                                 foreach (Segment segment in shape.segments)
                                 {
                                     // move segment.
-                                    segment.position += mouseGridDelta;
+                                    MaybeUndo(segment.position, segment.position += mouseGridDelta);
                                     // move bezier pivot handles.
-                                    segment.bezierPivot1.position += mouseGridDelta;
-                                    segment.bezierPivot2.position += mouseGridDelta;
+                                    MaybeUndo(segment.bezierPivot1.position, segment.bezierPivot1.position += mouseGridDelta);
+                                    MaybeUndo(segment.bezierPivot2.position, segment.bezierPivot2.position += mouseGridDelta);
                                 }
                                 this.Repaint();
                             }
@@ -366,9 +406,13 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                             {
                                 if (segment.type != SegmentType.Bezier) continue;
                                 if (IsObjectSelected(segment.bezierPivot1))
-                                    segment.bezierPivot1.position += mouseGridDelta;
+                                {
+                                    MaybeUndo(segment.bezierPivot1.position, segment.bezierPivot1.position += mouseGridDelta);
+                                }
                                 if (IsObjectSelected(segment.bezierPivot2))
-                                    segment.bezierPivot2.position += mouseGridDelta;
+                                {
+                                    MaybeUndo(segment.bezierPivot2.position, segment.bezierPivot2.position += mouseGridDelta);
+                                }
                                 this.Repaint();
                             }
                         }
@@ -377,7 +421,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         {
                             // we don't move segments while the shape is dragged (they already moved).
                             if (IsObjectSelected(GetShapeOfSegment(segment).pivot)) continue;
-                            segment.position += mouseGridDelta;
+                            MaybeUndo(segment.position, segment.position += mouseGridDelta);
                             this.Repaint();
                         }
 
@@ -446,6 +490,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         this.Repaint();
                     }
                 }
+
+                // maybe register an undo state if there was a change.
+                MaybeRegisterUndo();
             }
 
             // implement keyboard shortcuts.
@@ -454,151 +501,178 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 if (Event.current.keyCode == KeyCode.N)
                 {
                     OnNew();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.O)
                 {
                     OnOpen();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.S)
                 {
                     OnSave();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.R && Event.current.modifiers != 0)
                 {
                     OnRotate90Left();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.R)
                 {
                     OnRotate90Right();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.H)
                 {
                     OnFlipHorizontally();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.V)
                 {
                     OnFlipVertically();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Plus || Event.current.keyCode == KeyCode.KeypadPlus)
                 {
                     OnZoomIn();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Minus || Event.current.keyCode == KeyCode.KeypadMinus)
                 {
                     OnZoomOut();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.F)
                 {
                     OnHome();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.A)
                 {
                     OnShapeCreate();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.I)
                 {
                     OnSegmentInsert();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.E)
                 {
                     OnSegmentExtrude();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Delete)
                 {
                     OnDelete();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.L)
                 {
                     OnSegmentLinear();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.B)
                 {
                     OnSegmentBezier();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.D && Event.current.modifiers != 0)
                 {
                     OnShapeDuplicate();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.D)
                 {
                     OnSegmentBezierDetail();
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha1 && Event.current.modifiers != 0)
                 {
                     OnCreatePolygon(false);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha1)
                 {
                     OnCreatePolygon(true);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha2 && Event.current.modifiers != 0)
                 {
                     OnRevolveShape(false);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha2)
                 {
                     OnRevolveShape(true);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha3 && Event.current.modifiers != 0)
                 {
                     OnExtrudeShape(false);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha3)
                 {
                     OnExtrudeShape(true);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha4 && Event.current.modifiers != 0)
                 {
                     OnExtrudePoint(false);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha4)
                 {
                     OnExtrudePoint(true);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Alpha5 && Event.current.modifiers != 0)
                 {
                     OnExtrudeBevel(false);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
                 else if (Event.current.keyCode == KeyCode.Alpha5)
                 {
                     OnExtrudeBevel(true);
+                    MaybeRegisterUndo();
                     Event.current.Use();
                 }
             }
 
-            //if(Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed")
-            //{
-            //    // we don't want to use the unity editor undo function.
-            //    Debug.Log(Event.current.commandName);
-            //    Event.current.Use();
-            //}
+            if (Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed")
+            {
+                // redraw to make sure any changes to the project are visible.
+                this.Repaint();
+            }
 
             if (Event.current.type == EventType.Repaint)
             {
@@ -777,103 +851,126 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorNewTexture, "New Project (N)"), createBrushStyle))
             {
                 OnNew();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorOpenTexture, "Open Project (O)"), createBrushStyle))
             {
                 OnOpen();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSaveTexture, "Save Project (S)"), createBrushStyle))
             {
                 OnSave();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorRotate90LeftTexture, "Rotate 90° Left Around Pivot (SHIFT + R)"), createBrushStyle))
             {
                 OnRotate90Left();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorRotate90RightTexture, "Rotate 90° Right Around Pivot (R)"), createBrushStyle))
             {
                 OnRotate90Right();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorFlipVerticallyTexture, "Flip Vertically At Pivot (V)"), createBrushStyle))
             {
                 OnFlipVertically();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorFlipHorizontallyTexture, "Flip Horizontally At Pivot (H)"), createBrushStyle))
             {
                 OnFlipHorizontally();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorZoomInTexture, "Zoom In (+)"), createBrushStyle))
             {
                 OnZoomIn();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorZoomOutTexture, "Zoom Out (-)"), createBrushStyle))
             {
                 OnZoomOut();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorHomeTexture, "Reset Camera To Center (F)"), createBrushStyle))
             {
                 OnHome();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeDuplicateTexture, "Duplicate Selected Shape(s) (SHIFT + D)"), createBrushStyle))
             {
                 OnShapeDuplicate();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorShapeCreateTexture, "Add New Shape (A)"), createBrushStyle))
             {
                 OnShapeCreate();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentInsertTexture, "Split Segment(s) (I)"), createBrushStyle))
             {
                 OnSegmentInsert();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentExtrudeTexture, "Extrude Segment(s) (E)"), createBrushStyle))
             {
                 OnSegmentExtrude();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorDeleteTexture, "Delete Segment(s) or Shape(s) (DEL)"), createBrushStyle))
             {
                 OnDelete();
+                MaybeRegisterUndo();
             }
 
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentLinearTexture, "Linear Segment (L)"), createBrushStyle))
             {
                 OnSegmentLinear();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentBezierTexture, "Bezier Segment (B)"), createBrushStyle))
             {
                 OnSegmentBezier();
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorSegmentBezierDetailTexture, "Bezier Detail Settings (D)"), createBrushStyle))
             {
                 OnSegmentBezierDetail();
+                MaybeRegisterUndo();
             }
 
             GUI.enabled = (Selection.activeGameObject && Selection.activeGameObject.HasComponent<ShapeEditor.ShapeEditorBrush>());
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorCreatePolygonTexture, "Create Polygon (1 or SHIFT + 1 to skip popup)"), createBrushStyle))
             {
                 OnCreatePolygon(true);
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeRevolveTexture, "Revolve Shape (2 or SHIFT + 2 to skip popup)"), createBrushStyle))
             {
                 OnRevolveShape(true);
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeShapeTexture, "Extrude Shape (3 or SHIFT + 3 to skip popup)"), createBrushStyle))
             {
                 OnExtrudeShape(true);
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudePointTexture, "Extrude To Point (4 or SHIFT + 4 to skip popup)"), createBrushStyle))
             {
                 OnExtrudePoint(true);
+                MaybeRegisterUndo();
             }
             if (GUILayout.Button(new GUIContent(SabreCSGResources.ShapeEditorExtrudeBevelTexture, "Extrude Bevelled (5 or SHIFT + 5 to skip popup)"), createBrushStyle))
             {
                 OnExtrudeBevel(true);
+                MaybeRegisterUndo();
             }
             GUI.enabled = true;
 
@@ -896,6 +993,120 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             }
 
             GUILayout.EndHorizontal();
+        }
+
+        private void OnFocus()
+        {
+            // forward event to custom undo stack.
+            undoRedoBarrier.OnFocus();
+        }
+
+        private void OnLostFocus()
+        {
+            // forward event to custom undo stack.
+            undoRedoBarrier.OnLostFocus();
+        }
+
+        private void OnDestroy()
+        {
+            // forward event to custom undo stack.
+            undoRedoBarrier.OnDestroy();
+        }
+
+        /// <summary>
+        /// Maybes registers an undo operation if the project has been modified.
+        /// </summary>
+        private void MaybeRegisterUndo()
+        {
+            // if the project has been modified:
+            if (undoStackIsDirty)
+            {
+                undoStackIsDirty = false;
+
+                // push a copy of the last project state onto the undo stack.
+                undoStack.Push(undoStackLastProject.Clone());
+                undoStackLastProject = project.Clone();
+
+                // clear all redo operations.
+                redoStack.Clear();
+            }
+        }
+
+        /// <summary>
+        /// If the two given values are different it will save an undo state.
+        /// </summary>
+        /// <param name="original">The original value.</param>
+        /// <param name="operation">The value after the operation.</param>
+        private void MaybeUndo(int original, int operation)
+        {
+            if (original != operation)
+                undoStackIsDirty = true;
+        }
+
+        /// <summary>
+        /// If the two given values are different it will save an undo state.
+        /// </summary>
+        /// <param name="original">The original value.</param>
+        /// <param name="operation">The value after the operation.</param>
+        private void MaybeUndo(Vector2Int original, Vector2Int operation)
+        {
+            if (original != operation)
+                undoStackIsDirty = true;
+        }
+
+        /// <summary>
+        /// If the two given values are different it will save an undo state.
+        /// </summary>
+        /// <param name="original">The original value.</param>
+        /// <param name="operation">The value after the operation.</param>
+        private void MaybeUndo(Project original, Project operation)
+        {
+            if (JsonUtility.ToJson(original) != JsonUtility.ToJson(operation))
+                undoStackIsDirty = true;
+        }
+
+        /// <summary>
+        /// Handles the OnUndo event of the <see cref="undoRedoBarrier"/>.
+        /// </summary>
+        private void OnUndo(object sender, EventArgs e)
+        {
+            // if we can still undo:
+            if (undoStack.Count > 0)
+            {
+                // add the current project state to the redo stack.
+                redoStack.Push(project.Clone());
+
+                // pop a project state from the undo stack.
+                project = undoStack.Pop();
+
+                // the last state is the current state:
+                undoStackLastProject = project.Clone();
+
+                // reset the current selection as those objects no longer exist.
+                selectedObjects.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Handles the OnRedo event of the <see cref="undoRedoBarrier"/>.
+        /// </summary>
+        private void OnRedo(object sender, EventArgs e)
+        {
+            // if we can still redo:
+            if (redoStack.Count > 0)
+            {
+                // add the current project state to the undo stack.
+                undoStack.Push(project.Clone());
+
+                // pop a project state from the redo stack.
+                project = redoStack.Pop();
+
+                // the last state is the current state:
+                undoStackLastProject = project.Clone();
+
+                // reset the current selection as those objects no longer exist.
+                selectedObjects.Clear();
+            }
         }
 
         /// <summary>
@@ -949,7 +1160,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             if (EditorUtility.DisplayDialog("2D Shape Editor", "Are you sure you wish to create a new project?", "Yes", "No"))
             {
                 // create a new project.
-                project = new Project();
+                MaybeUndo(project, project = new Project());
             }
         }
 
@@ -968,12 +1179,12 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     if (proj.version != 1)
                     {
                         if (EditorUtility.DisplayDialog("2D Shape Editor", "Unsupported project version! Would you like to try loading it anyway?", "Yes", "No"))
-                            project = proj;
+                            MaybeUndo(project, project = proj);
                         Repaint();
                     }
                     else
                     {
-                        project = proj;
+                        MaybeUndo(project, project = proj);
                         Repaint();
                     }
                 }
@@ -1009,6 +1220,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Left()
         {
+            Project projectBackup = project.Clone();
+
             // find any selected shapes:
             List<Shape> selectedShapes = new List<Shape>();
             foreach (Shape shape in project.shapes)
@@ -1020,6 +1233,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 RotateSegments(project.shapes.ToArray(), -90, project.globalPivot.position);
             else
                 RotateSegments(selectedShapes.ToArray(), -90, project.globalPivot.position);
+
+            MaybeUndo(projectBackup, project);
         }
 
         /// <summary>
@@ -1027,6 +1242,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnRotate90Right()
         {
+            Project projectBackup = project.Clone();
+
             // find any selected shapes:
             List<Shape> selectedShapes = new List<Shape>();
             foreach (Shape shape in project.shapes)
@@ -1038,6 +1255,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 RotateSegments(project.shapes.ToArray(), 90, project.globalPivot.position);
             else
                 RotateSegments(selectedShapes.ToArray(), 90, project.globalPivot.position);
+
+            MaybeUndo(projectBackup, project);
         }
 
         /// <summary>
@@ -1062,6 +1281,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // recalculate the pivot position of the shape.
                 shape.CalculatePivotPosition();
             }
+
+            // can undo this operation.
+            undoStackIsDirty = true;
         }
 
         /// <summary>
@@ -1086,6 +1308,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // recalculate the pivot position of the shape.
                 shape.CalculatePivotPosition();
             }
+
+            // can undo this operation.
+            undoStackIsDirty = true;
         }
 
         /// <summary>
@@ -1156,7 +1381,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         segment.bezierPivot1.position += new Vector2Int(2, 2);
                         segment.bezierPivot2.position += new Vector2Int(2, 2);
                     }
+                    // recalculate the pivot position of the shape.
                     duplicate.CalculatePivotPosition();
+                    // can undo this operation.
+                    undoStackIsDirty = true;
                 }
             }
         }
@@ -1167,6 +1395,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         private void OnShapeCreate()
         {
             project.shapes.Add(new Shape());
+
+            // can undo this operation.
+            undoStackIsDirty = true;
         }
 
         /// <summary>
@@ -1187,6 +1418,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // recalculate the pivot position of the shape.
                 parent.CalculatePivotPosition();
+
+                // can undo this operation.
+                undoStackIsDirty = true;
             }
         }
 
@@ -1195,7 +1429,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnSegmentExtrude()
         {
-            foreach (Segment segment in selectedSegments.ToArray()) // use .ToArray() to iterate a clone.
+            foreach (Segment segment in selectedSegments.ToArray()) // using .ToArray() to iterate a clone.
             {
                 bool inverted = project.flipHorizontally ^ project.flipVertically;
                 Segment next = GetNextSegment(segment);
@@ -1212,6 +1446,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // update the selection so we have the extruded segment selected, this improves the workflow experience.
                 selectedObjects.Remove(segment);
                 selectedObjects.Add(select);
+                // can undo this operation.
+                undoStackIsDirty = true;
             }
         }
 
@@ -1237,6 +1473,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
 
                 // recalculate the pivot position of the shape.
                 parent.CalculatePivotPosition();
+
+                // can undo this operation.
+                undoStackIsDirty = true;
             }
             // remove all selected shapes.
             foreach (Shape shape in project.shapes.ToArray()) // use .ToArray() to iterate a clone.
@@ -1245,6 +1484,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 {
                     project.shapes.Remove(shape);
                     selectedObjects.Remove(shape.pivot);
+
+                    // can undo this operation.
+                    undoStackIsDirty = true;
                 }
             }
             ClearSelectionOf<Segment>();
@@ -1265,6 +1507,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                     if (IsObjectSelected(segment) || IsObjectSelected(segment.bezierPivot1) || IsObjectSelected(segment.bezierPivot2))
                     {
                         segment.type = SegmentType.Linear;
+
+                        // can undo this operation.
+                        undoStackIsDirty = true;
                     }
                 }
             }
@@ -1289,6 +1534,9 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // set the bezier pivots to two positions on the segment.
                 segment.bezierPivot1.position = new Vector2Int(Mathf.RoundToInt(first.x), Mathf.RoundToInt(first.y));
                 segment.bezierPivot2.position = new Vector2Int(Mathf.RoundToInt(second.x), Mathf.RoundToInt(second.y));
+
+                // can undo this operation.
+                undoStackIsDirty = true;
             }
         }
 
@@ -1307,7 +1555,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                         if (segment.type == SegmentType.Linear) continue;
                         // the segment or any of its bezier pivots can be used to select it.
                         if (IsObjectSelected(segment) || IsObjectSelected(segment.bezierPivot1) || IsObjectSelected(segment.bezierPivot2))
-                            segment.bezierDetail = self.bezierDetailLevel_Detail;
+                        {
+                            MaybeUndo(segment.bezierDetail, segment.bezierDetail = self.bezierDetailLevel_Detail);
+                            MaybeRegisterUndo();
+                        }
                     }
                 }
 
@@ -1510,7 +1761,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
             ShowCenteredPopupWindowContent(new ShapeEditorWindowPopup(ShapeEditorWindowPopup.PopupMode.GlobalPivotPosition, project, (self) =>
             {
                 // set the new global pivot position.
-                project.globalPivot.position = self.GlobalPivotPosition_Position;
+                MaybeUndo(project.globalPivot.position, project.globalPivot.position = self.GlobalPivotPosition_Position);
+                MaybeRegisterUndo();
 
                 // show the changes.
                 Repaint();
@@ -1522,7 +1774,8 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         /// </summary>
         private void OnToolsPivotResetPosition()
         {
-            project.globalPivot.position = Vector2Int.zero;
+            MaybeUndo(project.globalPivot.position, project.globalPivot.position = Vector2Int.zero);
+            MaybeRegisterUndo();
         }
 
         /// <summary>
@@ -1568,6 +1821,10 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
                 // add the circle shape to the project.
                 shape.segments = segments;
                 project.shapes.Add(shape);
+
+                // can undo this operation.
+                undoStackIsDirty = true;
+                MaybeRegisterUndo();
 
                 // show the changes.
                 Repaint();
@@ -1753,7 +2010,7 @@ namespace Sabresaurus.SabreCSG.ShapeEditor
         public void LoadProject(Project project)
         {
             // load the project into the editor.
-            this.project = project.Clone();
+            MaybeUndo(this.project, this.project = project.Clone());
             // update the viewport so that the user can see the changes.
             Repaint();
         }
