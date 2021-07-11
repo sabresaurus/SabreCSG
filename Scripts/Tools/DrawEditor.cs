@@ -1016,6 +1016,7 @@ namespace Sabresaurus.SabreCSG
 
         public override void Deactivated()
         {
+            base.Deactivated();
         }
 
         public override bool PreventBrushSelection

@@ -121,7 +121,7 @@ namespace Sabresaurus.SabreCSG
             
         }
 
-        private static void OnTopToolbarGUI(int windowID)
+        public static void OnTopToolbarGUI(int windowID)
         {
 			EditorGUILayout.BeginHorizontal();
             MainMode currentMode = CurrentSettings.CurrentMode;
@@ -167,7 +167,7 @@ namespace Sabresaurus.SabreCSG
 			EditorGUILayout.EndHorizontal();
         }
 
-		private static void OnWarningToolbar(int windowID)
+		public static void OnWarningToolbar(int windowID)
 		{
 			GUIStyle style = SabreGUILayout.GetOverlayStyle();
 			Vector2 size = style.CalcSize(new GUIContent(warningMessage));
@@ -307,7 +307,7 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
-		static void OnViewMenuGUI(int windowID) {
+		public static void OnViewMenuGUI(int windowID) {
 
 			float left_pad = 90f;
 			EditorGUIUtility.labelWidth = 118f;
@@ -450,7 +450,7 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 		}
 
-		static void OnPrimitiveMenuGUI(int windowID) {
+		public static void OnPrimitiveMenuGUI(int windowID) {
 			GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
 			createBrushStyle.fixedHeight = 20;
 
@@ -542,9 +542,9 @@ namespace Sabresaurus.SabreCSG
 			GUILayout.EndHorizontal();
 		}
 
-        private static void OnBottomToolbarGUI(int windowID)
-        {
-            GUILayout.BeginHorizontal();
+		public static void OnBottomToolbarGUI(int windowID)
+		{
+			GUILayout.BeginHorizontal();
 
 			GUIStyle createBrushStyle = new GUIStyle(EditorStyles.toolbarButton);
 			createBrushStyle.fixedHeight = 20;

@@ -1307,7 +1307,11 @@ namespace Sabresaurus.SabreCSG
                 BRUSH_MENU_HEIGHT
             );
 
+#if UNITY_2021_2_OR_NEWER
+            SabreToolsOverlay.window1 = () => OnTopToolbarGUI(0);
+#else
             GUILayout.Window(140007, rectangle, OnTopToolbarGUI, "", style);
+#endif
 
             if (primaryTargetBrush != null)
             {
@@ -1317,7 +1321,11 @@ namespace Sabresaurus.SabreCSG
                 style = new GUIStyle(EditorStyles.toolbar);
                 style.fixedWidth = BRUSH_MENU_WIDTH;
                 style.fixedHeight = BRUSH_MENU_HEIGHT;
+#if UNITY_2021_2_OR_NEWER
+                SabreToolsOverlay.window2 = () => OnBrushSettingsGUI(0);
+#else
                 GUILayout.Window(140011, brushMenuRect, OnBrushSettingsGUI, "", style);
+#endif
             }
         }
 
@@ -1327,7 +1335,11 @@ namespace Sabresaurus.SabreCSG
         }
 
         private void OnBrushSettingsGUI(int windowID) {
-			GUILayout.BeginHorizontal();
+            // can happen in overlays without selection.
+            if (primaryTargetBrush == null)
+                return;
+
+            GUILayout.BeginHorizontal();
 			GUILayout.Label("Brush Settings", EditorStyles.boldLabel);
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
@@ -2475,6 +2487,8 @@ namespace Sabresaurus.SabreCSG
 
         public override void Deactivated()
         {
+            base.Deactivated();
+
             // Make sure we get rid of any active custom cursor
             SabreMouse.ResetCursor();
         }

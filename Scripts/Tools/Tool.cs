@@ -258,7 +258,13 @@ namespace Sabresaurus.SabreCSG
 		// Called when the selected brush changes
 		public abstract void ResetTool();
 
-		public abstract void Deactivated();
+		public virtual void Deactivated()
+        {
+#if UNITY_2021_2_OR_NEWER
+			SabreToolsOverlay.window1 = null;
+			SabreToolsOverlay.window2 = null;
+#endif
+		}
 
 		public virtual bool BrushesHandleDrawing
 		{

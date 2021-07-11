@@ -19,6 +19,7 @@ namespace Sabresaurus.SabreCSG
 
         public override void Deactivated()
         {
+            base.Deactivated();
         }
     }
 }
