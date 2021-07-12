@@ -2,6 +2,7 @@
 
 using UnityEditor;
 using UnityEditor.Overlays;
+using UnityEngine;
 
 namespace Sabresaurus.SabreCSG
 {
@@ -9,19 +10,22 @@ namespace Sabresaurus.SabreCSG
     public class SabreToolbarOverlay : IMGUIOverlay
     {
         private const string k_Id = "sabrecsg-toolbar-overlay";
+        public static SabreToolbarOverlay Instance;
 
         public override void OnCreated()
         {
             base.OnCreated();
+
+            Instance = this;
         }
 
         public override void OnGUI()
         {
             var model = CSGModel.GetActiveCSGModel();
+
             if (model)
             {
                 Toolbar.CSGModel = model;
-                Toolbar.OnBottomToolbarGUI(0);
 
                 if (Toolbar.primitiveMenuShowing)
                 {
@@ -37,6 +41,8 @@ namespace Sabresaurus.SabreCSG
                 {
                     Toolbar.OnWarningToolbar(0);
                 }
+
+                Toolbar.OnBottomToolbarGUI(0);
             }
         }
     }

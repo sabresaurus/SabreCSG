@@ -10,6 +10,7 @@ namespace Sabresaurus.SabreCSG
     public class SabreToolsOverlay : IMGUIOverlay
     {
         private const string k_Id = "sabrecsg-tools-overlay";
+        public static SabreToolsOverlay Instance;
 
         public static System.Action window1;
         public static System.Action window2;
@@ -17,6 +18,8 @@ namespace Sabresaurus.SabreCSG
         public override void OnCreated()
         {
             base.OnCreated();
+
+            Instance = this;
         }
 
         public override void OnGUI()
