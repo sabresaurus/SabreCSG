@@ -76,7 +76,11 @@ namespace Sabresaurus.SabreCSG
 
         private List<Polygon> lastHitSet = new List<Polygon>();
 
+#if UNITY_2021_2_OR_NEWER
+        private Rect alignButtonRect = new Rect(118, 140, 80, 45);
+#else
         private Rect alignButtonRect = new Rect(118, 110, 80, 45);
+#endif
 
         private Material lastMaterial = null;
         private Color lastColor = Color.white;
@@ -1141,7 +1145,11 @@ namespace Sabresaurus.SabreCSG
             // Set the style height to match the rectangle (so it stretches instead of tiling)
             toolbar.fixedHeight = ToolbarRect.height;
             // Draw the actual GUI via a Window
+#if UNITY_2021_2_OR_NEWER
+            SabreToolsOverlay.window1 = () => OnToolbarGUI(0);
+#else
             GUILayout.Window(140009, ToolbarRect, OnToolbarGUI, "", toolbar);
+#endif
         }
 
         private void OnKeyAction(SceneView sceneView, Event e)
@@ -1468,7 +1476,11 @@ namespace Sabresaurus.SabreCSG
             }
 
             GUILayout.BeginHorizontal(GUILayout.Width(50));
+#if UNITY_2021_2_OR_NEWER
+            Rect rect = new Rect(66, 66, 60, 15);
+#else
             Rect rect = new Rect(72, 48, 60, 15);
+#endif
             bool newExcludeState = SabreGUILayout.ToggleMixed(rect, excludeState, excludeConflict, "Exclude");
 
             EditorGUI.showMixedValue = false; // Reset mixed state
@@ -1539,7 +1551,11 @@ namespace Sabresaurus.SabreCSG
             GUIStyle textFieldStyle2 = SabreGUILayout.GetTextFieldStyle2();
 
             // East Scale (u scale)
+#if UNITY_2021_2_OR_NEWER
+            Rect rect = new Rect(138, 21, 60, 16);
+#else
             Rect rect = new Rect(138, 2, 60, 16);
+#endif
             if (SabreGUILayout.DrawUVField(rect, eastScale, ref uScaleString, "uScaleField", textFieldStyle1))
             {
                 float newEastScale;
@@ -1557,7 +1573,11 @@ namespace Sabresaurus.SabreCSG
             }
 
             // North scale (v scale)
+#if UNITY_2021_2_OR_NEWER
+            rect = new Rect(138, 36, 60, 16);
+#else
             rect = new Rect(138, 17, 60, 16);
+#endif
             if (SabreGUILayout.DrawUVField(rect, northScale, ref vScaleString, "vScaleField", textFieldStyle1))
             {
                 float newNorthScale;
@@ -1575,7 +1595,11 @@ namespace Sabresaurus.SabreCSG
             }
 
             // North scale (v scale)
+#if UNITY_2021_2_OR_NEWER
+            rect = new Rect(138, 54, 60, 16);
+#else
             rect = new Rect(138, 35, 60, 16);
+#endif
             if (SabreGUILayout.DrawUVField(rect, eastOffset, ref uOffsetString, "uOffsetField", textFieldStyle2))
             {
                 float newEastOffset;
@@ -1592,7 +1616,11 @@ namespace Sabresaurus.SabreCSG
                 }
             }
 
+#if UNITY_2021_2_OR_NEWER
+            rect = new Rect(138, 69, 60, 16);
+#else
             rect = new Rect(138, 50, 60, 16);
+#endif
             if (SabreGUILayout.DrawUVField(rect, northOffset, ref vOffsetString, "vOffsetField", textFieldStyle2))
             {
                 float newNorthOffset;
@@ -1632,8 +1660,11 @@ namespace Sabresaurus.SabreCSG
 
             GUISkin inspectorSkin = SabreGUILayout.GetInspectorSkin();
 
+#if UNITY_2021_2_OR_NEWER
+            Rect rect = new Rect(138, 89, 60, 18);
+#else
             Rect rect = new Rect(138, 68, 60, 18);
-
+#endif
             if (GUI.Button(rect, "Color", inspectorSkin.button))
             {
                 vertexColorWindow = VertexColorWindow.CreateAndShow(csgModel, this);
@@ -1979,6 +2010,7 @@ namespace Sabresaurus.SabreCSG
 
         public override void Deactivated()
         {
+            base.Deactivated();
         }
 
         public override bool BrushesHandleDrawing

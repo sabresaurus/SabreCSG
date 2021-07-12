@@ -309,6 +309,11 @@ namespace Sabresaurus.SabreCSG
             }
             Event e = Event.current;
 
+#if UNITY_2021_2_OR_NEWER
+            if (SabreToolbarOverlay.Instance != null) SabreToolbarOverlay.Instance.displayed = EditMode;
+            if (SabreToolsOverlay.Instance != null) SabreToolsOverlay.Instance.displayed = EditMode;
+#endif
+
             if (!EditMode)
             {
                 return;
