@@ -1359,8 +1359,10 @@ namespace Sabresaurus.SabreCSG
                 // Then resubscribe and repaint
                 isSubscribedToDuringSceneGui = true;
 #if UNITY_2019_1_OR_NEWER
+                SceneView.duringSceneGui -= OnSceneGUI;
                 SceneView.duringSceneGui += OnSceneGUI;
 #else
+                SceneView.onSceneGUIDelegate -= OnSceneGUI;
                 SceneView.onSceneGUIDelegate += OnSceneGUI;
 #endif
                 SceneView.RepaintAll();
