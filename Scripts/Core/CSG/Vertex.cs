@@ -152,7 +152,7 @@ namespace Sabresaurus.SabreCSG
         {
             return other != null &&
                    EqualityComparer<Vector3>.Default.Equals(Position, other.Position) &&
-                   EqualityComparer<Vector2>.Default.Equals(UV, other.UV) &&
+                   UV.x.Equals(other.UV.x) && UV.y.Equals(other.UV.y) &&
                    EqualityComparer<Vector3>.Default.Equals(Normal, other.Normal) &&
                    EqualityComparer<Color32>.Default.Equals(Color, other.Color);
         }
