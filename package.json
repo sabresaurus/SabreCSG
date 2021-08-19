@@ -1,0 +1,9 @@
+{
+    "name": "sabrecsg",
+    "displayName": "SabreCSG",
+    "version": "1.9.0",
+    "description": "SabreCSG is a set of level design tools for building complex levels quickly inside Unity.",
+    "keywords": [
+    ],
+    "category": "Unity"
+}
