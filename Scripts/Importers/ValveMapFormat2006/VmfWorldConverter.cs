@@ -260,7 +260,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// <returns><c>true</c> if the specified name is an excluded material; otherwise, <c>false</c>.</returns>
         private static bool IsExcludedMaterial(string name)
         {
-            switch (name.toUpper())
+            switch (name.ToUpper())
             {
                 case "TOOLS/TOOLSNODRAW":
                     return true;
@@ -275,7 +275,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// <returns><c>true</c> if the specified name is an invisible material; otherwise, <c>false</c>.</returns>
         private static bool IsInvisibleMaterial(string name)
         {
-            switch (name.toUpper())
+            switch (name.ToUpper())
             {
                 case "TOOLS/TOOLSCLIP":
                 case "TOOLS/TOOLSNPCCLIP":
@@ -295,7 +295,7 @@ namespace Sabresaurus.SabreCSG.Importers.ValveMapFormat2006
         /// <returns><c>true</c> if the specified name is a special material; otherwise, <c>false</c>.</returns>
         private static bool IsSpecialMaterial(string name)
         {
-            switch (name.toUpper())
+            switch (name.ToUpper())
             {
                 case "TOOLS/TOOLSTRIGGER":
                 case "TOOLS/TOOLSBLOCK_LOS":
