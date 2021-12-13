@@ -73,6 +73,7 @@ namespace Sabresaurus.SabreCSG
 				bottomToolbarHeight *= 2;
 			}
 
+#if !UNITY_2021_2_OR_NEWER
             Rect rectangle = new Rect(0, sceneView.position.height - bottomToolbarHeight, sceneView.position.width, bottomToolbarHeight);
 
             GUIStyle style = new GUIStyle(EditorStyles.toolbar);
@@ -104,6 +105,7 @@ namespace Sabresaurus.SabreCSG
 
 				style.fixedHeight = VIEW_MENU_HEIGHT;
 				GUILayout.Window(140012, viewMenuRect, OnViewMenuGUI, "", style);
+
 			}
 
 			style = new GUIStyle(EditorStyles.toolbar);
@@ -118,10 +120,10 @@ namespace Sabresaurus.SabreCSG
 				rectangle = new Rect(0, sceneView.position.height - bottomToolbarHeight - style.fixedHeight, sceneView.position.width, style.fixedHeight);
 				GUILayout.Window(140005, rectangle, OnWarningToolbar, "", style);
 			}
-            
-        }
+#endif
+		}
 
-        public static void OnTopToolbarGUI(int windowID)
+		public static void OnTopToolbarGUI(int windowID)
         {
 			EditorGUILayout.BeginHorizontal();
             MainMode currentMode = CurrentSettings.CurrentMode;
