@@ -1345,6 +1345,11 @@ namespace Sabresaurus.SabreCSG
                             string assetPath = AssetDatabase.GetAssetPath(newTexture);
                             TextureImporter importer = TextureImporter.GetAtPath(assetPath) as TextureImporter;
 
+                            if (importer == null)
+                            {
+                                continue;
+                            }
+
 #if UNITY_5_5_OR_NEWER
                             // Unity 5.5 refactored the TextureImporter, requiring slightly different logic
                             TextureImporterSettings importerSettings = new TextureImporterSettings();
