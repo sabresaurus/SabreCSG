@@ -1345,6 +1345,7 @@ namespace Sabresaurus.SabreCSG
                             string assetPath = AssetDatabase.GetAssetPath(newTexture);
                             TextureImporter importer = TextureImporter.GetAtPath(assetPath) as TextureImporter;
 
+                            // The importer may be null on Texture3D.
                             if (importer == null)
                             {
                                 continue;
@@ -1383,7 +1384,10 @@ namespace Sabresaurus.SabreCSG
                 Rect rect = GUILayoutUtility.GetLastRect();
                 rect.position += new Vector2(rect.width, 0);
                 Material drawMaterial = SabreCSGResources.GetPreviewMaterial();
-                drawMaterial.mainTexture = secondaryTexture;
+                if (secondaryTexture != null && secondaryTexture.dimension != UnityEngine.Rendering.TextureDimension.Tex2D)
+                    drawMaterial.mainTexture = null;
+                else
+                    drawMaterial.mainTexture = secondaryTexture;
 
                 if (PlayerSettings.colorSpace == ColorSpace.Linear)
                 {
