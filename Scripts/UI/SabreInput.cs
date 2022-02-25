@@ -39,6 +39,17 @@ namespace Sabresaurus.SabreCSG
 			}
 		}
 
+        /// <summary>
+        /// Determines whether the specified event has the <see cref="EventModifiers.Command"/> (on mac) or <see cref="EventModifiers.Control"/> key pressed.
+        /// </summary>
+        /// <param name="e">The event to check.</param>
+        /// <returns>
+        /// <c>true</c> if the specified event has the command or control key pressed; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsCommandModifier(Event e)
+        {
+            return IsModifier(Event.current, EventModifiers.Control) || IsModifier(Event.current, EventModifiers.Command);
+        }
 
 	}
 }
