@@ -27,7 +27,9 @@ namespace Sabresaurus.SabreCSG
 			// The automatic lightmapping conflicts when dealing with small brush counts, so default to user baking
 			// The user can change this back to Auto if they want, but generally that'll only be an issue when they've
 			// got a few brushes.
+#if !UNITY_2020_1_OR_NEWER
 			Lightmapping.giWorkflowMode = Lightmapping.GIWorkflowMode.OnDemand;
+#endif
 		}
 		
 		[MenuItem("Edit/Rebuild CSG " + KeyMappings.Rebuild, false, 100)]
